@@ -13,7 +13,7 @@ import yosay from 'yosay';
 import { MemFsUtil } from '../util/MemfsUtil';
 
 export default class Init extends Command {
-  static description = 'describe the command here';
+  static description = 'create a new Flarum extension';
 
   static flags = {
     help: flags.help({ char: 'h' }),
