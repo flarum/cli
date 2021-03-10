@@ -75,6 +75,10 @@ export default abstract class BaseFsCommand extends Command {
   // Utils
   // ----------------------------------------------------------------
 
+  protected getBoilerplateDir(subdir?: string) {
+    return path.resolve(__dirname, '../../boilerplate', subdir as string);
+  }
+
   /**
    * Some infra steps will copy over portions of the boilerplate.
    * To do this, we need to fill in the templated fields in our boilerplate files

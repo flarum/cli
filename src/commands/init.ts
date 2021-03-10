@@ -159,8 +159,8 @@ export default class Init extends BaseFsCommand {
       year: new Date().getFullYear(),
     });
 
-    const boilerplate = path.resolve(__dirname, '../../boilerplate/**');
-    this.fs.copyTpl(boilerplate, dir, tpl, undefined, { globOptions: { dot: true } });
+    const boilerplateDir = this.getBoilerplateDir('init');
+    this.fs.copyTpl(boilerplateDir, dir, tpl, undefined, { globOptions: { dot: true } });
 
     const memFsUtil = new MemFsUtil(this.fs, dir);
 
