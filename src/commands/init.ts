@@ -1,42 +1,20 @@
-import { Command, flags } from '@oclif/command';
-import { IConfig } from '@oclif/config';
 import chalk from 'chalk';
 import cli from 'cli-ux';
 import filesystem from 'fs';
-import { create as createMemFs, Store } from 'mem-fs';
-import { create as createMemFsEditor, Editor } from 'mem-fs-editor';
 import path from 'path';
 import prompts from 'prompts';
 import licenseList from 'spdx-license-list/simple';
 import yosay from 'yosay';
+import BaseFsCommand from '../util/BaseFsCommand';
 
 import { MemFsUtil } from '../util/MemfsUtil';
 
-export default class Init extends Command {
+export default class Init extends BaseFsCommand {
   static description = 'create a new Flarum extension';
 
-  static flags = {
-    help: flags.help({ char: 'h' }),
-  };
+  static flags = {...BaseFsCommand.flags};
 
-  static args = [{
-    name: 'path',
-    description: 'The root directory in which to create the Flarum extension',
-    default: process.cwd(),
-    parse: path.resolve
-  }];
-
-  protected fs: Editor;
-  protected store: Store;
-  protected promptsOptions: prompts.Options;
-
-  constructor(argv: string[], config: IConfig) {
-    super(argv, config);
-
-    this.store = createMemFs();
-    this.fs = createMemFsEditor(this.store);
-    this.promptsOptions = { onCancel: () => this.exit() };
-  }
+  static args = [...BaseFsCommand.args];
 
   async run() {
     const { args, flags } = this.parse(Init);
@@ -47,38 +25,36 @@ export default class Init extends Command {
 
     await this.confirmDir(dir);
 
+    await this.emptyDirCheck(dir);
+
     await this.setup(dir);
 
-    await this.finalize(dir);
+    await this.fsCommit(dir);
   }
 
-  async confirmDir(dir: string) {
+  protected async emptyDirCheck(dir: string) {
     const files = filesystem.readdirSync(dir);
 
     const empty = files.length === 0 || files.length === 1 && files[0] === '.git';
 
+    if (empty) return;
+
     const response = await prompts(
       [
         {
-          name: 'verify',
-          type: 'confirm',
-          message: `Write to ${dir}`,
-          initial: true,
-        },
-        {
           name: 'overwrite',
-          type: prev => prev && !empty && 'confirm',
+          type: 'confirm',
           message: 'Directory not empty. Overwrite?',
         },
       ],
     )
 
-    if (!response.verify || response.overwrite === false) this.exit();
+    if (response.overwrite === false) this.exit();
 
-    if (response.overwrite) this.fs.delete(`${dir}/!(*.git)`);
+    this.fs.delete(`${dir}/!(*.git)`);
   }
 
-  async setup(dir: string) {
+  protected async setup(dir: string) {
     const response = await prompts(
       [
         {
@@ -208,18 +184,5 @@ export default class Init extends Command {
     this.fs.write(path.resolve(dir, 'LICENSE.md'), license.licenseText);
 
     cli.action.stop();
-  }
-
-  async finalize(dir: string) {
-    cli.action.start("Finalizing...");
-
-    this.fs.commit(err => {
-      if (err) {
-        cli.action.stop("Failed");
-        this.error(err);
-      }
-
-      cli.action.stop(`Successfully set up Flarum extension in ${dir}`);
-    });
   }
 }
