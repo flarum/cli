@@ -11,10 +11,14 @@ export class MemFsUtil {
   }
 
   mv(from: string, to: string) {
-    this.fs.move(path.resolve(this.baseDir, from), path.resolve(this.baseDir, to))
+    this.fs.move(path.resolve(this.baseDir, from), path.resolve(this.baseDir, to));
   }
 
   del(f: string) {
-    this.fs.delete(path.resolve(this.baseDir, f))
+    this.fs.delete(path.resolve(this.baseDir, f));
+  }
+
+  exists(f: string) {
+    return this.fs.exists(path.resolve(this.baseDir, f));
   }
 }

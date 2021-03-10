@@ -49,7 +49,10 @@
     "bin": "flarum-cli",
     "plugins": [
       "@oclif/plugin-help"
-    ]
+    ],
+    "topics": {
+      "infra": {"description": "add/modify infrastructure for an existing Flarum extension"}
+    }
   },
   "repository": "flarum/flarum-cli",
   "scripts": {

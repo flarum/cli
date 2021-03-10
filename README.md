@@ -30,7 +30,8 @@ USAGE
 <!-- commands -->
 * [`flarum-cli augment [FILE]`](#flarum-cli-augment-file)
 * [`flarum-cli help [COMMAND]`](#flarum-cli-help-command)
-* [`flarum-cli init [FILE]`](#flarum-cli-init-file)
+* [`flarum-cli infra:testing [FILE]`](#flarum-cli-infratesting-file)
+* [`flarum-cli init [PATH]`](#flarum-cli-init-path)
 
 ## `flarum-cli augment [FILE]`
 
@@ -65,18 +66,36 @@ OPTIONS
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v3.2.2/src/commands/help.ts)_
 
-## `flarum-cli init [FILE]`
+## `flarum-cli infra:testing [FILE]`
 
 describe the command here
 
 ```
 USAGE
-  $ flarum-cli init [FILE]
+  $ flarum-cli infra:testing [FILE]
 
 OPTIONS
   -f, --force
   -h, --help       show CLI help
   -n, --name=name  name to print
+```
+
+_See code: [src/commands/infra/testing.ts](https://github.com/flarum/flarum-cli/blob/v0.0.0/src/commands/infra/testing.ts)_
+
+## `flarum-cli init [PATH]`
+
+describe the command here
+
+```
+USAGE
+  $ flarum-cli init [PATH]
+
+ARGUMENTS
+  PATH  [default: /home/Programming/Projects/flarum/flarum-cli] The root directory in which to create the Flarum
+        extension
+
+OPTIONS
+  -h, --help  show CLI help
 ```
 
 _See code: [src/commands/init.ts](https://github.com/flarum/flarum-cli/blob/v0.0.0/src/commands/init.ts)_
