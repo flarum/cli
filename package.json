@@ -51,6 +51,7 @@
       "@oclif/plugin-help"
     ],
     "topics": {
+      "generate": {"description": "add boilerplate code to an existing Flarum extension"},
       "infra": {"description": "add/modify infrastructure for an existing Flarum extension"}
     }
   },

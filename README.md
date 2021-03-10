@@ -28,26 +28,27 @@ USAGE
 <!-- usagestop -->
 # Commands
 <!-- commands -->
-* [`flarum-cli augment [FILE]`](#flarum-cli-augment-file)
+* [`flarum-cli generate:migration [PATH]`](#flarum-cli-generatemigration-path)
 * [`flarum-cli help [COMMAND]`](#flarum-cli-help-command)
-* [`flarum-cli infra:testing [FILE]`](#flarum-cli-infratesting-file)
+* [`flarum-cli infra:backend-testing [PATH]`](#flarum-cli-infrabackend-testing-path)
 * [`flarum-cli init [PATH]`](#flarum-cli-init-path)
 
-## `flarum-cli augment [FILE]`
+## `flarum-cli generate:migration [PATH]`
 
-describe the command here
+generate an empty migration template
 
 ```
 USAGE
-  $ flarum-cli augment [FILE]
+  $ flarum-cli generate:migration [PATH]
+
+ARGUMENTS
+  PATH  [default: /home/Programming/Projects/flarum/flarum-cli] The Flarum extension's directory
 
 OPTIONS
-  -f, --force
-  -h, --help       show CLI help
-  -n, --name=name  name to print
+  -h, --help  show CLI help
 ```
 
-_See code: [src/commands/augment.ts](https://github.com/flarum/flarum-cli/blob/v0.0.0/src/commands/augment.ts)_
+_See code: [src/commands/generate/migration.ts](https://github.com/flarum/flarum-cli/blob/v0.0.0/src/commands/generate/migration.ts)_
 
 ## `flarum-cli help [COMMAND]`
 
@@ -66,33 +67,33 @@ OPTIONS
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v3.2.2/src/commands/help.ts)_
 
-## `flarum-cli infra:testing [FILE]`
+## `flarum-cli infra:backend-testing [PATH]`
 
-describe the command here
+add/update backend testing infrastructure
 
 ```
 USAGE
-  $ flarum-cli infra:testing [FILE]
+  $ flarum-cli infra:backend-testing [PATH]
+
+ARGUMENTS
+  PATH  [default: /home/Programming/Projects/flarum/flarum-cli] The Flarum extension's directory
 
 OPTIONS
-  -f, --force
-  -h, --help       show CLI help
-  -n, --name=name  name to print
+  -h, --help  show CLI help
 ```
 
-_See code: [src/commands/infra/testing.ts](https://github.com/flarum/flarum-cli/blob/v0.0.0/src/commands/infra/testing.ts)_
+_See code: [src/commands/infra/backend-testing.ts](https://github.com/flarum/flarum-cli/blob/v0.0.0/src/commands/infra/backend-testing.ts)_
 
 ## `flarum-cli init [PATH]`
 
-describe the command here
+create a new Flarum extension
 
 ```
 USAGE
   $ flarum-cli init [PATH]
 
 ARGUMENTS
-  PATH  [default: /home/Programming/Projects/flarum/flarum-cli] The root directory in which to create the Flarum
-        extension
+  PATH  [default: /home/Programming/Projects/flarum/flarum-cli] The Flarum extension's directory
 
 OPTIONS
   -h, --help  show CLI help
