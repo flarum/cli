@@ -32,7 +32,7 @@ USAGE
 * [`flarum-cli help [COMMAND]`](#flarum-cli-help-command)
 * [`flarum-cli infra:backend-testing [PATH]`](#flarum-cli-infrabackend-testing-path)
 * [`flarum-cli init [PATH]`](#flarum-cli-init-path)
-* [`flarum-cli update:js-imports [FILE]`](#flarum-cli-updatejs-imports-file)
+* [`flarum-cli update:js-imports [PATH]`](#flarum-cli-updatejs-imports-path)
 
 ## `flarum-cli generate:migration [PATH]`
 
@@ -102,18 +102,19 @@ OPTIONS
 
 _See code: [src/commands/init.ts](https://github.com/flarum/flarum-cli/blob/v0.0.0/src/commands/init.ts)_
 
-## `flarum-cli update:js-imports [FILE]`
+## `flarum-cli update:js-imports [PATH]`
 
-describe the command here
+updates JS imports from core to use proper namespaces
 
 ```
 USAGE
-  $ flarum-cli update:js-imports [FILE]
+  $ flarum-cli update:js-imports [PATH]
+
+ARGUMENTS
+  PATH  [default: /home/Programming/Projects/flarum/flarum-cli] The Flarum extension's directory
 
 OPTIONS
-  -f, --force
-  -h, --help       show CLI help
-  -n, --name=name  name to print
+  -h, --help  show CLI help
 ```
 
 _See code: [src/commands/update/js-imports.ts](https://github.com/flarum/flarum-cli/blob/v0.0.0/src/commands/update/js-imports.ts)_
