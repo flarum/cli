@@ -27,9 +27,12 @@ export default class UpdateJsImports extends BaseFsCommand {
 
     let importMap: ImportMap = await this.compileImportMap(dir);
 
-    await this.updateJsFiles(dir, importMap);
+    const { files, importsChanged } = await this.updateJsFiles(dir, importMap);
 
     await this.fsCommit(dir);
+
+    this.log(`Updated ${importsChanged} core JS imports in ${files} files to use.`);
+    this.log("Please make sure to check my work and test before commiting!!!");
   };
 
   async compileImportMap(dir: string): Promise<ImportMap> {
@@ -82,7 +85,7 @@ export default class UpdateJsImports extends BaseFsCommand {
       });
 
     cli.action.stop();
-    this.log(`Updated ${importsChanged} imports in ${files} files.`);
-    this.log("Please make sure to check my work and test before commiting!!!");
+
+    return { files, importsChanged };
   }
 }

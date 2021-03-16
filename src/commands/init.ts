@@ -33,6 +33,8 @@ export default class Init extends BaseFsCommand {
     await this.fsCommit(dir);
 
     await this.installPackages(dir);
+
+    this.log('Extension generation complete! Visit https://docs.flarum.org/extend to learn more about Flarume extension development.');
   }
 
   protected async emptyDirCheck(dir: string) {
