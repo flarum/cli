@@ -1,15 +1,15 @@
 import cli from 'cli-ux';
 import filesystem from 'fs';
 import path from 'path';
-import prompts from 'prompts'
-import BaseFsCommand from '../../util/BaseFsCommand'
+import prompts from 'prompts';
+import BaseFsCommand from '../../util/BaseFsCommand';
 
 export default class GenerateMigration extends BaseFsCommand {
-  static description = 'generate an empty migration template'
+  static description = 'generate an empty migration template';
 
-  static flags = { ...BaseFsCommand.flags }
+  static flags = { ...BaseFsCommand.flags };
 
-  static args = [...BaseFsCommand.args]
+  static args = [...BaseFsCommand.args];
 
   async run() {
     const { args, flags } = this.parse(GenerateMigration);
@@ -29,12 +29,10 @@ export default class GenerateMigration extends BaseFsCommand {
         name: 'name',
         type: 'text',
         message: `Migration name/short description`,
-        validate: s =>
-          /^[0-9a-zA-Z_ ]+$/.test(s.trim()) ||
-          'Field is required; alphanumerical characters, underscores, and spaces only!',
-        format: str => str.toLowerCase().replace(/ /g, "_")
-      }
-    ])
+        validate: (s) => /^[0-9a-zA-Z_ ]+$/.test(s.trim()) || 'Field is required; alphanumerical characters, underscores, and spaces only!',
+        format: (str) => str.toLowerCase().replace(/ /g, '_'),
+      },
+    ]);
 
     cli.action.start('Creating migration...');
 

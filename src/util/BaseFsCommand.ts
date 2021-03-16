@@ -10,15 +10,17 @@ import { execSync } from 'child_process';
 
 export default abstract class BaseFsCommand extends Command {
   static flags: flags.Input<any> = {
-    help: flags.help({ char: 'h' })
-  }
+    help: flags.help({ char: 'h' }),
+  };
 
-  static args = [{
-    name: 'path',
-    description: "The Flarum extension's directory",
-    default: process.cwd(),
-    parse: path.resolve
-  }];
+  static args = [
+    {
+      name: 'path',
+      description: "The Flarum extension's directory",
+      default: process.cwd(),
+      parse: path.resolve,
+    },
+  ];
 
   protected fs: Editor;
   protected store: Store;
@@ -47,63 +49,63 @@ export default abstract class BaseFsCommand extends Command {
       currPath = path.resolve(currPath, '..');
     }
 
-    this.error(`${path.resolve(currDir)} is not located in a valid Flarum extension! Flarum extensions must contain (at a minimum) 'extend.php' and 'composer.json' files.`)
+    this.error(
+      `${path.resolve(
+        currDir
+      )} is not located in a valid Flarum extension! Flarum extensions must contain (at a minimum) 'extend.php' and 'composer.json' files.`
+    );
   }
 
   protected async confirmDir(dir: string) {
-    const response = await prompts(
-      [
-        {
-          name: 'verify',
-          type: 'confirm',
-          message: `Work in ${path.resolve(dir)}?`,
-          initial: true,
-        }
-      ],
-    )
+    const response = await prompts([
+      {
+        name: 'verify',
+        type: 'confirm',
+        message: `Work in ${path.resolve(dir)}?`,
+        initial: true,
+      },
+    ]);
 
     if (!response.verify) this.exit();
   }
 
   protected async ensureComposerInstallRan(dir: string) {
     let needed = false;
-    if ((new MemFsUtil(this.fs, dir)).exists('vendor/flarum/core/composer.json')) return;
+    if (new MemFsUtil(this.fs, dir).exists('vendor/flarum/core/composer.json')) return;
 
     this.log("This command requires `composer install` to have been ran in your extension's root directory.");
 
-    const response = await prompts(
-      [
-        {
-          name: 'composer',
-          type: 'confirm',
-          message: 'Would you like me to take care of that for you?',
-          initial: true,
-        }
-      ],
-    )
+    const response = await prompts([
+      {
+        name: 'composer',
+        type: 'confirm',
+        message: 'Would you like me to take care of that for you?',
+        initial: true,
+      },
+    ]);
 
     if (response.composer) {
       cli.action.start('Installing composer packages');
       execSync('composer install', { cwd: dir });
       cli.action.stop();
     } else {
-      this.error("Run `composer install` in your extension's root directory, then try again.")
+      this.error("Run `composer install` in your extension's root directory, then try again.");
     }
   }
 
   protected async fsCommit(dir: string) {
-    cli.action.start("Finalizing files");
+    cli.action.start('Finalizing files');
 
     return new Promise((resolve, reject) => {
-      this.fs.commit(err => {
+      this.fs.commit((err) => {
         if (err) {
-          cli.action.stop("Failed");
+          cli.action.stop('Failed');
           this.error(err);
         }
 
         cli.action.stop();
         resolve(0);
-      })
+      });
     });
   }
 
@@ -122,15 +124,15 @@ export default abstract class BaseFsCommand extends Command {
    * TODO: Figure out how to generate this from the init prompts so we don't need to have these keys twice.
    */
   protected simulateInitPromptData(dir: string) {
-    const data: any = {}
+    const data: any = {};
     const extensionComposerJson: any = this.fs.readJSON(path.resolve(dir, 'composer.json'));
     data.packageName = extensionComposerJson.name || '';
     data.packageDescription = extensionComposerJson.description || '';
     data.license = extensionComposerJson.license || '';
     data.authorName = '';
     data.authorEmail = '';
-    data.packageNamespace = (Object.keys(extensionComposerJson?.autoload["psr-4"] ?? {})[0] || '').slice(0, -1).replace("\\", "\\\\");
-    data.extensionName = extensionComposerJson?.extra["flarum-extension"].title || '';
+    data.packageNamespace = (Object.keys(extensionComposerJson?.autoload['psr-4'] ?? {})[0] || '').slice(0, -1).replace('\\', '\\\\');
+    data.extensionName = extensionComposerJson?.extra['flarum-extension'].title || '';
 
     return data;
   }

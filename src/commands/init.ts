@@ -13,7 +13,7 @@ import { MemFsUtil } from '../util/MemfsUtil';
 export default class Init extends BaseFsCommand {
   static description = 'create a new Flarum extension';
 
-  static flags = {...BaseFsCommand.flags};
+  static flags = { ...BaseFsCommand.flags };
 
   static args = [...BaseFsCommand.args];
 
@@ -22,7 +22,7 @@ export default class Init extends BaseFsCommand {
 
     const dir = args.path;
 
-    this.log(yosay('Welcome to a Flarum extension generator\n\n- Flarum Team'))
+    this.log(yosay('Welcome to a Flarum extension generator\n\n- Flarum Team'));
 
     await this.confirmDir(dir);
 
@@ -40,19 +40,17 @@ export default class Init extends BaseFsCommand {
   protected async emptyDirCheck(dir: string) {
     const files = filesystem.readdirSync(dir);
 
-    const empty = files.length === 0 || files.length === 1 && files[0] === '.git';
+    const empty = files.length === 0 || (files.length === 1 && files[0] === '.git');
 
     if (empty) return;
 
-    const response = await prompts(
-      [
-        {
-          name: 'overwrite',
-          type: 'confirm',
-          message: 'Directory not empty. Overwrite?',
-        },
-      ],
-    )
+    const response = await prompts([
+      {
+        name: 'overwrite',
+        type: 'confirm',
+        message: 'Directory not empty. Overwrite?',
+      },
+    ]);
 
     if (response.overwrite === false) this.exit();
 
@@ -66,10 +64,8 @@ export default class Init extends BaseFsCommand {
           name: 'packageName',
           type: 'text',
           message: `Package ${chalk.dim('(vendor/extension-name)')}`,
-          validate: s =>
-            /^([0-9a-zA-Z-]{2,})\/([0-9a-zA-Z-]{2,})$/.test(s.trim()) ||
-            'Invalid package name format',
-          format: s => s.toLowerCase(),
+          validate: (s) => /^([0-9a-zA-Z-]{2,})\/([0-9a-zA-Z-]{2,})$/.test(s.trim()) || 'Invalid package name format',
+          format: (s) => s.toLowerCase(),
         },
         {
           name: 'packageDescription',
@@ -80,14 +76,12 @@ export default class Init extends BaseFsCommand {
           name: 'namespace',
           type: 'text',
           message: `Package namespace ${chalk.dim('(Vendor\\ExtensionName)')}`,
-          validate: s =>
-            /^([0-9a-zA-Z]+)\\([0-9a-zA-Z]+)$/.test(s.trim()) ||
-            'Invalid namespace format',
-          format: str =>
+          validate: (s) => /^([0-9a-zA-Z]+)\\([0-9a-zA-Z]+)$/.test(s.trim()) || 'Invalid namespace format',
+          format: (str) =>
             str &&
             str
               .split('\\')
-              .map(s => s[0].toUpperCase() + s.slice(1))
+              .map((s) => s[0].toUpperCase() + s.slice(1))
               .join('\\'),
         },
         {
@@ -99,25 +93,20 @@ export default class Init extends BaseFsCommand {
           name: 'authorEmail',
           type: 'text',
           message: 'Author email',
-          validate: s =>
-            !s ||
-            /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(
-              s
-            ) ||
-            'Invalid email format',
+          validate: (s) => !s || /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(s) || 'Invalid email format',
         },
         {
           name: 'license',
           type: 'autocomplete',
           message: 'License',
-          choices: Array.from(licenseList as Set<string>).map(e => ({ title: e, value: e })),
+          choices: Array.from(licenseList as Set<string>).map((e) => ({ title: e, value: e })),
         },
         {
           name: 'extensionName',
           type: 'text',
           message: 'Extension name',
-          validate: str => !!str.trim() || 'The extension name is required',
-          format: str =>
+          validate: (str) => !!str.trim() || 'The extension name is required',
+          format: (str) =>
             str
               .split(' ')
               .map((s: string) => (s.length > 3 ? s[0].toUpperCase() + s.slice(1) : s))
@@ -192,22 +181,20 @@ export default class Init extends BaseFsCommand {
   }
 
   async installPackages(dir: string) {
-    const response = await prompts(
-      [
-        {
-          name: 'composer',
-          type: 'confirm',
-          message: 'Run `composer install`? (recommended)',
-          initial: true,
-        },
-        {
-          name: 'npm',
-          type: 'confirm',
-          message: 'Run `npm install`? (recommended)',
-          initial: true,
-        },
-      ],
-    )
+    const response = await prompts([
+      {
+        name: 'composer',
+        type: 'confirm',
+        message: 'Run `composer install`? (recommended)',
+        initial: true,
+      },
+      {
+        name: 'npm',
+        type: 'confirm',
+        message: 'Run `npm install`? (recommended)',
+        initial: true,
+      },
+    ]);
 
     if (!response.composer && !response.npm) return;
 

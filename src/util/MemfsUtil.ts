@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { Editor } from "mem-fs-editor";
+import { Editor } from 'mem-fs-editor';
 
 export class MemFsUtil {
   fs: Editor;

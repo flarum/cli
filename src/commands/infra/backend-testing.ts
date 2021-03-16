@@ -5,9 +5,9 @@ import BaseFsCommand from '../../util/BaseFsCommand';
 import { MemFsUtil } from '../../util/MemfsUtil';
 
 export default class InfraBackendTesting extends BaseFsCommand {
-  static description = 'add/update backend testing infrastructure'
+  static description = 'add/update backend testing infrastructure';
 
-  static flags = {...BaseFsCommand.flags};
+  static flags = { ...BaseFsCommand.flags };
 
   static args = [...BaseFsCommand.args];
 
@@ -28,7 +28,7 @@ export default class InfraBackendTesting extends BaseFsCommand {
     await this.updateComposerJsonFields(dir, boilerplateDir, fakeInitData);
 
     await this.fsCommit(dir);
-  };
+  }
 
   protected async existingTestsCheck(dir: string) {
     const memFsUtil = new MemFsUtil(this.fs, dir);
@@ -39,14 +39,14 @@ export default class InfraBackendTesting extends BaseFsCommand {
         name: 'overwriteTests',
         type: 'confirm',
         message: 'Test infrastructure files already exist. Overwrite with the latest version?',
-      }
-    ])
+      },
+    ]);
 
     if (response.overwriteTests === false) this.exit();
   }
 
   protected async copyInfraFiles(extDir: string, boilerplateDir: string, fakeInitData: any) {
-    cli.action.start("Copying over test infrastructure files...");
+    cli.action.start('Copying over test infrastructure files...');
 
     const infraFiles = [
       'tests/phpunit.integration.xml',
@@ -54,10 +54,10 @@ export default class InfraBackendTesting extends BaseFsCommand {
       'tests/fixtures/.gitkeep',
       'tests/integration/setup.php',
       'tests/unit/.gitkeep',
-      '.github/workflows/test.yml'
+      '.github/workflows/test.yml',
     ];
 
-    infraFiles.forEach(filePath => {
+    infraFiles.forEach((filePath) => {
       this.fs.copyTpl(path.resolve(boilerplateDir, filePath), path.resolve(extDir, filePath), fakeInitData);
     });
 
@@ -65,7 +65,7 @@ export default class InfraBackendTesting extends BaseFsCommand {
   }
 
   protected async updateComposerJsonFields(extDir: string, boilerplateDir: string, fakeInitData: any) {
-    cli.action.start("Updating composer.json test scripts...");
+    cli.action.start('Updating composer.json test scripts...');
 
     // We copy it to resolve template tags.
     this.fs.copyTpl(path.resolve(boilerplateDir, 'composer.json'), path.resolve(boilerplateDir, 'composer.json.tmp'), fakeInitData);
