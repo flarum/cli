@@ -14,9 +14,7 @@ export default class GenerateMigration extends BaseFsCommand {
   async run() {
     const { args, flags } = this.parse(GenerateMigration);
 
-    const dir = args.path;
-
-    await this.assertInFlarumInstallation(dir);
+    const dir = await this.getFlarumExtensionRoot(args.path);
 
     await this.confirmDir(dir);
 
@@ -63,7 +61,6 @@ export default class GenerateMigration extends BaseFsCommand {
       if (!match) continue;
 
       const now = new Date();
-      console.log(match, now.getFullYear(), now.getMonth(), now.getDate())
 
       if (parseInt(match[1]) === now.getFullYear() && parseInt(match[2]) === now.getMonth() && parseInt(match[3]) === now.getDate()) {
         return parseInt(match[4]) + 1;

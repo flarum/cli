@@ -6,6 +6,7 @@ import { create as createMemFs, Store } from 'mem-fs';
 import { create as createMemFsEditor, Editor } from 'mem-fs-editor';
 import prompts, { Options } from 'prompts';
 import { MemFsUtil } from './MemfsUtil';
+import { execSync } from 'child_process';
 
 export default abstract class BaseFsCommand extends Command {
   static flags: flags.Input<any> = {
@@ -35,12 +36,18 @@ export default abstract class BaseFsCommand extends Command {
   // Reusable Steps
   // ----------------------------------------------------------------
 
-  protected async assertInFlarumInstallation(dir: string) {
-    const memFsUtil = new MemFsUtil(this.fs, dir);
+  protected async getFlarumExtensionRoot(currDir: string) {
+    let currPath = path.resolve(currDir);
 
-    if (!memFsUtil.exists('composer.json') || !memFsUtil.exists('extend.php')) {
-      this.error(`${path.resolve(dir)} is not a valid Flarum extension! Flarum extensions must contain (at a minimum) 'extend.php' and 'composer.json' files.`);
+    while (currPath !== '/') {
+      if (this.fs.exists(path.resolve(currPath, 'composer.json')) && this.fs.exists(path.resolve(currPath, 'extend.php'))) {
+        return currPath;
+      }
+
+      currPath = path.resolve(currPath, '..');
     }
+
+    this.error(`${path.resolve(currDir)} is not located in a valid Flarum extension! Flarum extensions must contain (at a minimum) 'extend.php' and 'composer.json' files.`)
   }
 
   protected async confirmDir(dir: string) {
@@ -56,6 +63,32 @@ export default abstract class BaseFsCommand extends Command {
     )
 
     if (!response.verify) this.exit();
+  }
+
+  protected async ensureComposerInstallRan(dir: string) {
+    let needed = false;
+    if ((new MemFsUtil(this.fs, dir)).exists('vendor/flarum/core/composer.json')) return;
+
+    this.log("This command requires `composer install` to have been ran in your extension's root directory.");
+
+    const response = await prompts(
+      [
+        {
+          name: 'composer',
+          type: 'confirm',
+          message: 'Would you like me to take care of that for you?',
+          initial: true,
+        }
+      ],
+    )
+
+    if (response.composer) {
+      cli.action.start('Installing composer packages');
+      execSync('composer install', { cwd: dir });
+      cli.action.stop();
+    } else {
+      this.error("Run `composer install` in your extension's root directory, then try again.")
+    }
   }
 
   protected async fsCommit(dir: string) {

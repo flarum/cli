@@ -12,11 +12,9 @@ export default class InfraBackendTesting extends BaseFsCommand {
   static args = [...BaseFsCommand.args];
 
   async run() {
-    const { args, flags } = this.parse(InfraBackendTesting)
+    const { args } = this.parse(InfraBackendTesting);
 
-    const dir = args.path;
-
-    await this.assertInFlarumInstallation(dir);
+    const dir = await this.getFlarumExtensionRoot(args.path);
 
     await this.confirmDir(dir);
 

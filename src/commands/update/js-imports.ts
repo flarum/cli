@@ -17,13 +17,13 @@ export default class UpdateJsImports extends BaseFsCommand {
   static args = [...BaseFsCommand.args];
 
   async run() {
-    const { args, flags } = this.parse(UpdateJsImports)
+    const { args } = this.parse(UpdateJsImports)
 
-    const dir = args.path;
-
-    await this.assertInFlarumInstallation(dir);
+    const dir = await this.getFlarumExtensionRoot(args.path);
 
     await this.confirmDir(dir);
+
+    await this.ensureComposerInstallRan(dir);
 
     let importMap: ImportMap = await this.compileImportMap(dir);
 
@@ -31,15 +31,11 @@ export default class UpdateJsImports extends BaseFsCommand {
 
     await this.fsCommit(dir);
 
-    this.log(`Updated ${importsChanged} core JS imports in ${files} files to use.`);
+    this.log(`Successfully updated ${importsChanged} core JS imports in ${files} files.`);
     this.log("Please make sure to check my work and test before commiting!!!");
   };
 
   async compileImportMap(dir: string): Promise<ImportMap> {
-    if (!(new MemFsUtil(this.fs, dir)).exists('vendor/flarum/core/composer.json')) {
-      this.error("Please run `composer install` in your extension's root directory, then try again.")
-    }
-
     const importMap: ImportMap = {};
     const jsSrcDir = `${dir}/vendor/flarum/core/js/src/`
 
