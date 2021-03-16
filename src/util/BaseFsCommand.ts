@@ -59,7 +59,7 @@ export default abstract class BaseFsCommand extends Command {
   }
 
   protected async fsCommit(dir: string) {
-    cli.action.start("Finalizing...");
+    cli.action.start("Finalizing files");
 
     this.fs.commit(err => {
       if (err) {

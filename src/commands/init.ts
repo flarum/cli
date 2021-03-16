@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import { exec, execSync } from 'child_process';
 import cli from 'cli-ux';
 import filesystem from 'fs';
 import path from 'path';
@@ -30,6 +31,8 @@ export default class Init extends BaseFsCommand {
     await this.setup(dir);
 
     await this.fsCommit(dir);
+
+    await this.installPackages(dir);
   }
 
   protected async emptyDirCheck(dir: string) {
@@ -184,5 +187,38 @@ export default class Init extends BaseFsCommand {
     this.fs.write(path.resolve(dir, 'LICENSE.md'), license.licenseText);
 
     cli.action.stop();
+  }
+
+  async installPackages(dir: string) {
+    const response = await prompts(
+      [
+        {
+          name: 'composer',
+          type: 'confirm',
+          message: 'Run `composer install`? (recommended)',
+          initial: true,
+        },
+        {
+          name: 'npm',
+          type: 'confirm',
+          message: 'Run `npm install`? (recommended)',
+          initial: true,
+        },
+      ],
+    )
+
+    if (!response.composer && !response.npm) return;
+
+    if (response.composer) {
+      cli.action.start('Installing composer packages');
+      execSync('composer install');
+      cli.action.stop();
+    }
+
+    if (response.composer) {
+      cli.action.start('Installing npm packages');
+      execSync('npm install', { cwd: './js' });
+      cli.action.stop();
+    }
   }
 }
