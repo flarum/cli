@@ -32,6 +32,7 @@ USAGE
 * [`flarum-cli help [COMMAND]`](#flarum-cli-help-command)
 * [`flarum-cli infra:backend-testing [PATH]`](#flarum-cli-infrabackend-testing-path)
 * [`flarum-cli init [PATH]`](#flarum-cli-init-path)
+* [`flarum-cli update:js-imports [FILE]`](#flarum-cli-updatejs-imports-file)
 
 ## `flarum-cli generate:migration [PATH]`
 
@@ -100,4 +101,20 @@ OPTIONS
 ```
 
 _See code: [src/commands/init.ts](https://github.com/flarum/flarum-cli/blob/v0.0.0/src/commands/init.ts)_
+
+## `flarum-cli update:js-imports [FILE]`
+
+describe the command here
+
+```
+USAGE
+  $ flarum-cli update:js-imports [FILE]
+
+OPTIONS
+  -f, --force
+  -h, --help       show CLI help
+  -n, --name=name  name to print
+```
+
+_See code: [src/commands/update/js-imports.ts](https://github.com/flarum/flarum-cli/blob/v0.0.0/src/commands/update/js-imports.ts)_
 <!-- commandsstop -->
