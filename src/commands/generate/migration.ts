@@ -44,7 +44,7 @@ export default class GenerateMigration extends BaseFsCommand {
 
     const name = `${pad(now.getFullYear(), 4)}_${pad(now.getMonth(), 2)}_${pad(now.getDate(), 2)}_${pad(migrationNumber, 6)}_${response.name}.php`;
 
-    const boilerplateDir = this.getBoilerplateDir('generate');
+    const boilerplateDir = this.getCliDir('stubs');
 
     this.fs.copyTpl(path.resolve(boilerplateDir, 'migration.php'), path.resolve(dir, 'migrations', name), this.simulateInitPromptData(dir));
 

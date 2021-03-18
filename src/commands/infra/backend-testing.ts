@@ -20,7 +20,7 @@ export default class InfraBackendTesting extends BaseFsCommand {
 
     await this.existingTestsCheck(dir);
 
-    const boilerplateDir = this.getBoilerplateDir('init');
+    const boilerplateDir = this.getCliDir('boilerplate/extension');
     const fakeInitData = this.simulateInitPromptData(dir);
 
     await this.copyInfraFiles(dir, boilerplateDir, fakeInitData);

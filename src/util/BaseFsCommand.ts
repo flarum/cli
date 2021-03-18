@@ -113,8 +113,8 @@ export default abstract class BaseFsCommand extends Command {
   // Utils
   // ----------------------------------------------------------------
 
-  protected getBoilerplateDir(subdir?: string) {
-    return path.resolve(__dirname, '../../boilerplate', subdir as string);
+  protected getCliDir(subdir?: string) {
+    return path.resolve(__dirname, '../..', subdir as string);
   }
 
   /**
