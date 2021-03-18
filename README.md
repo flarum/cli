@@ -28,11 +28,28 @@ USAGE
 <!-- usagestop -->
 # Commands
 <!-- commands -->
+* [`flarum-cli generate:backend:event-listener [FILE]`](#flarum-cli-generatebackendevent-listener-file)
 * [`flarum-cli generate:migration [PATH]`](#flarum-cli-generatemigration-path)
 * [`flarum-cli help [COMMAND]`](#flarum-cli-help-command)
 * [`flarum-cli infra:backend-testing [PATH]`](#flarum-cli-infrabackend-testing-path)
 * [`flarum-cli init [PATH]`](#flarum-cli-init-path)
 * [`flarum-cli update:js-imports [PATH]`](#flarum-cli-updatejs-imports-path)
+
+## `flarum-cli generate:backend:event-listener [FILE]`
+
+describe the command here
+
+```
+USAGE
+  $ flarum-cli generate:backend:event-listener [FILE]
+
+OPTIONS
+  -f, --force
+  -h, --help       show CLI help
+  -n, --name=name  name to print
+```
+
+_See code: [src/commands/generate/backend/event-listener.ts](https://github.com/flarum/flarum-cli/blob/v0.0.0/src/commands/generate/backend/event-listener.ts)_
 
 ## `flarum-cli generate:migration [PATH]`
 

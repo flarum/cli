@@ -6,7 +6,7 @@ import { create as createMemFs, Store } from 'mem-fs';
 import { create as createMemFsEditor, Editor } from 'mem-fs-editor';
 import prompts, { Options } from 'prompts';
 import { MemFsUtil } from './MemfsUtil';
-import { execSync } from 'child_process';
+import { execFileSync, execSync } from 'child_process';
 
 export default abstract class BaseFsCommand extends Command {
   static flags: flags.Input<any> = {
@@ -135,5 +135,18 @@ export default abstract class BaseFsCommand extends Command {
     data.extensionName = extensionComposerJson?.extra['flarum-extension'].title || '';
 
     return data;
+  }
+
+  protected async modifyExtend(extDir: string, op: string, params: any): Promise<string> {
+    const currExtendContents = this.fs.read(path.resolve(extDir, 'extend.php'));
+    const input = JSON.stringify({
+      'extend.php': currExtendContents,
+      op,
+      params
+    });
+
+    const res = execSync(`php ${this.getCliDir('php-subsystem/index.php')}`, { input });
+
+    return res.toString();
   }
 }

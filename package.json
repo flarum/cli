@@ -48,11 +48,19 @@
     "commands": "./lib/commands",
     "bin": "flarum-cli",
     "plugins": [
-      "@oclif/plugin-help"
+      "@oclif/plugin-help",
+      "@tiagonapoli/oclif-plugin-spaced-commands"
     ],
     "topics": {
-      "generate": {"description": "add boilerplate code to an existing Flarum extension"},
-      "infra": {"description": "add/modify infrastructure for an existing Flarum extension"}
+      "generate:backend": {
+        "description": "add backend boilerplate code to an existing Flarum extension"
+      },
+      "generate": {
+        "description": "add boilerplate code to an existing Flarum extension"
+      },
+      "infra": {
+        "description": "add/modify infrastructure for an existing Flarum extension"
+      }
     }
   },
   "repository": "flarum/flarum-cli",
@@ -68,7 +76,9 @@
   "dependencies": {
     "@oclif/command": "^1.8.0",
     "@oclif/config": "^1.17.0",
+    "@oclif/plugin-autocomplete": "^0.3.0",
     "@oclif/plugin-help": "^3.2.2",
+    "@tiagonapoli/oclif-plugin-spaced-commands": "^0.0.6",
     "chalk": "^2.4.2",
     "mem-fs": "^1.2.0",
     "mem-fs-editor": "^8.0.0",
