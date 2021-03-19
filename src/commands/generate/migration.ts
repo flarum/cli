@@ -32,7 +32,7 @@ export default class GenerateMigration extends BaseFsCommand {
         validate: (s) => /^[0-9a-zA-Z_ ]+$/.test(s.trim()) || 'Field is required; alphanumerical characters, underscores, and spaces only!',
         format: (str) => str.toLowerCase().replace(/ /g, '_'),
       },
-    ]);
+    ], this.promptsOptions);
 
     cli.action.start('Creating migration...');
 

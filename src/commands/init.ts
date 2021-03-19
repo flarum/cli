@@ -50,7 +50,7 @@ export default class Init extends BaseFsCommand {
         type: 'confirm',
         message: 'Directory not empty. Overwrite?',
       },
-    ]);
+    ], this.promptsOptions);
 
     if (response.overwrite === false) this.exit();
 
@@ -194,7 +194,7 @@ export default class Init extends BaseFsCommand {
         message: 'Run `npm install`? (recommended)',
         initial: true,
       },
-    ]);
+    ], this.promptsOptions);
 
     if (!response.composer && !response.npm) return;
 

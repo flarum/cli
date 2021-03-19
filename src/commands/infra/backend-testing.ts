@@ -40,7 +40,7 @@ export default class InfraBackendTesting extends BaseFsCommand {
         type: 'confirm',
         message: 'Test infrastructure files already exist. Overwrite with the latest version?',
       },
-    ]);
+    ], this.promptsOptions);
 
     if (response.overwriteTests === false) this.exit();
   }

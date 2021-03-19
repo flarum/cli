@@ -6,8 +6,7 @@ import { create as createMemFs, Store } from 'mem-fs';
 import { create as createMemFsEditor, Editor } from 'mem-fs-editor';
 import prompts, { Options } from 'prompts';
 import { MemFsUtil } from './MemfsUtil';
-import { execFileSync, execSync } from 'child_process';
-import ExtenderParams from '../contracts/ExtenderParamsInterface';
+import { execSync } from 'child_process';
 
 export default abstract class BaseFsCommand extends Command {
   static flags: flags.Input<any> = {
@@ -65,7 +64,7 @@ export default abstract class BaseFsCommand extends Command {
         message: `Work in ${path.resolve(dir)}?`,
         initial: true,
       },
-    ]);
+    ], this.promptsOptions);
 
     if (!response.verify) this.exit();
   }
@@ -83,7 +82,7 @@ export default abstract class BaseFsCommand extends Command {
         message: 'Would you like me to take care of that for you?',
         initial: true,
       },
-    ]);
+    ], this.promptsOptions);
 
     if (response.composer) {
       cli.action.start('Installing composer packages');
@@ -136,18 +135,5 @@ export default abstract class BaseFsCommand extends Command {
     data.extensionName = extensionComposerJson?.extra['flarum-extension'].title || '';
 
     return data;
-  }
-
-  protected async addExtender(extDir: string, params: ExtenderParams): Promise<string> {
-    const currExtendContents = this.fs.read(path.resolve(extDir, 'extend.php'));
-    const input = JSON.stringify({
-      'extend.php': currExtendContents,
-      op: 'extender.add',
-      params
-    });
-
-    const res = execSync(`php ${this.getCliDir('php-subsystem/index.php')}`, { input });
-
-    return res.toString();
   }
 }
