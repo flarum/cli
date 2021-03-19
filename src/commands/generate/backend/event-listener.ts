@@ -1,3 +1,4 @@
+import ExtenderParams, { ArgType } from '../../../contracts/ExtenderParamsInterface';
 import BaseFsCommand from '../../../util/BaseFsCommand';
 
 export default class GenerateBackendEventListener extends BaseFsCommand {
@@ -12,7 +13,30 @@ export default class GenerateBackendEventListener extends BaseFsCommand {
 
     const extDir = await this.getFlarumExtensionRoot(args.path);
 
-    const output = await this.modifyExtend(extDir, 'event_listen', {'event': 'fdsfadssdafdsafsa\\sadfdsafsadfas'});
+    const params: ExtenderParams = {
+      extender: {
+        className: 'Extend\\Event'
+      },
+      methodCalls: [
+        {
+          methodName: 'listen',
+          args: [
+            {
+              type: ArgType.CLASS_CONST,
+              value: '\\Flarum\\Post\\Saving',
+              auxiliaryValue: 'class'
+            },
+            {
+              type: ArgType.CLASS_CONST,
+              value: '\\Some\\Listener',
+              auxiliaryValue: 'class'
+            }
+          ]
+        }
+      ]
+    }
+
+    const output = await this.addExtender(extDir, params);
 
     this.log(output);
   }

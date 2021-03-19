@@ -7,6 +7,7 @@ import { create as createMemFsEditor, Editor } from 'mem-fs-editor';
 import prompts, { Options } from 'prompts';
 import { MemFsUtil } from './MemfsUtil';
 import { execFileSync, execSync } from 'child_process';
+import ExtenderParams from '../contracts/ExtenderParamsInterface';
 
 export default abstract class BaseFsCommand extends Command {
   static flags: flags.Input<any> = {
@@ -137,11 +138,11 @@ export default abstract class BaseFsCommand extends Command {
     return data;
   }
 
-  protected async modifyExtend(extDir: string, op: string, params: any): Promise<string> {
+  protected async addExtender(extDir: string, params: ExtenderParams): Promise<string> {
     const currExtendContents = this.fs.read(path.resolve(extDir, 'extend.php'));
     const input = JSON.stringify({
       'extend.php': currExtendContents,
-      op,
+      op: 'extender.add',
       params
     });
 
