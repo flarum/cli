@@ -34,7 +34,7 @@
   },
   "files": [
     "/bin",
-    "/src",
+    "/lib",
     "/npm-shrinkwrap.json",
     "/oclif.manifest.json"
   ],
@@ -43,11 +43,11 @@
     "oclif"
   ],
   "license": "MIT",
-  "main": "src/index.js",
+  "main": "lib/index.js",
   "oclif": {
-    "commands": "./src/commands",
+    "commands": "./lib/commands",
     "bin": "flarum-cli",
-    "helpClass": "./src/help",
+    "helpClass": "./lib/help",
     "plugins": [
       "@oclif/plugin-help",
       "@tiagonapoli/oclif-plugin-spaced-commands"
@@ -69,11 +69,11 @@
     "format": "prettier --write src",
     "postpack": "rm -f oclif.manifest.json",
     "posttest": "eslint . --ext .ts --config .eslintrc",
-    "prepack": "rm -rf src && tsc -b && oclif-dev manifest && oclif-dev readme",
+    "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
     "test": "nyc --extension .ts mocha --forbid-only \"test/**/*.test.ts\"",
     "version": "oclif-dev readme && git add README.md"
   },
-  "types": "src/index.d.ts",
+  "types": "lib/index.d.ts",
   "dependencies": {
     "@oclif/command": "^1.8.0",
     "@oclif/config": "^1.17.0",
