@@ -15,7 +15,7 @@ export default class GenerateBackendEventListener extends BaseFsCommand {
 
     const params: ExtenderParams = {
       extender: {
-        className: 'Extend\\Event'
+        className: '\\Flarum\\Extend\\Event'
       },
       methodCalls: [
         {
