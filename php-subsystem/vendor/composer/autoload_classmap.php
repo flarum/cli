@@ -7,8 +7,8 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
-    'Flarum\\CliPhpSubsystem\\ExtenderVisitor' => $baseDir . '/src/ExtenderVisitor.php',
-    'Flarum\\CliPhpSubsystem\\ModifyExtend' => $baseDir . '/src/ModifyExtend.php',
+    'Flarum\\CliPhpSubsystem\\ExtenderUtil' => $baseDir . '/src/ExtenderUtil.php',
+    'Flarum\\CliPhpSubsystem\\NodeVisitors\\AddExtender' => $baseDir . '/src/NodeVisitors/AddExtender.php',
     'PhpParser\\Builder' => $vendorDir . '/nikic/php-parser/lib/PhpParser/Builder.php',
     'PhpParser\\BuilderFactory' => $vendorDir . '/nikic/php-parser/lib/PhpParser/BuilderFactory.php',
     'PhpParser\\BuilderHelpers' => $vendorDir . '/nikic/php-parser/lib/PhpParser/BuilderHelpers.php',

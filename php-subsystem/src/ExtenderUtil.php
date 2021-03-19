@@ -6,11 +6,17 @@ use PhpParser\Lexer;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor;
 use PhpParser\Parser;
-use PhpParser\ParserFactory;
 use PhpParser\PrettyPrinter;
 
-class ModifyExtend
+class ExtenderUtil
 {
+  /**
+   * Value of the extension's extend.php file.
+   *
+   * @var string
+   */
+  protected $extendVal;
+
   /**
    * @var Parser
    */
@@ -26,21 +32,27 @@ class ModifyExtend
    */
   protected $traverser;
 
-  public function __construct()
+  public function __construct($currExtendValue)
   {
+    $this->extendVal = $currExtendValue;
     $this->prettyPrinter = new PrettyPrinter\Standard(['shortArraySyntax' => true]);
     $this->traverser = new NodeTraverser();
   }
 
-  public function run($input)
+  public function add($params)
   {
-    $this->traverser->addVisitor(new ExtenderVisitor($input['params']));
+    return $this->run(new NodeVisitors\AddExtender($params));
+  }
 
-    $process = $this->backupOriginal($input['extend.php']);
+  protected function run(NodeVisitor $visitor)
+  {
+    $original = $this->backupOriginal($this->extendVal);
 
-    $ast = $this->traverser->traverse($process['ast']);
+    $this->traverser->addVisitor($visitor);
 
-    echo $this->prettyPrinter->printFormatPreserving($ast, $process['oldAst'], $process['oldTokens']);
+    $ast = $this->traverser->traverse($original['ast']);
+
+    return $this->prettyPrinter->printFormatPreserving($ast, $original['oldAst'], $original['oldTokens']);
   }
 
   protected function backupOriginal($originalCode) {

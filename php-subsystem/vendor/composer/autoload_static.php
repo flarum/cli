@@ -30,8 +30,8 @@ class ComposerStaticInit033f1ff7c16740840897bb4dbdb77dd3
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
-        'Flarum\\CliPhpSubsystem\\ExtenderVisitor' => __DIR__ . '/../..' . '/src/ExtenderVisitor.php',
-        'Flarum\\CliPhpSubsystem\\ModifyExtend' => __DIR__ . '/../..' . '/src/ModifyExtend.php',
+        'Flarum\\CliPhpSubsystem\\ExtenderUtil' => __DIR__ . '/../..' . '/src/ExtenderUtil.php',
+        'Flarum\\CliPhpSubsystem\\NodeVisitors\\AddExtender' => __DIR__ . '/../..' . '/src/NodeVisitors/AddExtender.php',
         'PhpParser\\Builder' => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser/Builder.php',
         'PhpParser\\BuilderFactory' => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser/BuilderFactory.php',
         'PhpParser\\BuilderHelpers' => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser/BuilderHelpers.php',
