@@ -5,6 +5,7 @@ namespace Flarum\CliPhpSubsystem;
 use PhpParser\Lexer;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor;
+use PhpParser\NodeVisitor\NameResolver;
 use PhpParser\Parser;
 use PhpParser\PrettyPrinter;
 
@@ -16,6 +17,11 @@ class ExtenderUtil
    * @var string
    */
   protected $extendVal;
+
+  /**
+   * @var NameResolver
+   */
+  protected $nameResolver;
 
   /**
    * @var Parser
@@ -36,12 +42,16 @@ class ExtenderUtil
   {
     $this->extendVal = $currExtendValue;
     $this->prettyPrinter = new PrettyPrinter\Standard(['shortArraySyntax' => true]);
+    $this->nameResolver = new NodeVisitor\NameResolver(null, [
+      'replaceNodes' => false
+    ]);
     $this->traverser = new NodeTraverser();
+    $this->traverser->addVisitor($this->nameResolver);
   }
 
   public function add($params)
   {
-    return $this->run(new NodeVisitors\AddExtender($params));
+    return $this->run(new NodeVisitors\AddExtender($params, $this->nameResolver->getNameContext()));
   }
 
   protected function run(NodeVisitor $visitor)

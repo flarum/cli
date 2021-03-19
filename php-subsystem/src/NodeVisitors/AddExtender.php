@@ -3,7 +3,7 @@
 namespace Flarum\CliPhpSubsystem\NodeVisitors;
 
 use PhpParser\BuilderFactory;
-use PhpParser\Comment;
+use PhpParser\NameContext;
 use PhpParser\Node;
 use PhpParser\NodeVisitorAbstract;
 
@@ -14,10 +14,16 @@ class AddExtender extends NodeVisitorAbstract
    */
   protected $nodeFactory;
 
-  public function __construct($params)
+  /**
+   * @var NameContext
+   */
+  protected $nameContext;
+
+  public function __construct($params, NameContext $nameContext)
   {
     $this->nodeFactory = new BuilderFactory();
     $this->params = $params;
+    $this->nameContext = $nameContext;
   }
 
   public function leaveNode(Node $node)
@@ -36,7 +42,6 @@ class AddExtender extends NodeVisitorAbstract
             $methodCall['methodName'],
             array_map([$this, 'cleanArg'], $methodCall['args'])
           );
-          $extender->setAttribute('comments', [new Comment("// fdsafdsafdsafdsa")]);
         }
       }
 
@@ -65,7 +70,7 @@ class AddExtender extends NodeVisitorAbstract
       }
     }
 
-    return $this->nodeFactory->new($className, $args);
+    return $this->nodeFactory->new($this->resolveName($className), $args);
   }
 
   protected function recurseGetExtender(Node $node, string $className, $args)
@@ -104,17 +109,29 @@ class AddExtender extends NodeVisitorAbstract
 
   protected function nameMatches(Node\Name $name, string $cmp)
   {
-    return $name->toString() === $cmp;
+    return $name->getAttribute('resolvedName')->toCodeString() === $cmp;
+  }
+
+  protected function resolveName(string $name)
+  {
+    $nameWithoutLeadingSlash = ltrim($name, "\\");
+    $nameOptions = $this->nameContext->getPossibleNames($nameWithoutLeadingSlash, Node\Stmt\Use_::TYPE_NORMAL);
+
+    // If there are only 2 options, the name context couldn't find an import.
+    // In this case we want to use the fully qualified option, which is always first.
+    if (count($nameOptions) === 2) {
+      return $nameOptions[1]->toCodeString();
+    } else {
+      return end($nameOptions)->toCodeString();
+    }
   }
 
   protected function cleanArg($arg) {
     if ($arg['type'] === 'primitive') {
       return $arg->value;
     } else if ($arg['type'] === 'class_const') {
-      return new Node\Expr\ClassConstFetch(
-        new Node\Name($arg['value']),
-        $arg['auxiliaryValue']
-      );
+
+      return $this->nodeFactory->classConstFetch($this->resolveName($arg['value']), $arg['auxiliaryValue']);
     }
   }
 }
