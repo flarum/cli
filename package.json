@@ -36,7 +36,10 @@
     "/bin",
     "/lib",
     "/npm-shrinkwrap.json",
-    "/oclif.manifest.json"
+    "/oclif.manifest.json",
+    "boilerplate",
+    "stubs",
+    "php-subsystem"
   ],
   "homepage": "https://github.com/flarum/flarum-cli",
   "keywords": [
