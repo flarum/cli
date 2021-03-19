@@ -127,11 +127,14 @@ class AddExtender extends NodeVisitorAbstract
   }
 
   protected function cleanArg($arg) {
-    if ($arg['type'] === 'primitive') {
-      return $arg->value;
-    } else if ($arg['type'] === 'class_const') {
-
-      return $this->nodeFactory->classConstFetch($this->resolveName($arg['value']), $arg['auxiliaryValue']);
+    switch ($arg['type']) {
+      case 'primitive':
+        return $arg->value;
+      case 'class_const':
+        return $this->nodeFactory->classConstFetch(
+          $this->resolveName($arg['value']),
+          $arg['auxiliaryValue']
+        );
     }
   }
 }
