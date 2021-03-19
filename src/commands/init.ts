@@ -77,7 +77,7 @@ export default class Init extends BaseFsCommand {
           type: 'text',
           message: `Package namespace ${chalk.dim('(Vendor\\ExtensionName)')}`,
           validate: (s) => /^([0-9a-zA-Z]+)\\([0-9a-zA-Z]+)$/.test(s.trim()) || 'Invalid namespace format',
-          format: (str) =>
+          format: (str: string) =>
             str &&
             str
               .split('\\')
