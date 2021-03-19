@@ -1,10 +1,10 @@
 {
   "name": "flarum-cli",
   "description": "A CLI for developing Flarum extensions",
-  "version": "0.0.0",
+  "version": "1.0.0-alpha.1",
   "author": "Flarum Team",
   "bin": {
-    "flarum-cli": "./bin/run"
+    "flarum-cli": "bin/run"
   },
   "bugs": "https://github.com/flarum/flarum-cli/issues",
   "devDependencies": {

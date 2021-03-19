@@ -16,7 +16,7 @@ $ npm install -g flarum-cli
 $ flarum-cli COMMAND
 running command...
 $ flarum-cli (-v|--version|version)
-flarum-cli/0.0.0 linux-x64 node-v12.18.4
+flarum-cli/1.0.0-alpha.1 linux-x64 node-v12.18.4
 $ flarum-cli --help [COMMAND]
 USAGE
   $ flarum-cli COMMAND
@@ -35,4 +35,3 @@ or
 ```sh-session
 flarum-cli --help
 ```
-
