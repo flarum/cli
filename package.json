@@ -84,6 +84,7 @@
     "@oclif/plugin-help": "^3.2.2",
     "@tiagonapoli/oclif-plugin-spaced-commands": "^0.0.6",
     "chalk": "^2.4.2",
+    "glob": "^7.1.6",
     "mem-fs": "^1.2.0",
     "mem-fs-editor": "^8.0.0",
     "prompts": "^2.4.0",
