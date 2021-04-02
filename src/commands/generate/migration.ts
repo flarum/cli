@@ -42,7 +42,7 @@ export default class GenerateMigration extends BaseFsCommand {
 
     const pad = (val: number, len: number) => String(val).padStart(len, '0');
 
-    const name = `${pad(now.getFullYear(), 4)}_${pad(now.getMonth(), 2)}_${pad(now.getDate(), 2)}_${pad(migrationNumber, 6)}_${response.name}.php`;
+    const name = `${pad(now.getFullYear(), 4)}_${pad(now.getMonth() + 1, 2)}_${pad(now.getDate(), 2)}_${pad(migrationNumber, 6)}_${response.name}.php`;
 
     const boilerplateDir = this.getCliDir('stubs');
 
@@ -60,7 +60,7 @@ export default class GenerateMigration extends BaseFsCommand {
 
       const now = new Date();
 
-      if (parseInt(match[1]) === now.getFullYear() && parseInt(match[2]) === now.getMonth() && parseInt(match[3]) === now.getDate()) {
+      if (parseInt(match[1]) === now.getFullYear() && parseInt(match[2]) === now.getMonth() + 1 && parseInt(match[3]) === now.getDate()) {
         return parseInt(match[4]) + 1;
       }
     }
