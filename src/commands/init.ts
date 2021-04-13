@@ -204,7 +204,7 @@ export default class Init extends BaseFsCommand {
       cli.action.stop();
     }
 
-    if (response.composer) {
+    if (response.npm) {
       cli.action.start('Installing npm packages');
       execSync('npm install', { cwd: './js' });
       cli.action.stop();
