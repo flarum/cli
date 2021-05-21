@@ -3,13 +3,14 @@ import { create as createMemFsEditor, Editor } from 'mem-fs-editor';
 // @ts-ignore
 import { filter, forEachSeries, reduce } from 'modern-async';
 import { ParamProvider } from '../provider/param-provider';
+import { PhpProvider } from '../provider/php-provider';
 
 export interface Step {
   name: string;
 
   composable: boolean;
 
-  run: (fs: Store, fsEditor: Editor, paramProvider: ParamProvider) => Promise<Store>;
+  run: (fs: Store, fsEditor: Editor, paramProvider: ParamProvider, phpProvider: PhpProvider) => Promise<Store>;
 }
 
 class ComposedStep implements Step {
@@ -24,9 +25,9 @@ class ComposedStep implements Step {
     this.name = `Composition of ${steps.map(s => s.name).join(', ')}`;
   }
 
-  async run(fs: Store, fsEditor: Editor, paramProvider: ParamProvider): Promise<Store> {
+  async run(fs: Store, fsEditor: Editor, paramProvider: ParamProvider, phpProvider: PhpProvider): Promise<Store> {
     return reduce(this.steps, (acc: Store, currStep: Step) => {
-      return currStep.run(acc, fsEditor, paramProvider);
+      return currStep.run(acc, fsEditor, paramProvider, phpProvider);
     }, fs);
   }
 }
@@ -42,8 +43,11 @@ export class StepManager {
 
   private paramProvider: ParamProvider;
 
-  constructor(paramProvider: ParamProvider) {
+  private phpProvider: PhpProvider;
+
+  constructor(paramProvider: ParamProvider, phpProvider: PhpProvider) {
     this.paramProvider = paramProvider;
+    this.phpProvider = phpProvider;
   }
 
   /**
@@ -89,7 +93,7 @@ export class StepManager {
     const fsEditor = createMemFsEditor(fs);
 
     this.paramProvider.reset({});
-    const newFs = await step.run(fs, fsEditor, this.paramProvider);
+    const newFs = await step.run(fs, fsEditor, this.paramProvider, this.phpProvider);
 
     return new Promise((resolve, _reject) => {
       createMemFsEditor(newFs).commit(err => {

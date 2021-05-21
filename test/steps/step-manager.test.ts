@@ -1,11 +1,11 @@
 import { StepManager } from '../../src/steps/step-manager';
-import { stubParamProviderFactory, stubStepFactory } from '../stubs';
+import { stubParamProviderFactory, stubPhpProviderFactory, stubStepFactory } from '../stubs';
 
 describe('StepManager', function () {
   describe('Single step', function () {
     test('Can add and run single step', async function () {
       const paramProvider = stubParamProviderFactory({});
-      const stepManager = new StepManager(paramProvider);
+      const stepManager = new StepManager(paramProvider,  stubPhpProviderFactory());
       const step = stubStepFactory('Step');
 
       stepManager.step(step);
@@ -15,7 +15,7 @@ describe('StepManager', function () {
 
     test('Single optional step will run if confirmed', async function () {
       const paramProvider = stubParamProviderFactory({ execute_step: true });
-      const stepManager = new StepManager(paramProvider);
+      const stepManager = new StepManager(paramProvider,  stubPhpProviderFactory());
       const step = stubStepFactory('Optional Step');
 
       stepManager.step(step, true);
@@ -25,7 +25,7 @@ describe('StepManager', function () {
 
     test('Single optional step wont run if not confirmed', async function () {
       const paramProvider = stubParamProviderFactory({ execute_step: false });
-      const stepManager = new StepManager(paramProvider);
+      const stepManager = new StepManager(paramProvider,  stubPhpProviderFactory());
       const step = stubStepFactory('Optional Step');
 
       stepManager.step(step, true);
@@ -37,7 +37,7 @@ describe('StepManager', function () {
   describe('Composed Steps', function () {
     test('Errors when trying to compose non-composable steps', async function () {
       const paramProvider = stubParamProviderFactory({});
-      const stepManager = new StepManager(paramProvider);
+      const stepManager = new StepManager(paramProvider,  stubPhpProviderFactory());
 
       expect(() => {
         stepManager.composedSteps([
@@ -50,7 +50,7 @@ describe('StepManager', function () {
 
     test('Can add and run single composed step', async function () {
       const paramProvider = stubParamProviderFactory({});
-      const stepManager = new StepManager(paramProvider);
+      const stepManager = new StepManager(paramProvider,  stubPhpProviderFactory());
 
       stepManager.composedSteps([
         stubStepFactory('Step 1'),
@@ -63,7 +63,7 @@ describe('StepManager', function () {
 
     test('Single composed optional step will run if confirmed', async function () {
       const paramProvider = stubParamProviderFactory({ execute_step: true });
-      const stepManager = new StepManager(paramProvider);
+      const stepManager = new StepManager(paramProvider,  stubPhpProviderFactory());
 
       stepManager.composedSteps([
         stubStepFactory('Step 1'),
@@ -76,7 +76,7 @@ describe('StepManager', function () {
 
     test('Single composed optional step wont run if not confirmed', async function () {
       const paramProvider = stubParamProviderFactory({ execute_step: false });
-      const stepManager = new StepManager(paramProvider);
+      const stepManager = new StepManager(paramProvider,  stubPhpProviderFactory());
 
       stepManager.composedSteps([
         stubStepFactory('Step 1'),
@@ -91,7 +91,7 @@ describe('StepManager', function () {
   describe('Multiple simple steps', function () {
     test('Can add and run multiple required simple and composed steps in order', async function () {
       const paramProvider = stubParamProviderFactory({});
-      const stepManager = new StepManager(paramProvider);
+      const stepManager = new StepManager(paramProvider,  stubPhpProviderFactory());
 
       stepManager
         .step(stubStepFactory('Step 1'))
@@ -108,7 +108,7 @@ describe('StepManager', function () {
 
     test('Can add and run multiple required simple and composed steps in order', async function () {
       const paramProvider = stubParamProviderFactory({});
-      const stepManager = new StepManager(paramProvider);
+      const stepManager = new StepManager(paramProvider,  stubPhpProviderFactory());
 
       stepManager
         .step(stubStepFactory('Step 1'))
@@ -131,7 +131,7 @@ describe('StepManager', function () {
         .mockReturnValueOnce(false)
         .mockReturnValueOnce(false);
       paramProvider.get = mockedGet.bind(paramProvider);
-      const stepManager = new StepManager(paramProvider);
+      const stepManager = new StepManager(paramProvider,  stubPhpProviderFactory());
 
       stepManager
         .step(stubStepFactory('Step 1'))
@@ -169,7 +169,7 @@ describe('StepManager', function () {
       const paramProvider = stubParamProviderFactory({});
       paramProvider.get = jest.fn(async () => callOrder.push('get') && 'some string').bind(paramProvider);
       paramProvider.reset = jest.fn(() => callOrder.push('reset')).bind(paramProvider);
-      const stepManager = new StepManager(paramProvider);
+      const stepManager = new StepManager(paramProvider,  stubPhpProviderFactory());
 
       await stepManager.composedSteps([
         stubStepFactory('Step 1', true, [{ name: 'some_param', type: 'text' }]),
@@ -188,7 +188,7 @@ describe('StepManager', function () {
       const paramProvider = stubParamProviderFactory({});
       paramProvider.get = jest.fn(async () => callOrder.push('get') && 'some string').bind(paramProvider);
       paramProvider.reset = jest.fn(() => callOrder.push('reset')).bind(paramProvider);
-      const stepManager = new StepManager(paramProvider);
+      const stepManager = new StepManager(paramProvider,  stubPhpProviderFactory());
 
       await stepManager
         .step(stubStepFactory('Step 1', true, [{name: 'some_param', type: 'text'}]))
