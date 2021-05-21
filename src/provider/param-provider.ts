@@ -1,10 +1,23 @@
-import prompt from 'prompts';
-import { ParamProvider, StepParamDef } from '../contracts/step';
+import prompt, { PromptObject } from 'prompts';
+
+export interface ParamProvider {
+  /**
+   * Retrie
+   */
+  get<T>(paramDef: ParamDef): Promise<T>;
+
+  /**
+   * Load a set of param values as initial values
+   */
+  reset(initial: { [key: string]: unknown }): void;
+}
+
+export type ParamDef = PromptObject;
 
 export class PromptParamProvider implements ParamProvider {
   private cache = new Map<string, unknown>();
 
-  async get<T>(paramDef: StepParamDef): Promise<T> {
+  async get<T>(paramDef: ParamDef): Promise<T> {
     const paramName = paramDef.name as string;
 
     if (this.cache.has(paramName)) {

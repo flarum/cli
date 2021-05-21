@@ -1,8 +1,16 @@
 import { create as createMemFs, Store } from 'mem-fs';
 import { create as createMemFsEditor, Editor } from 'mem-fs-editor';
-import { ParamProvider, Step } from '../contracts/step';
 // @ts-ignore
-import { filter, forEach, reduce } from 'modern-async';
+import { filter, forEachSeries, reduce } from 'modern-async';
+import { ParamProvider } from '../provider/param-provider';
+
+export interface Step {
+  name: string;
+
+  composable: boolean;
+
+  run: (fs: Store, fsEditor: Editor, paramProvider: ParamProvider) => Promise<Store>;
+}
 
 class ComposedStep implements Step {
   composable = true;
@@ -64,14 +72,11 @@ export class StepManager {
   }
 
   async run(): Promise<string[]> {
-    const stepsToRun = (await filter(this.steps, async (storedStep: StoredStep) => !storedStep.optional || this.confirmStep(storedStep.confirmationMessage)))
-      .map((storedStep: StoredStep) => storedStep.step);
+    const stepsToRun = await filter(this.steps, async (storedStep: StoredStep) => !storedStep.optional || this.confirmStep(storedStep.confirmationMessage));
 
-    await forEach(stepsToRun, async (step: Step) => {
-      await this.runStep(step);
-    });
+    await forEachSeries(stepsToRun.map((storedStep: StoredStep) => storedStep.step), this.runStep.bind(this));
 
-    return stepsToRun.map((step: Step) => step.name);
+    return stepsToRun.map((storedStep: StoredStep) => storedStep.step.name);
   }
 
   private async confirmStep(message: string): Promise<boolean> {
@@ -79,20 +84,20 @@ export class StepManager {
     return this.paramProvider.get<boolean>({ name: 'execute_step', message, type: 'confirm' });
   }
 
-  private async runStep(step: Step): Promise<void> {
+  private async runStep(step: Step): Promise<boolean> {
     const fs = createMemFs();
     const fsEditor = createMemFsEditor(fs);
 
     this.paramProvider.reset({});
     const newFs = await step.run(fs, fsEditor, this.paramProvider);
 
-    await new Promise((resolve, _reject) => {
+    return new Promise((resolve, _reject) => {
       createMemFsEditor(newFs).commit(err => {
         if (err) {
           throw new Error(err);
         }
 
-        resolve(0);
+        resolve(true);
       });
     });
   }
