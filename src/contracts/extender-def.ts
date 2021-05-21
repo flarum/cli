@@ -1,4 +1,4 @@
-export default interface ExtenderParams {
+export interface ExtenderDef {
   extender: ExtenderSpec;
   methodCalls?: MethodCallSpec[];
 }
@@ -14,7 +14,7 @@ export interface MethodCallSpec {
 }
 
 export interface ArgSpec {
-  type: ArgType,
+  type: ArgType;
   value: string | boolean | CallbackSpec;
   auxiliaryValue?: string;
 }
