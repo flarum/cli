@@ -1,7 +1,7 @@
 import { prompt } from 'prompts';
-import { PromptParamProvider } from '../../src/steps/prompt-param-provider';
+import { PromptParamProvider } from '../../src/provider/param-provider';
 
-describe('param provider', function () {
+describe('PromptParamProvider Works', function () {
   test('Reads values from prompts properly', async function () {
     const provider = new PromptParamProvider();
 
