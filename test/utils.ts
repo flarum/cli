@@ -4,10 +4,15 @@ import { resolve } from 'path';
 import { Step } from '../src/steps/step-manager';
 import { stubParamProviderFactory, stubPathProviderFactory, stubPhpProviderFactory } from './stubs';
 
-export async function runStep(StepClass: any, params: Record<string, unknown>): Promise<Store> {
+export async function runStep(StepClass: any, params: Record<string, unknown>, initialFiles: Record<string, string> = {}): Promise<Store> {
   const step: Step = new StepClass();
 
   const fs = createMemFs();
+  const fsEditor = createMemFsEditor(fs);
+  Object.keys(initialFiles).forEach(path => {
+    fsEditor.write(path, initialFiles[path]);
+  });
+
   const pathProvider = stubPathProviderFactory({boilerplate: resolve(__dirname, '../boilerplate')});
   const paramProvider = stubParamProviderFactory(params);
   const phpProvider = stubPhpProviderFactory();
