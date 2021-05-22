@@ -32,6 +32,10 @@ describe('Test extension skeleton step', function () {
 
     expect(getFsPaths(fs).sort()).toStrictEqual(expected);
     expect(getExtFileContents(fs, 'extend.php').includes('Extend\\Locales')).toBe(true);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/js/dist/forum.js'")).toBe(true);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/forum.less')")).toBe(true);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/js/dist/admin.js'")).toBe(true);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/admin.less'")).toBe(true);
   });
 
   test('Can exclude locales', async function () {
@@ -55,6 +59,10 @@ describe('Test extension skeleton step', function () {
 
     expect(getFsPaths(fs).sort()).toStrictEqual(expected);
     expect(getExtFileContents(fs, 'extend.php').includes('Extend\\Locales')).toBe(false);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/js/dist/forum.js'")).toBe(true);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/forum.less')")).toBe(true);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/js/dist/admin.js'")).toBe(true);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/admin.less'")).toBe(true);
   });
 
   test('Can exclude JS completely', async function () {
@@ -77,6 +85,11 @@ describe('Test extension skeleton step', function () {
       .filter(path => !path.includes('/js'));
 
     expect(getFsPaths(fs).sort()).toStrictEqual(expected);
+    expect(getExtFileContents(fs, 'extend.php').includes('Extend\\Locales')).toBe(true);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/js/dist/forum.js'")).toBe(false);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/forum.less')")).toBe(true);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/js/dist/admin.js'")).toBe(false);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/admin.less'")).toBe(true);
   });
 
   test('Can exclude CSS completely', async function () {
@@ -99,6 +112,11 @@ describe('Test extension skeleton step', function () {
       .filter(path => !path.includes('/less'));
 
     expect(getFsPaths(fs).sort()).toStrictEqual(expected);
+    expect(getExtFileContents(fs, 'extend.php').includes('Extend\\Locales')).toBe(true);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/js/dist/forum.js'")).toBe(true);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/forum.less')")).toBe(false);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/js/dist/admin.js'")).toBe(true);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/admin.less'")).toBe(false);
   });
 
   test('Can exclude admin portion', async function () {
@@ -121,6 +139,11 @@ describe('Test extension skeleton step', function () {
       .filter(path => !path.includes('admin'));
 
     expect(getFsPaths(fs).sort()).toStrictEqual(expected);
+    expect(getExtFileContents(fs, 'extend.php').includes('Extend\\Locales')).toBe(true);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/js/dist/forum.js'")).toBe(true);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/forum.less')")).toBe(true);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/js/dist/admin.js'")).toBe(false);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/admin.less'")).toBe(false);
   });
 
   test('Can exclude forum portion', async function () {
@@ -143,5 +166,10 @@ describe('Test extension skeleton step', function () {
       .filter(path => !path.includes('forum'));
 
     expect(getFsPaths(fs).sort()).toStrictEqual(expected);
+    expect(getExtFileContents(fs, 'extend.php').includes('Extend\\Locales')).toBe(true);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/js/dist/forum.js'")).toBe(false);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/forum.less')")).toBe(false);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/js/dist/admin.js'")).toBe(true);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/admin.less'")).toBe(true);
   });
 });
