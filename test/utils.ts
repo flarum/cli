@@ -18,8 +18,7 @@ export async function runStep(StepClass: any, params: Record<string, unknown>): 
 export function getFsPaths(store: Store, extDir = '/ext'): string[] {
   // TODO: update when issues with mem-fs typings resolved.
   // @ts-ignore
-  return store.all().filter(f => f.state !== 'deleted')
-    .map(f => f.path)
+  return store.all().filter(f => f.state !== 'deleted').map(f => f.path)
     .filter((path: string) => path.startsWith(extDir))
     .sort();
 }
