@@ -1,8 +1,9 @@
 import { create as createMemFs, Store } from 'mem-fs';
-import { create as createMemFsEditor, Editor } from 'mem-fs-editor';
+import { create as createMemFsEditor } from 'mem-fs-editor';
 // @ts-ignore
 import { filter, forEachSeries, reduce } from 'modern-async';
 import { ParamProvider } from '../provider/param-provider';
+import { PathProvider } from '../provider/path-provider';
 import { PhpProvider } from '../provider/php-provider';
 
 export interface Step {
@@ -10,7 +11,7 @@ export interface Step {
 
   composable: boolean;
 
-  run: (fs: Store, fsEditor: Editor, paramProvider: ParamProvider, phpProvider: PhpProvider) => Promise<Store>;
+  run: (fs: Store, pathProvider: PathProvider, paramProvider: ParamProvider, phpProvider: PhpProvider) => Promise<Store>;
 }
 
 class ComposedStep implements Step {
@@ -25,9 +26,9 @@ class ComposedStep implements Step {
     this.name = `Composition of ${steps.map(s => s.name).join(', ')}`;
   }
 
-  async run(fs: Store, fsEditor: Editor, paramProvider: ParamProvider, phpProvider: PhpProvider): Promise<Store> {
+  async run(fs: Store, pathProvider: PathProvider, paramProvider: ParamProvider, phpProvider: PhpProvider): Promise<Store> {
     return reduce(this.steps, (acc: Store, currStep: Step) => {
-      return currStep.run(acc, fsEditor, paramProvider, phpProvider);
+      return currStep.run(acc, pathProvider, paramProvider, phpProvider);
     }, fs);
   }
 }
@@ -41,11 +42,14 @@ interface StoredStep {
 export class StepManager {
   private steps: StoredStep[] = [];
 
+  private pathProvider: PathProvider;
+
   private paramProvider: ParamProvider;
 
   private phpProvider: PhpProvider;
 
-  constructor(paramProvider: ParamProvider, phpProvider: PhpProvider) {
+  constructor(pathProvider: PathProvider, paramProvider: ParamProvider, phpProvider: PhpProvider) {
+    this.pathProvider = pathProvider;
     this.paramProvider = paramProvider;
     this.phpProvider = phpProvider;
   }
@@ -90,10 +94,9 @@ export class StepManager {
 
   private async runStep(step: Step): Promise<boolean> {
     const fs = createMemFs();
-    const fsEditor = createMemFsEditor(fs);
 
     this.paramProvider.reset({});
-    const newFs = await step.run(fs, fsEditor, this.paramProvider, this.phpProvider);
+    const newFs = await step.run(fs, this.pathProvider, this.paramProvider, this.phpProvider);
 
     return new Promise((resolve, _reject) => {
       createMemFsEditor(newFs).commit(err => {
