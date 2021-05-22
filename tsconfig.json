@@ -11,7 +11,14 @@
     "typeRoots": [
       "./node_modules/@types",
       "./types/",
-    ]
+    ],
+    "baseUrl": "./",
+    "paths": {
+      "*": [
+        "src/subfolder/node_modules/@types/*",
+        "*"
+      ]
+    }
   },
   "include": [
     "src/**/*"
