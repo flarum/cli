@@ -2,6 +2,7 @@ import { create as createMemFsEditor } from 'mem-fs-editor';
 import { UpdateJSImports } from '../../../src/steps/update/js-imports';
 import { resolve } from 'path';
 import { runStep } from '../../utils';
+import { PathProvider } from '../../../src/provider/path-provider';
 
 const files = [
   // admin
@@ -58,16 +59,18 @@ import X from 'flarum/forum/components/DiscussionListItem';`;
 
 describe('Test JS import rewrite', function () {
   test('Rewrites imports properly', async function () {
-    const initialFiles: Record<string, string> = {
-      '/ext/js/src/forum/something.js': fileToRewrite,
-    };
+    const fs = await runStep(UpdateJSImports, {}, (pathProvider: PathProvider) => {
+      const initialFiles: Record<string, string> = {};
 
-    // JS import step will rewrite based on existing vendor files, so we need to make those.
-    files.forEach(path => {
-      initialFiles[resolve('/ext/vendor/flarum/core/js/src', path)] = 'Something';
+      initialFiles[pathProvider.ext('/ext/js/src/forum/something.js')] = fileToRewrite;
+
+      // JS import step will rewrite based on existing vendor files, so we need to make those.
+      files.forEach(path => {
+        initialFiles[resolve(pathProvider.ext('vendor/flarum/core/js/src'), path)] = 'Something';
+      });
+
+      return initialFiles;
     });
-
-    const fs = await runStep(UpdateJSImports, {}, initialFiles);
 
     expect(createMemFsEditor(fs).read(resolve('/ext/js/src/forum/something.js'))).toStrictEqual(expectedOutput);
   });

@@ -1,21 +1,29 @@
 import { create as createMemFs, Store } from 'mem-fs';
 import { create as createMemFsEditor } from 'mem-fs-editor';
 import { resolve } from 'path';
+import { PathProvider } from '../src/provider/path-provider';
 import { Step } from '../src/steps/step-manager';
 import { stubParamProviderFactory, stubPathProviderFactory, stubPhpProviderFactory } from './stubs';
 
-export async function runStep(StepClass: any, params: Record<string, unknown>, initialFiles: Record<string, string> = {}): Promise<Store> {
+const empty = {};
+
+export async function runStep(
+  StepClass: any,
+  params: Record<string, unknown>,
+  initialFilesCallback: (pathProvider: PathProvider) => Record<string, string> = () => empty
+): Promise<Store> {
   const step: Step = new StepClass();
 
   const fs = createMemFs();
+  const pathProvider = stubPathProviderFactory({ boilerplate: resolve(__dirname, '../boilerplate') });
+  const paramProvider = stubParamProviderFactory(params);
+  const phpProvider = stubPhpProviderFactory();
+
   const fsEditor = createMemFsEditor(fs);
+  const initialFiles = initialFilesCallback(pathProvider);
   Object.keys(initialFiles).forEach(path => {
     fsEditor.write(path, initialFiles[path]);
   });
-
-  const pathProvider = stubPathProviderFactory({boilerplate: resolve(__dirname, '../boilerplate')});
-  const paramProvider = stubParamProviderFactory(params);
-  const phpProvider = stubPhpProviderFactory();
 
   return step.run(fs, pathProvider, paramProvider, phpProvider);
 }
