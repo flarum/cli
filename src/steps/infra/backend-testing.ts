@@ -7,7 +7,7 @@ import { PhpProvider } from '../../provider/php-provider';
 import { extensionMetadata } from '../../utils/extension-metadata';
 import { Step } from '../step-manager';
 
-export class BackendTesting implements Step {
+export class BackendTestingInfra implements Step {
   name = 'Add/update backend testing infrastructure';
 
   composable = true;

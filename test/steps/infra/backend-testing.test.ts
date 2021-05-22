@@ -1,11 +1,11 @@
 import { getExtFileContents, getFsPaths, runStep } from '../../utils';
-import { BackendTesting } from '../../../src/steps/infra/backend-testing';
+import { BackendTestingInfra } from '../../../src/steps/infra/backend-testing';
 import { resolve } from 'path';
 import { PathProvider } from '../../../src/provider/path-provider';
 
 describe('Backend testing infra step', function () {
   test('Touches proper files', async function () {
-    const fs = await runStep(BackendTesting, {});
+    const fs = await runStep(BackendTestingInfra, {});
 
     const expected = [
       'tests/phpunit.integration.xml',
@@ -22,7 +22,7 @@ describe('Backend testing infra step', function () {
   });
 
   test('Doesnt mess up composer.json if already present', async function () {
-    const fs = await runStep(BackendTesting, {}, (pathProvider: PathProvider) => {
+    const fs = await runStep(BackendTestingInfra, {}, (pathProvider: PathProvider) => {
       const initialFiles: any = {};
 
       initialFiles[pathProvider.ext('composer.json')] = JSON.stringify({
