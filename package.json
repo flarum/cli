@@ -78,6 +78,7 @@
   },
   "types": "lib/index.d.ts",
   "dependencies": {
+    "@babel/preset-env": "^7.14.2",
     "@oclif/command": "^1.8.0",
     "@oclif/config": "^1.17.0",
     "@oclif/plugin-autocomplete": "^0.3.0",

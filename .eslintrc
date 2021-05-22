@@ -4,6 +4,7 @@
     "indent": ["error", 2, {"MemberExpression": 1}],
     "valid-jsdoc": "off",
     "semi": [2, "always"],
+    "max-params": ["error", 6],
     "object-curly-spacing": "off"
   },
   "extends": [
