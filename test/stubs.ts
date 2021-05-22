@@ -5,14 +5,18 @@ import { PathProvider } from '../src/provider/path-provider';
 import { ExtenderDef, PhpProvider } from '../src/provider/php-provider';
 import { Step } from '../src/steps/step-manager';
 
-export function stubStepFactory(name: string, composable = true, paramsConsumed: ParamDef[] = []): Step {
+export function stubStepFactory(name: string, composable = true, paramsConsumed: ParamDef[] = [], paramsExposed: Record<string, unknown> = {}): Step {
   return {
     name,
     composable,
+    exposes: Object.keys(paramsExposed),
     async run(fs: Store, _pathProvider: PathProvider, paramProvider: ParamProvider, _phpProvider: PhpProvider): Promise<Store> {
       paramsConsumed.forEach(paramProvider.get);
 
       return fs;
+    },
+    getExposed(_pathProvider: PathProvider): Record<string, unknown> {
+      return paramsExposed;
     },
   };
 }
@@ -43,18 +47,6 @@ export function stubPathProviderFactory(paths: TestPaths = {}): PathProvider {
 
     requestedDir(path: string): string {
       return resolve(paths.requestedDir || '/ext', path);
-    },
-  };
-}
-
-export function stubParamProviderFactory(initial: Record<string, unknown>): ParamProvider {
-  return {
-    async get<T>(paramDef: ParamDef): Promise<T> {
-      return initial[paramDef.name as string] as T;
-    },
-
-    reset() {
-      // No cache, so do nothing.
     },
   };
 }

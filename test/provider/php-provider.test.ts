@@ -1,7 +1,7 @@
 import path from 'path';
 import { ArgType, ExtenderDef, PhpSubsystemProvider } from '../../src/provider/php-provider';
 
-describe('PromptParamProvider Works', function () {
+describe('PhpProvider Works', function () {
   test('Can add simple extender', async function () {
     const provider = new PhpSubsystemProvider(path.resolve(__dirname, '../../php-subsystem/index.php'));
 

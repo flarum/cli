@@ -1,21 +1,13 @@
 import prompt, { PromptObject } from 'prompts';
 
-export interface ParamProvider {
-  /**
-   * Retrie
-   */
-  get<T>(paramDef: ParamDef): Promise<T>;
-
-  /**
-   * Load a set of param values as initial values
-   */
-  reset(initial: { [key: string]: unknown }): void;
-}
-
 export type ParamDef = PromptObject;
 
-export class PromptParamProvider implements ParamProvider {
+export class ParamProvider {
   private cache = new Map<string, unknown>();
+
+  constructor(initial: Record<string, unknown> = {}) {
+    this.cache = new Map(Object.entries(initial));
+  }
 
   async get<T>(paramDef: ParamDef): Promise<T> {
     const paramName = paramDef.name as string;
@@ -30,9 +22,5 @@ export class PromptParamProvider implements ParamProvider {
     this.cache.set(paramName, resValue);
 
     return resValue;
-  }
-
-  reset(initial: { [key: string]: unknown }): void {
-    this.cache = new Map(Object.entries(initial));
   }
 }

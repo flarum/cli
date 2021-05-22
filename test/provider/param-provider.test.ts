@@ -1,9 +1,9 @@
 import { prompt } from 'prompts';
-import { PromptParamProvider } from '../../src/provider/param-provider';
+import { ParamProvider } from '../../src/provider/param-provider';
 
-describe('PromptParamProvider Works', function () {
+describe('ParamProvider Works', function () {
   test('Reads values from prompts properly', async function () {
-    const provider = new PromptParamProvider();
+    const provider = new ParamProvider();
 
     prompt.inject(['Test']);
 
@@ -12,7 +12,7 @@ describe('PromptParamProvider Works', function () {
   });
 
   test('Obtains from cache if present', async function () {
-    const provider = new PromptParamProvider();
+    const provider = new ParamProvider();
 
     prompt.inject(['Test']);
 
@@ -20,23 +20,11 @@ describe('PromptParamProvider Works', function () {
     expect(await provider.get({ name: 'same', type: 'text', message: '_' })).toStrictEqual('Test');
   });
 
-  test('Resetting resets cache as expected', async function () {
-    const provider = new PromptParamProvider();
+  test('Obtains from initial if present', async function () {
+    const provider = new ParamProvider({same: 'A', different: 'B'});
 
-    prompt.inject(['Test']);
-
-    expect(await provider.get({ name: 'same', type: 'text', message: '_' })).toStrictEqual('Test');
+    expect(await provider.get({ name: 'same', type: 'text', message: '_' })).toStrictEqual('A');
     provider.reset({});
-    expect(await provider.get({ name: 'same', type: 'text', message: '_' })).toStrictEqual(undefined);
-  });
-
-  test('Resetting can inject new values', async function () {
-    const provider = new PromptParamProvider();
-
-    prompt.inject(['Test']);
-
-    expect(await provider.get({ name: 'same', type: 'text', message: '_' })).toStrictEqual('Test');
-    provider.reset({same: 'Some value'});
-    expect(await provider.get({ name: 'same', type: 'text', message: '_' })).toStrictEqual('Some value');
+    expect(await provider.get({ name: 'different', type: 'text', message: '_' })).toStrictEqual('B');
   });
 });
