@@ -1,6 +1,6 @@
 # <%= extensionName %>
 
-![License](https://img.shields.io/badge/license-<%= license %>-blue.svg) [![Latest Stable Version](https://img.shields.io/packagist/v/<%= packageName %>.svg)](https://packagist.org/packages/<%= packageName %>) [![Total Downloads](https://img.shields.io/packagist/dt/<%= packageName %>.svg)](https://packagist.org/packages/<%= packageName %>)
+![License](https://img.shields.io/badge/license-<%= licenseType %>-blue.svg) [![Latest Stable Version](https://img.shields.io/packagist/v/<%= packageName %>.svg)](https://packagist.org/packages/<%= packageName %>) [![Total Downloads](https://img.shields.io/packagist/dt/<%= packageName %>.svg)](https://packagist.org/packages/<%= packageName %>)
 
 A [Flarum](http://flarum.org) extension. <%= packageDescription %>
 
