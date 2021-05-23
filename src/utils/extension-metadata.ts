@@ -5,7 +5,7 @@ export function extensionMetadata(extensionComposerJson: any = {}) {
   data.licenseType = extensionComposerJson?.license || '';
   data.authorName = '';
   data.authorEmail = '';
-  data.packageNamespace = (Object.keys(extensionComposerJson?.autoload?.['psr-4'] ?? {})[0] || '').slice(0, -1).replace('\\', '\\\\');
+  data.packageNamespace = (Object.keys(extensionComposerJson?.autoload?.['psr-4'] ?? {})[0] || '').slice(0, -1);
   data.extensionName = extensionComposerJson?.extra?.['flarum-extension']?.title || '';
 
   return data;
