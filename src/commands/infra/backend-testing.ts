@@ -12,7 +12,7 @@ export default class BackendTesting extends BaseCommand {
 
   protected steps(stepManager: StepManager): StepManager {
     return stepManager
-      .namedStep('testing', new BackendTestingInfra(), {})
+      .namedStep('testing', new BackendTestingInfra())
       .step(new ComposerInstall(), { optional: true, confirmationMessage: 'Run `composer update`? (recommended)', default: true }, [
         {
           sourceStep: 'testing',
