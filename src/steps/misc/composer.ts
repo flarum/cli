@@ -11,7 +11,7 @@ export class ComposerInstall implements Step {
   composable = false;
 
   async run(fs: Store, pathProvider: PathProvider, _paramProvider: ParamProvider, _phpProvider: PhpProvider): Promise<Store> {
-    execSync('composer install', { cwd: pathProvider.ext('') });
+    execSync('composer update', { cwd: pathProvider.ext('') });
 
     return fs;
   }
