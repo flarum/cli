@@ -1,9 +1,9 @@
-import prompt, { PromptObject } from 'prompts';
+import prompt, { Options, PromptObject } from 'prompts';
 import { exit } from '@oclif/errors';
 
 export type ParamDef = PromptObject;
 
-const promptsOptions = { onCancel: () => exit() };
+export const PROMPTS_OPTIONS: Options = { onCancel: () => exit() };
 
 export class ParamProvider {
   private cache = new Map<string, unknown>();
@@ -19,7 +19,7 @@ export class ParamProvider {
       return this.cache.get(paramName) as T;
     }
 
-    const res = await prompt(paramDef, promptsOptions) as Record<string, unknown>;
+    const res = await prompt(paramDef, PROMPTS_OPTIONS) as Record<string, unknown>;
     const resValue = res[paramName] as T;
 
     this.cache.set(paramName, resValue);
