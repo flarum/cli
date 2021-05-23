@@ -3,6 +3,7 @@ import { ExtensionSkeleton } from '../steps/init/extension-skeleton';
 import { ComposerInstall } from '../steps/misc/composer';
 import { YarnInstall } from '../steps/misc/yarn';
 import BaseCommand from '../base-command';
+import yosay from 'yosay';
 
 export default class Init extends BaseCommand {
   static description = 'create a new Flarum extension';
@@ -24,6 +25,14 @@ export default class Init extends BaseCommand {
           dontRunIfFalsy: true,
         },
       ]);
+  }
+
+  protected welcomeMessage() {
+    return yosay('Welcome to a Flarum extension generator\n\n- Flarum Team');
+  }
+
+  protected goodbyeMessage() {
+    return 'Extension generation complete! Visit https://docs.flarum.org/extend to learn more about Flarume extension development.';
   }
 
   protected async additionalPreRunChecks(extRoot: string) {
