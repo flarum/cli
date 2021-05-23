@@ -12,7 +12,7 @@ export class BackendTestingInfra extends BaseInfraStep {
     '.github/workflows/test.yml',
   ];
 
-  jsonToAugment = {
+  protected jsonToAugment = {
     'composer.json': ['scripts', 'scripts-description', 'require-dev'],
   };
 }
