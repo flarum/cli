@@ -24,3 +24,9 @@ export class ParamProvider {
     return resValue;
   }
 }
+
+export type ParamProviderFactory = (initial: Record<string, unknown>) => ParamProvider;
+
+export const paramProviderFactory: ParamProviderFactory = (initial = {}) => {
+  return new ParamProvider(initial);
+};
