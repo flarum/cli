@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import { Validator } from '../../../utils/validation';
 import { BasePhpStubStep } from '../php-base';
 
-export class GenerateEventListener extends BasePhpStubStep {
+export class GenerateEventListenerStub extends BasePhpStubStep {
   type = 'Generate Event Listener Class';
 
   protected additionalExposes = ['eventClass'];

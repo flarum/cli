@@ -1,6 +1,6 @@
 import { getFsPaths, runStep } from '../../utils';
 
-import { GenerateEventListener } from '../../../src/steps/stubs/backend/event-listener';
+import { GenerateEventListenerStub } from '../../../src/steps/stubs/backend/event-listener';
 import { PathProvider } from '../../../src/provider/path-provider';
 
 interface StubTest {
@@ -22,7 +22,7 @@ const requestedDir = '/ext/src/somePath';
 const testSpecs: StubTest[] = [
   // Event Listener
   {
-    stubClass: GenerateEventListener,
+    stubClass: GenerateEventListenerStub,
     params: {
       className: 'MutateDatabaseSave',
       eventClass: '\\Flarum\\Post\\Event\\Saving',
