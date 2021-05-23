@@ -24,7 +24,6 @@ describe('ParamProvider Works', function () {
     const provider = new ParamProvider({same: 'A', different: 'B'});
 
     expect(await provider.get({ name: 'same', type: 'text', message: '_' })).toStrictEqual('A');
-    provider.reset({});
     expect(await provider.get({ name: 'different', type: 'text', message: '_' })).toStrictEqual('B');
   });
 });
