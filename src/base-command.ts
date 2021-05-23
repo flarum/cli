@@ -4,7 +4,7 @@ import { resolve } from 'path';
 import prompts from 'prompts';
 import globby from 'globby';
 import { execSync } from 'child_process';
-import { existsSync, readdirSync, unlinkSync } from 'fs';
+import { existsSync, unlinkSync } from 'fs';
 import { paramProviderFactory, PROMPTS_OPTIONS } from './provider/param-provider';
 import { StepManager } from './steps/step-manager';
 import { PathFsProvider } from './provider/path-provider';
@@ -24,8 +24,6 @@ export default abstract class BaseCommand extends Command {
 
   protected requireExistingExtension = true;
 
-  protected requireEmptyDir = false;
-
   async run() {
     const { args } = this.parse(this.constructor as any);
 
@@ -44,10 +42,6 @@ export default abstract class BaseCommand extends Command {
       await this.confirmExtDir(extRoot);
     } else {
       extRoot = path || process.cwd();
-    }
-
-    if (this.requireEmptyDir) {
-      await this.emptyDirCheck(extRoot);
     }
 
     await this.additionalPreRunChecks(extRoot);
@@ -144,24 +138,33 @@ export default abstract class BaseCommand extends Command {
     }
   }
 
-  protected async emptyDirCheck(dir: string) {
-    const files = readdirSync(dir);
+  /**
+   * If false, files do not exist so no need to override.
+   * If true, files should be overriden.
+   * If user says no, will exit and not return anything.
+   */
+  protected async confirmOverrideFiles(dir: string, pattern: string, confirmationMessage: string): Promise<boolean> {
+    const files = await globby(resolve(dir, pattern));
 
     const empty = files.length === 0 || (files.length === 1 && files[0] === '.git');
 
-    if (empty) return;
+    if (empty) return false;
 
     const response = await prompts([
       {
         name: 'overwrite',
         type: 'confirm',
-        message: 'Directory not empty. Overwrite?',
+        message: confirmationMessage,
       },
     ], PROMPTS_OPTIONS);
 
     if (response.overwrite === false) this.exit();
 
-    const pathsToDelete = await globby(`${dir}/!(*.git)`);
+    return true;
+  }
+
+  protected async  deleteFiles(dir: string, pattern: string) {
+    const pathsToDelete = await globby(resolve(dir, pattern));
 
     pathsToDelete.forEach(unlinkSync);
   }

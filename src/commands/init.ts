@@ -11,8 +11,6 @@ export default class Init extends BaseCommand {
 
   static args = [...BaseCommand.args];
 
-  protected requireEmptyDir = true;
-
   protected requireExistingExtension = false;
 
   protected steps(stepManager: StepManager): StepManager {
@@ -26,5 +24,11 @@ export default class Init extends BaseCommand {
           dontRunIfFalsy: true,
         },
       ]);
+  }
+
+  protected async additionalPreRunChecks(extRoot: string) {
+    if (await this.confirmOverrideFiles(extRoot, '**/*', 'Directory not empty. Overwrite?')) {
+      this.deleteFiles(extRoot, '**/*');
+    }
   }
 }
