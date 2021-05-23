@@ -1,6 +1,7 @@
 module.exports = {
   setupFilesAfterEnv: ['jest-extended'],
   collectCoverage: true,
+  testEnvironment: 'node',
   preset: 'ts-jest',
   coverageReporters: [
     'html',
@@ -8,7 +9,6 @@ module.exports = {
     'text-summary',
   ],
   transform: {
-    '^.+\\.(ts|tsx)?$': 'ts-jest',
-    '^.+\\.(js|jsx)$': 'babel-jest',
+    '^.+\\.(ts|tsx|js|jsx)$': 'ts-jest',
   },
 };
