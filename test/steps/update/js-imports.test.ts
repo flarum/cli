@@ -59,7 +59,7 @@ import X from 'flarum/forum/components/DiscussionListItem';`;
 
 describe('Test JS import rewrite', function () {
   test('Rewrites imports properly', async function () {
-    const fs = await runStep(UpdateJSImports, [], {}, (pathProvider: PathProvider) => {
+    const { fs } = await runStep(UpdateJSImports, [], {}, (pathProvider: PathProvider) => {
       const initialFiles: Record<string, string> = {};
 
       initialFiles[pathProvider.ext('/ext/js/src/forum/something.js')] = fileToRewrite;

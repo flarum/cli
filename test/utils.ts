@@ -9,12 +9,17 @@ import { stubPathProviderFactory, stubPhpProviderFactory } from './stubs';
 
 const empty = {};
 
+interface StepOutput {
+  fs: Store;
+  exposedParams: Record<string, unknown>;
+}
+
 export async function runStep(
   StepClass: any,
   params: unknown[] = [],
   initialParams: Record<string, unknown> = {},
   initialFilesCallback: (pathProvider: PathProvider) => Record<string, string> = () => empty
-): Promise<Store> {
+): Promise<StepOutput> {
   const step: Step = new StepClass();
 
   const fs = createMemFs();
@@ -29,7 +34,10 @@ export async function runStep(
     fsEditor.write(path, initialFiles[path]);
   });
 
-  return step.run(fs, pathProvider, paramProvider, phpProvider);
+  const newFs = await step.run(fs, pathProvider, paramProvider, phpProvider);
+  const exposedParams = step.getExposed(pathProvider, paramProvider);
+
+  return { fs: newFs, exposedParams };
 }
 
 export function getFsPaths(store: Store, extDir = '/ext'): string[] {
