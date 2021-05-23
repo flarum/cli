@@ -206,32 +206,6 @@ export default class BoilerplateBuilder {
       return this._extensionMetadata
     }
 
-    protected populateExtenderDef(extenderDef: ExtenderDef, params: ExtenderParams): ExtenderDef {
-      const fill = (val: string, params: ExtenderParams) => {
-        return val.replace(/\${(.*)}/gm, (match, ...args): string => {
-          return params[match[1]]
-        })
-      }
-
-      const recursiveCopyAndFill = (obj: any, params: ExtenderParams): any => {
-        if (typeof obj === 'string') return fill(obj, params)
-        if (Array.isArray(obj)) return obj.map(v => recursiveCopyAndFill(v, params))
-        if (obj !== new Object(obj)) return obj
-
-        const newObj: any = {}
-
-        Object.keys(obj).forEach(key => {
-          const value = obj[key]
-
-          newObj[key] = recursiveCopyAndFill(value, params)
-        })
-
-        return newObj
-      }
-
-      return recursiveCopyAndFill(extenderDef, params)
-    }
-
     /**
      * If the user has explicitly requested a directory, use that.
      *
