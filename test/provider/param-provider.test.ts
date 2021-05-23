@@ -27,7 +27,7 @@ describe('ParamProvider Works', function () {
     expect(await provider.get({ name: 'different', type: 'text', message: '_' })).toStrictEqual('B');
   });
 
-  describe('#has', async function () {
+  describe('#has', function () {
     it('Returns has if not in cache', function () {
       const provider = new ParamProvider();
 
