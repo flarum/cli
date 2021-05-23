@@ -8,7 +8,7 @@ async function getExpected(): Promise<string[]> {
   const skeletonDir = resolve(`${__dirname}/../../../boilerplate/skeleton/extension`);
   const skeletonPaths = await globby(`${skeletonDir}/**/*`, { dot: true });
 
-  return [...skeletonPaths, skeletonDir, `${skeletonDir}/LICENSE.md`].map(path => path.replace(skeletonDir, '/ext')).sort();
+  return [...skeletonPaths, `${skeletonDir}/LICENSE.md`].map(path => path.replace(skeletonDir, '/ext')).sort();
 }
 
 describe('Test extension skeleton step', function () {

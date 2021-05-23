@@ -18,12 +18,13 @@ export async function runStep(
   StepClass: any,
   params: unknown[] = [],
   initialParams: Record<string, unknown> = {},
-  initialFilesCallback: (pathProvider: PathProvider) => Record<string, string> = () => empty
+  initialFilesCallback: (pathProvider: PathProvider) => Record<string, string> = () => empty,
+  requestedDir?: string
 ): Promise<StepOutput> {
   const step: Step = new StepClass();
 
   const fs = createMemFs();
-  const pathProvider = stubPathProviderFactory({ boilerplate: resolve(__dirname, '../boilerplate') });
+  const pathProvider = stubPathProviderFactory({ boilerplate: resolve(__dirname, '../boilerplate'), requestedDir });
   prompt.inject(params);
   const paramProvider = new ParamProvider(initialParams);
   const phpProvider = stubPhpProviderFactory();
@@ -41,7 +42,7 @@ export async function runStep(
 }
 
 export function getFsPaths(store: Store, extDir = '/ext'): string[] {
-  return store.all().filter(f => f.state !== 'deleted').map(f => f.path)
+  return store.all().filter(f => f.state && f.state !== 'deleted').map(f => f.path)
     .filter((path: string) => path.startsWith(extDir))
     .sort();
 }
