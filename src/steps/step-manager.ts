@@ -161,7 +161,7 @@ export class StepManager {
       if (!this.exposedParams.has(dep.sourceStep)) allDependenciesRan = false;
       const sourceDeps = this.exposedParams.get(dep.sourceStep);
 
-      if (dep.dontRunIfFalsy && !sourceDeps![dep.exposedName]) {
+      if (dep.exposedName !== '__succeeded' && dep.dontRunIfFalsy && !sourceDeps![dep.exposedName]) {
         noRequiredNonFalsyDependenciesAreFalsy = false;
       }
     });

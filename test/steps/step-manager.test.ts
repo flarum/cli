@@ -216,7 +216,8 @@ describe('Step Manager Execution', function () {
   });
 
   test('Steps can consume `__succeeded` magic param from previous steps', async function () {
-    await (new StepManager())
+    prompt.inject([true]);
+    const results = await (new StepManager())
       .namedStep('step with no exposed params', stubStepFactory('Standalone'))
       .step(stubStepFactory('Standalone'), {}, [
         {
@@ -224,11 +225,26 @@ describe('Step Manager Execution', function () {
           exposedName: '__succeeded',
         },
       ])
+      .step(stubStepFactory('Standalone Optional'), {optional: true, default: true}, [
+        {
+          sourceStep: 'step with no exposed params',
+          exposedName: '__succeeded',
+          dontRunIfFalsy: true,
+        },
+      ])
       .run(stubPathProviderFactory(), paramProviderFactory, stubPhpProviderFactory());
+
+    expect(results).toStrictEqual([
+      'Standalone',
+      'Standalone',
+      'Standalone Optional',
+    ]);
 
     // Tests that params are shared properly.
     expect(JSON.stringify(paramProviderFactory.mock.calls)).toStrictEqual(JSON.stringify([
       [{}],
+      [{ __succeeded: true }],
+      [{ context: 'Confirm Step' }],  // Prompt for confirmation of optional step
       [{ __succeeded: true }],
     ]));
   });
