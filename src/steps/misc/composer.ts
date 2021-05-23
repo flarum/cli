@@ -15,4 +15,10 @@ export class ComposerInstall implements Step {
 
     return fs;
   }
+
+  exposes = [];
+
+  getExposed() {
+    return {};
+  }
 }

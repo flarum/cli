@@ -15,4 +15,10 @@ export class NpmInstall implements Step {
 
     return fs;
   }
+
+  exposes = [];
+
+  getExposed() {
+    return {};
+  }
 }
