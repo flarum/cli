@@ -9,7 +9,7 @@ describe('Step Manager Validation', function () {
     test('Holds without steps before', function () {
       expect(() => {
         (new StepManager())
-          .step(stubStepFactory('Generate Controller'), false, '', [{
+          .step(stubStepFactory('Generate Controller'), { optional: false }, [{
             sourceStep: 'model',
             exposedName: 'modelClass',
           }]);
@@ -20,7 +20,7 @@ describe('Step Manager Validation', function () {
       expect(() => {
         (new StepManager())
           .step(stubStepFactory('Some irrelevant step'))
-          .step(stubStepFactory('Generate Controller'), false, '', [{
+          .step(stubStepFactory('Generate Controller'), { optional: false }, [{
             sourceStep: 'model',
             exposedName: 'modelClass',
           }]);
@@ -30,7 +30,7 @@ describe('Step Manager Validation', function () {
     test('Holds for named steps', function () {
       expect(() => {
         (new StepManager())
-          .namedStep('someName', stubStepFactory('Generate Controller'), false, '', [{
+          .namedStep('someName', stubStepFactory('Generate Controller'), { optional: false }, [{
             sourceStep: 'model',
             exposedName: 'modelClass',
           }]);
@@ -42,7 +42,7 @@ describe('Step Manager Validation', function () {
         (new StepManager())
           .atomicGroup((stepManager: StepManager) => {
             stepManager
-              .step(stubStepFactory('Generate Controller'), false, '', [{
+              .step(stubStepFactory('Generate Controller'), { optional: false }, [{
                 sourceStep: 'model',
                 exposedName: 'modelClass',
               }]);
@@ -56,7 +56,7 @@ describe('Step Manager Validation', function () {
       expect(() => {
         (new StepManager())
           .namedStep('model', stubStepFactory('Generate Model'))
-          .step(stubStepFactory('Generate Controller'), false, '', [{
+          .step(stubStepFactory('Generate Controller'), { optional: false }, [{
             sourceStep: 'model',
             exposedName: 'modelClass',
           }]);
@@ -67,7 +67,7 @@ describe('Step Manager Validation', function () {
       expect(() => {
         (new StepManager())
           .namedStep('model', stubStepFactory('Generate Model', true, [], { somethingElse: 'Something' }))
-          .step(stubStepFactory('Generate Controller'), false, '', [{
+          .step(stubStepFactory('Generate Controller'), { optional: false }, [{
             sourceStep: 'model',
             exposedName: 'modelClass',
           }]);
@@ -80,7 +80,7 @@ describe('Step Manager Validation', function () {
           .namedStep('model', stubStepFactory('Generate Model'))
           .atomicGroup((stepManager: StepManager) => {
             stepManager
-              .step(stubStepFactory('Generate Controller'), false, '', [{
+              .step(stubStepFactory('Generate Controller'), { optional: false }, [{
                 sourceStep: 'model',
                 exposedName: 'modelClass',
               }]);
@@ -149,11 +149,11 @@ describe('Step Manager Execution', function () {
       .step(stubStepFactory('Standalone'))
       .step(stubStepFactory('Standalone'))
       .namedStep('model', stubStepFactory('Generate Model', true, [], { modelClass: 'Something' }))
-      .step(stubStepFactory('Generate Controller'), false, '', [{
+      .step(stubStepFactory('Generate Controller'), { optional: false }, [{
         sourceStep: 'model',
         exposedName: 'modelClass',
       }])
-      .step(stubStepFactory('Generate Serializer'), false, '', [{
+      .step(stubStepFactory('Generate Serializer'), { optional: false }, [{
         sourceStep: 'model',
         exposedName: 'modelClass',
         consumedName: 'targetModelClass',
@@ -161,7 +161,7 @@ describe('Step Manager Execution', function () {
       .atomicGroup((stepManager: StepManager) => {
         stepManager
           .namedStep('listener', stubStepFactory('Generate Listener', true, [], { listenerClass: 'Something Else' }))
-          .step(stubStepFactory('Listener Extender'), false, '', [
+          .step(stubStepFactory('Listener Extender'), { optional: false }, [
             {
               sourceStep: 'listener',
               exposedName: 'listenerClass',
@@ -204,14 +204,14 @@ describe('Step Manager Execution', function () {
     prompt.inject([true, false, false, true]);
 
     const results = await (new StepManager())
-      .step(stubStepFactory('Optional runs'), true)
-      .step(stubStepFactory('Optional not runs'), true)
+      .step(stubStepFactory('Optional runs'), { optional: true })
+      .step(stubStepFactory('Optional not runs'), { optional: true })
       .step(stubStepFactory('Not Optional'))
       .atomicGroup((stepManager: StepManager) => {
         stepManager
-          .step(stubStepFactory('Atomic optional not runs'), true)
+          .step(stubStepFactory('Atomic optional not runs'), { optional: true })
           .step(stubStepFactory('Atomic not optional'))
-          .step(stubStepFactory('Atomic optional runs'), true);
+          .step(stubStepFactory('Atomic optional runs'), { optional: true });
       })
       .run(stubPathProviderFactory(), paramProviderFactory, stubPhpProviderFactory());
 
@@ -228,15 +228,15 @@ describe('Step Manager Execution', function () {
       prompt.inject([true, false]);
 
       const results = await (new StepManager())
-        .namedStep('dep1', stubStepFactory('Generate Model', true, [], { something: 'X' }), true)
-        .namedStep('dep2', stubStepFactory('Generate Serializer', true, [], { 'something else': 'Y' }), true)
-        .step(stubStepFactory('Relies on dep1'), false, '', [
+        .namedStep('dep1', stubStepFactory('Generate Model', true, [], { something: 'X' }), { optional: true })
+        .namedStep('dep2', stubStepFactory('Generate Serializer', true, [], { 'something else': 'Y' }), { optional: true })
+        .step(stubStepFactory('Relies on dep1'), { optional: false }, [
           {
             sourceStep: 'dep1',
             exposedName: 'something',
           },
         ])
-        .step(stubStepFactory('Relies on dep2'), false, '', [
+        .step(stubStepFactory('Relies on dep2'), { optional: false }, [
           {
             sourceStep: 'dep2',
             exposedName: 'something else',
@@ -254,15 +254,15 @@ describe('Step Manager Execution', function () {
       prompt.inject([true, false]);
 
       const results = await (new StepManager())
-        .namedStep('dep1', stubStepFactory('Generate Model', true, [], { something: 'X' }), true)
-        .namedStep('dep2', stubStepFactory('Generate Serializer', true, [], { 'something else': 'Y' }), true)
-        .namedStep('dep1b', stubStepFactory('Relies on dep1', true, [], { foo: 'bar' }), false, '', [
+        .namedStep('dep1', stubStepFactory('Generate Model', true, [], { something: 'X' }), { optional: true })
+        .namedStep('dep2', stubStepFactory('Generate Serializer', true, [], { 'something else': 'Y' }), { optional: true })
+        .namedStep('dep1b', stubStepFactory('Relies on dep1', true, [], { foo: 'bar' }), { optional: false }, [
           {
             sourceStep: 'dep1',
             exposedName: 'something',
           },
         ])
-        .namedStep('dep2b', stubStepFactory('Relies on dep2', true, [], { hello: 'world' }), false, '', [
+        .namedStep('dep2b', stubStepFactory('Relies on dep2', true, [], { hello: 'world' }), { optional: false }, [
           {
             sourceStep: 'dep2',
             exposedName: 'something else',
@@ -270,13 +270,13 @@ describe('Step Manager Execution', function () {
         ])
         .atomicGroup((stepManager: StepManager) => {
           stepManager
-            .step(stubStepFactory('Relies on dep1b'), false, '', [
+            .step(stubStepFactory('Relies on dep1b'), { optional: false }, [
               {
                 sourceStep: 'dep1b',
                 exposedName: 'foo',
               },
             ])
-            .step(stubStepFactory('Relies on dep2b'), false, '', [
+            .step(stubStepFactory('Relies on dep2b'), { optional: false }, [
               {
                 sourceStep: 'dep2b',
                 exposedName: 'hello',

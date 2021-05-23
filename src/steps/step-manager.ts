@@ -33,11 +33,17 @@ export interface Step {
   getExposed(pathProvider: PathProvider, paramProvider: ParamProvider): Record<string, unknown>;
 }
 
+interface ShouldRunConfig {
+  optional?: boolean;
+  confirmationMessage?: string;
+  default?: boolean;
+
+}
+
 interface StoredStep {
   name?: string;
   step: Step;
-  optional: boolean;
-  confirmationMessage: string;
+  shouldRun: ShouldRunConfig;
   dependencies: StepDependency[];
 }
 
@@ -57,22 +63,22 @@ export class StepManager {
   /**
    * A step is an incremental operation that updates the filesystem.
    */
-  step(step: Step, optional = false, confirmationMessage = '', dependencies: StepDependency[] = []): this {
+  step(step: Step, shouldRun: ShouldRunConfig = {}, dependencies: StepDependency[] = []): this {
     this.validateDependencies(step, dependencies);
 
-    this.steps = [...this.steps, { step, optional, confirmationMessage, dependencies }];
+    this.steps = [...this.steps, { step, shouldRun, dependencies }];
 
     return this;
   }
 
-  namedStep(name: string, step: Step, optional = false, confirmationMessage = '', dependencies: StepDependency[] = []): this {
+  namedStep(name: string, step: Step, shouldRun: ShouldRunConfig = {}, dependencies: StepDependency[] = []): this {
     if (this.namedSteps.has(name)) {
       throw new Error(`Named steps must have unique names. A step with name "${name}" already exists.`);
     }
 
     this.validateDependencies(step, dependencies);
 
-    const newStep = { name, step, optional, confirmationMessage, dependencies };
+    const newStep = { name, step, shouldRun, dependencies };
 
     this.steps = [...this.steps, newStep];
 
@@ -150,11 +156,12 @@ export class StepManager {
     const allDependenciesRan = storedStep.dependencies.every(dep => this.exposedParams.has(dep.sourceStep));
     if (!allDependenciesRan) return false;
 
-    if (!storedStep.optional) return true;
+    if (!storedStep.shouldRun.optional) return true;
 
     const promptConfirm = await paramProviderFactory({context: 'Confirm Step'}).get<boolean>({
       name: 'execute_step',
-      message: storedStep.confirmationMessage,
+      message: storedStep.shouldRun.confirmationMessage || `Run step of type "${storedStep.step.type}"?`,
+      initial: storedStep.shouldRun.default || false,
       type: 'confirm',
     });
 
@@ -201,20 +208,20 @@ class AtomicStepManager extends StepManager {
     this.exposedParams = parentExposedParams;
   }
 
-  step(step: Step, optional = false, confirmationMessage = '', dependencies: StepDependency[] = []): this {
+  step(step: Step, shouldRun: ShouldRunConfig = {}, dependencies: StepDependency[] = []): this {
     if (!step.composable) {
       throw new Error(`Step of type "${step.type}" is not composable, and cannot be added to an atomic group.`);
     }
 
-    return super.step(step, optional, confirmationMessage, dependencies);
+    return super.step(step, shouldRun, dependencies);
   }
 
-  namedStep(name: string, step: Step, optional = false, confirmationMessage = '', dependencies: StepDependency[] = []): this {
+  namedStep(name: string, step: Step, shouldRun: ShouldRunConfig = {}, dependencies: StepDependency[] = []): this {
     if (!step.composable) {
       throw new Error(`Step of type "${step.type}" is not composable, and cannot be added to an atomic group.`);
     }
 
-    return super.namedStep(name, step, optional, confirmationMessage, dependencies);
+    return super.namedStep(name, step, shouldRun, dependencies);
   }
 
   atomicGroup(_callback: (stepManager: AtomicStepManager) => void): this {
