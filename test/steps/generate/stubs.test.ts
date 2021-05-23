@@ -1,6 +1,7 @@
 import { getFsPaths, runStep } from '../../utils';
 
 import { GenerateEventListenerStub } from '../../../src/steps/stubs/backend/event-listener';
+import { GenerateMigrationStub } from '../../../src/steps/stubs/backend/migration';
 import { PathProvider } from '../../../src/provider/path-provider';
 
 interface StubTest {
@@ -78,5 +79,48 @@ describe('Stub tests', function () {
         expect(exposedParams).toStrictEqual(spec.expectedExposedParamsRequestedDir);
       });
     });
+  });
+});
+
+const migrationSpec = {
+  stubClass: GenerateMigrationStub,
+  params: {
+    name: 'new migration',
+  },
+  expectedModifiedFilesDefaultDir: [
+    '/ext/migrations/2020_01_01_000000_new_migration.php',
+  ],
+  expectedModifiedFilesRequestedDir: [
+    '/ext/migrations/2020_01_01_000000_new_migration.php',
+  ],
+  expectedExposedParamsDefaultDir: {},
+  expectedExposedParamsRequestedDir: {},
+};
+
+describe('Stub Test: Migrations', function () {
+  jest
+    .useFakeTimers('modern')
+    .setSystemTime(new Date('2020-01-01T03:24:00').getTime());
+
+  const initialFilesCallback = (pathProvider: PathProvider) => {
+    const initial: Record<string, string> = {};
+    initial[pathProvider.ext('composer.json')] = JSON.stringify(sampleComposerJson);
+    return initial;
+  };
+
+  test('With default dir', async function () {
+    const { fs, exposedParams } = await runStep(migrationSpec.stubClass, Object.values(migrationSpec.params), {}, initialFilesCallback);
+
+    expect(getFsPaths(fs)).toStrictEqual([...migrationSpec.expectedModifiedFilesDefaultDir, '/ext/composer.json'].sort());
+
+    expect(exposedParams).toStrictEqual(migrationSpec.expectedExposedParamsDefaultDir);
+  });
+
+  test('With requested dir', async function () {
+    const { fs, exposedParams } = await runStep(migrationSpec.stubClass, Object.values(migrationSpec.params), {}, initialFilesCallback, requestedDir);
+
+    expect(getFsPaths(fs)).toStrictEqual([...migrationSpec.expectedModifiedFilesRequestedDir, '/ext/composer.json'].sort());
+
+    expect(exposedParams).toStrictEqual(migrationSpec.expectedExposedParamsRequestedDir);
   });
 });

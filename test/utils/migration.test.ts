@@ -8,8 +8,8 @@ describe('getNextMigrationName', function () {
   test('formats properly', function () {
     const noMigrations: string[] = [];
 
-    expect(getNextMigrationName(noMigrations, 'some name')).toBe('2020_01_01_000000_some_name.php');
-    expect(getNextMigrationName(noMigrations, 'SoMe __ NaMME')).toBe('2020_01_01_000000_some____namme.php');
+    expect(getNextMigrationName(noMigrations, 'some name') + '.php').toBe('2020_01_01_000000_some_name.php');
+    expect(getNextMigrationName(noMigrations, 'SoMe __ NaMME') + '.php').toBe('2020_01_01_000000_some____namme.php');
   });
 
   test('migrations on other days dont affect number', function () {
@@ -19,7 +19,7 @@ describe('getNextMigrationName', function () {
       '2083_06_17_666666_migration.php',
     ];
 
-    expect(getNextMigrationName(existingMigrations, 'some name')).toBe('2020_01_01_000000_some_name.php');
+    expect(getNextMigrationName(existingMigrations, 'some name') + '.php').toBe('2020_01_01_000000_some_name.php');
   });
 
   test('migrations on same day result in number being one above greatest', function () {
@@ -29,6 +29,6 @@ describe('getNextMigrationName', function () {
       '2020_01_01_999998_migration.php',
     ];
 
-    expect(getNextMigrationName(existingMigrations, 'some name')).toBe('2020_01_01_999999_some_name.php');
+    expect(getNextMigrationName(existingMigrations, 'some name') + '.php').toBe('2020_01_01_999999_some_name.php');
   });
 });

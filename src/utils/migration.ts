@@ -18,5 +18,5 @@ export function getNextMigrationName(currNames: string[], name: string): string 
 
   const pad = (val: number, len: number) => String(val).padStart(len, '0');
 
-  return `${pad(now.getFullYear(), 4)}_${pad(now.getMonth() + 1, 2)}_${pad(now.getDate(), 2)}_${pad(number, 6)}_${cleanedName}.php`;
+  return `${pad(now.getFullYear(), 4)}_${pad(now.getMonth() + 1, 2)}_${pad(now.getDate(), 2)}_${pad(number, 6)}_${cleanedName}`;
 }

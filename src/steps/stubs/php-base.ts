@@ -19,6 +19,15 @@ export interface StubGenerationSchema {
    */
   recommendedSubdir: string;
 
+  forceRecommendedSubdir?: boolean;
+
+  /**
+   * Where should the file be created in relation to the extension root?
+   *
+   * Defaults to `./src`.
+   */
+  root?: string;
+
   /**
    * The relative path to the stub's source file relative to the
    * `stubs` directory.
@@ -48,7 +57,8 @@ export abstract class BasePhpStubStep implements Step {
 
     this.params = await this.compileParams(fsEditor, pathProvider, paramProvider);
 
-    const newFilePath = pathProvider.ext('src', this.subdir, `${this.params.className}.php`);
+    const newFileName = await this.getFileName(fs, pathProvider, paramProvider);
+    const newFilePath = pathProvider.ext(this.schema.root || './src', this.subdir, `${newFileName}.php`);
 
     fsEditor.copyTpl(pathProvider.boilerplate('stubs', this.schema.sourceFile), newFilePath, this.params);
 
@@ -102,7 +112,7 @@ export abstract class BasePhpStubStep implements Step {
     return params;
   }
 
-  protected async getFileName(paramProvider: ParamProvider): Promise<string> {
+  protected async getFileName(_fs: Store, _pathProvider: PathProvider, paramProvider: ParamProvider): Promise<string> {
     return paramProvider.get<string>({ name: 'className', type: 'text' });
   }
 
@@ -113,7 +123,7 @@ export abstract class BasePhpStubStep implements Step {
     const packageNamespace = extensionMetadata(composerJsonContents).packageNamespace;
 
     let subdir: string;
-    if (pathProvider.requestedDir() === null) {
+    if (this.schema.forceRecommendedSubdir || pathProvider.requestedDir() === null) {
       subdir = this.schema.recommendedSubdir.replace('\\', '.').replace('/', '.');
     } else {
       subdir = pathProvider.requestedDir()!.slice(`${pathProvider.ext('src')}/`.length);
