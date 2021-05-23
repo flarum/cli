@@ -12,7 +12,6 @@
     "@oclif/dev-cli": "^1.26.0",
     "@oclif/test": "^1.2.8",
     "@types/chai": "^4.2.15",
-    "@types/chalk": "^2.2.0",
     "@types/jest": "^26.0.23",
     "@types/mem-fs-editor": "^7.0.0",
     "@types/node": "^10.17.55",
