@@ -1,5 +1,6 @@
 {
   "rules": {
+    "unicorn/no-abusive-eslint-disable": "off",
     "@typescript-eslint/ban-ts-ignore": "off",
     "indent": ["error", 2, {"MemberExpression": 1}],
     "valid-jsdoc": "off",
