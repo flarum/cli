@@ -26,6 +26,20 @@ export class ParamProvider {
 
     return resValue;
   }
+
+  has(name: string): boolean {
+    return this.cache.has(name);
+  }
+
+  /**
+   * @internal
+   */
+  cached(): Record<string, unknown> {
+    return [...this.cache].reduce((obj, [key, value]) => {
+      obj[key] = value;
+      return obj;
+    }, {} as Record<string, unknown>);
+  }
 }
 
 export type ParamProviderFactory = (initial: Record<string, unknown>) => ParamProvider;
