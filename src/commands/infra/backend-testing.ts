@@ -10,8 +10,6 @@ export default class BackendTesting extends BaseCommand {
 
   static args = [...BaseCommand.args];
 
-  protected requireExistingExtension = false;
-
   protected steps(stepManager: StepManager): StepManager {
     return stepManager
       .namedStep('testing', new BackendTestingInfra(), {})
