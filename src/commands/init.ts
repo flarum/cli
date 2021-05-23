@@ -17,8 +17,14 @@ export default class Init extends BaseCommand {
 
   protected steps(stepManager: StepManager): StepManager {
     return stepManager
-      .step(new ExtensionSkeleton())
+      .namedStep('skeleton', new ExtensionSkeleton(), {})
       .step(new ComposerInstall(), { optional: true, confirmationMessage: 'Run `composer install`? (recommended)', default: true})
-      .step(new YarnInstall(), { optional: true, confirmationMessage: 'Run `yarn install`? (recommended)', default: true });
+      .step(new YarnInstall(), { optional: true, confirmationMessage: 'Run `yarn install`? (recommended)', default: true }, [
+        {
+          sourceStep: 'skeleton',
+          exposedName: 'useJs',
+          dontRunIfFalsy: true,
+        },
+      ]);
   }
 }
