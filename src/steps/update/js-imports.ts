@@ -37,7 +37,7 @@ export class UpdateJSImports implements Step {
 
     const srcRegex = new RegExp(`${pathProvider.ext('js/src')}/.*(js|jsx|ts|tsx)`);
     const fsSrcFilePaths = fs.all().map(file => file.path).filter(path => path && srcRegex.test(path));
-    const persistedSrcFilePaths = glob.sync(pathProvider.ext('/js/src/**/*.{js,jsx,ts,tsx}'));
+    const persistedSrcFilePaths = glob.sync(pathProvider.ext('js/src/**/*.{js,jsx,ts,tsx}'));
 
     [...fsSrcFilePaths, ...persistedSrcFilePaths]
       .forEach(match => {
