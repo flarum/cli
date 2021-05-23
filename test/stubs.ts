@@ -5,9 +5,9 @@ import { PathProvider } from '../src/provider/path-provider';
 import { ExtenderDef, PhpProvider } from '../src/provider/php-provider';
 import { Step } from '../src/steps/step-manager';
 
-export function stubStepFactory(name: string, composable = true, paramsConsumed: ParamDef[] = [], paramsExposed: Record<string, unknown> = {}): Step {
+export function stubStepFactory(type: string, composable = true, paramsConsumed: ParamDef[] = [], paramsExposed: Record<string, unknown> = {}): Step {
   return {
-    name,
+    type,
     composable,
     exposes: Object.keys(paramsExposed),
     async run(fs: Store, _pathProvider: PathProvider, paramProvider: ParamProvider, _phpProvider: PhpProvider): Promise<Store> {
@@ -15,7 +15,7 @@ export function stubStepFactory(name: string, composable = true, paramsConsumed:
 
       return fs;
     },
-    getExposed(_pathProvider: PathProvider): Record<string, unknown> {
+    getExposed(_pathProvider: PathProvider, _paramProvider: ParamProvider): Record<string, unknown> {
       return paramsExposed;
     },
   };

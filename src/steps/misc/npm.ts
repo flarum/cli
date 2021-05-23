@@ -6,7 +6,7 @@ import { PhpProvider } from '../../provider/php-provider';
 import { Step } from '../step-manager';
 
 export class NpmInstall implements Step {
-  name = 'Run NPM install';
+  type = 'Run NPM install';
 
   composable = false;
 

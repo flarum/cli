@@ -8,7 +8,7 @@ import { PhpProvider } from '../../provider/php-provider';
 import { Step } from '../step-manager';
 
 export class ExtensionSkeleton implements Step {
-  name = 'Generate extension skeleton';
+  type = 'Generate extension skeleton';
 
   composable = true;
 
@@ -138,5 +138,11 @@ export class ExtensionSkeleton implements Step {
     }
 
     return fs;
+  }
+
+  exposes = [];
+
+  getExposed(_pathProvider: PathProvider, _paramProvider: ParamProvider): Record<string, unknown> {
+    return {};
   }
 }

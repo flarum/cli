@@ -1,205 +1,295 @@
+/* eslint-disable max-nested-callbacks */
+import { prompt } from 'prompts';
+import { paramProviderFactory as defaultPPFac } from '../../src/provider/param-provider';
 import { StepManager } from '../../src/steps/step-manager';
-import { stubParamProviderFactory, stubPathProviderFactory, stubPhpProviderFactory, stubStepFactory } from '../stubs';
+import { stubPathProviderFactory, stubPhpProviderFactory, stubStepFactory } from '../stubs';
 
-describe('StepManager', function () {
-  describe('Single step', function () {
-    test('Can add and run single step', async function () {
-      const paramProvider = stubParamProviderFactory({});
-      const stepManager = new StepManager(stubPathProviderFactory(), paramProvider,  stubPhpProviderFactory());
-      const step = stubStepFactory('Step');
-
-      stepManager.step(step);
-
-      expect(await stepManager.run()).toStrictEqual(['Step']);
-    });
-
-    test('Single optional step will run if confirmed', async function () {
-      const paramProvider = stubParamProviderFactory({ execute_step: true });
-      const stepManager = new StepManager(stubPathProviderFactory(), paramProvider,  stubPhpProviderFactory());
-      const step = stubStepFactory('Optional Step');
-
-      stepManager.step(step, true);
-
-      expect(await stepManager.run()).toStrictEqual(['Optional Step']);
-    });
-
-    test('Single optional step wont run if not confirmed', async function () {
-      const paramProvider = stubParamProviderFactory({ execute_step: false });
-      const stepManager = new StepManager(stubPathProviderFactory(), paramProvider,  stubPhpProviderFactory());
-      const step = stubStepFactory('Optional Step');
-
-      stepManager.step(step, true);
-
-      expect(await stepManager.run()).toStrictEqual([]);
-    });
-  });
-
-  describe('Composed Steps', function () {
-    test('Errors when trying to compose non-composable steps', async function () {
-      const paramProvider = stubParamProviderFactory({});
-      const stepManager = new StepManager(stubPathProviderFactory(), paramProvider,  stubPhpProviderFactory());
-
+describe('Step Manager Validation', function () {
+  describe('dependencies on nonexistent steps will cause errors', function () {
+    test('Holds without steps before', function () {
       expect(() => {
-        stepManager.composedSteps([
-          stubStepFactory('Step 1'),
-          stubStepFactory('Step 2', false),
-          stubStepFactory('Step 3'),
-        ]);
-      }).toThrow('The step "Step 2" is not composable.');
+        (new StepManager())
+          .step(stubStepFactory('Generate Controller'), false, '', [{
+            sourceStep: 'model',
+            exposedName: 'modelClass',
+          }]);
+      }).toThrow('Step of type "Generate Controller" depends on nonexistent named steps "model"');
     });
 
-    test('Can add and run single composed step', async function () {
-      const paramProvider = stubParamProviderFactory({});
-      const stepManager = new StepManager(stubPathProviderFactory(), paramProvider,  stubPhpProviderFactory());
-
-      stepManager.composedSteps([
-        stubStepFactory('Step 1'),
-        stubStepFactory('Step 2'),
-        stubStepFactory('Step 3'),
-      ]);
-
-      expect(await stepManager.run()).toStrictEqual(['Composition of Step 1, Step 2, Step 3']);
+    test('Holds with steps before', function () {
+      expect(() => {
+        (new StepManager())
+          .step(stubStepFactory('Some irrelevant step'))
+          .step(stubStepFactory('Generate Controller'), false, '', [{
+            sourceStep: 'model',
+            exposedName: 'modelClass',
+          }]);
+      }).toThrow('Step of type "Generate Controller" depends on nonexistent named steps "model"');
     });
 
-    test('Single composed optional step will run if confirmed', async function () {
-      const paramProvider = stubParamProviderFactory({ execute_step: true });
-      const stepManager = new StepManager(stubPathProviderFactory(), paramProvider,  stubPhpProviderFactory());
-
-      stepManager.composedSteps([
-        stubStepFactory('Step 1'),
-        stubStepFactory('Step 2'),
-        stubStepFactory('Step 3'),
-      ], true);
-
-      expect(await stepManager.run()).toStrictEqual(['Composition of Step 1, Step 2, Step 3']);
+    test('Holds for named steps', function () {
+      expect(() => {
+        (new StepManager())
+          .namedStep('someName', stubStepFactory('Generate Controller'), false, '', [{
+            sourceStep: 'model',
+            exposedName: 'modelClass',
+          }]);
+      }).toThrow('Step of type "Generate Controller" depends on nonexistent named steps "model"');
     });
 
-    test('Single composed optional step wont run if not confirmed', async function () {
-      const paramProvider = stubParamProviderFactory({ execute_step: false });
-      const stepManager = new StepManager(stubPathProviderFactory(), paramProvider,  stubPhpProviderFactory());
-
-      stepManager.composedSteps([
-        stubStepFactory('Step 1'),
-        stubStepFactory('Step 2'),
-        stubStepFactory('Step 3'),
-      ], true);
-
-      expect(await stepManager.run()).toStrictEqual([]);
+    test('Holds with atomic group', function () {
+      expect(() => {
+        (new StepManager())
+          .atomicGroup((stepManager: StepManager) => {
+            stepManager
+              .step(stubStepFactory('Generate Controller'), false, '', [{
+                sourceStep: 'model',
+                exposedName: 'modelClass',
+              }]);
+          });
+      }).toThrow('Step of type "Generate Controller" depends on nonexistent named steps "model"');
     });
   });
 
-  describe('Multiple simple steps', function () {
-    test('Can add and run multiple required simple and composed steps in order', async function () {
-      const paramProvider = stubParamProviderFactory({});
-      const stepManager = new StepManager(stubPathProviderFactory(), paramProvider,  stubPhpProviderFactory());
-
-      stepManager
-        .step(stubStepFactory('Step 1'))
-        .composedSteps([
-          stubStepFactory('Step 2'),
-          stubStepFactory('Step 3'),
-          stubStepFactory('Step 4'),
-        ])
-        .step(stubStepFactory('Step 5'))
-        .step(stubStepFactory('Step 6'));
-
-      expect(await stepManager.run()).toStrictEqual(['Step 1', 'Composition of Step 2, Step 3, Step 4', 'Step 5', 'Step 6']);
+  describe('Dependencies on non-existent exposed params from existing steps will error when being added', function () {
+    test('Holds when dependency doesnt have any params', function () {
+      expect(() => {
+        (new StepManager())
+          .namedStep('model', stubStepFactory('Generate Model'))
+          .step(stubStepFactory('Generate Controller'), false, '', [{
+            sourceStep: 'model',
+            exposedName: 'modelClass',
+          }]);
+      }).toThrow('Step of type "Generate Controller" depends on nonexistent exposed params "modelClass" from named steps "model"');
     });
 
-    test('Can add and run multiple required simple and composed steps in order', async function () {
-      const paramProvider = stubParamProviderFactory({});
-      const stepManager = new StepManager(stubPathProviderFactory(), paramProvider,  stubPhpProviderFactory());
-
-      stepManager
-        .step(stubStepFactory('Step 1'))
-        .composedSteps([
-          stubStepFactory('Step 2'),
-          stubStepFactory('Step 3'),
-          stubStepFactory('Step 4'),
-        ])
-        .step(stubStepFactory('Step 5'))
-        .step(stubStepFactory('Step 6'));
-
-      expect(await stepManager.run()).toStrictEqual(['Step 1', 'Composition of Step 2, Step 3, Step 4', 'Step 5', 'Step 6']);
+    test('Holds when dependency has params but none with required name', function () {
+      expect(() => {
+        (new StepManager())
+          .namedStep('model', stubStepFactory('Generate Model', true, [], { somethingElse: 'Something' }))
+          .step(stubStepFactory('Generate Controller'), false, '', [{
+            sourceStep: 'model',
+            exposedName: 'modelClass',
+          }]);
+      }).toThrow('Step of type "Generate Controller" depends on nonexistent exposed params "modelClass" from named steps "model"');
     });
 
-    test('Rules for optional execution properly followed for complex sequence of steps', async function () {
-      const paramProvider = stubParamProviderFactory({});
-      const mockedGet = jest.fn()
-        .mockReturnValueOnce(true)
-        .mockReturnValueOnce(true)
-        .mockReturnValueOnce(false)
-        .mockReturnValueOnce(false);
-      paramProvider.get = mockedGet.bind(paramProvider);
-      const stepManager = new StepManager(stubPathProviderFactory(), paramProvider,  stubPhpProviderFactory());
-
-      stepManager
-        .step(stubStepFactory('Step 1'))
-        .composedSteps([
-          stubStepFactory('Step 2'),
-          stubStepFactory('Step 3'),
-          stubStepFactory('Step 4'),
-        ])
-        .step(stubStepFactory('Step 5'), true)
-        .step(stubStepFactory('Step 6'), true)
-        .composedSteps([
-          stubStepFactory('Step 7'),
-          stubStepFactory('Step 8'),
-        ])
-        .step(stubStepFactory('Step 9'), true)
-        .composedSteps([
-          stubStepFactory('Step 10'),
-          stubStepFactory('Step 11'),
-        ], true);
-
-      expect(await stepManager.run()).toStrictEqual([
-        'Step 1', // not optional
-        'Composition of Step 2, Step 3, Step 4', // not optional
-        'Step 5',
-        'Step 6',
-        'Composition of Step 7, Step 8',
-      ]);
+    test('Holds with atomic group', function () {
+      expect(() => {
+        (new StepManager())
+          .namedStep('model', stubStepFactory('Generate Model'))
+          .atomicGroup((stepManager: StepManager) => {
+            stepManager
+              .step(stubStepFactory('Generate Controller'), false, '', [{
+                sourceStep: 'model',
+                exposedName: 'modelClass',
+              }]);
+          });
+      }).toThrow('Step of type "Generate Controller" depends on nonexistent exposed params "modelClass" from named steps "model"');
     });
   });
 
-  describe('Steps and Param Provider Invocations', function () {
-    test('Composable steps should share param state', async function () {
-      const callOrder: string[] = [];
-
-      const paramProvider = stubParamProviderFactory({});
-      paramProvider.get = jest.fn(async () => callOrder.push('get') && 'some string').bind(paramProvider);
-      paramProvider.reset = jest.fn(() => callOrder.push('reset')).bind(paramProvider);
-      const stepManager = new StepManager(stubPathProviderFactory(), paramProvider,  stubPhpProviderFactory());
-
-      await stepManager.composedSteps([
-        stubStepFactory('Step 1', true, [{ name: 'some_param', type: 'text' }]),
-        stubStepFactory('Step 2', true, [{ name: 'some_param', type: 'text' }]),
-        stubStepFactory('Step 3', true, [{ name: 'some_param', type: 'text' }]),
-        stubStepFactory('Step 4', true, [{ name: 'some_param', type: 'text' }]),
-      ]).run();
-
-      // Reset isn't called in between
-      expect(callOrder).toStrictEqual(['reset', 'get', 'get', 'get', 'get']);
+  describe('Named steps must be unique', function () {
+    test('Holds with simple steps', function () {
+      expect(() => {
+        (new StepManager())
+          .namedStep('model', stubStepFactory('Generate Model'))
+          .namedStep('model', stubStepFactory('Generate Serializer'));
+      }).toThrow('Named steps must have unique names. A step with name "model" already exists.');
     });
 
-    test('Sequential steps should have param state refreshed in between', async function () {
-      const callOrder: string[] = [];
-
-      const paramProvider = stubParamProviderFactory({});
-      paramProvider.get = jest.fn(async () => callOrder.push('get') && 'some string').bind(paramProvider);
-      paramProvider.reset = jest.fn(() => callOrder.push('reset')).bind(paramProvider);
-      const stepManager = new StepManager(stubPathProviderFactory(), paramProvider,  stubPhpProviderFactory());
-
-      await stepManager
-        .step(stubStepFactory('Step 1', true, [{name: 'some_param', type: 'text'}]))
-        .step(stubStepFactory('Step 2', true, [{name: 'some_param', type: 'text'}]))
-        .step(stubStepFactory('Step 3', true, [{ name: 'some_param', type: 'text' }]))
-        .step(stubStepFactory('Step 4', true, [{ name: 'some_param', type: 'text' }]))
-        .run();
-
-      // Reset IS called in between
-      expect(callOrder).toStrictEqual(['reset', 'get', 'reset', 'get', 'reset', 'get', 'reset', 'get']);
+    test('Holds with atomic group', function () {
+      expect(() => {
+        (new StepManager())
+          .namedStep('model', stubStepFactory('Generate Model'))
+          .atomicGroup((stepManager: StepManager) => {
+            stepManager
+              .namedStep('model', stubStepFactory('Generate Serializer'));
+          });
+      }).toThrow('Named steps must have unique names. A step with name "model" already exists.');
     });
+  });
+
+  test('Errors when trying to put non-composable step in atomic group', async function () {
+    expect(() => {
+      (new StepManager())
+        .atomicGroup((stepManager: StepManager) => {
+          stepManager
+            .step(stubStepFactory('Step 1'))
+            .step(stubStepFactory('Step 2', false))
+            .step(stubStepFactory('Step 3'));
+        });
+    }).toThrow('Step of type "Step 2" is not composable, and cannot be added to an atomic group.');
+  });
+
+  test("Atomic groups can't be nested.", async function () {
+    expect(() => {
+      (new StepManager())
+        .atomicGroup((stepManager: StepManager) => {
+          stepManager
+            .step(stubStepFactory('Step 1'))
+            .atomicGroup((stepManagerInner: StepManager) => {
+              stepManagerInner
+                .step(stubStepFactory('Step 2'))
+                .step(stubStepFactory('Step 3'));
+            })
+            .step(stubStepFactory('Step 4'));
+        });
+    }).toThrow("Atomic groups can't be nested.");
   });
 });
 
+describe('Step Manager Execution', function () {
+  const paramProviderFactory = jest.fn(defaultPPFac);
+
+  test('Can run a complex but valid sequence of steps, params properly passed to dependencies', async function () {
+    const commitMethod = jest.spyOn(StepManager.prototype as any, 'commit');
+
+    const results = await (new StepManager())
+      .step(stubStepFactory('Standalone'))
+      .step(stubStepFactory('Standalone'))
+      .namedStep('model', stubStepFactory('Generate Model', true, [], { modelClass: 'Something' }))
+      .step(stubStepFactory('Generate Controller'), false, '', [{
+        sourceStep: 'model',
+        exposedName: 'modelClass',
+      }])
+      .step(stubStepFactory('Generate Serializer'), false, '', [{
+        sourceStep: 'model',
+        exposedName: 'modelClass',
+        consumedName: 'targetModelClass',
+      }])
+      .atomicGroup((stepManager: StepManager) => {
+        stepManager
+          .namedStep('listener', stubStepFactory('Generate Listener', true, [], { listenerClass: 'Something Else' }))
+          .step(stubStepFactory('Listener Extender'), false, '', [
+            {
+              sourceStep: 'listener',
+              exposedName: 'listenerClass',
+            },
+            {
+              sourceStep: 'model',
+              exposedName: 'modelClass',
+              consumedName: 'isnt_used_here_but_why_not',
+            },
+          ]);
+      })
+      .run(stubPathProviderFactory(), paramProviderFactory, stubPhpProviderFactory());
+
+    // Tests that all steps run, and that they do so in order.
+    expect(results).toStrictEqual([
+      'Standalone',
+      'Standalone',
+      'Generate Model',
+      'Generate Controller',
+      'Generate Serializer',
+      'Generate Listener',
+      'Listener Extender',
+    ]);
+
+    // Tests that params are shared properly.
+    expect(JSON.stringify(paramProviderFactory.mock.calls)).toStrictEqual(JSON.stringify([
+      [{}],
+      [{}],
+      [{}],
+      [{ modelClass: 'Something' }],
+      [{ targetModelClass: 'Something' }],
+      [{}],
+      [{ listenerClass: 'Something Else', isnt_used_here_but_why_not: 'Something' }],
+    ]));
+
+    expect(commitMethod.mock.calls.length).toBe(6);
+  });
+
+  test('Optional steps wont run if not confirmed', async function () {
+    prompt.inject([true, false, false, true]);
+
+    const results = await (new StepManager())
+      .step(stubStepFactory('Optional runs'), true)
+      .step(stubStepFactory('Optional not runs'), true)
+      .step(stubStepFactory('Not Optional'))
+      .atomicGroup((stepManager: StepManager) => {
+        stepManager
+          .step(stubStepFactory('Atomic optional not runs'), true)
+          .step(stubStepFactory('Atomic not optional'))
+          .step(stubStepFactory('Atomic optional runs'), true);
+      })
+      .run(stubPathProviderFactory(), paramProviderFactory, stubPhpProviderFactory());
+
+    expect(results).toStrictEqual([
+      'Optional runs',
+      'Not Optional',
+      'Atomic not optional',
+      'Atomic optional runs',
+    ]);
+  });
+
+  describe("If a step doesnt run, its dependencies won't be run.", function () {
+    test('Shallow dependencies', async function () {
+      prompt.inject([true, false]);
+
+      const results = await (new StepManager())
+        .namedStep('dep1', stubStepFactory('Generate Model', true, [], { something: 'X' }), true)
+        .namedStep('dep2', stubStepFactory('Generate Serializer', true, [], { 'something else': 'Y' }), true)
+        .step(stubStepFactory('Relies on dep1'), false, '', [
+          {
+            sourceStep: 'dep1',
+            exposedName: 'something',
+          },
+        ])
+        .step(stubStepFactory('Relies on dep2'), false, '', [
+          {
+            sourceStep: 'dep2',
+            exposedName: 'something else',
+          },
+        ])
+        .run(stubPathProviderFactory(), paramProviderFactory, stubPhpProviderFactory());
+
+      expect(results).toStrictEqual([
+        'Generate Model',
+        'Relies on dep1',
+      ]);
+    });
+
+    test('Chained and Atomic Groups', async function () {
+      prompt.inject([true, false]);
+
+      const results = await (new StepManager())
+        .namedStep('dep1', stubStepFactory('Generate Model', true, [], { something: 'X' }), true)
+        .namedStep('dep2', stubStepFactory('Generate Serializer', true, [], { 'something else': 'Y' }), true)
+        .namedStep('dep1b', stubStepFactory('Relies on dep1', true, [], { foo: 'bar' }), false, '', [
+          {
+            sourceStep: 'dep1',
+            exposedName: 'something',
+          },
+        ])
+        .namedStep('dep2b', stubStepFactory('Relies on dep2', true, [], { hello: 'world' }), false, '', [
+          {
+            sourceStep: 'dep2',
+            exposedName: 'something else',
+          },
+        ])
+        .atomicGroup((stepManager: StepManager) => {
+          stepManager
+            .step(stubStepFactory('Relies on dep1b'), false, '', [
+              {
+                sourceStep: 'dep1b',
+                exposedName: 'foo',
+              },
+            ])
+            .step(stubStepFactory('Relies on dep2b'), false, '', [
+              {
+                sourceStep: 'dep2b',
+                exposedName: 'hello',
+              },
+            ]);
+        })
+        .run(stubPathProviderFactory(), paramProviderFactory, stubPhpProviderFactory());
+
+      expect(results).toStrictEqual([
+        'Generate Model',
+        'Relies on dep1',
+        'Relies on dep1b',
+      ]);
+    });
+  });
+});

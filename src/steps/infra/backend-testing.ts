@@ -8,7 +8,7 @@ import { extensionMetadata } from '../../utils/extension-metadata';
 import { Step } from '../step-manager';
 
 export class BackendTestingInfra implements Step {
-  name = 'Add/update backend testing infrastructure';
+  type = 'Add/update backend testing infrastructure';
 
   composable = true;
 
@@ -42,5 +42,11 @@ export class BackendTestingInfra implements Step {
     fsEditor.extendJSON(pathProvider.ext('composer.json'), relevant);
 
     return fs;
+  }
+
+  exposes = [];
+
+  getExposed(_pathProvider: PathProvider, _paramProvider: ParamProvider): Record<string, unknown> {
+    return {};
   }
 }

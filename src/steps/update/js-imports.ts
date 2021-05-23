@@ -13,7 +13,7 @@ const IMPORT_REGEX = /(?<key>import|export)\s+(?:(?<alias>[\w,{}\s*]+)\s+from)?\
 type ImportMap = Record<string, string>;
 
 export class UpdateJSImports implements Step {
-  name = 'Use full flarum/namespace in JS imports';
+  type = 'Use full flarum/namespace in JS imports';
 
   composable = false;
 
@@ -61,5 +61,11 @@ export class UpdateJSImports implements Step {
       });
 
     return fs;
+  }
+
+  exposes = [];
+
+  getExposed(_pathProvider: PathProvider, _paramProvider: ParamProvider): Record<string, unknown> {
+    return {};
   }
 }
