@@ -87,13 +87,13 @@ export class ExtensionSkeleton implements Step {
     });
     const useJs = await paramProvider.get<boolean>({
       name: 'useJs',
-      type: (prev, values) => (values.admin || values.forum) && 'confirm',
+      type: () => (admin || forum) && 'confirm',
       message: 'Javascript',
       initial: true,
     });
     const useCss = await paramProvider.get<boolean>({
       name: 'useCss',
-      type: (prev, values) => (values.admin || values.forum) && 'confirm',
+      type: () => (admin || forum) && 'confirm',
       message: 'CSS',
       initial: true,
     });
