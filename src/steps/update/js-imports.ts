@@ -25,7 +25,7 @@ export class UpdateJSImports implements Step {
 
     const vendorRegex = new RegExp(`${jsSrcDir}/.*(js|jsx|ts|tsx)`);
     const fsVendorFilePaths = fs.all().map(file => file.path).filter(path => path && vendorRegex.test(path));
-    const persistedVendorFilePaths = glob.sync(`${jsSrcDir}**/*.{js,jsx,ts,tsx}`);
+    const persistedVendorFilePaths = glob.sync(`${jsSrcDir}/**/*.{js,jsx,ts,tsx}`);
 
     [...fsVendorFilePaths, ...persistedVendorFilePaths]
       .forEach(currPath => {
