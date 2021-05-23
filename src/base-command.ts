@@ -9,6 +9,7 @@ import { paramProviderFactory, PROMPTS_OPTIONS } from './provider/param-provider
 import { StepManager } from './steps/step-manager';
 import { PathFsProvider } from './provider/path-provider';
 import { PhpSubsystemProvider } from './provider/php-provider';
+import chalk from 'chalk';
 
 export default abstract class BaseCommand extends Command {
   static flags: flags.Input<any> = {
@@ -56,9 +57,12 @@ export default abstract class BaseCommand extends Command {
     const completed = await this.steps(new StepManager())
       .run(pathProvider, paramProviderFactory, phpProvider);
 
-    this.log('The following steps were completed:');
+    this.log('\n\n');
+    this.log(chalk.bold(chalk.underline(chalk.green('Success! The following steps were completed:'))));
 
-    completed.forEach(stepName => this.log(stepName));
+    completed.forEach(stepName => this.log(`- ${chalk.dim(stepName)}`));
+
+    this.log('');
 
     const goodbyeMessage = this.goodbyeMessage();
     if (goodbyeMessage) {
