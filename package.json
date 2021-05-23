@@ -4,6 +4,7 @@
   "version": "1.0.0-alpha.3",
   "author": "Flarum Team",
   "bin": {
+    "fl": "bin/run",
     "flarum-cli": "bin/run"
   },
   "bugs": "https://github.com/flarum/flarum-cli/issues",
