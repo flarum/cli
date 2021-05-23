@@ -6,7 +6,7 @@ import { PhpProvider } from '../../provider/php-provider';
 import { Step } from '../step-manager';
 
 export class ComposerInstall implements Step {
-  type = 'Run composer install';
+  type = 'Run composer install/update';
 
   composable = false;
 
