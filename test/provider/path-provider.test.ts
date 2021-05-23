@@ -14,11 +14,11 @@ describe('PathFsProvider Works', function () {
     expect(provider.requestedDir('file2.php')).toStrictEqual('/tmp/file2.php');
   });
 
-  test('Uses cwd if requestedDir not provided', async function () {
+  test('Returns null if requestedDir not provided', async function () {
     const provider = new PathFsProvider({
       ext: '/',
     });
 
-    expect(provider.requestedDir('file.php')).toStrictEqual(path.resolve(process.cwd(), 'file.php'));
+    expect(provider.requestedDir('file.php')).toBe(null);
   });
 });

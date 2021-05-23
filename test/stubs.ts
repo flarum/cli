@@ -33,20 +33,20 @@ interface TestPaths {
 
 export function stubPathProviderFactory(paths: TestPaths = {}): PathProvider {
   return {
-    cwd(path: string): string {
-      return resolve(paths.cwd || '/cwd', path);
+    cwd(...path: string[]): string {
+      return resolve(paths.cwd || '/cwd', ...path);
     },
 
-    boilerplate(path: string): string {
-      return resolve(paths.boilerplate || '/boilerplate', path);
+    boilerplate(...path: string[]): string {
+      return resolve(paths.boilerplate || '/boilerplate', ...path);
     },
 
-    ext(path: string): string {
-      return resolve(paths.ext || '/ext', path);
+    ext(...path: string[]): string {
+      return resolve(paths.ext || '/ext', ...path);
     },
 
-    requestedDir(path: string): string {
-      return resolve(paths.requestedDir || '/ext', path);
+    requestedDir(...path: string[]): string|null {
+      return paths.requestedDir ? resolve(paths.requestedDir, ...path) : null;
     },
   };
 }

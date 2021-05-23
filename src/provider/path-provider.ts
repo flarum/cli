@@ -1,13 +1,13 @@
 import { resolve } from 'path';
 
 export interface PathProvider {
-  cwd(path: string): string;
+  cwd(...path: string[]): string;
 
-  ext(path: string): string;
+  ext(...path: string[]): string;
 
-  boilerplate(path: string): string;
+  boilerplate(...path: string[]): string;
 
-  requestedDir(path: string): string;
+  requestedDir(...path: string[]): string|null;
 }
 
 interface Paths {
@@ -23,21 +23,21 @@ export class PathFsProvider implements PathProvider {
     this.paths = paths;
   }
 
-  cwd(path: string): string {
-    return resolve(process.cwd(), path);
+  cwd(...path: string[]): string {
+    return resolve(process.cwd(), ...path);
   }
 
-  ext(path: string): string {
-    return resolve(this.paths.ext, path);
+  ext(...path: string[]): string {
+    return resolve(this.paths.ext, ...path);
   }
 
-  boilerplate(path: string): string {
-    return resolve(__dirname, '../../boilerplate', path);
+  boilerplate(...path: string[]): string {
+    return resolve(__dirname, '../../boilerplate', ...path);
   }
 
-  requestedDir(path: string): string {
-    if (!this.paths.requestedDir) return this.cwd(path);
+  requestedDir(...path: string[]): string|null {
+    if (!this.paths.requestedDir) return null;
 
-    return resolve(this.paths.requestedDir, path);
+    return resolve(this.paths.requestedDir, ...path);
   }
 }
