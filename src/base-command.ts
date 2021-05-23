@@ -50,6 +50,8 @@ export default abstract class BaseCommand extends Command {
       await this.emptyDirCheck(extRoot);
     }
 
+    await this.additionalPreRunChecks(extRoot);
+
     const pathProvider = new PathFsProvider({
       requestedDir: path,
       ext: extRoot,
@@ -76,6 +78,10 @@ export default abstract class BaseCommand extends Command {
 
   protected goodbyeMessage(): string {
     return 'Please make sure to check my work, adjust formatting, and test before commiting!!!';
+  }
+
+  protected async additionalPreRunChecks(_extRoot: string) {
+    // Can be implemented if needed.
   }
 
   protected abstract steps(stepManager: StepManager): StepManager;
