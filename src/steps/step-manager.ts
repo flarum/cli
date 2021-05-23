@@ -118,7 +118,7 @@ export class StepManager {
     dependencies.forEach(dependency => {
       const sourceStep = this.namedSteps.get(dependency.sourceStep);
 
-      if (!sourceStep?.step.exposes.includes(dependency.exposedName)) {
+      if (!sourceStep?.step.exposes.includes(dependency.exposedName) && dependency.exposedName !== '__succeeded') {
         missingDependencyParamSteps.push(sourceStep?.name as string);
         missingDependencyParams.push(dependency.exposedName);
       }
@@ -170,7 +170,7 @@ export class StepManager {
 
     if (!storedStep.shouldRun.optional) return true;
 
-    const promptConfirm = await paramProviderFactory({context: 'Confirm Step'}).get<boolean>({
+    const promptConfirm = await paramProviderFactory({ context: 'Confirm Step' }).get<boolean>({
       name: 'execute_step',
       message: storedStep.shouldRun.confirmationMessage || `Run step of type "${storedStep.step.type}"?`,
       initial: storedStep.shouldRun.default || false,
@@ -184,7 +184,14 @@ export class StepManager {
     const fs = createMemFs();
 
     const initial: Record<string, unknown> = storedStep.dependencies.reduce((initial, dep) => {
-      initial[dep.consumedName || dep.exposedName] = this.exposedParams.get(dep.sourceStep)![dep.exposedName];
+      let depValue;
+      if (dep.exposedName === '__succeeded') {
+        depValue = this.exposedParams.has(dep.sourceStep);
+      } else {
+        depValue = this.exposedParams.get(dep.sourceStep)![dep.exposedName];
+      }
+
+      initial[dep.consumedName || dep.exposedName] = depValue;
 
       return initial;
     }, {} as Record<string, unknown>);

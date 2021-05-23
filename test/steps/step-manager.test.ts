@@ -87,6 +87,17 @@ describe('Step Manager Validation', function () {
           });
       }).toThrow('Step of type "Generate Controller" depends on nonexistent exposed params "modelClass" from named steps "model"');
     });
+
+    test('`__succeeded` magic param is allowed.', function () {
+      expect(() => {
+        (new StepManager())
+          .namedStep('model', stubStepFactory('Generate Model'))
+          .step(stubStepFactory('Generate Controller'), { optional: false }, [{
+            sourceStep: 'model',
+            exposedName: '__succeeded',
+          }]);
+      }).not.toThrow();
+    });
   });
 
   describe('Named steps must be unique', function () {
@@ -141,6 +152,10 @@ describe('Step Manager Validation', function () {
 
 describe('Step Manager Execution', function () {
   const paramProviderFactory = jest.fn(defaultPPFac);
+
+  beforeEach(() => {
+    paramProviderFactory.mockClear();
+  });
 
   test('Can run a complex but valid sequence of steps, params properly passed to dependencies', async function () {
     const commitMethod = jest.spyOn(StepManager.prototype as any, 'commit');
@@ -198,6 +213,24 @@ describe('Step Manager Execution', function () {
     ]));
 
     expect(commitMethod.mock.calls.length).toBe(6);
+  });
+
+  test('Steps can consume `__succeeded` magic param from previous steps', async function () {
+    await (new StepManager())
+      .namedStep('step with no exposed params', stubStepFactory('Standalone'))
+      .step(stubStepFactory('Standalone'), {}, [
+        {
+          sourceStep: 'step with no exposed params',
+          exposedName: '__succeeded',
+        },
+      ])
+      .run(stubPathProviderFactory(), paramProviderFactory, stubPhpProviderFactory());
+
+    // Tests that params are shared properly.
+    expect(JSON.stringify(paramProviderFactory.mock.calls)).toStrictEqual(JSON.stringify([
+      [{}],
+      [{ __succeeded: true }],
+    ]));
   });
 
   test('Optional steps wont run if not confirmed', async function () {
