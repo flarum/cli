@@ -51,6 +51,7 @@ interface StepDependency {
   sourceStep: string;
   exposedName: string;
   consumedName?: string;
+  dontRunIfFalsy?: boolean;
 }
 
 export class StepManager {
@@ -153,8 +154,19 @@ export class StepManager {
   }
 
   protected async stepShouldRun(storedStep: StoredStep, paramProviderFactory: ParamProviderFactory): Promise<boolean> {
-    const allDependenciesRan = storedStep.dependencies.every(dep => this.exposedParams.has(dep.sourceStep));
-    if (!allDependenciesRan) return false;
+    let allDependenciesRan = true;
+    let noRequiredNonFalsyDependenciesAreFalsy = true;
+
+    storedStep.dependencies.forEach(dep => {
+      if (!this.exposedParams.has(dep.sourceStep)) allDependenciesRan = false;
+      const sourceDeps = this.exposedParams.get(dep.sourceStep);
+
+      if (dep.dontRunIfFalsy && !sourceDeps![dep.exposedName]) {
+        noRequiredNonFalsyDependenciesAreFalsy = false;
+      }
+    });
+
+    if (!allDependenciesRan || !noRequiredNonFalsyDependenciesAreFalsy) return false;
 
     if (!storedStep.shouldRun.optional) return true;
 

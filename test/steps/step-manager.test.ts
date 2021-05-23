@@ -292,4 +292,49 @@ describe('Step Manager Execution', function () {
       ]);
     });
   });
+
+  test('If a dependency marked as "dontRunIfFalsy" is falsy, dont run.', async function () {
+    prompt.inject([true, true]);
+
+    const results = await (new StepManager())
+      .namedStep('dep1', stubStepFactory('Generate Model', true, [], { something: false }))
+      .namedStep('dep2', stubStepFactory('Generate Serializer', true, [], { 'something else': true }))
+      .step(stubStepFactory('Relies on dep1, shouldnt run'), { optional: false }, [
+        {
+          sourceStep: 'dep1',
+          exposedName: 'something',
+          dontRunIfFalsy: true,
+        },
+      ])
+      .step(stubStepFactory('Relies on dep1, should run'), { optional: false }, [
+        {
+          sourceStep: 'dep1',
+          exposedName: 'something',
+          dontRunIfFalsy: false,
+        },
+      ])
+      .step(stubStepFactory('Relies on dep2, should run'), { optional: false }, [
+        {
+          sourceStep: 'dep2',
+          exposedName: 'something else',
+          dontRunIfFalsy: false,
+        },
+      ])
+      .step(stubStepFactory('Relies on dep2, also should run'), { optional: false }, [
+        {
+          sourceStep: 'dep2',
+          exposedName: 'something else',
+          dontRunIfFalsy: false,
+        },
+      ])
+      .run(stubPathProviderFactory(), paramProviderFactory, stubPhpProviderFactory());
+
+    expect(results).toStrictEqual([
+      'Generate Model',
+      'Generate Serializer',
+      'Relies on dep1, should run',
+      'Relies on dep2, should run',
+      'Relies on dep2, also should run',
+    ]);
+  });
 });
