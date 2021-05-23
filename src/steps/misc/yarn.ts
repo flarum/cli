@@ -5,13 +5,13 @@ import { PathProvider } from '../../provider/path-provider';
 import { PhpProvider } from '../../provider/php-provider';
 import { Step } from '../step-manager';
 
-export class NpmInstall implements Step {
-  type = 'Run NPM install';
+export class YarnInstall implements Step {
+  type = 'Run yarn install';
 
   composable = false;
 
   async run(fs: Store, pathProvider: PathProvider, _paramProvider: ParamProvider, _phpProvider: PhpProvider): Promise<Store> {
-    execSync('npm install', { cwd: pathProvider.ext('js') });
+    execSync('yarn install', { cwd: pathProvider.ext('js') });
 
     return fs;
   }
