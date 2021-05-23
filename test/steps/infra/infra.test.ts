@@ -14,6 +14,11 @@ interface InfraTest {
 
 const initialComposerJson = JSON.stringify({
   name: 'flarum/demo',
+  autoload: {
+    'psr-4': {
+      'Flarum\\Demo\\': 'src',
+    },
+  },
   scripts: {
     'test:unit': 'should be overriden',
     somethingElse: 'should not be overriden',

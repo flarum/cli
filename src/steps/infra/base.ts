@@ -31,9 +31,11 @@ export abstract class BaseInfraStep implements Step {
 
     const fakeInitData = extensionMetadata(fsEditor.readJSON(pathProvider.ext('composer.json')));
 
+    fakeInitData.packageNamespace = fakeInitData.packageNamespace.replace('\\', '\\\\');
+
     Object.keys(this.jsonToAugment).forEach(jsonPath => {
       const boilerplatePath = pathProvider.boilerplate('skeleton/extension', jsonPath);
-      const boilerplateTmpPath = pathProvider.boilerplate('skeleton/extension', jsonPath);
+      const boilerplateTmpPath = pathProvider.boilerplate('skeleton/extension', `${jsonPath}.tmp`);
       // We copy it to resolve template tags.
       fsEditor.copyTpl(boilerplatePath, boilerplateTmpPath, fakeInitData);
       const boilerplateComposerJson: any = fsEditor.readJSON(boilerplateTmpPath);
