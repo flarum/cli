@@ -169,6 +169,12 @@ class AddExtender extends NodeVisitorAbstract
           $closure = $closure->addParam($newParam);
         }
 
+        if (isset($spec['value']['commentText'])) {
+          $closure = $closure->addStmt(
+            new Node\Scalar\String_($spec['value']['commentText'])
+          );
+        }
+
         if (isset($spec['value']['return'])) {
           $closure = $closure->addStmt(
             new Return_(

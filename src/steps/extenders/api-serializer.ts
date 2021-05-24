@@ -43,6 +43,7 @@ export class GenerateApiSerializerAttributesExtender extends BaseExtenderStep {
                     typeType: ParamTypeType.PRIMITIVE,
                   },
                 ],
+                commentText: 'See https://docs.flarum.org/extend/api.html#serializers',
                 return: {
                   type: ExpressionType.VARIABLE,
                   value: 'attributes',
