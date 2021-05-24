@@ -19,7 +19,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => '64cb35d4fb6f667d371cec13eb120f88dd38c180',
+    'reference' => 'd180caa730264a9db3943ade1885f39dfcee19b4',
     'name' => 'flarum/cli-php-util',
   ),
   'versions' => 
@@ -31,16 +31,16 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => '64cb35d4fb6f667d371cec13eb120f88dd38c180',
+      'reference' => 'd180caa730264a9db3943ade1885f39dfcee19b4',
     ),
     'nikic/php-parser' => 
     array (
-      'pretty_version' => 'v4.10.4',
-      'version' => '4.10.4.0',
+      'pretty_version' => 'v4.10.5',
+      'version' => '4.10.5.0',
       'aliases' => 
       array (
       ),
-      'reference' => 'c6d052fc58cb876152f89f532b95a8d7907e7f0e',
+      'reference' => '4432ba399e47c66624bc73c8c0f811e5c109576f',
     ),
   ),
 );
