@@ -22,6 +22,9 @@ USAGE
   $ flarum-cli COMMAND
 ...
 ```
+
+You can also use `fl` instead of `flarum-cli` as a shorthand.
+
 <!-- usagestop -->
 
 To see a list of available commands, run:
