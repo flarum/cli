@@ -105,7 +105,7 @@ class AddExtender extends NodeVisitorAbstract
 
   protected function exprMatchesTarget(Node\Expr $expr, array $targetSpec, Node\Expr $targetExpr): bool
   {
-    if ($targetSpec['type'] === 'primitive') {
+    if ($targetSpec['type'] === 'scalar') {
       /** @var $targetExpr Node\Scalar */
       return $expr instanceof Node\Scalar && $expr->value === $targetExpr['value'];
     }
@@ -138,8 +138,20 @@ class AddExtender extends NodeVisitorAbstract
 
   protected function specToExpr(array $spec): Node\Expr {
     switch ($spec['type']) {
-      case 'primitive':
-        return $spec['value'];
+      case 'scalar':
+        $value = $spec['value'];
+        if (is_string($value)) {
+          return new Node\Scalar\String_($value);
+        }
+        if (is_integer($value)) {
+          return new Node\Scalar\LNumber($value, ['kind' => Node\Scalar\LNumber::KIND_DEC]);
+        }
+        if (is_float($value)) {
+          return new Node\Scalar\DNumber($value);
+        }
+        if (is_bool($value)) {
+          return new Node\Scalar\LNumber($value, ['kind' => Node\Scalar\LNumber::KIND_BIN]);
+        }
       case 'class_const':
         return $this->nodeFactory->classConstFetch(
           $this->resolveName($spec['value']),
@@ -166,6 +178,9 @@ class AddExtender extends NodeVisitorAbstract
         }
 
         return $closure->getNode();
+      default:
+        $type = $spec['type'];
+        throw new \Exception("Unrecognized type: $type");
     }
   }
 }

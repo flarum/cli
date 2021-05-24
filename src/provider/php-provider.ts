@@ -17,7 +17,7 @@ export interface MethodCallSpec {
 
 export interface ExpressionSpec {
   type: ExpressionType;
-  value: string | boolean | ClosureSpec;
+  value: string | boolean | number | ClosureSpec;
   auxiliaryValue?: string;
 }
 
@@ -63,6 +63,10 @@ export class PhpSubsystemProvider implements PhpProvider {
     });
 
     const res = execSync(`php ${this.phpPath}`, { input });
+
+    if (!res) {
+      throw new Error(`The PHP subsystem returned an invalid value: ${res}`);
+    }
 
     return res.toString();
   }
