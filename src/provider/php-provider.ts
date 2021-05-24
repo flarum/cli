@@ -7,33 +7,41 @@ export interface ExtenderDef {
 
 export interface ExtenderSpec {
   className: string;
-  args?: ArgSpec[];
+  args?: ExpressionSpec[];
 }
 
 export interface MethodCallSpec {
   methodName: string;
-  args?: ArgSpec[];
+  args?: ExpressionSpec[];
 }
 
-export interface ArgSpec {
-  type: ArgType;
-  value: string | boolean | CallbackSpec;
+export interface ExpressionSpec {
+  type: ExpressionType;
+  value: string | boolean | ClosureSpec;
   auxiliaryValue?: string;
 }
 
-export interface CallbackSpec {
+export interface ClosureSpec {
   params: ParamSpec[];
-  bodyComment: string;
+  return?: ExpressionSpec;
 }
 
 export interface ParamSpec {
+  typeType: ParamTypeType;
   type: string;
   name: string;
 }
 
-export enum ArgType {
+export enum ExpressionType {
   SCALAR = 'scalar',
   CLASS_CONST = 'class_const',
+  CLOSURE = 'closure',
+  VARIABLE = 'variable',
+}
+
+export enum ParamTypeType {
+  CLASS = 'class',
+  PRIMITIVE = 'primitive',
 }
 
 export interface PhpProvider {

@@ -1,7 +1,7 @@
 import { StepManager } from '../../../steps/step-manager';
 import BaseCommand from '../../../base-command';
 import { GenerateEventListenerStub } from '../../../steps/stubs/backend/event-listener';
-import { GenerateEventListenerExtender } from '../../../steps/extenders/event-listener';
+import { GenerateEventListenerExtender } from '../../../steps/extenders/event';
 
 export default class EventListener extends BaseCommand {
   static description = 'generate an event listener class';

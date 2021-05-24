@@ -1,13 +1,13 @@
 /* eslint-disable no-template-curly-in-string */
 import { Validator } from '../../utils/validation';
-import { ArgType } from '../../provider/php-provider';
-import { BaseExtenderStep } from './base';
+import { ExpressionType } from '../../provider/php-provider';
+import { BaseExtenderStep, ExtenderGenerationSchema } from './base';
 import chalk from 'chalk';
 
 export class GenerateEventListenerExtender extends BaseExtenderStep {
   type = 'Generate Event Listener extender';
 
-  protected schema = {
+  protected schema: ExtenderGenerationSchema = {
     extenderDef: {
       extender: {
         className: '\\Flarum\\Extend\\Event',
@@ -17,12 +17,12 @@ export class GenerateEventListenerExtender extends BaseExtenderStep {
           methodName: 'listen',
           args: [
             {
-              type: ArgType.CLASS_CONST,
+              type: ExpressionType.CLASS_CONST,
               value: '${eventClass}',
               auxiliaryValue: 'class',
             },
             {
-              type: ArgType.CLASS_CONST,
+              type: ExpressionType.CLASS_CONST,
               value: '${listenerClass}',
               auxiliaryValue: 'class',
             },

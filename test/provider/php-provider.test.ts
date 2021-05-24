@@ -1,5 +1,5 @@
 import path from 'path';
-import { ArgType, ExtenderDef, PhpSubsystemProvider } from '../../src/provider/php-provider';
+import { ExpressionType, ExtenderDef, PhpSubsystemProvider } from '../../src/provider/php-provider';
 
 describe('PhpProvider Works', function () {
   test('Can add simple extender', async function () {
@@ -20,12 +20,12 @@ describe('PhpProvider Works', function () {
           methodName: 'listen',
           args: [
             {
-              type: ArgType.CLASS_CONST,
+              type: ExpressionType.CLASS_CONST,
               value: 'Flarum\\Post\\Event\\Saving',
               auxiliaryValue: 'class',
             },
             {
-              type: ArgType.CLASS_CONST,
+              type: ExpressionType.CLASS_CONST,
               value: 'Some\\Class',
               auxiliaryValue: 'class',
             },
