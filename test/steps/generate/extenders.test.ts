@@ -1,6 +1,7 @@
 import { getFsPaths, runStep } from '../../utils';
 
-import { GenerateEventListenerExtender } from '../../../src/steps/extenders/event-listener';
+import { GenerateApiSerializerAttributesExtender } from '../../../src/steps/extenders/api-serializer';
+import { GenerateEventListenerExtender } from '../../../src/steps/extenders/event';
 import { PathProvider } from '../../../src/provider/path-provider';
 
 interface ExtenderTest {
@@ -18,6 +19,14 @@ const testSpecs: ExtenderTest[] = [
     params: {
       eventClass: 'Flarum\\Post\\Event\\Saving',
       listenerClass: 'Flarum\\Demo\\Listener\\SaveToDb',
+    },
+  },
+  // API Attributes
+  {
+    extenderClass: GenerateApiSerializerAttributesExtender,
+    params: {
+      serializerClass: 'Flarum\\Api\\Serializer\\UserSerializer',
+      modelClass: 'Flarum\\User\\User',
     },
   },
 ];
