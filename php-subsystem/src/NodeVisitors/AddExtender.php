@@ -42,7 +42,7 @@ class AddExtender extends NodeVisitorAbstract
           $extender = $this->nodeFactory->methodCall(
             $extender,
             $methodCall['methodName'],
-            array_map([$this, 'cleanArg'], $methodCall['args'])
+            array_map([$this, 'specToExpr'], $methodCall['args'])
           );
         }
       }
@@ -57,17 +57,22 @@ class AddExtender extends NodeVisitorAbstract
     }
   }
 
-  protected function getOrCreateExtender(Node\Expr\Array_ $arr, $extenderSpec)
+  /**
+   * Gets or creates an extender class node with the proper args.
+   */
+  protected function getOrCreateExtender(Node\Expr\Array_ $existingExtenders, array $extenderSpec)
   {
     $className = $extenderSpec['className'];
     if (isset($extenderSpec['args'])) {
-      $args = array_map([$this, 'cleanArg'], $extenderSpec['args']);
+      $argSpecs = $extenderSpec['args'];
+      $args = array_map([$this, 'specToExpr'], $extenderSpec['args']);
     } else {
+      $argSpecs = [];
       $args = [];
     }
 
-    foreach ((array) $arr->items as $item) {
-      if (($extender = $this->recurseGetExtender($item, $className, $args))) {
+    foreach ((array) $existingExtenders->items as $extender) {
+      if (($extender = $this->recurseGetExtender($extender, $className, $argSpecs, $args))) {
         return $extender;
       }
     }
@@ -75,21 +80,22 @@ class AddExtender extends NodeVisitorAbstract
     return $this->nodeFactory->new($this->resolveName($className), $args);
   }
 
-  protected function recurseGetExtender(Node $node, string $className, $args)
+  protected function recurseGetExtender(Node $node, string $className, array $argSpecs, array $args)
   {
     if ($node instanceof Node\Expr\ArrayItem) {
-      if (!$this->recurseGetExtender($node->value, $className, $args)) return;
+      if (!$this->recurseGetExtender($node->value, $className, $argSpecs, $args)) return;
 
       return $node;
     }
     else if ($node instanceof Node\Expr\MethodCall) {
-      return $this->recurseGetExtender($node->var, $className, $args);
+      return $this->recurseGetExtender($node->var, $className, $argSpecs, $args);
     } else if ($node instanceof Node\Expr\New_) {
       $nameMatches = $this->nameMatches($node->class, $className);
       $argsMatch = true;
 
+      if (count($node->args) !== count($args)) return false;
       for ($i = 0; $i < count($args); $i++) {
-        if (!$this->argMatchesSpec($node->args[$i], $args[$i])) $argsMatch = false;
+        if (!$this->exprMatchesTarget($node->args[$i]->value, $argSpecs[$i], $args[$i])) $argsMatch = false;
       }
       return $nameMatches && $argsMatch ? $node : false;
     }
@@ -97,21 +103,23 @@ class AddExtender extends NodeVisitorAbstract
     return false;
   }
 
-  protected function argMatchesSpec(Node\Arg $arg, $cmp): bool
+  protected function exprMatchesTarget(Node\Expr $expr, array $targetSpec, Node\Expr $targetExpr): bool
   {
-    if ($cmp['type'] === 'primitive') {
-      return $arg->value instanceof Node\Scalar && $cmp['value'] === $arg->value->value;
+    if ($targetSpec['type'] === 'primitive') {
+      /** @var $targetExpr Node\Scalar */
+      return $expr instanceof Node\Scalar && $expr->value === $targetExpr['value'];
     }
-    else if ($cmp['type'] === 'class_const') {
-      return $arg->value instanceof Node\Expr\ClassConstFetch &&
-             $arg->value->name->name === $cmp->name->name &&
-             $arg->value->class->toString() === $cmp->class->toString();
+    else if ($targetSpec['type'] === 'class_const') {
+      /** @var $targetExpr Node\Expr\ClassConstFetch */
+      return $expr instanceof Node\Expr\ClassConstFetch &&
+             $expr->name->name === $targetExpr->name->name &&
+             $expr->class->toString() === $targetExpr->class->toString();
     }
   }
 
-  protected function nameMatches(Node\Name $name, string $cmp): bool
+  protected function nameMatches(Node\Name $name, string $target): bool
   {
-    return $name->getAttribute('resolvedName')->toCodeString() === $cmp;
+    return $name->getAttribute('resolvedName')->toCodeString() === $target;
   }
 
   protected function resolveName(string $name): string
@@ -128,30 +136,31 @@ class AddExtender extends NodeVisitorAbstract
     }
   }
 
-  protected function cleanArg($arg): Node {
-    switch ($arg['type']) {
+  protected function specToExpr(array $spec): Node\Expr {
+    switch ($spec['type']) {
       case 'primitive':
-        return $arg->value;
+        return $spec['value'];
       case 'class_const':
         return $this->nodeFactory->classConstFetch(
-          $this->resolveName($arg['value']),
-          $arg['auxiliaryValue']
+          $this->resolveName($spec['value']),
+          $spec['auxiliaryValue']
         );
       case 'variable':
-        return new Variable($arg['value']);
+        return new Variable($spec['value']);
       case 'closure':
         $closure = new ClosureBuilder();
-        foreach ($arg['value']['params'] as $param) {
+        foreach ($spec['value']['params'] as $param) {
+          $type = $param['typeType'] === 'class' ? $this->resolveName($param['type']) : $param['type'];
           $newParam = $this->nodeFactory->param($param['name'])
-              ->setType($this->resolveName($param['type']))
+              ->setType($type)
               ->getNode();
           $closure = $closure->addParam($newParam);
         }
 
-        if (isset($arg['value']['return'])) {
+        if (isset($spec['value']['return'])) {
           $closure = $closure->addStmt(
             new Return_(
-              $this->cleanArg($arg['value']['return'])
+              $this->specToExpr($spec['value']['return'])
             )
           );
         }
@@ -161,6 +170,9 @@ class AddExtender extends NodeVisitorAbstract
   }
 }
 
+// The following class is pretty much a copy of the PhpParser\Builder\Function_ class (with no $name).
+// Consult that when working on this.
+
 use PhpParser;
 use PhpParser\Builder\FunctionLike;
 use PhpParser\BuilderHelpers;
@@ -168,7 +180,6 @@ use PhpParser\Node\Expr;
 
 class ClosureBuilder extends FunctionLike
 {
-    protected $name;
     protected $stmts = [];
 
     /**
