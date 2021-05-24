@@ -5,6 +5,8 @@ namespace Flarum\CliPhpSubsystem\NodeVisitors;
 use PhpParser\BuilderFactory;
 use PhpParser\NameContext;
 use PhpParser\Node;
+use PhpParser\Node\Expr\Variable;
+use PhpParser\Node\Stmt\Return_;
 use PhpParser\NodeVisitorAbstract;
 
 class AddExtender extends NodeVisitorAbstract
@@ -95,7 +97,7 @@ class AddExtender extends NodeVisitorAbstract
     return false;
   }
 
-  protected function argMatchesSpec(Node\Arg $arg, $cmp)
+  protected function argMatchesSpec(Node\Arg $arg, $cmp): bool
   {
     if ($cmp['type'] === 'primitive') {
       return $arg->value instanceof Node\Scalar && $cmp['value'] === $arg->value->value;
@@ -107,12 +109,12 @@ class AddExtender extends NodeVisitorAbstract
     }
   }
 
-  protected function nameMatches(Node\Name $name, string $cmp)
+  protected function nameMatches(Node\Name $name, string $cmp): bool
   {
     return $name->getAttribute('resolvedName')->toCodeString() === $cmp;
   }
 
-  protected function resolveName(string $name)
+  protected function resolveName(string $name): string
   {
     $nameWithoutLeadingSlash = ltrim($name, "\\");
     $nameOptions = $this->nameContext->getPossibleNames($nameWithoutLeadingSlash, Node\Stmt\Use_::TYPE_NORMAL);
@@ -126,7 +128,7 @@ class AddExtender extends NodeVisitorAbstract
     }
   }
 
-  protected function cleanArg($arg) {
+  protected function cleanArg($arg): Node {
     switch ($arg['type']) {
       case 'primitive':
         return $arg->value;
@@ -135,6 +137,64 @@ class AddExtender extends NodeVisitorAbstract
           $this->resolveName($arg['value']),
           $arg['auxiliaryValue']
         );
+      case 'variable':
+        return new Variable($arg['value']);
+      case 'closure':
+        $closure = new ClosureBuilder();
+        foreach ($arg['value']['params'] as $param) {
+          $newParam = $this->nodeFactory->param($param['name'])
+              ->setType($this->resolveName($param['type']))
+              ->getNode();
+          $closure = $closure->addParam($newParam);
+        }
+
+        if (isset($arg['value']['return'])) {
+          $closure = $closure->addStmt(
+            new Return_(
+              $this->cleanArg($arg['value']['return'])
+            )
+          );
+        }
+
+        return $closure->getNode();
     }
   }
+}
+
+use PhpParser;
+use PhpParser\Builder\FunctionLike;
+use PhpParser\BuilderHelpers;
+use PhpParser\Node\Expr;
+
+class ClosureBuilder extends FunctionLike
+{
+    protected $name;
+    protected $stmts = [];
+
+    /**
+     * Adds a statement.
+     *
+     * @param Node|PhpParser\Builder $stmt The statement to add
+     *
+     * @return $this The builder instance (for fluid interface)
+     */
+    public function addStmt($stmt) {
+        $this->stmts[] = BuilderHelpers::normalizeStmt($stmt);
+
+        return $this;
+    }
+
+    /**
+     * Returns the built function node.
+     *
+     * @return Stmt\Function_ The built function node
+     */
+    public function getNode() : Node {
+        return new Expr\Closure([
+            'byRef'      => $this->returnByRef,
+            'params'     => $this->params,
+            'returnType' => $this->returnType,
+            'stmts'      => $this->stmts,
+        ], $this->attributes);
+    }
 }
