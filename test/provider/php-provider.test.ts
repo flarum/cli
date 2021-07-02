@@ -2,12 +2,16 @@ import path from 'path';
 import { ExpressionType, ExtenderDef, ParamTypeType, PhpSubsystemProvider } from '../../src/provider/php-provider';
 
 const extendContent = `<?php
+namespace Muralf\\Dummy;
+
 use Flarum\\Extend;
 
 return [];
 `;
 
 const expectedComplex = `<?php
+namespace Muralf\\Dummy;
+
 use Flarum\\Extend;
 
 return [(new Extend\\Imaginary('hello', 7, \\Flarum\\Notification::class))->listen(\\Flarum\\Post\\Event\\Saving::class, \\Some\\Class::class, function (array $someArray, string $someString, \\Flarum\\Database\\Migration $migration) {
