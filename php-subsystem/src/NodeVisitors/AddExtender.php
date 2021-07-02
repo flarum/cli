@@ -31,6 +31,10 @@ class AddExtender extends NodeVisitorAbstract
   public function leaveNode(Node $node)
   {
     if ($node instanceof Node\Stmt\Return_ && $node->expr instanceof Node\Expr\Array_) {
+        if (! isset($this->params['extender'])) {
+            throw new \Exception('Invalid Extender Schema');
+        }
+
       $extender = $this->getOrCreateExtender($node->expr, $this->params['extender']);
       $exists = $extender instanceof Node\Expr\ArrayItem;
 
