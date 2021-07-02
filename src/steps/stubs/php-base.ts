@@ -72,11 +72,14 @@ export abstract class BasePhpStubStep implements Step {
   protected phpClassParams: string[] = [];
 
   protected async compileParams(fsEditor: Editor, pathProvider: PathProvider, paramProvider: ParamProvider): Promise<Record<string, unknown>> {
+    const composerJsonContents = this.composerJsonContents(fsEditor, pathProvider);
+
     const params: Record<string, string> = {
-      classNamespace: this.stubNamespace(fsEditor, pathProvider),
+      classNamespace: this.stubNamespace(composerJsonContents, pathProvider),
+      extensionId: composerJsonContents.extensionId,
     };
 
-    let paramDefs = this.schema.params.filter(param => param.name !== 'classNamespace');
+    let paramDefs = this.schema.params.filter(param => param.name !== 'classNamespace' && param.name !== 'extensionId');
 
     const classParams = [...this.phpClassParams];
     const classNameParam = paramDefs.find(param => param.name === 'className');
@@ -118,9 +121,8 @@ export abstract class BasePhpStubStep implements Step {
 
   protected subdir !: string;
 
-  protected stubNamespace(fsEditor: Editor, pathProvider: PathProvider): string {
-    const composerJsonContents = fsEditor.readJSON(pathProvider.ext('composer.json'));
-    const packageNamespace = extensionMetadata(composerJsonContents).packageNamespace;
+  protected stubNamespace(composerJsonContents: any, pathProvider: PathProvider): string {
+    const packageNamespace = composerJsonContents.packageNamespace;
 
     let subdir: string;
     if (this.schema.forceRecommendedSubdir || pathProvider.requestedDir() === null) {
@@ -129,8 +131,18 @@ export abstract class BasePhpStubStep implements Step {
       subdir = pathProvider.requestedDir()!.slice(`${pathProvider.ext('src')}/`.length);
     }
 
-    this.subdir = subdir;
+    this.subdir = subdir.replace('.', '/');
 
-    return `${packageNamespace}\\${subdir.replace('.', '\\')}`;
+    let namespace = `${packageNamespace}`;
+
+    if (this.schema.root === './tests') {
+      namespace += '\\tests';
+    }
+
+    return `${namespace}\\${subdir.replace('.', '\\')}`;
+  }
+
+  protected composerJsonContents(fsEditor: Editor, pathProvider: PathProvider): any {
+    return extensionMetadata(fsEditor.readJSON(pathProvider.ext('composer.json')));
   }
 }

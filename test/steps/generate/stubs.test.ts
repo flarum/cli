@@ -1,6 +1,7 @@
 import { getFsPaths, runStep } from '../../utils';
 
 import { GenerateEventListenerStub } from '../../../src/steps/stubs/backend/event-listener';
+import { GenerateIntegrationTestStub } from '../../../src/steps/stubs/backend/integration-test';
 import { GenerateMigrationStub } from '../../../src/steps/stubs/backend/migration';
 import { PathProvider } from '../../../src/provider/path-provider';
 
@@ -19,6 +20,7 @@ interface StubTest {
 }
 
 const requestedDir = '/ext/src/somePath';
+const requestedTestDir = '/ext/tests/somePath';
 
 const testSpecs: StubTest[] = [
   // Event Listener
@@ -41,6 +43,26 @@ const testSpecs: StubTest[] = [
     expectedExposedParamsRequestedDir: {
       class: 'Flarum\\Demo\\somePath\\MutateDatabaseSave',
       eventClass: '\\Flarum\\Post\\Event\\Saving',
+    },
+  },
+
+  // Integration Test
+  {
+    stubClass: GenerateIntegrationTestStub,
+    params: {
+      className: 'ListPotatoesTest',
+    },
+    expectedModifiedFilesDefaultDir: [
+      '/ext/tests/integration/api/ListPotatoesTest.php',
+    ],
+    expectedModifiedFilesRequestedDir: [
+      `${requestedTestDir}/ListPotatoesTest.php`,
+    ],
+    expectedExposedParamsDefaultDir: {
+      class: 'Flarum\\Demo\\tests\\integration\\api\\ListPotatoesTest',
+    },
+    expectedExposedParamsRequestedDir: {
+      class: 'Flarum\\Demo\\tests\\somePath\\ListPotatoesTest',
     },
   },
 ];

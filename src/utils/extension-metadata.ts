@@ -7,6 +7,7 @@ export function extensionMetadata(extensionComposerJson: any = {}) {
   data.authorEmail = '';
   data.packageNamespace = (Object.keys(extensionComposerJson?.autoload?.['psr-4'] ?? {})[0] || '').slice(0, -1);
   data.extensionName = extensionComposerJson?.extra?.['flarum-extension']?.title || '';
+  data.extensionId = data.packageName.replace(/(flarum-ext-)|(flarum-)/, '').replace('/', '-');
 
   return data;
 }
