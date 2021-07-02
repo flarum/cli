@@ -127,13 +127,9 @@ class AddExtender extends NodeVisitorAbstract
     $nameWithoutLeadingSlash = ltrim($name, "\\");
     $nameOptions = $this->nameContext->getPossibleNames($nameWithoutLeadingSlash, Node\Stmt\Use_::TYPE_NORMAL);
 
-    // If there are only 2 options, the name context couldn't find an import.
-    // In this case we want to use the fully qualified option, which is always first.
-    if (count($nameOptions) === 2) {
-      return $nameOptions[0]->toCodeString();
-    } else {
-      return end($nameOptions)->toCodeString();
-    }
+    $option = end($nameOptions);
+
+    return $option->isFullyQualified() ? $option->toCodeString() : $option->toString();
   }
 
   protected function specToExpr(array $spec): Node\Expr {
