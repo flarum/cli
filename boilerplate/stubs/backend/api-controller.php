@@ -1,18 +1,18 @@
 <?php
 
 namespace <%= classNamespace %>;
-<% if (classType !== 'none') { %>
-use Flarum\Api\Controller\<%= classType %>;<% } %>
-use Flarum\Http\RequestUtil;<% if (classType !== 'AbstractShowController' && classType !== 'AbstractListController') { %>
+
+use Flarum\Api\Controller\<%= classType %>;
+use Flarum\Http\RequestUtil;<% if (classType === 'AbstractDeleteController' || classType === 'AbstractCreateController') { %>
 use Illuminate\Contracts\Bus\Dispatcher;<% } %><% if (classType === 'AbstractShowController' || classType === 'AbstractDeleteController') { %>
-use Illuminate\Support\Arr;<% } %><% if (classType === 'none') { %>
-use Psr\Http\Message\ResponseInterface;<% } %>
-use Psr\Http\Message\ServerRequestInterface;<% if (classType === 'none') { %>
-use Psr\Http\Server\RequestHandlerInterface;<% } %><% if (classType !== 'none' && classType !== 'AbstractDeleteController') { %>
-use Tobscure\JsonApi\Document;<% } %>
-<% if (classType === 'none') { %>
-class <%= className %> implements RequestHandlerInterface<% } %><% if (classType !== 'none') { %>
-class <%= className %> extends <%= classType %><% } %>
+use Illuminate\Support\Arr;<% } %>
+use Psr\Http\Message\ServerRequestInterface;<% if (classType !== 'AbstractDeleteController') { %>
+use Tobscure\JsonApi\Document;<% } %><% if (classType === 'AbstractSerializeController') { %>
+use Tobscure\JsonApi\Collection;
+use Tobscure\JsonApi\Resource;
+use Tobscure\JsonApi\SerializerInterface;<% } %>
+
+class <%= className %> extends <%= classType %>
 {<% if (classType === 'AbstractCreateController' || classType === 'AbstractDeleteController') { %>
     /**
      * @var Dispatcher
@@ -26,7 +26,7 @@ class <%= className %> extends <%= classType %><% } %>
     {
         $this->bus = $bus;
     }
-    <% } %><% if (classType === 'AbstractShowController' || classType === 'AbstractListController' || classType === 'AbstractCreateController') { %>
+    <% } %><% if (classType === 'AbstractSerializeController' || classType === 'AbstractShowController' || classType === 'AbstractListController' || classType === 'AbstractCreateController') { %>
     /**
      * {@inheritdoc}
      */
@@ -62,12 +62,13 @@ class <%= className %> extends <%= classType %><% } %>
             // ...
         );
     }
-    <% } %><% if (classType === 'none') { %>
+    <% } %><% if (classType === 'AbstractSerializeController') { %>
     /**
      * {@inheritdoc}
      */
-    public function handle(ServerRequestInterface $request): ResponseInterface
+    protected function createElement($data, SerializerInterface $serializer)
     {
-        // ...
+        // return new Collection($data, $serializer);
+        // return new Resource($data, $serializer);
     }<% } %>
 }

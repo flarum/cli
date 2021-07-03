@@ -28,8 +28,8 @@ export class GenerateApiControllerStub extends BasePhpStubStep {
         message: 'Api Controller type',
         choices: [
           {
-            title: 'None',
-            value: 'none',
+            title: 'Normal',
+            value: 'AbstractSerializeController',
           },
           {
             title: 'List',
