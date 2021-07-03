@@ -110,8 +110,8 @@ class AddExtender extends NodeVisitorAbstract
   protected function exprMatchesTarget(Node\Expr $expr, array $targetSpec, Node\Expr $targetExpr): bool
   {
     if ($targetSpec['type'] === 'scalar') {
-      /** @var $targetExpr Node\Scalar */
-      return $expr instanceof Node\Scalar && $expr->value === $targetExpr['value'];
+      /** @var Node\Scalar $targetExpr */
+      return $expr instanceof Node\Scalar && $expr->value === $targetExpr->value;
     }
     else if ($targetSpec['type'] === 'class_const') {
       /** @var $targetExpr Node\Expr\ClassConstFetch */
