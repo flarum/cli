@@ -180,9 +180,7 @@ export class StepManager {
     return promptConfirm;
   }
 
-  protected async runStep(storedStep: StoredStep, pathProvider: PathProvider, paramProviderFactory: ParamProviderFactory, phpProvider: PhpProvider): Promise<Store> {
-    const fs = createMemFs();
-
+  protected async runStep(storedStep: StoredStep, pathProvider: PathProvider, paramProviderFactory: ParamProviderFactory, phpProvider: PhpProvider, fs: Store = createMemFs()): Promise<Store> {
     const initial: Record<string, unknown> = storedStep.dependencies.reduce((initial, dep) => {
       let depValue;
       if (dep.exposedName === '__succeeded') {
@@ -258,7 +256,7 @@ class AtomicStepManager extends StepManager {
       const shouldRun: boolean = await this.stepShouldRun(storedStep, paramProviderFactory);
       if (!shouldRun) continue;
 
-      fs = await this.runStep(storedStep, pathProvider, paramProviderFactory, phpProvider);
+      fs = await this.runStep(storedStep, pathProvider, paramProviderFactory, phpProvider, fs);
 
       stepNames.push(storedStep.step.type);
     }
