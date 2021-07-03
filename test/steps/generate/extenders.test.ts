@@ -2,6 +2,7 @@ import { getFsPaths, runStep } from '../../utils';
 
 import { GenerateApiSerializerAttributesExtender } from '../../../src/steps/extenders/api-serializer';
 import { GenerateEventListenerExtender } from '../../../src/steps/extenders/event';
+import { GenerateRouteExtender } from '../../../src/steps/extenders/route';
 import { PathProvider } from '../../../src/provider/path-provider';
 
 interface ExtenderTest {
@@ -27,6 +28,15 @@ const testSpecs: ExtenderTest[] = [
     params: {
       serializerClass: 'Flarum\\Api\\Serializer\\UserSerializer',
       modelClass: 'Flarum\\User\\User',
+    },
+  },
+  // Route
+  {
+    extenderClass: GenerateRouteExtender,
+    params: {
+      routePath: '/potatoes',
+      routeName: 'potatoes.index',
+      routeHandler: 'Flarum\\Demo\\Api\\Controller\\ListPotatoesController',
     },
   },
 ];
