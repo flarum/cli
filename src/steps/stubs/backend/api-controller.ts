@@ -1,4 +1,3 @@
-import chalk from 'chalk';
 import { Validator } from '../../../utils/validation';
 import { BasePhpStubStep } from '../php-base';
 
@@ -26,7 +25,7 @@ export class GenerateApiControllerStub extends BasePhpStubStep {
       {
         name: 'classType',
         type: 'autocomplete',
-        message: `Api Controller type`,
+        message: 'Api Controller type',
         choices: [
           {
             title: 'None',

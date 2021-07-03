@@ -43,7 +43,7 @@ export class GenerateRouteExtender extends BaseExtenderStep {
       {
         name: 'httpMethod',
         type: 'autocomplete',
-        message: `HTTP Method`,
+        message: 'HTTP Method',
         choices: ['post', 'get', 'delete', 'patch', 'put'].map((method: string) => ({
           title: method,
           value: method,
