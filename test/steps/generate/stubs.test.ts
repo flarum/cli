@@ -1,6 +1,7 @@
 import { getFsPaths, runStep } from '../../utils';
 
 import { GenerateEventListenerStub } from '../../../src/steps/stubs/backend/event-listener';
+import { GenerateApiControllerStub } from '../../../src/steps/stubs/backend/api-controller';
 import { GenerateIntegrationTestStub } from '../../../src/steps/stubs/backend/integration-test';
 import { GenerateMigrationStub } from '../../../src/steps/stubs/backend/migration';
 import { PathProvider } from '../../../src/provider/path-provider';
@@ -43,6 +44,27 @@ const testSpecs: StubTest[] = [
     expectedExposedParamsRequestedDir: {
       class: 'Flarum\\Demo\\somePath\\MutateDatabaseSave',
       eventClass: '\\Flarum\\Post\\Event\\Saving',
+    },
+  },
+
+  // Api Controller
+  {
+    stubClass: GenerateApiControllerStub,
+    params: {
+      className: 'ListPotatoesController',
+      classType: 'AbstractListController',
+    },
+    expectedModifiedFilesDefaultDir: [
+      '/ext/src/Api/Controller/ListPotatoesController.php',
+    ],
+    expectedModifiedFilesRequestedDir: [
+      `${requestedDir}/ListPotatoesController.php`,
+    ],
+    expectedExposedParamsDefaultDir: {
+      class: 'Flarum\\Demo\\Api\\Controller\\ListPotatoesController',
+    },
+    expectedExposedParamsRequestedDir: {
+      class: 'Flarum\\Demo\\somePath\\ListPotatoesController',
     },
   },
 
