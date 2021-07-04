@@ -1,7 +1,9 @@
 import { readdirSync } from 'fs';
 import { Store } from 'mem-fs';
-import { ParamProvider } from 'src/provider/param-provider';
-import { PathProvider } from 'src/provider/path-provider';
+import { Editor } from 'mem-fs-editor';
+import { ParamProvider } from '../../../provider/param-provider';
+import { PathProvider } from '../../../provider/path-provider';
+import { Validator } from '../../../utils/validation';
 import { getNextMigrationName } from '../../../utils/migration';
 import { BasePhpStubStep } from '../php-base';
 
@@ -18,9 +20,21 @@ export class GenerateMigrationStub extends BasePhpStubStep {
         name: 'name',
         type: 'text',
         message: 'Migration name/short description',
-        validate: (s: string) => /^[0-9a-zA-Z_ ]+$/.test(s.trim()) || 'Field is required; alphanumerical characters, underscores, and spaces only!',
+        validate: Validator.migrationName,
       },
     ],
+  }
+
+  protected async compileParams(fsEditor: Editor, pathProvider: PathProvider, paramProvider: ParamProvider): Promise<Record<string, unknown>> {
+    const params = await super.compileParams(fsEditor, pathProvider, paramProvider);
+
+    const regex = new RegExp(/^create_([A-z0-9_]+)_table$/);
+
+    if (regex.test(params.name as string)) {
+      params.tableName = regex.exec(params.name as string)?.pop();
+    }
+
+    return params;
   }
 
   protected async getFileName(fs: Store, pathProvider: PathProvider, _paramProvider: ParamProvider) {

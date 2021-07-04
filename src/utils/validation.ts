@@ -10,4 +10,8 @@ export class Validator {
   public static routeName(s: string) {
     return /^([A-z-._0-9]+)$/.test(s.trim()) || 'Invalid path name: only alphanumerical characters allowed and (._-).';
   }
+
+  public static migrationName(s: string) {
+    return /^[0-9a-zA-Z_ ]+$/.test(s.trim()) || 'Field is required; alphanumerical characters, underscores, and spaces only!';
+  }
 }
