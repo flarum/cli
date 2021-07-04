@@ -48,7 +48,13 @@ export abstract class BasePhpStubStep implements Step {
     return [...this.additionalExposes, 'class'];
   }
 
-  protected additionalExposes: string[] = []
+  protected additionalExposes: string[] = [];
+
+  get implicitParams(): string[] {
+    return [...this.additionalImplicitParams, 'classNamespace', 'extensionId'];
+  }
+
+  protected additionalImplicitParams: string[] = [];
 
   protected params: Record<string, unknown> = {};
 
@@ -79,7 +85,7 @@ export abstract class BasePhpStubStep implements Step {
       extensionId: composerJsonContents.extensionId,
     };
 
-    let paramDefs = this.schema.params.filter(param => param.name !== 'classNamespace' && param.name !== 'extensionId');
+    let paramDefs = this.schema.params.filter(param => !this.implicitParams.includes(param.name as string));
 
     const classParams = [...this.phpClassParams];
     const classNameParam = paramDefs.find(param => param.name === 'className');
@@ -111,6 +117,12 @@ export abstract class BasePhpStubStep implements Step {
       // eslint-disable-next-line no-await-in-loop
       params[paramDefs[i].name as string] = await paramProvider.get(paramDefs[i] as PromptObject);
     }
+
+    this.implicitParams.forEach(implicitParam => {
+      if (! params[implicitParam] && paramProvider.has(implicitParam)) {
+        params[implicitParam] = paramProvider.cached()[implicitParam] as string;
+      }
+    });
 
     return params;
   }
