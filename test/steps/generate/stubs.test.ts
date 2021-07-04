@@ -4,6 +4,7 @@ import { GenerateEventListenerStub } from '../../../src/steps/stubs/backend/even
 import { GenerateApiControllerStub } from '../../../src/steps/stubs/backend/api-controller';
 import { GenerateIntegrationTestStub } from '../../../src/steps/stubs/backend/integration-test';
 import { GenerateMigrationStub } from '../../../src/steps/stubs/backend/migration';
+import { GenerateModelStub } from '../../../src/steps/stubs/backend/model';
 import { PathProvider } from '../../../src/provider/path-provider';
 
 interface StubTest {
@@ -65,6 +66,27 @@ const testSpecs: StubTest[] = [
     },
     expectedExposedParamsRequestedDir: {
       class: 'Flarum\\Demo\\somePath\\ListPotatoesController',
+    },
+  },
+
+  // Model
+  {
+    stubClass: GenerateModelStub,
+    params: {
+      className: 'CustomModel',
+      tableName: 'custom_models',
+    },
+    expectedModifiedFilesDefaultDir: [
+      '/ext/src/CustomModel.php',
+    ],
+    expectedModifiedFilesRequestedDir: [
+      `${requestedDir}/CustomModel.php`,
+    ],
+    expectedExposedParamsDefaultDir: {
+      class: 'Flarum\\Demo\\CustomModel',
+    },
+    expectedExposedParamsRequestedDir: {
+      class: 'Flarum\\Demo\\somePath\\CustomModel',
     },
   },
 

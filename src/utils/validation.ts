@@ -14,4 +14,8 @@ export class Validator {
   public static migrationName(s: string) {
     return /^[0-9a-zA-Z_ ]+$/.test(s.trim()) || 'Field is required; alphanumerical characters, underscores, and spaces only!';
   }
+
+  public static tableName(s: string) {
+    return /^[0-9,a-z,A-Z$_]{0,64}$/.test(s.trim()) || 'Invalid table name, must be less than 64 alphanumerical characters.';
+  }
 }

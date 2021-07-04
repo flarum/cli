@@ -119,7 +119,7 @@ export abstract class BasePhpStubStep implements Step {
     }
 
     this.implicitParams.forEach(implicitParam => {
-      if (! params[implicitParam] && paramProvider.has(implicitParam)) {
+      if (!params[implicitParam] && paramProvider.has(implicitParam)) {
         params[implicitParam] = paramProvider.cached()[implicitParam] as string;
       }
     });
@@ -151,7 +151,11 @@ export abstract class BasePhpStubStep implements Step {
       namespace += '\\tests';
     }
 
-    return `${namespace}\\${subdir.replace('.', '\\')}`;
+    if (subdir) {
+      namespace += `\\${subdir.replace('.', '\\')}`;
+    }
+
+    return namespace;
   }
 
   protected composerJsonContents(fsEditor: Editor, pathProvider: PathProvider): any {
