@@ -1,12 +1,13 @@
-flarum-cli
-==========
+<p align=center><img alt="flarum-cli" src="https://user-images.githubusercontent.com/20267363/124392516-f32b6780-dced-11eb-87b8-5af0ac0c75cc.png"></p>
+<h1 align=center>Flarum CLI</h1><p align=center>
+A CLI for developing Flarum extensions</p>
 
-A CLI for developing Flarum extensions
-
-[![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
-[![Version](https://img.shields.io/npm/v/flarum-cli.svg)](https://npmjs.org/package/flarum-cli)
-[![Downloads/week](https://img.shields.io/npm/dw/flarum-cli.svg)](https://npmjs.org/package/flarum-cli)
-[![License](https://img.shields.io/npm/l/flarum-cli.svg)](https://github.com/flarum/flarum-cli/blob/master/package.json)
+<p align=center>
+<a href="https://oclif.io"><img alt"oclif" src="https://img.shields.io/badge/cli-oclif-brightgreen.svg"></a>
+<a href="https://npmjs.org/package/flarum-cli"><img alt"Version" src="https://img.shields.io/npm/v/flarum-cli.svg"></a>
+<a href="https://npmjs.org/package/flarum-cli"><img alt"Downloads/week" src="https://img.shields.io/npm/dw/flarum-cli.svg"></a>
+<a href="https://github.com/flarum/flarum-cli/blob/master/package.json"><img alt"License" src="https://img.shields.io/npm/l/flarum-cli.svg"></a>
+</p>
 
 * [Usage](#usage)
 ## Usage
