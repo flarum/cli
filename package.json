@@ -90,7 +90,7 @@
     "chalk": "^2.4.2",
     "glob": "^7.1.6",
     "just-safe-get": "^2.1.2",
-    "mem-fs": "git+https://github.com/askvortsov1/mem-fs#as/typescript",
+    "mem-fs": "^2.2.1",
     "mem-fs-editor": "^8.0.0",
     "modern-async": "^1.0.2",
     "pluralize": "^8.0.0",
