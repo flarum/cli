@@ -13,8 +13,9 @@ A CLI for developing Flarum extensions</p>
 * [Usage](#usage)
 * [Commands](#commands)
   - [`generate`](#generate)
-    + [Stubs](#stubs)
-    + [Extenders](#extenders)
+    * [`backend`](#backend)
+      + [Stubs](#stubs)
+      + [Extenders](#extenders)
 
 ## Installation
 <!-- installation -->
@@ -67,20 +68,23 @@ The are 3 categories for what the CLI can do in addition to a special command:
 ### `generate`
 List of what you can currently generate using the flarum cli:
 
-#### Stubs
+#### `backend`
+Boilerplate for the backend.
+
+##### Stubs
 Creates files filled with default common code ready to be directly used.
 
 * **Event Listeners (`event-listener`)**: allows the creation of an event listener class with its relevant extender given an event class.
-* **Migrations**: Given a short descriptive name, it creates a migration file timestamped in the name and ready to be filled. using proper laravel naming conventions is recommended. For example `create_examples_table` will create a table creation migration.
-* **API Controllers**: Requires the name of the controller and its type (list,show,create ..etc).
+* **Migrations (`migration`)**: Given a short descriptive name, it creates a migration file timestamped in the name and ready to be filled. using proper Laravel naming conventions is recommended. For example `create_examples_table` will create a table creation migration for an `examples` table.
+* **API Controllers (`api-controller`)**: Requires the name of the controller and its type (list,show,create ..etc).
 * **Models**: Requires the name and optionally a table name.
-* **Integration Tests**.
+* **Integration Tests (`integration-test`)**.
 
-#### Extenders
+##### Extenders
 Auto fills the extension's `extend.php` file with extender declaration code given a set of parameters.
 
-* **API Serializer Attributes**.
-* **Routes**.
+* **API Serializer Attributes (`api-serializer-attributes`)**.
+* **Routes (`route`)**.
 
 <!-- commandsstop -->
 
