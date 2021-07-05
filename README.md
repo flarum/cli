@@ -9,15 +9,29 @@ A CLI for developing Flarum extensions</p>
 <a href="https://github.com/flarum/flarum-cli/blob/master/package.json"><img alt"License" src="https://img.shields.io/npm/l/flarum-cli.svg"></a>
 </p>
 
+* [Installation](#installation)
 * [Usage](#usage)
+* [Commands](#commands)
+  - [`generate`](#generate)
+    + [Stubs](#stubs)
+    + [Extenders](#extenders)
+
+## Installation
+<!-- installation -->
+```sh-session
+$ npm install -g flarum-cli
+```
+<!-- installationstop -->
+
 ## Usage
 <!-- usage -->
 ```sh-session
-$ npm install -g flarum-cli
 $ flarum-cli COMMAND
 running command...
+
 $ flarum-cli (-v|--version|version)
 flarum-cli/1.0.0-alpha.4 linux-x64 node-v12.18.4
+
 $ flarum-cli --help [COMMAND]
 USAGE
   $ flarum-cli COMMAND
@@ -39,7 +53,40 @@ or
 flarum-cli --help
 ```
 
-## For Developers
+## Commands
+<!-- commands -->
+The are 3 categories for what the CLI can do in addition to a special command:
+1. `generate`: Generates boilerplate such as new classes (models, controllers, tests ..etc) or adds extenders in your extension's `extend.php`.
+2. `update`: Updates certain aspects of the code with latest flarum core changes.
+3. `infra`: Adds certain infrastructure to your extension, such as backend unit & integration tests infrastructure.
+
+* `init`: Initializes boilerplate code for a new extension.
+
+
+
+### `generate`
+List of what you can currently generate using the flarum cli:
+
+#### Stubs
+Creates files filled with default common code ready to be directly used.
+
+* **Event Listeners (`event-listener`)**: allows the creation of an event listener class with its relevant extender given an event class.
+* **Migrations**: Given a short descriptive name, it creates a migration file timestamped in the name and ready to be filled. using proper laravel naming conventions is recommended. For example `create_examples_table` will create a table creation migration.
+* **API Controllers**: Requires the name of the controller and its type (list,show,create ..etc).
+* **Models**: Requires the name and optionally a table name.
+* **Integration Tests**.
+
+#### Extenders
+Auto fills the extension's `extend.php` file with extender declaration code given a set of parameters.
+
+* **API Serializer Attributes**.
+* **Routes**.
+
+<!-- commandsstop -->
+
+## For Maintainers
+
+This section is for maintainers of the flarum-cli codebase.
 
 ### Key Concepts
 
