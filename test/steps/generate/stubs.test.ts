@@ -5,6 +5,7 @@ import { GenerateApiControllerStub } from '../../../src/steps/stubs/backend/api-
 import { GenerateIntegrationTestStub } from '../../../src/steps/stubs/backend/integration-test';
 import { GenerateMigrationStub } from '../../../src/steps/stubs/backend/migration';
 import { GenerateModelStub } from '../../../src/steps/stubs/backend/model';
+import { GenerateServiceProviderStub } from '../../../src/steps/stubs/backend/service-provider';
 import { PathProvider } from '../../../src/provider/path-provider';
 
 interface StubTest {
@@ -89,6 +90,26 @@ const testSpecs: StubTest[] = [
     expectedExposedParamsRequestedDir: {
       class: 'Flarum\\Demo\\somePath\\CustomModel',
       migrationName: 'create_custom_models_table',
+    },
+  },
+
+  // Service Provider
+  {
+    stubClass: GenerateServiceProviderStub,
+    params: {
+      className: 'CustomServiceProvider',
+    },
+    expectedModifiedFilesDefaultDir: [
+      '/ext/src/CustomServiceProvider.php',
+    ],
+    expectedModifiedFilesRequestedDir: [
+      `${requestedDir}/CustomServiceProvider.php`,
+    ],
+    expectedExposedParamsDefaultDir: {
+      class: 'Flarum\\Demo\\CustomServiceProvider',
+    },
+    expectedExposedParamsRequestedDir: {
+      class: 'Flarum\\Demo\\somePath\\CustomServiceProvider',
     },
   },
 

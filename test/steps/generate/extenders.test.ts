@@ -3,6 +3,7 @@ import { getFsPaths, runStep } from '../../utils';
 import { GenerateApiSerializerAttributesExtender } from '../../../src/steps/extenders/api-serializer';
 import { GenerateEventListenerExtender } from '../../../src/steps/extenders/event';
 import { GenerateRoutesExtender } from '../../../src/steps/extenders/route';
+import { GenerateServiceProviderExtender } from '../../../src/steps/extenders/service-provider';
 import { PathProvider } from '../../../src/provider/path-provider';
 
 interface ExtenderTest {
@@ -37,6 +38,13 @@ const testSpecs: ExtenderTest[] = [
       routePath: '/potatoes',
       routeName: 'potatoes.index',
       routeHandler: 'Flarum\\Demo\\Api\\Controller\\ListPotatoesController',
+    },
+  },
+  // Service Provider
+  {
+    extenderClass: GenerateServiceProviderExtender,
+    params: {
+      className: 'CustomServiceProvider',
     },
   },
 ];
