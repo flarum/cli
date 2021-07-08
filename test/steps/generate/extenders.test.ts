@@ -2,7 +2,7 @@ import { getFsPaths, runStep } from '../../utils';
 
 import { GenerateApiSerializerAttributesExtender } from '../../../src/steps/extenders/api-serializer';
 import { GenerateEventListenerExtender } from '../../../src/steps/extenders/event';
-import { GenerateRouteExtender } from '../../../src/steps/extenders/route';
+import { GenerateRoutesExtender } from '../../../src/steps/extenders/route';
 import { PathProvider } from '../../../src/provider/path-provider';
 
 interface ExtenderTest {
@@ -32,7 +32,7 @@ const testSpecs: ExtenderTest[] = [
   },
   // Route
   {
-    extenderClass: GenerateRouteExtender,
+    extenderClass: GenerateRoutesExtender,
     params: {
       routePath: '/potatoes',
       routeName: 'potatoes.index',

@@ -4,13 +4,13 @@ import { ExpressionType } from '../../provider/php-provider';
 import { BaseExtenderStep, ExtenderGenerationSchema } from './base';
 import chalk from 'chalk';
 
-export class GenerateRouteExtender extends BaseExtenderStep {
+export class GenerateRoutesExtender extends BaseExtenderStep {
   type = 'Generate Route extender';
 
   protected schema: ExtenderGenerationSchema = {
     extenderDef: {
       extender: {
-        className: '\\Flarum\\Extend\\Route',
+        className: '\\Flarum\\Extend\\Routes',
         args: [
           {
             type: ExpressionType.SCALAR,

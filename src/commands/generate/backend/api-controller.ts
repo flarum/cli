@@ -1,7 +1,7 @@
 import { StepManager } from '../../../steps/step-manager';
 import BaseCommand from '../../../base-command';
 import { GenerateApiControllerStub } from '../../../steps/stubs/backend/api-controller';
-import { GenerateRouteExtender } from '../../../steps/extenders/route';
+import { GenerateRoutesExtender } from '../../../steps/extenders/route';
 
 export default class ApiController extends BaseCommand {
   static description = 'generate an api controller class';
@@ -15,7 +15,7 @@ export default class ApiController extends BaseCommand {
       .atomicGroup(stepManager => {
         stepManager
           .namedStep('apiController', new GenerateApiControllerStub())
-          .step(new GenerateRouteExtender(), { optional: true, confirmationMessage: 'Generate corresponding extender?', default: true }, [
+          .step(new GenerateRoutesExtender(), { optional: true, confirmationMessage: 'Generate corresponding extender?', default: true }, [
             {
               sourceStep: 'apiController',
               exposedName: 'class',

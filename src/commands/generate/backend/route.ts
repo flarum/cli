@@ -1,6 +1,6 @@
 import { StepManager } from '../../../steps/step-manager';
 import BaseCommand from '../../../base-command';
-import { GenerateRouteExtender } from '../../../steps/extenders/route';
+import { GenerateRoutesExtender } from '../../../steps/extenders/route';
 
 export default class Route extends BaseCommand {
   static description = 'generate an API serializer attributes extender';
@@ -11,6 +11,6 @@ export default class Route extends BaseCommand {
 
   protected steps(stepManager: StepManager): StepManager {
     return stepManager
-      .step(new GenerateRouteExtender());
+      .step(new GenerateRoutesExtender());
   }
 }
