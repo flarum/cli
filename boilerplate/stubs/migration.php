@@ -1,4 +1,6 @@
 <?php
+
+use Illuminate\Database\Schema\Blueprint;
 <% if (typeof tableName === 'undefined' || ! tableName) { %>
 use Illuminate\Database\Schema\Builder;
 
@@ -13,7 +15,6 @@ return [
     }
 ];<% } %><% if (typeof tableName !== 'undefined' && tableName) { %>
 use Flarum\Database\Migration;
-use Illuminate\Database\Schema\Blueprint;
 
 return Migration::createTable(
     '<%= tableName %>',
