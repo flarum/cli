@@ -69,22 +69,24 @@ The are 3 categories for what the CLI can do in addition to a special command:
 List of what you can currently generate using the flarum cli:
 
 #### `backend`
-Boilerplate for the backend.
+Boilerplate for the backend. Run `flarum-cli generate backend` for a list of all commands.
+
+Some of these commands are listed below.
 
 ##### Stubs
 Creates files filled with default common code ready to be directly used.
 
-* **Event Listeners (`event-listener`)**: allows the creation of an event listener class with its relevant extender given an event class.
-* **Migrations (`migration`)**: Given a short descriptive name, it creates a migration file timestamped in the name and ready to be filled. using proper Laravel naming conventions is recommended. For example `create_examples_table` will create a table creation migration for an `examples` table.
-* **API Controllers (`api-controller`)**: Requires the name of the controller and its type (list,show,create ..etc).
-* **Models**: Requires the name and optionally a table name.
-* **Integration Tests (`integration-test`)**.
+* **Event Listeners (`flarum-cli generate backend event-listener`)**: allows the creation of an event listener class with its relevant extender given an event class.
+* **Migrations (`flarum-cli generate backend migration`)**: Given a short descriptive name, it creates a migration file timestamped in the name and ready to be filled. using proper Laravel naming conventions is recommended. For example `create_examples_table` will create a table creation migration for an `examples` table.
+* **API Controllers (`flarum-cli generate backend api-controller`)**: Requires the name of the controller and its type (list,show,create ..etc).
+* **Models (`flarum-cli generate backend model`)**: Requires the name and optionally a table name.
+* **Integration Tests (`flarum-cli generate backend integration-test`)**.
 
 ##### Extenders
 Auto fills the extension's `extend.php` file with extender declaration code given a set of parameters.
 
-* **API Serializer Attributes (`api-serializer-attributes`)**.
-* **Routes (`route`)**.
+* **API Serializer Attributes (`flarum-cli generate backend api-serializer-attributes`)**.
+* **Routes (`flarum-cli generate backend route`)**.
 
 <!-- commandsstop -->
 
