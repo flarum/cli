@@ -3,7 +3,7 @@ import { UpdateJSImports } from '../../steps/update/js-imports';
 import BaseCommand from '../../base-command';
 
 export default class UpdateJsImports extends BaseCommand {
-  static description = 'updates JS imports from core to use proper namespaces';
+  static description = 'Updates JS imports from core to use proper namespaces';
 
   static flags = { ...BaseCommand.flags };
 

@@ -4,7 +4,7 @@ import { GenerateServiceProviderStub } from '../../../steps/stubs/backend/servic
 import { GenerateServiceProviderExtender } from '../../../steps/extenders/service-provider';
 
 export default class ServiceProvider extends BaseCommand {
-  static description = 'generate a service provider class';
+  static description = 'Generate a service provider class';
 
   static flags = { ...BaseCommand.flags };
 

@@ -3,7 +3,7 @@ import BaseCommand from '../../../base-command';
 import { GenerateApiSerializerAttributesExtender } from '../../../steps/extenders/api-serializer';
 
 export default class ApiSerializerAttribute extends BaseCommand {
-  static description = 'generate an API serializer attributes extender';
+  static description = 'Generate an API serializer attributes extender';
 
   static flags = { ...BaseCommand.flags };
 

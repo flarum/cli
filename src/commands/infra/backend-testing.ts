@@ -4,7 +4,7 @@ import BaseCommand from '../../base-command';
 import { BackendTestingInfra } from '../../steps/infra/backend-testing';
 
 export default class BackendTesting extends BaseCommand {
-  static description = 'add/update backend testing infrastructure';
+  static description = 'Add/Update backend testing infrastructure';
 
   static flags = { ...BaseCommand.flags };
 

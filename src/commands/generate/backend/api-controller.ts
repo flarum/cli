@@ -4,7 +4,7 @@ import { GenerateApiControllerStub } from '../../../steps/stubs/backend/api-cont
 import { GenerateRoutesExtender } from '../../../steps/extenders/route';
 
 export default class ApiController extends BaseCommand {
-  static description = 'generate an api controller class';
+  static description = 'Generate an api controller class';
 
   static flags = { ...BaseCommand.flags };
 

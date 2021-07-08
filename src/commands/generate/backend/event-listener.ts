@@ -4,7 +4,7 @@ import { GenerateEventListenerStub } from '../../../steps/stubs/backend/event-li
 import { GenerateEventListenerExtender } from '../../../steps/extenders/event';
 
 export default class EventListener extends BaseCommand {
-  static description = 'generate an event listener class';
+  static description = 'Generate an event listener class';
 
   static flags = { ...BaseCommand.flags };
 

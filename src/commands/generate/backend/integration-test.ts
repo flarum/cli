@@ -3,7 +3,7 @@ import BaseCommand from '../../../base-command';
 import { GenerateIntegrationTestStub } from '../../../steps/stubs/backend/integration-test';
 
 export default class IntegrationTest extends BaseCommand {
-  static description = 'generate an integration test class';
+  static description = 'Generate an integration test class';
 
   static flags = { ...BaseCommand.flags };
 

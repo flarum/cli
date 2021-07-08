@@ -3,7 +3,7 @@ import BaseCommand from '../../../base-command';
 import { GenerateRoutesExtender } from '../../../steps/extenders/route';
 
 export default class Route extends BaseCommand {
-  static description = 'generate an API serializer attributes extender';
+  static description = 'Generate a routes extender';
 
   static flags = { ...BaseCommand.flags };
 

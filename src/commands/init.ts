@@ -6,7 +6,7 @@ import BaseCommand from '../base-command';
 import yosay from 'yosay';
 
 export default class Init extends BaseCommand {
-  static description = 'create a new Flarum extension';
+  static description = 'Create a new Flarum extension';
 
   static flags = { ...BaseCommand.flags };
 

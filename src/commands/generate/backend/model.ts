@@ -4,7 +4,7 @@ import { GenerateModelStub } from '../../../steps/stubs/backend/model';
 import { GenerateMigrationStub } from '../../../steps/stubs/backend/migration';
 
 export default class EventListener extends BaseCommand {
-  static description = 'generate an event listener class';
+  static description = 'Generate a model class';
 
   static flags = { ...BaseCommand.flags };
 

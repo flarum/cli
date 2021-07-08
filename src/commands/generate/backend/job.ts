@@ -3,7 +3,7 @@ import BaseCommand from '../../../base-command';
 import { GenerateJobStub } from '../../../steps/stubs/backend/job';
 
 export default class ServiceProvider extends BaseCommand {
-  static description = 'generate a job class';
+  static description = 'Generate a job class';
 
   static flags = { ...BaseCommand.flags };
 
