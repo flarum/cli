@@ -6,6 +6,7 @@ import { GenerateIntegrationTestStub } from '../../../src/steps/stubs/backend/in
 import { GenerateMigrationStub } from '../../../src/steps/stubs/backend/migration';
 import { GenerateModelStub } from '../../../src/steps/stubs/backend/model';
 import { GenerateServiceProviderStub } from '../../../src/steps/stubs/backend/service-provider';
+import { GenerateJobStub } from '../../../src/steps/stubs/backend/job';
 import { PathProvider } from '../../../src/provider/path-provider';
 
 interface StubTest {
@@ -110,6 +111,26 @@ const testSpecs: StubTest[] = [
     },
     expectedExposedParamsRequestedDir: {
       class: 'Flarum\\Demo\\somePath\\CustomServiceProvider',
+    },
+  },
+
+  // Job
+  {
+    stubClass: GenerateJobStub,
+    params: {
+      className: 'CustomJob',
+    },
+    expectedModifiedFilesDefaultDir: [
+      '/ext/src/Job/CustomJob.php',
+    ],
+    expectedModifiedFilesRequestedDir: [
+      `${requestedDir}/CustomJob.php`,
+    ],
+    expectedExposedParamsDefaultDir: {
+      class: 'Flarum\\Demo\\Job\\CustomJob',
+    },
+    expectedExposedParamsRequestedDir: {
+      class: 'Flarum\\Demo\\somePath\\CustomJob',
     },
   },
 
