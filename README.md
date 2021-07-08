@@ -31,7 +31,7 @@ $ flarum-cli COMMAND
 running command...
 
 $ flarum-cli (-v|--version|version)
-flarum-cli/1.0.0-alpha.4 linux-x64 node-v12.18.4
+flarum-cli/1.0.0-alpha.6 linux-x64 node-v12.18.4
 
 $ flarum-cli --help [COMMAND]
 USAGE
