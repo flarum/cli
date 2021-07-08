@@ -7,10 +7,10 @@
   "type": "flarum-extension",
   "license": "<%= licenseType %>",
   "require": {
-    "flarum/core": "^0.1.0-beta.16"
+    "flarum/core": "^1.0.0"
   },
   "require-dev": {
-    "flarum/testing": "^0.1.0-beta.16"
+    "flarum/testing": "^1.0.0"
   },
   "authors": [<% if (authorName && authorEmail) { %>
     {
