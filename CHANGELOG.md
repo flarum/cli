@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.0-alpha.6](https://github.com/flarum/core/compare/5351123...v1.0.0-alpha.6)
+## [1.0.0-alpha.6](https://github.com/flarum/flarum-cli/compare/5351123...v1.0.0-alpha.6)
 
 ### Added
 
