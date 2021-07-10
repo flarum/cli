@@ -9,30 +9,27 @@ A CLI for developing Flarum extensions</p>
 <a href="https://github.com/flarum/flarum-cli/blob/master/package.json"><img alt"License" src="https://img.shields.io/npm/l/flarum-cli.svg"></a>
 </p>
 
+<!-- toc -->
 * [Installation](#installation)
 * [Usage](#usage)
 * [Commands](#commands)
-  - [`generate`](#generate)
-    * [`backend`](#backend)
-      + [Stubs](#stubs)
-      + [Extenders](#extenders)
+<!-- tocstop -->
 
-## Installation
+# Installation
 <!-- installation -->
 ```sh-session
 $ npm install -g flarum-cli
 ```
 <!-- installationstop -->
 
-## Usage
+# Usage
 <!-- usage -->
 ```sh-session
+$ npm install -g flarum-cli
 $ flarum-cli COMMAND
 running command...
-
 $ flarum-cli (-v|--version|version)
-flarum-cli/1.0.0-alpha.6 linux-x64 node-v12.18.4
-
+flarum-cli/1.0.0-alpha.6 linux-x64 node-v14.17.2
 $ flarum-cli --help [COMMAND]
 USAGE
   $ flarum-cli COMMAND
@@ -54,40 +51,242 @@ or
 flarum-cli --help
 ```
 
-## Commands
+# Commands
 <!-- commands -->
-The are 3 categories for what the CLI can do in addition to a special command:
-1. `generate`: Generates boilerplate such as new classes (models, controllers, tests ..etc) or adds extenders in your extension's `extend.php`.
-2. `update`: Updates certain aspects of the code with latest flarum core changes.
-3. `infra`: Adds certain infrastructure to your extension, such as backend unit & integration tests infrastructure.
+* [`flarum-cli generate:backend:api-controller [PATH]`](#flarum-cli-generatebackendapi-controller-path)
+* [`flarum-cli generate:backend:api-serializer-attributes [PATH]`](#flarum-cli-generatebackendapi-serializer-attributes-path)
+* [`flarum-cli generate:backend:event-listener [PATH]`](#flarum-cli-generatebackendevent-listener-path)
+* [`flarum-cli generate:backend:integration-test [PATH]`](#flarum-cli-generatebackendintegration-test-path)
+* [`flarum-cli generate:backend:job [PATH]`](#flarum-cli-generatebackendjob-path)
+* [`flarum-cli generate:backend:migration [PATH]`](#flarum-cli-generatebackendmigration-path)
+* [`flarum-cli generate:backend:model [PATH]`](#flarum-cli-generatebackendmodel-path)
+* [`flarum-cli generate:backend:route [PATH]`](#flarum-cli-generatebackendroute-path)
+* [`flarum-cli generate:backend:service-provider [PATH]`](#flarum-cli-generatebackendservice-provider-path)
+* [`flarum-cli help [COMMAND]`](#flarum-cli-help-command)
+* [`flarum-cli infra:backend-testing [PATH]`](#flarum-cli-infrabackend-testing-path)
+* [`flarum-cli init [PATH]`](#flarum-cli-init-path)
+* [`flarum-cli update:js-imports [PATH]`](#flarum-cli-updatejs-imports-path)
 
-* `init`: Initializes boilerplate code for a new extension.
+## `flarum-cli generate:backend:api-controller [PATH]`
 
+Generate an api controller class
 
+```
+USAGE
+  $ flarum-cli generate backend api-controller [PATH]
 
-### `generate`
-List of what you can currently generate using the flarum cli:
+ARGUMENTS
+  PATH  Where should this command be executed?
 
-#### `backend`
-Boilerplate for the backend. Run `flarum-cli generate backend` for a list of all commands.
+OPTIONS
+  -h, --help  show CLI help
+```
 
-Some of these commands are listed below.
+_See code: [src/commands/generate/backend/api-controller.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/api-controller.ts)_
 
-##### Stubs
-Creates files filled with default common code ready to be directly used.
+## `flarum-cli generate:backend:api-serializer-attributes [PATH]`
 
-* **Event Listeners (`flarum-cli generate backend event-listener`)**: allows the creation of an event listener class with its relevant extender given an event class.
-* **Migrations (`flarum-cli generate backend migration`)**: Given a short descriptive name, it creates a migration file timestamped in the name and ready to be filled. using proper Laravel naming conventions is recommended. For example `create_examples_table` will create a table creation migration for an `examples` table.
-* **API Controllers (`flarum-cli generate backend api-controller`)**: Requires the name of the controller and its type (list,show,create ..etc).
-* **Models (`flarum-cli generate backend model`)**: Requires the name and optionally a table name.
-* **Integration Tests (`flarum-cli generate backend integration-test`)**.
+Generate an API serializer attributes extender
 
-##### Extenders
-Auto fills the extension's `extend.php` file with extender declaration code given a set of parameters.
+```
+USAGE
+  $ flarum-cli generate backend api-serializer-attributes [PATH]
 
-* **API Serializer Attributes (`flarum-cli generate backend api-serializer-attributes`)**.
-* **Routes (`flarum-cli generate backend route`)**.
+ARGUMENTS
+  PATH  Where should this command be executed?
 
+OPTIONS
+  -h, --help  show CLI help
+```
+
+_See code: [src/commands/generate/backend/api-serializer-attributes.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/api-serializer-attributes.ts)_
+
+## `flarum-cli generate:backend:event-listener [PATH]`
+
+Generate an event listener class
+
+```
+USAGE
+  $ flarum-cli generate backend event-listener [PATH]
+
+ARGUMENTS
+  PATH  Where should this command be executed?
+
+OPTIONS
+  -h, --help  show CLI help
+```
+
+_See code: [src/commands/generate/backend/event-listener.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/event-listener.ts)_
+
+## `flarum-cli generate:backend:integration-test [PATH]`
+
+Generate an integration test class
+
+```
+USAGE
+  $ flarum-cli generate backend integration-test [PATH]
+
+ARGUMENTS
+  PATH  Where should this command be executed?
+
+OPTIONS
+  -h, --help  show CLI help
+```
+
+_See code: [src/commands/generate/backend/integration-test.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/integration-test.ts)_
+
+## `flarum-cli generate:backend:job [PATH]`
+
+Generate a job class
+
+```
+USAGE
+  $ flarum-cli generate backend job [PATH]
+
+ARGUMENTS
+  PATH  Where should this command be executed?
+
+OPTIONS
+  -h, --help  show CLI help
+```
+
+_See code: [src/commands/generate/backend/job.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/job.ts)_
+
+## `flarum-cli generate:backend:migration [PATH]`
+
+Generate a migration
+
+```
+USAGE
+  $ flarum-cli generate backend migration [PATH]
+
+ARGUMENTS
+  PATH  Where should this command be executed?
+
+OPTIONS
+  -h, --help  show CLI help
+```
+
+_See code: [src/commands/generate/backend/migration.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/migration.ts)_
+
+## `flarum-cli generate:backend:model [PATH]`
+
+Generate a model class
+
+```
+USAGE
+  $ flarum-cli generate backend model [PATH]
+
+ARGUMENTS
+  PATH  Where should this command be executed?
+
+OPTIONS
+  -h, --help  show CLI help
+```
+
+_See code: [src/commands/generate/backend/model.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/model.ts)_
+
+## `flarum-cli generate:backend:route [PATH]`
+
+Generate a routes extender
+
+```
+USAGE
+  $ flarum-cli generate backend route [PATH]
+
+ARGUMENTS
+  PATH  Where should this command be executed?
+
+OPTIONS
+  -h, --help  show CLI help
+```
+
+_See code: [src/commands/generate/backend/route.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/route.ts)_
+
+## `flarum-cli generate:backend:service-provider [PATH]`
+
+Generate a service provider class
+
+```
+USAGE
+  $ flarum-cli generate backend service-provider [PATH]
+
+ARGUMENTS
+  PATH  Where should this command be executed?
+
+OPTIONS
+  -h, --help  show CLI help
+```
+
+_See code: [src/commands/generate/backend/service-provider.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/service-provider.ts)_
+
+## `flarum-cli help [COMMAND]`
+
+display help for flarum-cli
+
+```
+USAGE
+  $ flarum-cli help [COMMAND]
+
+ARGUMENTS
+  COMMAND  command to show help for
+
+OPTIONS
+  --all  see all commands in CLI
+```
+
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v3.2.2/src/commands/help.ts)_
+
+## `flarum-cli infra:backend-testing [PATH]`
+
+Add/Update backend testing infrastructure
+
+```
+USAGE
+  $ flarum-cli infra backend-testing [PATH]
+
+ARGUMENTS
+  PATH  Where should this command be executed?
+
+OPTIONS
+  -h, --help  show CLI help
+```
+
+_See code: [src/commands/infra/backend-testing.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/infra/backend-testing.ts)_
+
+## `flarum-cli init [PATH]`
+
+Create a new Flarum extension
+
+```
+USAGE
+  $ flarum-cli init [PATH]
+
+ARGUMENTS
+  PATH  Where should this command be executed?
+
+OPTIONS
+  -h, --help  show CLI help
+```
+
+_See code: [src/commands/init.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/init.ts)_
+
+## `flarum-cli update:js-imports [PATH]`
+
+Updates JS imports from core to use proper namespaces
+
+```
+USAGE
+  $ flarum-cli update js-imports [PATH]
+
+ARGUMENTS
+  PATH  Where should this command be executed?
+
+OPTIONS
+  -h, --help  show CLI help
+```
+
+_See code: [src/commands/update/js-imports.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/update/js-imports.ts)_
 <!-- commandsstop -->
 
 ## For Maintainers
