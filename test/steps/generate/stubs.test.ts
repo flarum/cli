@@ -9,6 +9,7 @@ import { GenerateModelStub } from '../../../src/steps/stubs/backend/model';
 import { GenerateServiceProviderStub } from '../../../src/steps/stubs/backend/service-provider';
 import { GenerateJobStub } from '../../../src/steps/stubs/backend/job';
 import { GenerateRepositoryStub } from '../../../src/steps/stubs/backend/repository';
+import { GenerateValidatorStub } from '../../../src/steps/stubs/backend/validator';
 import { PathProvider } from '../../../src/provider/path-provider';
 
 interface StubTest {
@@ -143,6 +144,26 @@ const testSpecs: StubTest[] = [
       class: 'Flarum\\Demo\\somePath\\CustomModelRepository',
       modelClass: 'Flarum\\CustomModel\\CustomModel',
       modelClassName: 'CustomModel',
+    },
+  },
+
+  // Validator
+  {
+    stubClass: GenerateValidatorStub,
+    params: {
+      className: 'CustomModelValidator',
+    },
+    expectedModifiedFilesDefaultDir: [
+      '/ext/src/CustomModelValidator.php',
+    ],
+    expectedModifiedFilesRequestedDir: [
+      `${requestedDir}/CustomModelValidator.php`,
+    ],
+    expectedExposedParamsDefaultDir: {
+      class: 'Flarum\\Demo\\CustomModelValidator',
+    },
+    expectedExposedParamsRequestedDir: {
+      class: 'Flarum\\Demo\\somePath\\CustomModelValidator',
     },
   },
 
