@@ -3,7 +3,7 @@ import BaseCommand from '../../../base-command';
 import { GenerateModelStub } from '../../../steps/stubs/backend/model';
 import { GenerateMigrationStub } from '../../../steps/stubs/backend/migration';
 
-export default class EventListener extends BaseCommand {
+export default class Model extends BaseCommand {
   static description = 'Generate a model class';
 
   static flags = { ...BaseCommand.flags };

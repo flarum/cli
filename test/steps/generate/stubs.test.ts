@@ -8,6 +8,7 @@ import { GenerateMigrationStub } from '../../../src/steps/stubs/backend/migratio
 import { GenerateModelStub } from '../../../src/steps/stubs/backend/model';
 import { GenerateServiceProviderStub } from '../../../src/steps/stubs/backend/service-provider';
 import { GenerateJobStub } from '../../../src/steps/stubs/backend/job';
+import { GenerateRepositoryStub } from '../../../src/steps/stubs/backend/repository';
 import { PathProvider } from '../../../src/provider/path-provider';
 
 interface StubTest {
@@ -117,6 +118,31 @@ const testSpecs: StubTest[] = [
     expectedExposedParamsRequestedDir: {
       class: 'Flarum\\Demo\\somePath\\CustomModel',
       migrationName: 'create_custom_models_table',
+    },
+  },
+
+  // Repository
+  {
+    stubClass: GenerateRepositoryStub,
+    params: {
+      className: 'CustomModelRepository',
+      modelClass: 'Flarum\\CustomModel\\CustomModel',
+    },
+    expectedModifiedFilesDefaultDir: [
+      '/ext/src/CustomModelRepository.php',
+    ],
+    expectedModifiedFilesRequestedDir: [
+      `${requestedDir}/CustomModelRepository.php`,
+    ],
+    expectedExposedParamsDefaultDir: {
+      class: 'Flarum\\Demo\\CustomModelRepository',
+      modelClass: 'Flarum\\CustomModel\\CustomModel',
+      modelClassName: 'CustomModel',
+    },
+    expectedExposedParamsRequestedDir: {
+      class: 'Flarum\\Demo\\somePath\\CustomModelRepository',
+      modelClass: 'Flarum\\CustomModel\\CustomModel',
+      modelClassName: 'CustomModel',
     },
   },
 

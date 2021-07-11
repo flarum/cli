@@ -7,7 +7,7 @@ import { pluralSnakeCaseModel } from '../../../utils/model-name';
 import { BasePhpStubStep } from '../php-base';
 
 export class GenerateApiSerializerStub extends BasePhpStubStep {
-  type = 'Generate Event Listener Class';
+  type = 'Generate Api Serializer Class';
 
   protected additionalExposes = ['modelClass', 'modelClassName'];
 
