@@ -2,6 +2,7 @@ import { getFsPaths, runStep } from '../../utils';
 
 import { GenerateEventListenerStub } from '../../../src/steps/stubs/backend/event-listener';
 import { GenerateApiControllerStub } from '../../../src/steps/stubs/backend/api-controller';
+import { GenerateApiSerializerStub } from '../../../src/steps/stubs/backend/api-serializer';
 import { GenerateIntegrationTestStub } from '../../../src/steps/stubs/backend/integration-test';
 import { GenerateMigrationStub } from '../../../src/steps/stubs/backend/migration';
 import { GenerateModelStub } from '../../../src/steps/stubs/backend/model';
@@ -68,6 +69,31 @@ const testSpecs: StubTest[] = [
     },
     expectedExposedParamsRequestedDir: {
       class: 'Flarum\\Demo\\somePath\\ListPotatoesController',
+    },
+  },
+
+  // Api Serializer
+  {
+    stubClass: GenerateApiSerializerStub,
+    params: {
+      className: 'PotatoSerializer',
+      modelClass: '\\Flarum\\Potato\\Potato',
+    },
+    expectedModifiedFilesDefaultDir: [
+      '/ext/src/Api/Serializer/PotatoSerializer.php',
+    ],
+    expectedModifiedFilesRequestedDir: [
+      `${requestedDir}/PotatoSerializer.php`,
+    ],
+    expectedExposedParamsDefaultDir: {
+      class: 'Flarum\\Demo\\Api\\Serializer\\PotatoSerializer',
+      modelClass: '\\Flarum\\Potato\\Potato',
+      modelClassName: 'Potato',
+    },
+    expectedExposedParamsRequestedDir: {
+      class: 'Flarum\\Demo\\somePath\\PotatoSerializer',
+      modelClass: '\\Flarum\\Potato\\Potato',
+      modelClassName: 'Potato',
     },
   },
 

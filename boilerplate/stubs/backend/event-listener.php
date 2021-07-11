@@ -2,7 +2,7 @@
 
 namespace <%= classNamespace %>;
 
-use \<%= eventClass %>;
+use <%= eventClass %>;
 
 class <%= className %>
 {
