@@ -115,10 +115,12 @@ const testSpecs: StubTest[] = [
     ],
     expectedExposedParamsDefaultDir: {
       class: 'Flarum\\Demo\\CustomModel',
+      className: 'CustomModel',
       migrationName: 'create_custom_models_table',
     },
     expectedExposedParamsRequestedDir: {
       class: 'Flarum\\Demo\\somePath\\CustomModel',
+      className: 'CustomModel',
       migrationName: 'create_custom_models_table',
     },
   },

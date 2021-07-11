@@ -8,7 +8,7 @@ import { BasePhpStubStep } from '../php-base';
 export class GenerateModelStub extends BasePhpStubStep {
   type = 'Generate Model Class';
 
-  protected additionalExposes = ['migrationName'];
+  protected additionalExposes = ['migrationName', 'className'];
 
   protected phpClassParams = [];
 
