@@ -10,6 +10,7 @@ import { GenerateServiceProviderStub } from '../../../src/steps/stubs/backend/se
 import { GenerateJobStub } from '../../../src/steps/stubs/backend/job';
 import { GenerateRepositoryStub } from '../../../src/steps/stubs/backend/repository';
 import { GenerateValidatorStub } from '../../../src/steps/stubs/backend/validator';
+import { GeneratePolicyStub } from '../../../src/steps/stubs/backend/policy';
 import { PathProvider } from '../../../src/provider/path-provider';
 
 interface StubTest {
@@ -164,6 +165,31 @@ const testSpecs: StubTest[] = [
     },
     expectedExposedParamsRequestedDir: {
       class: 'Flarum\\Demo\\somePath\\CustomModelValidator',
+    },
+  },
+
+  // Policy
+  {
+    stubClass: GeneratePolicyStub,
+    params: {
+      className: 'CustomModelPolicy',
+      modelClass: 'Flarum\\CustomModel\\CustomModel',
+    },
+    expectedModifiedFilesDefaultDir: [
+      '/ext/src/Access/CustomModelPolicy.php',
+    ],
+    expectedModifiedFilesRequestedDir: [
+      `${requestedDir}/CustomModelPolicy.php`,
+    ],
+    expectedExposedParamsDefaultDir: {
+      class: 'Flarum\\Demo\\Access\\CustomModelPolicy',
+      modelClass: 'Flarum\\CustomModel\\CustomModel',
+      modelClassName: 'CustomModel',
+    },
+    expectedExposedParamsRequestedDir: {
+      class: 'Flarum\\Demo\\somePath\\CustomModelPolicy',
+      modelClass: 'Flarum\\CustomModel\\CustomModel',
+      modelClassName: 'CustomModel',
     },
   },
 
