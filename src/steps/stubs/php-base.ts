@@ -7,6 +7,7 @@ import { PathProvider } from '../../provider/path-provider';
 import { PhpProvider } from '../../provider/php-provider';
 import { Step } from '../step-manager';
 import { extensionMetadata } from '../../utils/extension-metadata';
+import { cloneAndFill } from '../../utils/clone-and-fill';
 
 interface UserProvidedParam extends Omit<PromptObject, 'type'> {
   type: string;
@@ -65,8 +66,9 @@ export abstract class BasePhpStubStep implements Step {
 
     const newFileName = await this.getFileName(fs, pathProvider, paramProvider);
     const newFilePath = pathProvider.ext(this.schema.root || './src', this.subdir, `${newFileName}.php`);
+    const stub = cloneAndFill(this.schema.sourceFile, this.params);
 
-    fsEditor.copyTpl(pathProvider.boilerplate('stubs', this.schema.sourceFile), newFilePath, this.params);
+    fsEditor.copyTpl(pathProvider.boilerplate('stubs', stub), newFilePath, this.params);
 
     return fs;
   }
