@@ -109,7 +109,7 @@ export abstract class BasePhpStubStep implements Step {
 
       // eslint-disable-next-line no-await-in-loop
       params[classParam] = await paramProvider.get(paramDef as PromptObject);
-      params[`${classParam}Name`] = params[classParam].split('\\')[-1];
+      params[`${classParam}Name`] = params[classParam].split('\\').pop() as string;
       paramDefs = paramDefs.filter(param => param.name !== classParam && param.name !== `${classParam}Name`);
     }
 
