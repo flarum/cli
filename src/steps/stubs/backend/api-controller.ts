@@ -1,3 +1,4 @@
+/* eslint-disable no-template-curly-in-string */
 import { Validator } from '../../../utils/validation';
 import { BasePhpStubStep } from '../php-base';
 
@@ -10,7 +11,7 @@ export class GenerateApiControllerStub extends BasePhpStubStep {
 
   protected schema = {
     recommendedSubdir: 'Api/Controller',
-    sourceFile: 'backend/api-controller.php',
+    sourceFile: 'backend/api-controller/${classType}.php',
     params: [
       {
         name: 'className',
@@ -26,28 +27,10 @@ export class GenerateApiControllerStub extends BasePhpStubStep {
         name: 'classType',
         type: 'autocomplete',
         message: 'Api Controller type',
-        choices: [
-          {
-            title: 'Normal',
-            value: 'AbstractSerializeController',
-          },
-          {
-            title: 'List',
-            value: 'AbstractListController',
-          },
-          {
-            title: 'Show',
-            value: 'AbstractShowController',
-          },
-          {
-            title: 'Create',
-            value: 'AbstractCreateController',
-          },
-          {
-            title: 'Delete',
-            value: 'AbstractDeleteController',
-          },
-        ],
+        choices: ['Normal', 'List', 'Show', 'Create', 'Update', 'Delete'].map((type: string) => ({
+          title: type,
+          value: type.toLowerCase(),
+        })),
       },
     ],
   }

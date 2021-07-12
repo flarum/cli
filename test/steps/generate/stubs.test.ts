@@ -54,27 +54,6 @@ const testSpecs: StubTest[] = [
     },
   },
 
-  // Api Controller
-  {
-    stubClass: GenerateApiControllerStub,
-    params: {
-      className: 'ListPotatoesController',
-      classType: 'AbstractListController',
-    },
-    expectedModifiedFilesDefaultDir: [
-      '/ext/src/Api/Controller/ListPotatoesController.php',
-    ],
-    expectedModifiedFilesRequestedDir: [
-      `${requestedDir}/ListPotatoesController.php`,
-    ],
-    expectedExposedParamsDefaultDir: {
-      class: 'Flarum\\Demo\\Api\\Controller\\ListPotatoesController',
-    },
-    expectedExposedParamsRequestedDir: {
-      class: 'Flarum\\Demo\\somePath\\ListPotatoesController',
-    },
-  },
-
   // Api Serializer
   {
     stubClass: GenerateApiSerializerStub,
@@ -255,6 +234,29 @@ const testSpecs: StubTest[] = [
     },
   },
 ];
+
+// Api Controllers
+['normal', 'list', 'show', 'create', 'update', 'delete'].forEach(classType => {
+  testSpecs.push({
+    stubClass: GenerateApiControllerStub,
+    params: {
+      className: `${classType}Controller`,
+      classType,
+    },
+    expectedModifiedFilesDefaultDir: [
+      `/ext/src/Api/Controller/${classType}Controller.php`,
+    ],
+    expectedModifiedFilesRequestedDir: [
+      `${requestedDir}/${classType}Controller.php`,
+    ],
+    expectedExposedParamsDefaultDir: {
+      class: `Flarum\\Demo\\Api\\Controller\\${classType}Controller`,
+    },
+    expectedExposedParamsRequestedDir: {
+      class: `Flarum\\Demo\\somePath\\${classType}Controller`,
+    },
+  });
+});
 
 const sampleComposerJson = {
   name: 'flarum/test',

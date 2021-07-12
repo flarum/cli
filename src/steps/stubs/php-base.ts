@@ -66,7 +66,7 @@ export abstract class BasePhpStubStep implements Step {
 
     const newFileName = await this.getFileName(fs, pathProvider, paramProvider);
     const newFilePath = pathProvider.ext(this.schema.root || './src', this.subdir, `${newFileName}.php`);
-    const stub = cloneAndFill(this.schema.sourceFile, this.params);
+    const stub = cloneAndFill(this.schema.sourceFile, this.params as Record<string, string>);
 
     fsEditor.copyTpl(pathProvider.boilerplate('stubs', stub), newFilePath, this.params);
 

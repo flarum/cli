@@ -1,3 +1,4 @@
+import pluralize from 'pluralize';
 import { StepManager } from '../../../steps/step-manager';
 import BaseCommand from '../../../base-command';
 import { GenerateModelStub } from '../../../steps/stubs/backend/model';
@@ -95,7 +96,11 @@ export default class Model extends BaseCommand {
               sourceStep: 'model',
               exposedName: 'className',
               consumedName: 'className',
-              modifier: (modelClassName: unknown) => `List${modelClassName as string}Controller`,
+              modifier: (modelClassName: unknown) => {
+                const pluralModelClassName = pluralize(modelClassName as string);
+
+                return `List${pluralModelClassName}Controller`;
+              },
             },
           ], {
             classType: 'AbstractListController',
