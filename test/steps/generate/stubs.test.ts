@@ -3,6 +3,8 @@ import { getFsPaths, runStep } from '../../utils';
 import { GenerateEventListenerStub } from '../../../src/steps/stubs/backend/event-listener';
 import { GenerateApiControllerStub } from '../../../src/steps/stubs/backend/api-controller';
 import { GenerateApiSerializerStub } from '../../../src/steps/stubs/backend/api-serializer';
+import { GenerateHandlerStub } from '../../../src/steps/stubs/backend/handler';
+import { GenerateHandlerCommandStub } from '../../../src/steps/stubs/backend/handler-command';
 import { GenerateIntegrationTestStub } from '../../../src/steps/stubs/backend/integration-test';
 import { GenerateMigrationStub } from '../../../src/steps/stubs/backend/migration';
 import { GenerateModelStub } from '../../../src/steps/stubs/backend/model';
@@ -211,6 +213,53 @@ const testSpecs: StubTest[] = [
     },
     expectedExposedParamsRequestedDir: {
       class: 'Flarum\\Demo\\somePath\\CustomJob',
+    },
+  },
+
+  // Domain Handler Command
+  {
+    stubClass: GenerateHandlerCommandStub,
+    params: {
+      className: 'CustomBusCommand',
+      classType: 'create',
+    },
+    expectedModifiedFilesDefaultDir: [
+      '/ext/src/Command/CustomBusCommand.php',
+    ],
+    expectedModifiedFilesRequestedDir: [
+      `${requestedDir}/CustomBusCommand.php`,
+    ],
+    expectedExposedParamsDefaultDir: {
+      class: 'Flarum\\Demo\\Command\\CustomBusCommand',
+      className: 'CustomBusCommand',
+      classType: 'create',
+    },
+    expectedExposedParamsRequestedDir: {
+      class: 'Flarum\\Demo\\somePath\\CustomBusCommand',
+      className: 'CustomBusCommand',
+      classType: 'create',
+    },
+  },
+
+  // Domain Handler
+  {
+    stubClass: GenerateHandlerStub,
+    params: {
+      className: 'CustomBusCommandHandler',
+      handlerCommandClass: 'Flarum\\Demo\\Command\\CustomBusCommand',
+      classType: 'create',
+    },
+    expectedModifiedFilesDefaultDir: [
+      '/ext/src/Command/CustomBusCommandHandler.php',
+    ],
+    expectedModifiedFilesRequestedDir: [
+      `${requestedDir}/CustomBusCommandHandler.php`,
+    ],
+    expectedExposedParamsDefaultDir: {
+      class: 'Flarum\\Demo\\Command\\CustomBusCommandHandler',
+    },
+    expectedExposedParamsRequestedDir: {
+      class: 'Flarum\\Demo\\somePath\\CustomBusCommandHandler',
     },
   },
 
