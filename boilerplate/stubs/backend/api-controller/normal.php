@@ -7,9 +7,15 @@ use Psr\Http\Message\ServerRequestInterface;
 use Tobscure\JsonApi\Collection;
 use Tobscure\JsonApi\Resource;
 use Tobscure\JsonApi\SerializerInterface;
+use <%= serializerClass %>;
 
 class <%= className %> extends AbstractSerializeController
 {
+    /**
+     * {@inheritdoc}
+     */
+    public $serializer = <%= serializerClassName %>::class;
+
     /**
      * {@inheritdoc}
      */

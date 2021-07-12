@@ -9,9 +9,15 @@ use Illuminate\Support\Arr;
 use Psr\Http\Message\ServerRequestInterface;
 use Tobscure\JsonApi\Document;<% if (typeof handlerClass !== 'undefined' && handlerClass) { %>
 use <%= handlerClass %>;<% } %>
+use <%= serializerClass %>;
 
 class <%= className %> extends AbstractCreateController
-{<% if (typeof handlerClassName !== 'undefined' && handlerClassName) { %>
+{
+    /**
+     * {@inheritdoc}
+     */
+    public $serializer = <%= serializerClassName %>::class;
+<% if (typeof handlerClassName !== 'undefined' && handlerClassName) { %>
     /**
      * @var Dispatcher
      */

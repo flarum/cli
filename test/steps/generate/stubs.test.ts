@@ -241,6 +241,7 @@ const testSpecs: StubTest[] = [
     stubClass: GenerateApiControllerStub,
     params: {
       className: `${classType}Controller`,
+      serializerClass: `Flarum\\Demo\\Custom${classType}Serializer`,
       classType,
     },
     expectedModifiedFilesDefaultDir: [

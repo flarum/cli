@@ -8,9 +8,15 @@ use Illuminate\Support\Arr;
 use Psr\Http\Message\ServerRequestInterface;
 use Tobscure\JsonApi\Document;<% if (typeof repositoryClass !== 'undefined' && repositoryClass) { %>
 use <%= repositoryClass %>;<% } %>
+use <%= serializerClass %>;
 
 class <%= className %> extends AbstractShowController
-{<% if (typeof repositoryClassName !== 'undefined' && repositoryClassName) { %>
+{
+    /**
+     * {@inheritdoc}
+     */
+    public $serializer = <%= serializerClassName %>::class;
+<% if (typeof repositoryClassName !== 'undefined' && repositoryClassName) { %>
     /**
      * @var <%= repositoryClassName %>
      */

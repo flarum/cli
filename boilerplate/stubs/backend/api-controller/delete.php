@@ -8,9 +8,15 @@ use Illuminate\Contracts\Bus\Dispatcher;<% } %>
 use Illuminate\Support\Arr;
 use Psr\Http\Message\ServerRequestInterface;<% if (typeof handlerClass !== 'undefined' && handlerClass) { %>
 use <%= handlerClass %>;<% } %>
+use <%= serializerClass %>;
 
 class <%= className %> extends AbstractDeleteController
-{<% if (typeof handlerClassName !== 'undefined' && handlerClassName) { %>
+{
+    /**
+     * {@inheritdoc}
+     */
+    public $serializer = <%= serializerClassName %>::class;
+<% if (typeof handlerClassName !== 'undefined' && handlerClassName) { %>
     /**
      * @var Dispatcher
      */

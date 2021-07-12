@@ -1,4 +1,5 @@
 /* eslint-disable no-template-curly-in-string */
+import chalk from 'chalk';
 import { Validator } from '../../../utils/validation';
 import { BasePhpStubStep } from '../php-base';
 
@@ -7,7 +8,7 @@ export class GenerateApiControllerStub extends BasePhpStubStep {
 
   protected additionalExposes = [];
 
-  protected phpClassParams = [];
+  protected phpClassParams = ['serializerClass'];
 
   protected schema = {
     recommendedSubdir: 'Api/Controller',
@@ -31,6 +32,16 @@ export class GenerateApiControllerStub extends BasePhpStubStep {
           title: type,
           value: type.toLowerCase(),
         })),
+      },
+      {
+        name: 'serializerClass',
+        type: 'text',
+        message: `Serializer Class (${chalk.dim('Vendor\\Path\\Serializer')})`,
+        validate: Validator.class,
+      },
+      {
+        name: 'serializerClassName',
+        type: 'text',
       },
     ],
   }

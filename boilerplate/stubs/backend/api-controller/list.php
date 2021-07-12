@@ -7,9 +7,15 @@ use Flarum\Http\RequestUtil;
 use Flarum\Http\UrlGenerator;
 use Psr\Http\Message\ServerRequestInterface;
 use Tobscure\JsonApi\Document;
+use <%= serializerClass %>;
 
 class <%= className %> extends AbstractListController
 {
+    /**
+     * {@inheritdoc}
+     */
+    public $serializer = <%= serializerClassName %>::class;
+
     /**
      * @var UrlGenerator
      */
