@@ -8,7 +8,7 @@ export class GenerateApiControllerStub extends BasePhpStubStep {
 
   protected additionalExposes = [];
 
-  protected phpClassParams = ['serializerClass'];
+  protected phpClassParams = ['serializerClass', 'handlerCommandClass'];
 
   protected schema = {
     recommendedSubdir: 'Api/Controller',
@@ -41,6 +41,17 @@ export class GenerateApiControllerStub extends BasePhpStubStep {
       },
       {
         name: 'serializerClassName',
+        type: 'text',
+      },
+      {
+        name: 'handlerCommandClass',
+        type: 'text',
+        message: `Handler Command Class (${chalk.dim('Vendor\\Path\\Command')}) (Optional)`,
+        validate: Validator.class,
+        optional: true,
+      },
+      {
+        name: 'handlerCommandClassName',
         type: 'text',
       },
     ],

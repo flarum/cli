@@ -3,12 +3,12 @@
 namespace <%= classNamespace %>;
 
 use Flarum\Api\Controller\AbstractCreateController;
-use Flarum\Http\RequestUtil;<% if (typeof handlerClass !== 'undefined' && handlerClass) { %>
+use Flarum\Http\RequestUtil;<% if (typeof handlerCommandClass !== 'undefined' && handlerCommandClass) { %>
 use Illuminate\Contracts\Bus\Dispatcher;<% } %>
 use Illuminate\Support\Arr;
 use Psr\Http\Message\ServerRequestInterface;
-use Tobscure\JsonApi\Document;<% if (typeof handlerClass !== 'undefined' && handlerClass) { %>
-use <%= handlerClass %>;<% } %>
+use Tobscure\JsonApi\Document;<% if (typeof handlerCommandClass !== 'undefined' && handlerCommandClass) { %>
+use <%= handlerCommandClass %>;<% } %>
 use <%= serializerClass %>;
 
 class <%= className %> extends AbstractCreateController
@@ -17,7 +17,7 @@ class <%= className %> extends AbstractCreateController
      * {@inheritdoc}
      */
     public $serializer = <%= serializerClassName %>::class;
-<% if (typeof handlerClassName !== 'undefined' && handlerClassName) { %>
+<% if (typeof handlerCommandClassName !== 'undefined' && handlerCommandClassName) { %>
     /**
      * @var Dispatcher
      */
@@ -39,9 +39,9 @@ class <%= className %> extends AbstractCreateController
     {
         $actor = RequestUtil::getActor($request);
         $data = Arr::get($request->getParsedBody(), 'data', []);
-        <% if (typeof handlerClassName !== 'undefined' && handlerClassName) { %>
+        <% if (typeof handlerCommandClassName !== 'undefined' && handlerCommandClassName) { %>
         $model = $this->bus->dispatch(
-            new <%= handlerClassName %>($actor, $data)
+            new <%= handlerCommandClassName %>($actor, $data)
         );
         <% } else { %>
         // $model = ...

@@ -242,6 +242,7 @@ const testSpecs: StubTest[] = [
     params: {
       className: `${classType}Controller`,
       serializerClass: `Flarum\\Demo\\Custom${classType}Serializer`,
+      handlerCommandClass: `Flarum\\Demo\\Custom${classType}`,
       classType,
     },
     expectedModifiedFilesDefaultDir: [
