@@ -26,14 +26,14 @@ export default class Model extends BaseCommand {
       .atomicGroup(stepManager => {
         stepManager
           .namedStep('model', new GenerateModelStub())
-          .step(new GenerateMigrationStub(), { optional: true, confirmationMessage: 'Generate corresponding migration?', default: true }, [
+          .step(new GenerateMigrationStub(), { optional: true, confirmationMessage: 'Generate corresponding Migration?', default: true }, [
             {
               sourceStep: 'model',
               exposedName: 'migrationName',
               consumedName: 'name',
             },
           ])
-          .namedStep('serializer', new GenerateApiSerializerStub(), { optional: true, confirmationMessage: 'Generate corresponding API serializer?', default: true }, [
+          .namedStep('serializer', new GenerateApiSerializerStub(), { optional: true, confirmationMessage: 'Generate corresponding API Serializer?', default: true }, [
             {
               sourceStep: 'model',
               exposedName: 'class',
@@ -46,7 +46,7 @@ export default class Model extends BaseCommand {
               modifier: (modelClassName: unknown) => `${modelClassName as string}Serializer`,
             },
           ])
-          .namedStep('validator', new GenerateValidatorStub(), { optional: true, confirmationMessage: 'Generate corresponding validator?', default: true }, [
+          .namedStep('validator', new GenerateValidatorStub(), { optional: true, confirmationMessage: 'Generate corresponding Validator?', default: true }, [
             {
               sourceStep: 'model',
               exposedName: 'className',
@@ -54,7 +54,7 @@ export default class Model extends BaseCommand {
               modifier: (modelClassName: unknown) => `${modelClassName as string}Validator`,
             },
           ])
-          .namedStep('repository', new GenerateRepositoryStub(), { optional: true, confirmationMessage: 'Generate corresponding repository?', default: true }, [
+          .namedStep('repository', new GenerateRepositoryStub(), { optional: true, confirmationMessage: 'Generate corresponding Repository?', default: true }, [
             {
               sourceStep: 'model',
               exposedName: 'class',
@@ -67,7 +67,7 @@ export default class Model extends BaseCommand {
               modifier: (modelClassName: unknown) => `${modelClassName as string}Repository`,
             },
           ])
-          .namedStep('policy', new GeneratePolicyStub(), { optional: true, confirmationMessage: 'Generate corresponding policy?', default: true }, [
+          .namedStep('policy', new GeneratePolicyStub(), { optional: true, confirmationMessage: 'Generate corresponding Policy?', default: true }, [
             {
               sourceStep: 'model',
               exposedName: 'class',
@@ -101,7 +101,7 @@ export default class Model extends BaseCommand {
           .namedStep(
             'createHandlerCommand',
             new GenerateHandlerCommandStub(),
-            { optional: true, confirmationMessage: 'Generate corresponding domain handlers?', default: true },
+            { optional: true, confirmationMessage: 'Generate corresponding Domain Handlers?', default: true },
             [
               {
                 sourceStep: 'model',
@@ -247,7 +247,7 @@ export default class Model extends BaseCommand {
           .namedStep(
             'listApiController',
             new GenerateApiControllerStub(),
-            { optional: true, confirmationMessage: 'Generate corresponding CRUD API controllers?', default: true },
+            { optional: true, confirmationMessage: 'Generate corresponding CRUD API Controllers?', default: true },
             [
               {
                 sourceStep: 'model',

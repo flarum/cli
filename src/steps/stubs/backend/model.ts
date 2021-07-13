@@ -29,7 +29,7 @@ export class GenerateModelStub extends BasePhpStubStep {
       {
         name: 'tableName',
         type: 'text',
-        message: 'Table Name (Optional)',
+        message: 'Table name (Optional)',
         validate: Validator.tableName,
         optional: true,
       },
