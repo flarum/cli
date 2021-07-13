@@ -1,3 +1,4 @@
+/* eslint-disable no-warning-comments */
 import pluralize from 'pluralize';
 import { StepManager } from '../../../steps/step-manager';
 import BaseCommand from '../../../base-command';
@@ -9,6 +10,9 @@ import { GenerateRepositoryStub } from '../../../steps/stubs/backend/repository'
 import { GeneratePolicyStub } from '../../../steps/stubs/backend/policy';
 import { GeneratePolicyExtender } from '../../../steps/extenders/policy';
 import { GenerateApiControllerStub } from '../../../steps/stubs/backend/api-controller';
+import { GenerateHandlerStub } from '../../../steps/stubs/backend/handler';
+import { GenerateHandlerCommandStub } from '../../../steps/stubs/backend/handler-command';
+import { GenerateRoutesExtender } from '../../../steps/extenders/route';
 
 export default class Model extends BaseCommand {
   static description = 'Generate a model class';
@@ -29,7 +33,7 @@ export default class Model extends BaseCommand {
               consumedName: 'name',
             },
           ])
-          .step(new GenerateApiSerializerStub(), { optional: true, confirmationMessage: 'Generate corresponding API serializer?', default: true }, [
+          .namedStep('serializer', new GenerateApiSerializerStub(), { optional: true, confirmationMessage: 'Generate corresponding API serializer?', default: true }, [
             {
               sourceStep: 'model',
               exposedName: 'class',
@@ -42,7 +46,7 @@ export default class Model extends BaseCommand {
               modifier: (modelClassName: unknown) => `${modelClassName as string}Serializer`,
             },
           ])
-          .step(new GenerateValidatorStub(), { optional: true, confirmationMessage: 'Generate corresponding validator?', default: true }, [
+          .namedStep('validator', new GenerateValidatorStub(), { optional: true, confirmationMessage: 'Generate corresponding validator?', default: true }, [
             {
               sourceStep: 'model',
               exposedName: 'className',
@@ -50,7 +54,7 @@ export default class Model extends BaseCommand {
               modifier: (modelClassName: unknown) => `${modelClassName as string}Validator`,
             },
           ])
-          .step(new GenerateRepositoryStub(), { optional: true, confirmationMessage: 'Generate corresponding repository?', default: true }, [
+          .namedStep('repository', new GenerateRepositoryStub(), { optional: true, confirmationMessage: 'Generate corresponding repository?', default: true }, [
             {
               sourceStep: 'model',
               exposedName: 'class',
@@ -90,77 +94,441 @@ export default class Model extends BaseCommand {
               sourceStep: 'policy',
               exposedName: 'modelClass',
             },
-          ])
-          .namedStep('listApiController', new GenerateApiControllerStub(), { optional: true, confirmationMessage: 'Generate corresponding CRUD API controllers?', default: true }, [
-            {
-              sourceStep: 'model',
-              exposedName: 'className',
-              consumedName: 'className',
-              modifier: (modelClassName: unknown) => {
-                const pluralModelClassName = pluralize(modelClassName as string);
+          ]);
 
-                return `List${pluralModelClassName}Controller`;
+        // Domain Handler Commands
+        stepManager
+          .namedStep(
+            'createHandlerCommand',
+            new GenerateHandlerCommandStub(),
+            { optional: true, confirmationMessage: 'Generate corresponding domain handlers?', default: true },
+            [
+              {
+                sourceStep: 'model',
+                exposedName: 'className',
+                modifier: (modelClassName: unknown) => `Create${modelClassName as string}`,
               },
-            },
-          ], {
-            classType: 'AbstractListController',
-          })
-          .step('showApiController', new GenerateApiControllerStub(), {}, [
+            ],
             {
-              sourceStep: 'listApiController',
+              classType: 'create',
+            }
+          )
+          .namedStep(
+            'updateHandlerCommand',
+            new GenerateHandlerCommandStub(),
+            {},
+            [
+              {
+                sourceStep: 'createHandlerCommand',
+                exposedName: '__succeeded',
+              },
+              {
+                sourceStep: 'model',
+                exposedName: 'className',
+                modifier: (modelClassName: unknown) => `Edit${modelClassName as string}`,
+              },
+            ],
+            {
+              classType: 'update',
+            }
+          )
+          .namedStep(
+            'deleteHandlerCommand',
+            new GenerateHandlerCommandStub(),
+            {},
+            [
+              {
+                sourceStep: 'createHandlerCommand',
+                exposedName: '__succeeded',
+              },
+              {
+                sourceStep: 'model',
+                exposedName: 'className',
+                modifier: (modelClassName: unknown) => `Delete${modelClassName as string}`,
+              },
+            ],
+            {
+              classType: 'delete',
+            }
+          );
+
+        // Domain Handlers
+        stepManager
+          .step(new GenerateHandlerStub(), {}, [
+            {
+              sourceStep: 'createHandlerCommand',
               exposedName: '__succeeded',
             },
             {
-              sourceStep: 'model',
+              sourceStep: 'createHandlerCommand',
               exposedName: 'className',
-              consumedName: 'className',
-              modifier: (modelClassName: unknown) => `Show${modelClassName as string}Controller`,
+              modifier: (className: unknown) => `${className as string}Handler`,
             },
-          ], {
-            classType: 'AbstractShowController',
-          })
-          .step('createApiController', new GenerateApiControllerStub(), {}, [
             {
-              sourceStep: 'listApiController',
+              sourceStep: 'createHandlerCommand',
+              exposedName: 'className',
+              consumedName: 'handlerCommandClass',
+            },
+            {
+              sourceStep: 'repository',
+              exposedName: 'class',
+              consumedName: 'repositoryClass',
+            },
+            {
+              sourceStep: 'validator',
+              exposedName: 'class',
+              consumedName: 'validatorClass',
+            },
+            {
+              sourceStep: 'createHandlerCommand',
+              exposedName: 'classType',
+            },
+          ])
+          .step(new GenerateHandlerStub(), {}, [
+            {
+              sourceStep: 'updateHandlerCommand',
               exposedName: '__succeeded',
             },
             {
-              sourceStep: 'model',
+              sourceStep: 'updateHandlerCommand',
               exposedName: 'className',
-              consumedName: 'className',
-              modifier: (modelClassName: unknown) => `Create${modelClassName as string}Controller`,
+              modifier: (className: unknown) => `${className as string}Handler`,
             },
-          ], {
-            classType: 'AbstractCreateController',
-          })
-          .step('updateApiController', new GenerateApiControllerStub(), {}, [
             {
-              sourceStep: 'listApiController',
+              sourceStep: 'updateHandlerCommand',
+              exposedName: 'className',
+              consumedName: 'handlerCommandClass',
+            },
+            {
+              sourceStep: 'repository',
+              exposedName: 'class',
+              consumedName: 'repositoryClass',
+            },
+            {
+              sourceStep: 'validator',
+              exposedName: 'class',
+              consumedName: 'validatorClass',
+            },
+            {
+              sourceStep: 'updateHandlerCommand',
+              exposedName: 'classType',
+            },
+          ])
+          .step(new GenerateHandlerStub(), {}, [
+            {
+              sourceStep: 'deleteHandlerCommand',
               exposedName: '__succeeded',
             },
             {
-              sourceStep: 'model',
+              sourceStep: 'deleteHandlerCommand',
               exposedName: 'className',
-              consumedName: 'className',
-              modifier: (modelClassName: unknown) => `Update${modelClassName as string}Controller`,
-            },
-          ], {
-            classType: 'AbstractShowController',
-          })
-          .step('deleteApiController', new GenerateApiControllerStub(), {}, [
-            {
-              sourceStep: 'listApiController',
-              exposedName: '__succeeded',
+              modifier: (className: unknown) => `${className as string}Handler`,
             },
             {
-              sourceStep: 'model',
+              sourceStep: 'deleteHandlerCommand',
               exposedName: 'className',
-              consumedName: 'className',
-              modifier: (modelClassName: unknown) => `Delete${modelClassName as string}Controller`,
+              consumedName: 'handlerCommandClass',
+            },
+            {
+              sourceStep: 'repository',
+              exposedName: 'class',
+              consumedName: 'repositoryClass',
+            },
+            {
+              sourceStep: 'deleteHandlerCommand',
+              exposedName: 'classType',
             },
           ], {
-            classType: 'AbstractDeleteController',
+            validatorClass: '', // TODO: This type of parameter is a bit of a mess
           });
+
+        // API Controllers
+        stepManager
+          .namedStep(
+            'listApiController',
+            new GenerateApiControllerStub(),
+            { optional: true, confirmationMessage: 'Generate corresponding CRUD API controllers?', default: true },
+            [
+              {
+                sourceStep: 'model',
+                exposedName: 'className',
+                consumedName: 'className',
+                modifier: (modelClassName: unknown) => {
+                  const pluralModelClassName = pluralize(modelClassName as string);
+
+                  return `List${pluralModelClassName}Controller`;
+                },
+              },
+              {
+                sourceStep: 'serializer',
+                exposedName: 'class',
+                consumedName: 'serializerClass',
+              },
+            ],
+            {
+              classType: 'list',
+              handlerCommandClass: '',
+            }
+          )
+          .namedStep(
+            'showApiController',
+            new GenerateApiControllerStub(),
+            {},
+            [
+              {
+                sourceStep: 'listApiController',
+                exposedName: '__succeeded',
+              },
+              {
+                sourceStep: 'model',
+                exposedName: 'className',
+                consumedName: 'className',
+                modifier: (modelClassName: unknown) => `Show${modelClassName as string}Controller`,
+              },
+              {
+                sourceStep: 'serializer',
+                exposedName: 'class',
+                consumedName: 'serializerClass',
+              },
+            ],
+            {
+              classType: 'show',
+              handlerCommandClass: '',
+            }
+          )
+          .namedStep(
+            'createApiController',
+            new GenerateApiControllerStub(),
+            {},
+            [
+              {
+                sourceStep: 'listApiController',
+                exposedName: '__succeeded',
+              },
+              {
+                sourceStep: 'model',
+                exposedName: 'className',
+                consumedName: 'className',
+                modifier: (modelClassName: unknown) => `Create${modelClassName as string}Controller`,
+              },
+              {
+                sourceStep: 'serializer',
+                exposedName: 'class',
+                consumedName: 'serializerClass',
+              },
+              {
+                sourceStep: 'createHandlerCommand',
+                exposedName: 'class',
+                consumedName: 'handlerCommandClass',
+              },
+            ],
+            {
+              classType: 'create',
+            }
+          )
+          .namedStep(
+            'updateApiController',
+            new GenerateApiControllerStub(),
+            {},
+            [
+              {
+                sourceStep: 'listApiController',
+                exposedName: '__succeeded',
+              },
+              {
+                sourceStep: 'model',
+                exposedName: 'className',
+                consumedName: 'className',
+                modifier: (modelClassName: unknown) => `Update${modelClassName as string}Controller`,
+              },
+              {
+                sourceStep: 'serializer',
+                exposedName: 'class',
+                consumedName: 'serializerClass',
+              },
+              {
+                sourceStep: 'updateHandlerCommand',
+                exposedName: 'class',
+                consumedName: 'handlerCommandClass',
+              },
+            ],
+            {
+              classType: 'update',
+            }
+          )
+          .namedStep(
+            'deleteApiController',
+            new GenerateApiControllerStub(),
+            {},
+            [
+              {
+                sourceStep: 'listApiController',
+                exposedName: '__succeeded',
+              },
+              {
+                sourceStep: 'model',
+                exposedName: 'className',
+                consumedName: 'className',
+                modifier: (modelClassName: unknown) => `Delete${modelClassName as string}Controller`,
+              },
+              {
+                sourceStep: 'serializer',
+                exposedName: 'class',
+                consumedName: 'serializerClass',
+              },
+              {
+                sourceStep: 'deleteHandlerCommand',
+                exposedName: 'class',
+                consumedName: 'handlerCommandClass',
+              },
+            ],
+            {
+              classType: 'delete',
+            }
+          )
+          // Routes
+          .namedStep(
+            'listRoute',
+            new GenerateRoutesExtender(),
+            { optional: true, confirmationMessage: 'Generate corresponding API Routes?', default: true },
+            [
+              {
+                sourceStep: 'model',
+                exposedName: 'modelPluralSnake',
+                consumedName: 'routePath',
+                modifier: (value: unknown) => `/${value}`,
+              },
+              {
+                sourceStep: 'model',
+                exposedName: 'modelPluralSnake',
+                consumedName: 'routeName',
+                modifier: (value: unknown) => `${value}.index`,
+              },
+              {
+                sourceStep: 'listApiController',
+                exposedName: 'class',
+                consumedName: 'routeHandler',
+              },
+            ], {
+              httpMethod: 'get',
+            }
+          )
+          .step(
+            new GenerateRoutesExtender(),
+            {},
+            [
+              {
+                sourceStep: 'listRoute',
+                exposedName: '__succeeded',
+              },
+              {
+                sourceStep: 'model',
+                exposedName: 'modelPluralSnake',
+                consumedName: 'routePath',
+                modifier: (value: unknown) => `/${value}/{id}`,
+              },
+              {
+                sourceStep: 'model',
+                exposedName: 'modelPluralSnake',
+                consumedName: 'routeName',
+                modifier: (value: unknown) => `${value}.show`,
+              },
+              {
+                sourceStep: 'showApiController',
+                exposedName: 'class',
+                consumedName: 'routeHandler',
+              },
+            ], {
+              httpMethod: 'get',
+            }
+          )
+          .step(
+            new GenerateRoutesExtender(),
+            {},
+            [
+              {
+                sourceStep: 'listRoute',
+                exposedName: '__succeeded',
+              },
+              {
+                sourceStep: 'model',
+                exposedName: 'modelPluralSnake',
+                consumedName: 'routePath',
+                modifier: (value: unknown) => `/${value}`,
+              },
+              {
+                sourceStep: 'model',
+                exposedName: 'modelPluralSnake',
+                consumedName: 'routeName',
+                modifier: (value: unknown) => `${value}.create`,
+              },
+              {
+                sourceStep: 'createApiController',
+                exposedName: 'class',
+                consumedName: 'routeHandler',
+              },
+            ], {
+              httpMethod: 'post',
+            }
+          )
+          .step(
+            new GenerateRoutesExtender(),
+            {},
+            [
+              {
+                sourceStep: 'listRoute',
+                exposedName: '__succeeded',
+              },
+              {
+                sourceStep: 'model',
+                exposedName: 'modelPluralSnake',
+                consumedName: 'routePath',
+                modifier: (value: unknown) => `/${value}/{id}`,
+              },
+              {
+                sourceStep: 'model',
+                exposedName: 'modelPluralSnake',
+                consumedName: 'routeName',
+                modifier: (value: unknown) => `${value}.update`,
+              },
+              {
+                sourceStep: 'updateApiController',
+                exposedName: 'class',
+                consumedName: 'routeHandler',
+              },
+            ], {
+              httpMethod: 'patch',
+            }
+          )
+          .step(
+            new GenerateRoutesExtender(),
+            {},
+            [
+              {
+                sourceStep: 'listRoute',
+                exposedName: '__succeeded',
+              },
+              {
+                sourceStep: 'model',
+                exposedName: 'modelPluralSnake',
+                consumedName: 'routePath',
+                modifier: (value: unknown) => `/${value}/{id}`,
+              },
+              {
+                sourceStep: 'model',
+                exposedName: 'modelPluralSnake',
+                consumedName: 'routeName',
+                modifier: (value: unknown) => `${value}.delete`,
+              },
+              {
+                sourceStep: 'deleteApiController',
+                exposedName: 'class',
+                consumedName: 'routeHandler',
+              },
+            ], {
+              httpMethod: 'delete',
+            }
+          );
       });
   }
 }

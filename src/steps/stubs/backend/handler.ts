@@ -1,3 +1,4 @@
+/* eslint-disable no-warning-comments */
 import chalk from 'chalk';
 import { Validator } from '../../../utils/validation';
 import { BasePhpStubStep } from '../php-base';
@@ -7,7 +8,9 @@ export class GenerateHandlerStub extends BasePhpStubStep {
 
   protected additionalExposes = [];
 
-  protected phpClassParams = ['handlerCommandClass'];
+  protected additionalImplicitParams = ['repositoryClass', 'repositoryClassName', 'validatorClass', 'validatorClassName'];
+
+  protected phpClassParams = ['handlerCommandClass', 'repositoryClass', 'validatorClass'];
 
   protected schema = {
     recommendedSubdir: 'Command',
@@ -34,13 +37,24 @@ export class GenerateHandlerStub extends BasePhpStubStep {
         type: 'text',
       },
       {
-        name: 'classType',
-        type: 'autocomplete',
-        message: 'Class Type',
-        choices: ['None', 'Create', 'Update', 'Delete'].map((type: string) => ({
-          title: type,
-          value: type.toLowerCase(),
-        })),
+        name: 'repositoryClass', // TODO: This type of parameter is a bit of a mess
+        message: '',
+        optional: true,
+        type: 'text',
+      },
+      {
+        name: 'repositoryClassName',
+        type: 'text',
+      },
+      {
+        name: 'validatorClass',
+        message: '',
+        optional: true,
+        type: 'text',
+      },
+      {
+        name: 'validatorClassName',
+        type: 'text',
       },
     ],
   }

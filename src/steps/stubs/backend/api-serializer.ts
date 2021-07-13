@@ -9,7 +9,7 @@ import { BasePhpStubStep } from '../php-base';
 export class GenerateApiSerializerStub extends BasePhpStubStep {
   type = 'Generate Api Serializer Class';
 
-  protected additionalExposes = ['modelClass', 'modelClassName'];
+  protected additionalExposes = ['className', 'modelClass', 'modelClassName'];
 
   protected additionalImplicitParams = ['modelType'];
 

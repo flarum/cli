@@ -26,11 +26,10 @@ export default class ApiController extends BaseCommand {
               exposedName: 'class',
               consumedName: 'handlerCommandClass',
             },
-            {
-              sourceStep: 'handlerCommand',
-              exposedName: 'classType',
-            },
-          ]);
+          ], {
+            validatorClass: '',
+            repositoryClass: '',
+          });
       });
   }
 }

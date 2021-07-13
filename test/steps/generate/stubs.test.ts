@@ -71,11 +71,13 @@ const testSpecs: StubTest[] = [
     ],
     expectedExposedParamsDefaultDir: {
       class: 'Flarum\\Demo\\Api\\Serializer\\PotatoSerializer',
+      className: 'PotatoSerializer',
       modelClass: '\\Flarum\\Potato\\Potato',
       modelClassName: 'Potato',
     },
     expectedExposedParamsRequestedDir: {
       class: 'Flarum\\Demo\\somePath\\PotatoSerializer',
+      className: 'PotatoSerializer',
       modelClass: '\\Flarum\\Potato\\Potato',
       modelClassName: 'Potato',
     },
@@ -98,11 +100,13 @@ const testSpecs: StubTest[] = [
       class: 'Flarum\\Demo\\CustomModel',
       className: 'CustomModel',
       migrationName: 'create_custom_models_table',
+      modelPluralSnake: 'custom_models',
     },
     expectedExposedParamsRequestedDir: {
       class: 'Flarum\\Demo\\somePath\\CustomModel',
       className: 'CustomModel',
       migrationName: 'create_custom_models_table',
+      modelPluralSnake: 'custom_models',
     },
   },
 
@@ -247,7 +251,8 @@ const testSpecs: StubTest[] = [
     params: {
       className: 'CustomBusCommandHandler',
       handlerCommandClass: 'Flarum\\Demo\\Command\\CustomBusCommand',
-      classType: 'create',
+      validatorClass: 'Flarum\\Demo\\CustomModelRepository',
+      repositoryClass: 'Flarum\\Demo\\CustomModelValidator',
     },
     expectedModifiedFilesDefaultDir: [
       '/ext/src/Command/CustomBusCommandHandler.php',

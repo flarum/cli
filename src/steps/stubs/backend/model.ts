@@ -8,7 +8,7 @@ import { BasePhpStubStep } from '../php-base';
 export class GenerateModelStub extends BasePhpStubStep {
   type = 'Generate Model Class';
 
-  protected additionalExposes = ['migrationName', 'className'];
+  protected additionalExposes = ['migrationName', 'className', 'modelPluralSnake'];
 
   protected phpClassParams = [];
 
@@ -39,8 +39,10 @@ export class GenerateModelStub extends BasePhpStubStep {
   protected async compileParams(fsEditor: Editor, pathProvider: PathProvider, paramProvider: ParamProvider): Promise<Record<string, unknown>> {
     const params = await super.compileParams(fsEditor, pathProvider, paramProvider);
 
+    params.modelPluralSnake = pluralSnakeCaseModel(params.className as string);
+
     if (!params.tableName) {
-      params.tableName = pluralSnakeCaseModel(params.className as string);
+      params.tableName = params.modelPluralSnake;
     }
 
     params.migrationName = `create_${params.tableName}_table`;
