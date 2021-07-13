@@ -2,6 +2,7 @@
 
 namespace Flarum\CliPhpSubsystem;
 
+use Flarum\CliPhpSubsystem\CustomPrettyPrinter;
 use PhpParser\Lexer;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor;
@@ -41,7 +42,7 @@ class ExtenderUtil
   public function __construct($currExtendValue)
   {
     $this->extendVal = $currExtendValue;
-    $this->prettyPrinter = new PrettyPrinter\Standard(['shortArraySyntax' => true]);
+    $this->prettyPrinter = new CustomPrettyPrinter(['shortArraySyntax' => true]);
     $this->nameResolver = new NodeVisitor\NameResolver(null, [
       'replaceNodes' => false
     ]);

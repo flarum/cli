@@ -1,15 +1,15 @@
 import { StepManager } from '../../../steps/step-manager';
 import BaseCommand from '../../../base-command';
-import { GenerateJobStub } from '../../../steps/stubs/backend/job';
+import { GenerateValidatorStub } from '../../../steps/stubs/backend/validator';
 
-export default class Job extends BaseCommand {
-  static description = 'Generate a job class';
+export default class Validator extends BaseCommand {
+  static description = 'Generate a validator class';
 
   static flags = { ...BaseCommand.flags };
 
   static args = [...BaseCommand.args];
 
   protected steps(stepManager: StepManager): StepManager {
-    return stepManager.step(new GenerateJobStub());
+    return stepManager.step(new GenerateValidatorStub());
   }
 }

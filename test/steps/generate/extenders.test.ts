@@ -4,6 +4,7 @@ import { GenerateApiSerializerAttributesExtender } from '../../../src/steps/exte
 import { GenerateEventListenerExtender } from '../../../src/steps/extenders/event';
 import { GenerateRoutesExtender } from '../../../src/steps/extenders/route';
 import { GenerateServiceProviderExtender } from '../../../src/steps/extenders/service-provider';
+import { GeneratePolicyExtender } from '../../../src/steps/extenders/policy';
 import { PathProvider } from '../../../src/provider/path-provider';
 
 interface ExtenderTest {
@@ -45,6 +46,14 @@ const testSpecs: ExtenderTest[] = [
     extenderClass: GenerateServiceProviderExtender,
     params: {
       className: 'CustomServiceProvider',
+    },
+  },
+  // Event Listener
+  {
+    extenderClass: GeneratePolicyExtender,
+    params: {
+      modelClass: 'Flarum\\CustomModel\\CustomModel',
+      policyClass: 'Flarum\\Access\\CustomModelPolicy',
     },
   },
 ];

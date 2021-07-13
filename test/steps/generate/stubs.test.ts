@@ -2,11 +2,17 @@ import { getFsPaths, runStep } from '../../utils';
 
 import { GenerateEventListenerStub } from '../../../src/steps/stubs/backend/event-listener';
 import { GenerateApiControllerStub } from '../../../src/steps/stubs/backend/api-controller';
+import { GenerateApiSerializerStub } from '../../../src/steps/stubs/backend/api-serializer';
+import { GenerateHandlerStub } from '../../../src/steps/stubs/backend/handler';
+import { GenerateHandlerCommandStub } from '../../../src/steps/stubs/backend/handler-command';
 import { GenerateIntegrationTestStub } from '../../../src/steps/stubs/backend/integration-test';
 import { GenerateMigrationStub } from '../../../src/steps/stubs/backend/migration';
 import { GenerateModelStub } from '../../../src/steps/stubs/backend/model';
 import { GenerateServiceProviderStub } from '../../../src/steps/stubs/backend/service-provider';
 import { GenerateJobStub } from '../../../src/steps/stubs/backend/job';
+import { GenerateRepositoryStub } from '../../../src/steps/stubs/backend/repository';
+import { GenerateValidatorStub } from '../../../src/steps/stubs/backend/validator';
+import { GeneratePolicyStub } from '../../../src/steps/stubs/backend/policy';
 import { PathProvider } from '../../../src/provider/path-provider';
 
 interface StubTest {
@@ -50,24 +56,30 @@ const testSpecs: StubTest[] = [
     },
   },
 
-  // Api Controller
+  // Api Serializer
   {
-    stubClass: GenerateApiControllerStub,
+    stubClass: GenerateApiSerializerStub,
     params: {
-      className: 'ListPotatoesController',
-      classType: 'AbstractListController',
+      className: 'PotatoSerializer',
+      modelClass: '\\Flarum\\Potato\\Potato',
     },
     expectedModifiedFilesDefaultDir: [
-      '/ext/src/Api/Controller/ListPotatoesController.php',
+      '/ext/src/Api/Serializer/PotatoSerializer.php',
     ],
     expectedModifiedFilesRequestedDir: [
-      `${requestedDir}/ListPotatoesController.php`,
+      `${requestedDir}/PotatoSerializer.php`,
     ],
     expectedExposedParamsDefaultDir: {
-      class: 'Flarum\\Demo\\Api\\Controller\\ListPotatoesController',
+      class: 'Flarum\\Demo\\Api\\Serializer\\PotatoSerializer',
+      className: 'PotatoSerializer',
+      modelClass: '\\Flarum\\Potato\\Potato',
+      modelClassName: 'Potato',
     },
     expectedExposedParamsRequestedDir: {
-      class: 'Flarum\\Demo\\somePath\\ListPotatoesController',
+      class: 'Flarum\\Demo\\somePath\\PotatoSerializer',
+      className: 'PotatoSerializer',
+      modelClass: '\\Flarum\\Potato\\Potato',
+      modelClassName: 'Potato',
     },
   },
 
@@ -86,11 +98,85 @@ const testSpecs: StubTest[] = [
     ],
     expectedExposedParamsDefaultDir: {
       class: 'Flarum\\Demo\\CustomModel',
+      className: 'CustomModel',
       migrationName: 'create_custom_models_table',
+      modelPluralSnake: 'custom_models',
     },
     expectedExposedParamsRequestedDir: {
       class: 'Flarum\\Demo\\somePath\\CustomModel',
+      className: 'CustomModel',
       migrationName: 'create_custom_models_table',
+      modelPluralSnake: 'custom_models',
+    },
+  },
+
+  // Repository
+  {
+    stubClass: GenerateRepositoryStub,
+    params: {
+      className: 'CustomModelRepository',
+      modelClass: 'Flarum\\CustomModel\\CustomModel',
+    },
+    expectedModifiedFilesDefaultDir: [
+      '/ext/src/CustomModelRepository.php',
+    ],
+    expectedModifiedFilesRequestedDir: [
+      `${requestedDir}/CustomModelRepository.php`,
+    ],
+    expectedExposedParamsDefaultDir: {
+      class: 'Flarum\\Demo\\CustomModelRepository',
+      modelClass: 'Flarum\\CustomModel\\CustomModel',
+      modelClassName: 'CustomModel',
+    },
+    expectedExposedParamsRequestedDir: {
+      class: 'Flarum\\Demo\\somePath\\CustomModelRepository',
+      modelClass: 'Flarum\\CustomModel\\CustomModel',
+      modelClassName: 'CustomModel',
+    },
+  },
+
+  // Validator
+  {
+    stubClass: GenerateValidatorStub,
+    params: {
+      className: 'CustomModelValidator',
+    },
+    expectedModifiedFilesDefaultDir: [
+      '/ext/src/CustomModelValidator.php',
+    ],
+    expectedModifiedFilesRequestedDir: [
+      `${requestedDir}/CustomModelValidator.php`,
+    ],
+    expectedExposedParamsDefaultDir: {
+      class: 'Flarum\\Demo\\CustomModelValidator',
+    },
+    expectedExposedParamsRequestedDir: {
+      class: 'Flarum\\Demo\\somePath\\CustomModelValidator',
+    },
+  },
+
+  // Policy
+  {
+    stubClass: GeneratePolicyStub,
+    params: {
+      className: 'CustomModelPolicy',
+      modelClass: 'Flarum\\CustomModel\\CustomModel',
+    },
+    expectedModifiedFilesDefaultDir: [
+      '/ext/src/Access/CustomModelPolicy.php',
+    ],
+    expectedModifiedFilesRequestedDir: [
+      `${requestedDir}/CustomModelPolicy.php`,
+    ],
+    expectedExposedParamsDefaultDir: {
+      class: 'Flarum\\Demo\\Access\\CustomModelPolicy',
+      modelClass: 'Flarum\\CustomModel\\CustomModel',
+      modelClassName: 'CustomModel',
+    },
+    expectedExposedParamsRequestedDir: {
+      class: 'Flarum\\Demo\\somePath\\CustomModelPolicy',
+      modelClass: 'Flarum\\CustomModel\\CustomModel',
+      modelClassName: 'CustomModel',
     },
   },
 
@@ -134,6 +220,54 @@ const testSpecs: StubTest[] = [
     },
   },
 
+  // Domain Handler Command
+  {
+    stubClass: GenerateHandlerCommandStub,
+    params: {
+      className: 'CustomBusCommand',
+      classType: 'create',
+    },
+    expectedModifiedFilesDefaultDir: [
+      '/ext/src/Command/CustomBusCommand.php',
+    ],
+    expectedModifiedFilesRequestedDir: [
+      `${requestedDir}/CustomBusCommand.php`,
+    ],
+    expectedExposedParamsDefaultDir: {
+      class: 'Flarum\\Demo\\Command\\CustomBusCommand',
+      className: 'CustomBusCommand',
+      classType: 'create',
+    },
+    expectedExposedParamsRequestedDir: {
+      class: 'Flarum\\Demo\\somePath\\CustomBusCommand',
+      className: 'CustomBusCommand',
+      classType: 'create',
+    },
+  },
+
+  // Domain Handler
+  {
+    stubClass: GenerateHandlerStub,
+    params: {
+      className: 'CustomBusCommandHandler',
+      handlerCommandClass: 'Flarum\\Demo\\Command\\CustomBusCommand',
+      validatorClass: 'Flarum\\Demo\\CustomModelRepository',
+      repositoryClass: 'Flarum\\Demo\\CustomModelValidator',
+    },
+    expectedModifiedFilesDefaultDir: [
+      '/ext/src/Command/CustomBusCommandHandler.php',
+    ],
+    expectedModifiedFilesRequestedDir: [
+      `${requestedDir}/CustomBusCommandHandler.php`,
+    ],
+    expectedExposedParamsDefaultDir: {
+      class: 'Flarum\\Demo\\Command\\CustomBusCommandHandler',
+    },
+    expectedExposedParamsRequestedDir: {
+      class: 'Flarum\\Demo\\somePath\\CustomBusCommandHandler',
+    },
+  },
+
   // Integration Test
   {
     stubClass: GenerateIntegrationTestStub,
@@ -154,6 +288,31 @@ const testSpecs: StubTest[] = [
     },
   },
 ];
+
+// Api Controllers
+['normal', 'list', 'show', 'create', 'update', 'delete'].forEach(classType => {
+  testSpecs.push({
+    stubClass: GenerateApiControllerStub,
+    params: {
+      className: `${classType}Controller`,
+      serializerClass: `Flarum\\Demo\\Custom${classType}Serializer`,
+      handlerCommandClass: `Flarum\\Demo\\Custom${classType}`,
+      classType,
+    },
+    expectedModifiedFilesDefaultDir: [
+      `/ext/src/Api/Controller/${classType}Controller.php`,
+    ],
+    expectedModifiedFilesRequestedDir: [
+      `${requestedDir}/${classType}Controller.php`,
+    ],
+    expectedExposedParamsDefaultDir: {
+      class: `Flarum\\Demo\\Api\\Controller\\${classType}Controller`,
+    },
+    expectedExposedParamsRequestedDir: {
+      class: `Flarum\\Demo\\somePath\\${classType}Controller`,
+    },
+  });
+});
 
 const sampleComposerJson = {
   name: 'flarum/test',

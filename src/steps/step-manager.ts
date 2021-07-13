@@ -45,6 +45,7 @@ interface StoredStep {
   step: Step;
   shouldRun: ShouldRunConfig;
   dependencies: StepDependency[];
+  predefinedParams: PredefinedParameters;
 }
 
 interface StepDependency {
@@ -52,7 +53,10 @@ interface StepDependency {
   exposedName: string;
   consumedName?: string;
   dontRunIfFalsy?: boolean;
+  modifier?: (value: unknown) => string;
 }
+
+type PredefinedParameters = Record<string, unknown>;
 
 export class StepManager {
   protected steps: Array<StoredStep | AtomicStepManager> = [];
@@ -64,22 +68,22 @@ export class StepManager {
   /**
    * A step is an incremental operation that updates the filesystem.
    */
-  step(step: Step, shouldRun: ShouldRunConfig = {}, dependencies: StepDependency[] = []): this {
+  step(step: Step, shouldRun: ShouldRunConfig = {}, dependencies: StepDependency[] = [], predefinedParams: PredefinedParameters = {}): this {
     this.validateDependencies(step, dependencies);
 
-    this.steps = [...this.steps, { step, shouldRun, dependencies }];
+    this.steps = [...this.steps, { step, shouldRun, dependencies, predefinedParams }];
 
     return this;
   }
 
-  namedStep(name: string, step: Step, shouldRun: ShouldRunConfig = {}, dependencies: StepDependency[] = []): this {
+  namedStep(name: string, step: Step, shouldRun: ShouldRunConfig = {}, dependencies: StepDependency[] = [], predefinedParams: PredefinedParameters = {}): this {
     if (this.namedSteps.has(name)) {
       throw new Error(`Named steps must have unique names. A step with name "${name}" already exists.`);
     }
 
     this.validateDependencies(step, dependencies);
 
-    const newStep = { name, step, shouldRun, dependencies };
+    const newStep = { name, step, shouldRun, dependencies, predefinedParams };
 
     this.steps = [...this.steps, newStep];
 
@@ -189,12 +193,16 @@ export class StepManager {
         depValue = this.exposedParams.get(dep.sourceStep)![dep.exposedName];
       }
 
+      if (dep.modifier) {
+        depValue = dep.modifier(depValue);
+      }
+
       initial[dep.consumedName || dep.exposedName] = depValue;
 
       return initial;
     }, {} as Record<string, unknown>);
 
-    const paramProvider = paramProviderFactory(initial);
+    const paramProvider = paramProviderFactory({ ...initial, ...storedStep.predefinedParams });
 
     const newFs = await storedStep.step.run(fs, pathProvider, paramProvider, phpProvider);
 
@@ -225,20 +233,20 @@ class AtomicStepManager extends StepManager {
     this.exposedParams = parentExposedParams;
   }
 
-  step(step: Step, shouldRun: ShouldRunConfig = {}, dependencies: StepDependency[] = []): this {
+  step(step: Step, shouldRun: ShouldRunConfig = {}, dependencies: StepDependency[] = [], predefinedParams: PredefinedParameters = {}): this {
     if (!step.composable) {
       throw new Error(`Step of type "${step.type}" is not composable, and cannot be added to an atomic group.`);
     }
 
-    return super.step(step, shouldRun, dependencies);
+    return super.step(step, shouldRun, dependencies, predefinedParams);
   }
 
-  namedStep(name: string, step: Step, shouldRun: ShouldRunConfig = {}, dependencies: StepDependency[] = []): this {
+  namedStep(name: string, step: Step, shouldRun: ShouldRunConfig = {}, dependencies: StepDependency[] = [], predefinedParams: PredefinedParameters = {}): this {
     if (!step.composable) {
       throw new Error(`Step of type "${step.type}" is not composable, and cannot be added to an atomic group.`);
     }
 
-    return super.namedStep(name, step, shouldRun, dependencies);
+    return super.namedStep(name, step, shouldRun, dependencies, predefinedParams);
   }
 
   atomicGroup(_callback: (stepManager: AtomicStepManager) => void): this {

@@ -1,3 +1,4 @@
+import chalk from 'chalk';
 import { Editor } from 'mem-fs-editor';
 import { ParamProvider } from '../../../provider/param-provider';
 import { PathProvider } from '../../../provider/path-provider';
@@ -5,21 +6,23 @@ import { Validator } from '../../../utils/validation';
 import { pluralSnakeCaseModel } from '../../../utils/model-name';
 import { BasePhpStubStep } from '../php-base';
 
-export class GenerateModelStub extends BasePhpStubStep {
-  type = 'Generate Model Class';
+export class GenerateApiSerializerStub extends BasePhpStubStep {
+  type = 'Generate Api Serializer Class';
 
-  protected additionalExposes = ['migrationName', 'className', 'modelPluralSnake'];
+  protected additionalExposes = ['className', 'modelClass', 'modelClassName'];
 
-  protected phpClassParams = [];
+  protected additionalImplicitParams = ['modelType'];
+
+  protected phpClassParams = ['modelClass'];
 
   protected schema = {
-    recommendedSubdir: '',
-    sourceFile: 'backend/model.php',
+    recommendedSubdir: 'Api/Serializer',
+    sourceFile: 'backend/api-serializer.php',
     params: [
       {
         name: 'className',
         type: 'text',
-        message: 'Model class name',
+        message: 'Serializer class name',
         validate: Validator.className,
       },
       {
@@ -27,11 +30,18 @@ export class GenerateModelStub extends BasePhpStubStep {
         type: 'text',
       },
       {
-        name: 'tableName',
+        name: 'modelClass',
         type: 'text',
-        message: 'Table name (Optional)',
-        validate: Validator.tableName,
-        optional: true,
+        message: `Model Class (${chalk.dim('Vendor\\Path\\Model')})`,
+        validate: Validator.class,
+      },
+      {
+        name: 'modelClassName',
+        type: 'text',
+      },
+      {
+        name: 'modelType',
+        type: 'text',
       },
     ],
   }
@@ -39,13 +49,7 @@ export class GenerateModelStub extends BasePhpStubStep {
   protected async compileParams(fsEditor: Editor, pathProvider: PathProvider, paramProvider: ParamProvider): Promise<Record<string, unknown>> {
     const params = await super.compileParams(fsEditor, pathProvider, paramProvider);
 
-    params.modelPluralSnake = pluralSnakeCaseModel(params.className as string);
-
-    if (!params.tableName) {
-      params.tableName = params.modelPluralSnake;
-    }
-
-    params.migrationName = `create_${params.tableName}_table`;
+    params.modelType = pluralSnakeCaseModel(params.modelClassName as string);
 
     return params;
   }
