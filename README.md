@@ -54,14 +54,19 @@ flarum-cli --help
 # Commands
 <!-- commands -->
 * [`flarum-cli generate:backend:api-controller [PATH]`](#flarum-cli-generatebackendapi-controller-path)
+* [`flarum-cli generate:backend:api-serializer [PATH]`](#flarum-cli-generatebackendapi-serializer-path)
 * [`flarum-cli generate:backend:api-serializer-attributes [PATH]`](#flarum-cli-generatebackendapi-serializer-attributes-path)
 * [`flarum-cli generate:backend:event-listener [PATH]`](#flarum-cli-generatebackendevent-listener-path)
+* [`flarum-cli generate:backend:handler [PATH]`](#flarum-cli-generatebackendhandler-path)
 * [`flarum-cli generate:backend:integration-test [PATH]`](#flarum-cli-generatebackendintegration-test-path)
 * [`flarum-cli generate:backend:job [PATH]`](#flarum-cli-generatebackendjob-path)
 * [`flarum-cli generate:backend:migration [PATH]`](#flarum-cli-generatebackendmigration-path)
 * [`flarum-cli generate:backend:model [PATH]`](#flarum-cli-generatebackendmodel-path)
+* [`flarum-cli generate:backend:policy [PATH]`](#flarum-cli-generatebackendpolicy-path)
+* [`flarum-cli generate:backend:repository [PATH]`](#flarum-cli-generatebackendrepository-path)
 * [`flarum-cli generate:backend:route [PATH]`](#flarum-cli-generatebackendroute-path)
 * [`flarum-cli generate:backend:service-provider [PATH]`](#flarum-cli-generatebackendservice-provider-path)
+* [`flarum-cli generate:backend:validator [PATH]`](#flarum-cli-generatebackendvalidator-path)
 * [`flarum-cli help [COMMAND]`](#flarum-cli-help-command)
 * [`flarum-cli infra:backend-testing [PATH]`](#flarum-cli-infrabackend-testing-path)
 * [`flarum-cli init [PATH]`](#flarum-cli-init-path)
@@ -69,7 +74,7 @@ flarum-cli --help
 
 ## `flarum-cli generate:backend:api-controller [PATH]`
 
-Generate an api controller class
+Generate an API controller class
 
 ```
 USAGE
@@ -83,6 +88,23 @@ OPTIONS
 ```
 
 _See code: [src/commands/generate/backend/api-controller.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/api-controller.ts)_
+
+## `flarum-cli generate:backend:api-serializer [PATH]`
+
+Generate an API serializer class
+
+```
+USAGE
+  $ flarum-cli generate backend api-serializer [PATH]
+
+ARGUMENTS
+  PATH  Where should this command be executed?
+
+OPTIONS
+  -h, --help  show CLI help
+```
+
+_See code: [src/commands/generate/backend/api-serializer.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/api-serializer.ts)_
 
 ## `flarum-cli generate:backend:api-serializer-attributes [PATH]`
 
@@ -117,6 +139,23 @@ OPTIONS
 ```
 
 _See code: [src/commands/generate/backend/event-listener.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/event-listener.ts)_
+
+## `flarum-cli generate:backend:handler [PATH]`
+
+Generate a domain logic handler class
+
+```
+USAGE
+  $ flarum-cli generate backend handler [PATH]
+
+ARGUMENTS
+  PATH  Where should this command be executed?
+
+OPTIONS
+  -h, --help  show CLI help
+```
+
+_See code: [src/commands/generate/backend/handler.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/handler.ts)_
 
 ## `flarum-cli generate:backend:integration-test [PATH]`
 
@@ -186,6 +225,40 @@ OPTIONS
 
 _See code: [src/commands/generate/backend/model.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/model.ts)_
 
+## `flarum-cli generate:backend:policy [PATH]`
+
+Generate a policy class
+
+```
+USAGE
+  $ flarum-cli generate backend policy [PATH]
+
+ARGUMENTS
+  PATH  Where should this command be executed?
+
+OPTIONS
+  -h, --help  show CLI help
+```
+
+_See code: [src/commands/generate/backend/policy.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/policy.ts)_
+
+## `flarum-cli generate:backend:repository [PATH]`
+
+Generate a repository class
+
+```
+USAGE
+  $ flarum-cli generate backend repository [PATH]
+
+ARGUMENTS
+  PATH  Where should this command be executed?
+
+OPTIONS
+  -h, --help  show CLI help
+```
+
+_See code: [src/commands/generate/backend/repository.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/repository.ts)_
+
 ## `flarum-cli generate:backend:route [PATH]`
 
 Generate a routes extender
@@ -219,6 +292,23 @@ OPTIONS
 ```
 
 _See code: [src/commands/generate/backend/service-provider.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/service-provider.ts)_
+
+## `flarum-cli generate:backend:validator [PATH]`
+
+Generate a validator class
+
+```
+USAGE
+  $ flarum-cli generate backend validator [PATH]
+
+ARGUMENTS
+  PATH  Where should this command be executed?
+
+OPTIONS
+  -h, --help  show CLI help
+```
+
+_See code: [src/commands/generate/backend/validator.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/validator.ts)_
 
 ## `flarum-cli help [COMMAND]`
 
