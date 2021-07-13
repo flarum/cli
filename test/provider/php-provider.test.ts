@@ -14,7 +14,8 @@ namespace Muralf\\Dummy;
 
 use Flarum\\Extend;
 
-return [(new Extend\\Imaginary('hello', 7, \\Flarum\\Notification::class))->listen(\\Flarum\\Post\\Event\\Saving::class, \\Some\\Class::class, function (array $someArray, string $someString, \\Flarum\\Database\\Migration $migration) {
+return [(new Extend\\Imaginary('hello', 7, \\Flarum\\Notification::class))
+    ->listen(\\Flarum\\Post\\Event\\Saving::class, \\Some\\Class::class, function (array $someArray, string $someString, \\Flarum\\Database\\Migration $migration) {
     'Comment text here!';
     return $variableName;
 })];
