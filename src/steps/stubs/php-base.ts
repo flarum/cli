@@ -1,90 +1,26 @@
-import { pick } from '@zodash/pick';
-import { Store } from 'mem-fs';
-import { create, Editor } from 'mem-fs-editor';
+import { BaseStubStep } from './base';
+import { Editor } from 'mem-fs-editor';
 import { PromptObject } from 'prompts';
 import { ParamProvider } from '../../provider/param-provider';
 import { PathProvider } from '../../provider/path-provider';
-import { PhpProvider } from '../../provider/php-provider';
-import { Step } from '../step-manager';
-import { extensionMetadata } from '../../utils/extension-metadata';
-import { cloneAndFill } from '../../utils/clone-and-fill';
 
-interface UserProvidedParam extends Omit<PromptObject, 'type'> {
-  type: string;
-}
-
-export interface StubGenerationSchema {
-  /**
-   * A period-delimited subdirectory for where the stub should be
-   * located relative to the extension PHP src.
-   */
-  recommendedSubdir: string;
-
-  forceRecommendedSubdir?: boolean;
-
-  /**
-   * Where should the file be created in relation to the extension root?
-   *
-   * Defaults to `./src`.
-   */
-  root?: string;
-
-  /**
-   * The relative path to the stub's source file relative to the
-   * `stubs` directory.
-   */
-  sourceFile: string;
-
-  params: UserProvidedParam[];
-}
-
-export abstract class BasePhpStubStep implements Step {
-  abstract type: string;
-
-  protected abstract schema: StubGenerationSchema;
-
-  composable = true;
+export abstract class BasePhpStubStep extends BaseStubStep {
+  protected defaultRoot = './src';
 
   get exposes(): string[] {
-    return [...this.additionalExposes, 'class'];
+    return [...super.exposes, 'class'];
   }
-
-  protected additionalExposes: string[] = [];
 
   get implicitParams(): string[] {
-    return [...this.additionalImplicitParams, 'classNamespace', 'extensionId'];
-  }
-
-  protected additionalImplicitParams: string[] = [];
-
-  protected params: Record<string, unknown> = {};
-
-  async run(fs: Store, pathProvider: PathProvider, paramProvider: ParamProvider, _phpProvider: PhpProvider): Promise<Store> {
-    const fsEditor = create(fs);
-
-    this.params = await this.compileParams(fsEditor, pathProvider, paramProvider);
-
-    const newFileName = await this.getFileName(fs, pathProvider, paramProvider);
-    const newFilePath = pathProvider.ext(this.schema.root || './src', this.subdir, `${newFileName}.php`);
-    const stub = cloneAndFill(this.schema.sourceFile, this.params as Record<string, string>);
-
-    fsEditor.copyTpl(pathProvider.boilerplate('stubs', stub), newFilePath, this.params);
-
-    return fs;
-  }
-
-  getExposed(_pathProvider: PathProvider, _paramProvider: ParamProvider): Record<string, unknown> {
-    return pick(this.params, this.exposes);
+    return [...super.implicitParams, 'classNamespace'];
   }
 
   protected phpClassParams: string[] = [];
 
-  protected async compileParams(fsEditor: Editor, pathProvider: PathProvider, paramProvider: ParamProvider): Promise<Record<string, unknown>> {
-    const composerJsonContents = this.composerJsonContents(fsEditor, pathProvider);
-
-    const params: Record<string, string> = {
+  protected async precompileParams(composerJsonContents: any, fsEditor: Editor, pathProvider: PathProvider, paramProvider: ParamProvider): Promise<Record<string, unknown>> {
+    const params: Record<string, unknown> = {
+      ...await super.precompileParams(composerJsonContents, fsEditor, pathProvider, paramProvider),
       classNamespace: this.stubNamespace(composerJsonContents, pathProvider),
-      extensionId: composerJsonContents.extensionId,
     };
 
     let paramDefs = this.schema.params.filter(param => !this.implicitParams.includes(param.name as string));
@@ -111,29 +47,16 @@ export abstract class BasePhpStubStep implements Step {
 
       // eslint-disable-next-line no-await-in-loop
       params[classParam] = await paramProvider.get(paramDef as PromptObject);
-      params[`${classParam}Name`] = params[classParam].split('\\').pop() as string;
+      params[`${classParam}Name`] = (params[classParam] as string).split('\\').pop();
       paramDefs = paramDefs.filter(param => param.name !== classParam && param.name !== `${classParam}Name`);
     }
-
-    for (let i = 0; i < paramDefs.length; i++) {
-      // eslint-disable-next-line no-await-in-loop
-      params[paramDefs[i].name as string] = await paramProvider.get(paramDefs[i] as PromptObject);
-    }
-
-    this.implicitParams.forEach(implicitParam => {
-      if (!params[implicitParam] && paramProvider.has(implicitParam)) {
-        params[implicitParam] = paramProvider.cached()[implicitParam] as string;
-      }
-    });
 
     return params;
   }
 
   protected async getFileName(_fs: Store, _pathProvider: PathProvider, paramProvider: ParamProvider): Promise<string> {
-    return paramProvider.get<string>({ name: 'className', type: 'text' });
+    return await paramProvider.get<string>({ name: 'className', type: 'text' }) + '.php';
   }
-
-  protected subdir !: string;
 
   protected stubNamespace(composerJsonContents: any, pathProvider: PathProvider): string {
     const packageNamespace = composerJsonContents.packageNamespace;
@@ -158,9 +81,5 @@ export abstract class BasePhpStubStep implements Step {
     }
 
     return namespace;
-  }
-
-  protected composerJsonContents(fsEditor: Editor, pathProvider: PathProvider): any {
-    return extensionMetadata(fsEditor.readJSON(pathProvider.ext('composer.json')));
   }
 }
