@@ -1,61 +1,61 @@
 {
-  "name": "<%= packageName %>",<% if (packageDescription) { %>
-  "description": "<%= packageDescription %>",<% } %>
-  "keywords": [
-    "flarum"
-  ],
-  "type": "flarum-extension",
-  "license": "<%= licenseType %>",
-  "require": {
-    "flarum/core": "^1.0.0"
-  },
-  "require-dev": {
-    "flarum/testing": "^1.0.0"
-  },
-  "authors": [<% if (authorName && authorEmail) { %>
-    {
-      "name": "<%= authorName %>",<% if (authorEmail) { %>
-      "email": "<%= authorEmail %>",<% } %>
-      "role": "Developer"
-    }
-  <% } %>],
-  "autoload": {
-    "psr-4": {
-      "<%= packageNamespace %>\\": "src/"
-    }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "<%= packageNamespace %>\\Tests\\": "tests/"
-    }
-  },
-  "extra": {
-    "flarum-extension": {
-      "title": "<%= extensionName %>",
-      "category": "",
-      "icon": {
-        "name": "",
-        "backgroundColor": "",
-        "color": ""
-      }
-    },
-    "flagrow": {
-      "discuss": ""
-    }
-  },
-  "scripts": {
-    "test": [
-      "@test:unit",
-      "@test:integration"
+    "name": "<%= packageName %>",<% if (packageDescription) { %>
+    "description": "<%= packageDescription %>",<% } %>
+    "keywords": [
+        "flarum"
     ],
-    "test:unit": "phpunit -c tests/phpunit.unit.xml",
-    "test:integration": "phpunit -c tests/phpunit.integration.xml",
-    "test:setup": "@php tests/integration/setup.php"
-  },
-  "scripts-descriptions": {
-    "test": "Runs all tests.",
-    "test:unit": "Runs all unit tests.",
-    "test:integration": "Runs all integration tests.",
-    "test:setup": "Sets up a database for use with integration tests. Execute this only once."
-  }
+    "type": "flarum-extension",
+    "license": "<%= licenseType %>",
+    "require": {
+        "flarum/core": "^1.0.0"
+    },
+    "require-dev": {
+        "flarum/testing": "^1.0.0"
+    },
+    "authors": [<% if (authorName && authorEmail) { %>
+        {
+            "name": "<%= authorName %>",<% if (authorEmail) { %>
+            "email": "<%= authorEmail %>",<% } %>
+            "role": "Developer"
+        }
+    <% } %>],
+    "autoload": {
+        "psr-4": {
+            "<%= packageNamespace %>\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "<%= packageNamespace %>\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "flarum-extension": {
+            "title": "<%= extensionName %>",
+            "category": "",
+            "icon": {
+                "name": "",
+                "backgroundColor": "",
+                "color": ""
+            }
+        },
+        "flagrow": {
+            "discuss": ""
+        }
+    },
+    "scripts": {
+        "test": [
+            "@test:unit",
+            "@test:integration"
+        ],
+        "test:unit": "phpunit -c tests/phpunit.unit.xml",
+        "test:integration": "phpunit -c tests/phpunit.integration.xml",
+        "test:setup": "@php tests/integration/setup.php"
+    },
+    "scripts-descriptions": {
+        "test": "Runs all tests.",
+        "test:unit": "Runs all unit tests.",
+        "test:integration": "Runs all integration tests.",
+        "test:setup": "Sets up a database for use with integration tests. Execute this only once."
+    }
 }
