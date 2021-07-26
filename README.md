@@ -10,6 +10,7 @@ A CLI for developing Flarum extensions</p>
 </p>
 
 <!-- toc -->
+* [Introduction](#introduction)
 * [Installation](#installation)
 * [Usage](#usage)
 * [Commands](#commands)
@@ -34,7 +35,7 @@ $ npm install -g flarum-cli
 $ flarum-cli COMMAND
 running command...
 $ flarum-cli (-v|--version|version)
-flarum-cli/1.0.0-alpha.6 linux-x64 node-v14.17.2
+flarum-cli/1.0.0 linux-x64 node-v14.17.2
 $ flarum-cli --help [COMMAND]
 USAGE
   $ flarum-cli COMMAND
@@ -58,330 +59,29 @@ flarum-cli --help
 
 # Commands
 <!-- commands -->
-* [`flarum-cli generate:backend:api-controller [PATH]`](#flarum-cli-generatebackendapi-controller-path)
-* [`flarum-cli generate:backend:api-serializer [PATH]`](#flarum-cli-generatebackendapi-serializer-path)
-* [`flarum-cli generate:backend:api-serializer-attributes [PATH]`](#flarum-cli-generatebackendapi-serializer-attributes-path)
-* [`flarum-cli generate:backend:event-listener [PATH]`](#flarum-cli-generatebackendevent-listener-path)
-* [`flarum-cli generate:backend:handler [PATH]`](#flarum-cli-generatebackendhandler-path)
-* [`flarum-cli generate:backend:integration-test [PATH]`](#flarum-cli-generatebackendintegration-test-path)
-* [`flarum-cli generate:backend:job [PATH]`](#flarum-cli-generatebackendjob-path)
-* [`flarum-cli generate:backend:migration [PATH]`](#flarum-cli-generatebackendmigration-path)
-* [`flarum-cli generate:backend:model [PATH]`](#flarum-cli-generatebackendmodel-path)
-* [`flarum-cli generate:backend:policy [PATH]`](#flarum-cli-generatebackendpolicy-path)
-* [`flarum-cli generate:backend:repository [PATH]`](#flarum-cli-generatebackendrepository-path)
-* [`flarum-cli generate:backend:route [PATH]`](#flarum-cli-generatebackendroute-path)
-* [`flarum-cli generate:backend:service-provider [PATH]`](#flarum-cli-generatebackendservice-provider-path)
-* [`flarum-cli generate:backend:validator [PATH]`](#flarum-cli-generatebackendvalidator-path)
-* [`flarum-cli help [COMMAND]`](#flarum-cli-help-command)
-* [`flarum-cli infra:backend-testing [PATH]`](#flarum-cli-infrabackend-testing-path)
-* [`flarum-cli init [PATH]`](#flarum-cli-init-path)
-* [`flarum-cli update:js-imports [PATH]`](#flarum-cli-updatejs-imports-path)
-
-## `flarum-cli generate:backend:api-controller [PATH]`
-
-Generate an API controller class
-
-```
-USAGE
-  $ flarum-cli generate backend api-controller [PATH]
-
-ARGUMENTS
-  PATH  Where should this command be executed?
-
-OPTIONS
-  -h, --help  show CLI help
-```
-
-_See code: [src/commands/generate/backend/api-controller.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/api-controller.ts)_
-
-## `flarum-cli generate:backend:api-serializer [PATH]`
-
-Generate an API serializer class
-
-```
-USAGE
-  $ flarum-cli generate backend api-serializer [PATH]
-
-ARGUMENTS
-  PATH  Where should this command be executed?
-
-OPTIONS
-  -h, --help  show CLI help
-```
-
-_See code: [src/commands/generate/backend/api-serializer.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/api-serializer.ts)_
-
-## `flarum-cli generate:backend:api-serializer-attributes [PATH]`
-
-Generate an API serializer attributes extender
-
-```
-USAGE
-  $ flarum-cli generate backend api-serializer-attributes [PATH]
-
-ARGUMENTS
-  PATH  Where should this command be executed?
-
-OPTIONS
-  -h, --help  show CLI help
-```
-
-_See code: [src/commands/generate/backend/api-serializer-attributes.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/api-serializer-attributes.ts)_
-
-## `flarum-cli generate:backend:event-listener [PATH]`
-
-Generate an event listener class
-
-```
-USAGE
-  $ flarum-cli generate backend event-listener [PATH]
-
-ARGUMENTS
-  PATH  Where should this command be executed?
-
-OPTIONS
-  -h, --help  show CLI help
-```
-
-_See code: [src/commands/generate/backend/event-listener.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/event-listener.ts)_
-
-## `flarum-cli generate:backend:handler [PATH]`
-
-Generate a domain logic handler class
-
-```
-USAGE
-  $ flarum-cli generate backend handler [PATH]
-
-ARGUMENTS
-  PATH  Where should this command be executed?
-
-OPTIONS
-  -h, --help  show CLI help
-```
-
-_See code: [src/commands/generate/backend/handler.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/handler.ts)_
-
-## `flarum-cli generate:backend:integration-test [PATH]`
-
-Generate an integration test class
-
-```
-USAGE
-  $ flarum-cli generate backend integration-test [PATH]
-
-ARGUMENTS
-  PATH  Where should this command be executed?
-
-OPTIONS
-  -h, --help  show CLI help
-```
-
-_See code: [src/commands/generate/backend/integration-test.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/integration-test.ts)_
-
-## `flarum-cli generate:backend:job [PATH]`
-
-Generate a job class
-
-```
-USAGE
-  $ flarum-cli generate backend job [PATH]
-
-ARGUMENTS
-  PATH  Where should this command be executed?
-
-OPTIONS
-  -h, --help  show CLI help
-```
-
-_See code: [src/commands/generate/backend/job.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/job.ts)_
-
-## `flarum-cli generate:backend:migration [PATH]`
-
-Generate a migration
-
-```
-USAGE
-  $ flarum-cli generate backend migration [PATH]
-
-ARGUMENTS
-  PATH  Where should this command be executed?
-
-OPTIONS
-  -h, --help  show CLI help
-```
-
-_See code: [src/commands/generate/backend/migration.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/migration.ts)_
-
-## `flarum-cli generate:backend:model [PATH]`
-
-Generate a model class
-
-```
-USAGE
-  $ flarum-cli generate backend model [PATH]
-
-ARGUMENTS
-  PATH  Where should this command be executed?
-
-OPTIONS
-  -h, --help  show CLI help
-```
-
-_See code: [src/commands/generate/backend/model.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/model.ts)_
-
-## `flarum-cli generate:backend:policy [PATH]`
-
-Generate a policy class
-
-```
-USAGE
-  $ flarum-cli generate backend policy [PATH]
-
-ARGUMENTS
-  PATH  Where should this command be executed?
-
-OPTIONS
-  -h, --help  show CLI help
-```
-
-_See code: [src/commands/generate/backend/policy.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/policy.ts)_
-
-## `flarum-cli generate:backend:repository [PATH]`
-
-Generate a repository class
-
-```
-USAGE
-  $ flarum-cli generate backend repository [PATH]
-
-ARGUMENTS
-  PATH  Where should this command be executed?
-
-OPTIONS
-  -h, --help  show CLI help
-```
-
-_See code: [src/commands/generate/backend/repository.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/repository.ts)_
-
-## `flarum-cli generate:backend:route [PATH]`
-
-Generate a routes extender
-
-```
-USAGE
-  $ flarum-cli generate backend route [PATH]
-
-ARGUMENTS
-  PATH  Where should this command be executed?
-
-OPTIONS
-  -h, --help  show CLI help
-```
-
-_See code: [src/commands/generate/backend/route.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/route.ts)_
-
-## `flarum-cli generate:backend:service-provider [PATH]`
-
-Generate a service provider class
-
-```
-USAGE
-  $ flarum-cli generate backend service-provider [PATH]
-
-ARGUMENTS
-  PATH  Where should this command be executed?
-
-OPTIONS
-  -h, --help  show CLI help
-```
-
-_See code: [src/commands/generate/backend/service-provider.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/service-provider.ts)_
-
-## `flarum-cli generate:backend:validator [PATH]`
-
-Generate a validator class
-
-```
-USAGE
-  $ flarum-cli generate backend validator [PATH]
-
-ARGUMENTS
-  PATH  Where should this command be executed?
-
-OPTIONS
-  -h, --help  show CLI help
-```
-
-_See code: [src/commands/generate/backend/validator.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/generate/backend/validator.ts)_
-
-## `flarum-cli help [COMMAND]`
-
-display help for flarum-cli
-
-```
-USAGE
-  $ flarum-cli help [COMMAND]
-
-ARGUMENTS
-  COMMAND  command to show help for
-
-OPTIONS
-  --all  see all commands in CLI
-```
-
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v3.2.2/src/commands/help.ts)_
-
-## `flarum-cli infra:backend-testing [PATH]`
-
-Add/Update backend testing infrastructure
-
-```
-USAGE
-  $ flarum-cli infra backend-testing [PATH]
-
-ARGUMENTS
-  PATH  Where should this command be executed?
-
-OPTIONS
-  -h, --help  show CLI help
-```
-
-_See code: [src/commands/infra/backend-testing.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/infra/backend-testing.ts)_
-
-## `flarum-cli init [PATH]`
-
-Create a new Flarum extension
-
-```
-USAGE
-  $ flarum-cli init [PATH]
-
-ARGUMENTS
-  PATH  Where should this command be executed?
-
-OPTIONS
-  -h, --help  show CLI help
-```
-
-_See code: [src/commands/init.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/init.ts)_
-
-## `flarum-cli update:js-imports [PATH]`
-
-Updates JS imports from core to use proper namespaces
-
-```
-USAGE
-  $ flarum-cli update js-imports [PATH]
-
-ARGUMENTS
-  PATH  Where should this command be executed?
-
-OPTIONS
-  -h, --help  show CLI help
-```
-
-_See code: [src/commands/update/js-imports.ts](https://github.com/flarum/flarum-cli/blob/v1.0.0-alpha.6/src/commands/update/js-imports.ts)_
+* `flarum-cli generate:backend:api-controller [PATH]`
+* `flarum-cli generate:backend:api-serializer [PATH]`
+* `flarum-cli generate:backend:api-serializer-attributes [PATH]`
+* `flarum-cli generate:backend:event-listener [PATH]`
+* `flarum-cli generate:backend:handler [PATH]`
+* `flarum-cli generate:backend:integration-test [PATH]`
+* `flarum-cli generate:backend:job [PATH]`
+* `flarum-cli generate:backend:migration [PATH]`
+* `flarum-cli generate:backend:model [PATH]`
+* `flarum-cli generate:backend:policy [PATH]`
+* `flarum-cli generate:backend:repository [PATH]`
+* `flarum-cli generate:backend:route [PATH]`
+* `flarum-cli generate:backend:service-provider [PATH]`
+* `flarum-cli generate:backend:validator [PATH]`
+
+
+* `flarum-cli generate:frontend:model [PATH]`
+
+
+* `flarum-cli help [COMMAND]`
+* `flarum-cli infra:backend-testing [PATH]`
+* `flarum-cli init [PATH]`
+* `flarum-cli update:js-imports [PATH]`
 <!-- commandsstop -->
 
 ## For Maintainers

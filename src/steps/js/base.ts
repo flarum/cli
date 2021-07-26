@@ -17,12 +17,11 @@ export abstract class BaseJsStep implements Step {
   async run(fs: Store, pathProvider: PathProvider, paramProvider: ParamProvider, _phpProvider: PhpProvider): Promise<Store> {
     const fsEditor = create(fs);
 
-    let frontends = await paramProvider.get({ name: 'frontend', type: 'text' });
+    const frontend: string = await paramProvider.get({ name: 'frontend', type: 'text' });
+    let frontends: string[] = [frontend];
 
-    if (frontends === 'common') {
+    if (frontend === 'common') {
       frontends = ['admin', 'forum'];
-    } else {
-      frontends = [frontends];
     }
 
     frontends.forEach(frontend => {
@@ -49,9 +48,9 @@ export abstract class BaseJsStep implements Step {
     return fs;
   }
 
-  protected abstract async getDefinition(): string;
+  protected abstract async getDefinition(paramProvider: ParamProvider): Promise<string>;
 
-  protected abstract async getImports(): string;
+  protected abstract async getImports(frontend: string, pathProvider: PathProvider, paramProvider: ParamProvider): Promise<string>;
 
   protected importPath(frontend: string, classNamespace: string): string {
     let path = `../${classNamespace}`;

@@ -1,7 +1,7 @@
 {
   "name": "flarum-cli",
   "description": "A CLI for developing Flarum extensions",
-  "version": "1.0.0-alpha.6",
+  "version": "1.0.0",
   "author": "Flarum Team",
   "bin": {
     "fl": "bin/run",
@@ -60,6 +60,9 @@
     "topics": {
       "generate:backend": {
         "description": "add backend boilerplate code to an existing Flarum extension"
+      },
+      "generate:frontend": {
+        "description": "add frontend boilerplate code to an existing Flarum extension"
       },
       "generate": {
         "description": "add boilerplate code to an existing Flarum extension"
