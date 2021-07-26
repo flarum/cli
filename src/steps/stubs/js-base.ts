@@ -3,6 +3,7 @@ import { Editor } from 'mem-fs-editor';
 import { BaseStubStep } from './base';
 import { ParamProvider } from '../../provider/param-provider';
 import { PathProvider } from '../../provider/path-provider';
+import { cloneAndFill } from '../../utils/clone-and-fill';
 
 export abstract class BaseJsStubStep extends BaseStubStep {
   protected defaultRoot = './js/src';
@@ -12,17 +13,26 @@ export abstract class BaseJsStubStep extends BaseStubStep {
   }
 
   get implicitParams(): string[] {
-    return [...super.implicitParams];
+    return [...super.implicitParams, 'classNamespace'];
   }
 
   protected async precompileParams(composerJsonContents: any, fsEditor: Editor, pathProvider: PathProvider, paramProvider: ParamProvider): Promise<Record<string, unknown>> {
     const params = await super.precompileParams(composerJsonContents, fsEditor, pathProvider, paramProvider);
+
+    let paramDefs = this.schema.params.filter(param => !this.implicitParams.includes(param.name as string));
 
     if (this.schema.forceRecommendedSubdir || pathProvider.requestedDir() === null) {
       this.subdir = this.schema.recommendedSubdir;
     } else {
       this.subdir = pathProvider.requestedDir()!.slice(`${pathProvider.ext('js/src')}/`.length);
     }
+
+    params.frontend = await paramProvider.get(paramDefs.find(param => param.name === 'frontend') as PromptObject);
+    params.className = await paramProvider.get(paramDefs.find(param => param.name === 'className') as PromptObject);
+
+    this.subdir = cloneAndFill(this.subdir, params as Record<string, string>);
+
+    params.classNamespace = `${this.subdir}/${params.className}`;
 
     return params;
   }
