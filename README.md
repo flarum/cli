@@ -62,6 +62,7 @@ flarum-cli --help
 * `flarum-cli generate:backend:api-controller [PATH]`
 * `flarum-cli generate:backend:api-serializer [PATH]`
 * `flarum-cli generate:backend:api-serializer-attributes [PATH]`
+* `flarum-cli generate:backend:command [PATH]`
 * `flarum-cli generate:backend:event-listener [PATH]`
 * `flarum-cli generate:backend:handler [PATH]`
 * `flarum-cli generate:backend:integration-test [PATH]`
@@ -73,11 +74,8 @@ flarum-cli --help
 * `flarum-cli generate:backend:route [PATH]`
 * `flarum-cli generate:backend:service-provider [PATH]`
 * `flarum-cli generate:backend:validator [PATH]`
-
-
+* `flarum-cli generate:frontend:modal [PATH]`
 * `flarum-cli generate:frontend:model [PATH]`
-
-
 * `flarum-cli help [COMMAND]`
 * `flarum-cli infra:backend-testing [PATH]`
 * `flarum-cli init [PATH]`
