@@ -15,6 +15,7 @@ import { GenerateRepositoryStub } from '../../../src/steps/stubs/backend/reposit
 import { GenerateValidatorStub } from '../../../src/steps/stubs/backend/validator';
 import { GeneratePolicyStub } from '../../../src/steps/stubs/backend/policy';
 import { GenerateCommandStub } from '../../../src/steps/stubs/backend/command';
+import { GenerateModalStub } from '../../../src/steps/stubs/frontend/modal';
 import { PathProvider } from '../../../src/provider/path-provider';
 
 interface StubTest {
@@ -365,6 +366,28 @@ const frontendTestSpecs: StubTest[] = [
       classNamespace: 'somePath/CustomModel',
       frontend: 'common',
       modelPluralSnake: 'custom_models',
+    },
+  },
+  // Modal
+  {
+    stubClass: GenerateModalStub,
+    params: {
+      frontend: 'forum',
+      className: 'CustomModal',
+    },
+    expectedModifiedFilesDefaultDir: [
+      '/ext/js/src/forum/components/CustomModal.js',
+    ],
+    expectedModifiedFilesRequestedDir: [
+      `${requestedJsDir}/CustomModal.js`,
+    ],
+    expectedExposedParamsDefaultDir: {
+      className: 'CustomModal',
+      frontend: 'forum',
+    },
+    expectedExposedParamsRequestedDir: {
+      className: 'CustomModal',
+      frontend: 'forum',
     },
   },
 ];
