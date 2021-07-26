@@ -29,6 +29,6 @@ class <%= className %> extends TestCase
     /** @test */
     public function test_works()
     {
-        $this->assertTrue(true);
+        // See https://docs.flarum.org/extend/testing.html#backend-tests for more information.
     }
 }

@@ -36,6 +36,8 @@ class <%= className %> extends AbstractDeleteController
      */
     protected function delete(ServerRequestInterface $request)
     {
+        // See https://docs.flarum.org/extend/api.html#api-endpoints for more information.
+
         $modelId = Arr::get($request->getQueryParams(), 'id');
         $actor = RequestUtil::getActor($request);
         $input = $request->getParsedBody();

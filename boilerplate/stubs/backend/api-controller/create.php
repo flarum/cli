@@ -37,6 +37,8 @@ class <%= className %> extends AbstractCreateController
      */
     protected function data(ServerRequestInterface $request, Document $document)
     {
+        // See https://docs.flarum.org/extend/api.html#api-endpoints for more information.
+
         $actor = RequestUtil::getActor($request);
         $data = Arr::get($request->getParsedBody(), 'data', []);
         <% if (typeof handlerCommandClassName !== 'undefined' && handlerCommandClassName) { %>

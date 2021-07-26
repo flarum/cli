@@ -27,6 +27,8 @@ class <%= className %> extends AbstractSerializer
             );
         }
 
+        // See https://docs.flarum.org/extend/api.html#serializers for more information.
+
         return [
             // ...
         ];

@@ -8,7 +8,7 @@ class <%= className %>
 {
     public function register()
     {
-        // $this->container->...
+        // See https://docs.flarum.org/extend/service-provider.html#service-provider for more information.
     }
 
     public function boot(Container $container)

@@ -34,6 +34,8 @@ class <%= className %> extends AbstractListController
      */
     protected function data(ServerRequestInterface $request, Document $document)
     {
+        // See https://docs.flarum.org/extend/api.html#api-endpoints for more information.
+
         $actor = RequestUtil::getActor($request);
 
         $filters = $this->extractFilter($request);

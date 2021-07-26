@@ -10,7 +10,6 @@ class <%= className %> extends AbstractValidator
      * {@inheritdoc}
      */
     protected $rules = [
-        // Checkout https://laravel.com/docs/8.x/validation#available-validation-rules
-        // ...
+        // See https://laravel.com/docs/8.x/validation#available-validation-rules for more information.
     ];
 }

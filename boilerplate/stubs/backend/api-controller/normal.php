@@ -21,6 +21,8 @@ class <%= className %> extends AbstractSerializeController
      */
     protected function createElement($data, SerializerInterface $serializer)
     {
+        // See https://docs.flarum.org/extend/api.html#api-endpoints for more information.
+
         // return new Collection($data, $serializer);
         // return new Resource($data, $serializer);
     }
