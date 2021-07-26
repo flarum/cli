@@ -8,6 +8,7 @@ import { GenerateHandlerCommandStub } from '../../../src/steps/stubs/backend/han
 import { GenerateIntegrationTestStub } from '../../../src/steps/stubs/backend/integration-test';
 import { GenerateMigrationStub } from '../../../src/steps/stubs/backend/migration';
 import { GenerateModelStub } from '../../../src/steps/stubs/backend/model';
+import { GenerateModelStub as GenerateFrontendModelStub } from '../../../src/steps/stubs/frontend/model';
 import { GenerateServiceProviderStub } from '../../../src/steps/stubs/backend/service-provider';
 import { GenerateJobStub } from '../../../src/steps/stubs/backend/job';
 import { GenerateRepositoryStub } from '../../../src/steps/stubs/backend/repository';
@@ -30,9 +31,10 @@ interface StubTest {
 }
 
 const requestedDir = '/ext/src/somePath';
+const requestedJsDir = '/ext/js/src/somePath';
 const requestedTestDir = '/ext/tests/somePath';
 
-const testSpecs: StubTest[] = [
+const backendTestSpecs: StubTest[] = [
   // Event Listener
   {
     stubClass: GenerateEventListenerStub,
@@ -267,31 +269,11 @@ const testSpecs: StubTest[] = [
       class: 'Flarum\\Demo\\somePath\\CustomBusCommandHandler',
     },
   },
-
-  // Integration Test
-  {
-    stubClass: GenerateIntegrationTestStub,
-    params: {
-      className: 'ListPotatoesTest',
-    },
-    expectedModifiedFilesDefaultDir: [
-      '/ext/tests/integration/api/ListPotatoesTest.php',
-    ],
-    expectedModifiedFilesRequestedDir: [
-      `${requestedTestDir}/ListPotatoesTest.php`,
-    ],
-    expectedExposedParamsDefaultDir: {
-      class: 'Flarum\\Demo\\tests\\integration\\api\\ListPotatoesTest',
-    },
-    expectedExposedParamsRequestedDir: {
-      class: 'Flarum\\Demo\\tests\\somePath\\ListPotatoesTest',
-    },
-  },
 ];
 
 // Api Controllers
 ['normal', 'list', 'show', 'create', 'update', 'delete'].forEach(classType => {
-  testSpecs.push({
+  backendTestSpecs.push({
     stubClass: GenerateApiControllerStub,
     params: {
       className: `${classType}Controller`,
@@ -314,6 +296,51 @@ const testSpecs: StubTest[] = [
   });
 });
 
+const backendTestsTestSpecs: StubTest[] = [
+  // Integration Test
+  {
+    stubClass: GenerateIntegrationTestStub,
+    params: {
+      className: 'ListPotatoesTest',
+    },
+    expectedModifiedFilesDefaultDir: [
+      '/ext/tests/integration/api/ListPotatoesTest.php',
+    ],
+    expectedModifiedFilesRequestedDir: [
+      `${requestedTestDir}/ListPotatoesTest.php`,
+    ],
+    expectedExposedParamsDefaultDir: {
+      class: 'Flarum\\Demo\\tests\\integration\\api\\ListPotatoesTest',
+    },
+    expectedExposedParamsRequestedDir: {
+      class: 'Flarum\\Demo\\tests\\somePath\\ListPotatoesTest',
+    },
+  },
+];
+
+const frontendTestSpecs: StubTest[] = [
+  // Frontend Model
+  {
+    stubClass: GenerateFrontendModelStub,
+    params: {
+      frontend: 'common',
+      className: 'CustomModel',
+    },
+    expectedModifiedFilesDefaultDir: [
+      '/ext/js/src/common/models/CustomModel.js',
+    ],
+    expectedModifiedFilesRequestedDir: [
+      `${requestedJsDir}/CustomModel.js`,
+    ],
+    expectedExposedParamsDefaultDir: {
+      className: 'CustomModel',
+    },
+    expectedExposedParamsRequestedDir: {
+      className: 'CustomModel',
+    },
+  },
+];
+
 const sampleComposerJson = {
   name: 'flarum/test',
   autoload: {
@@ -323,29 +350,35 @@ const sampleComposerJson = {
   },
 };
 
-describe('Stub tests', function () {
-  testSpecs.forEach(spec => {
-    describe(`Stub Test: ${spec.stubClass.name}`, function () {
-      const initialFilesCallback = (pathProvider: PathProvider) => {
-        const initial: Record<string, string> = {};
-        initial[pathProvider.ext('composer.json')] = JSON.stringify(sampleComposerJson);
-        return initial;
-      };
+[
+  { requestedDir: requestedDir, testSpecs: backendTestSpecs },
+  { requestedDir: requestedTestDir, testSpecs: backendTestsTestSpecs },
+  { requestedDir: requestedJsDir, testSpecs: frontendTestSpecs },
+].forEach(specDefinition => {
+  describe('Backend stub tests', function () {
+    specDefinition.testSpecs.forEach(spec => {
+      describe(`Stub Test: ${spec.stubClass.name}`, function () {
+        const initialFilesCallback = (pathProvider: PathProvider) => {
+          const initial: Record<string, string> = {};
+          initial[pathProvider.ext('composer.json')] = JSON.stringify(sampleComposerJson);
+          return initial;
+        };
 
-      test('With default dir', async function () {
-        const { fs, exposedParams } = await runStep(spec.stubClass, Object.values(spec.params), {}, initialFilesCallback);
+        test('With default dir', async function () {
+          const { fs, exposedParams } = await runStep(spec.stubClass, Object.values(spec.params), {}, initialFilesCallback);
 
-        expect(getFsPaths(fs)).toStrictEqual([...spec.expectedModifiedFilesDefaultDir, '/ext/composer.json'].sort());
+          expect(getFsPaths(fs)).toStrictEqual([...spec.expectedModifiedFilesDefaultDir, '/ext/composer.json'].sort());
 
-        expect(exposedParams).toStrictEqual(spec.expectedExposedParamsDefaultDir);
-      });
+          expect(exposedParams).toStrictEqual(spec.expectedExposedParamsDefaultDir);
+        });
 
-      test('With requested dir', async function () {
-        const { fs, exposedParams } = await runStep(spec.stubClass, Object.values(spec.params), {}, initialFilesCallback, requestedDir);
+        test('With requested dir', async function () {
+          const { fs, exposedParams } = await runStep(spec.stubClass, Object.values(spec.params), {}, initialFilesCallback, specDefinition.requestedDir);
 
-        expect(getFsPaths(fs)).toStrictEqual([...spec.expectedModifiedFilesRequestedDir, '/ext/composer.json'].sort());
+          expect(getFsPaths(fs)).toStrictEqual([...spec.expectedModifiedFilesRequestedDir, '/ext/composer.json'].sort());
 
-        expect(exposedParams).toStrictEqual(spec.expectedExposedParamsRequestedDir);
+          expect(exposedParams).toStrictEqual(spec.expectedExposedParamsRequestedDir);
+        });
       });
     });
   });
