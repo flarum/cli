@@ -2,9 +2,10 @@
 
 namespace <%= classNamespace %>;
 
+use Flarum\Foundation\AbstractServiceProvider;
 use Illuminate\Contracts\Container\Container;
 
-class <%= className %>
+class <%= className %> extends AbstractServiceProvider
 {
     public function register()
     {
