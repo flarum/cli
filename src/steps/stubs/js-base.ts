@@ -1,5 +1,6 @@
 import { Store } from 'mem-fs';
 import { Editor } from 'mem-fs-editor';
+import { PromptObject } from 'prompts';
 import { BaseStubStep } from './base';
 import { ParamProvider } from '../../provider/param-provider';
 import { PathProvider } from '../../provider/path-provider';
@@ -19,7 +20,7 @@ export abstract class BaseJsStubStep extends BaseStubStep {
   protected async precompileParams(composerJsonContents: any, fsEditor: Editor, pathProvider: PathProvider, paramProvider: ParamProvider): Promise<Record<string, unknown>> {
     const params = await super.precompileParams(composerJsonContents, fsEditor, pathProvider, paramProvider);
 
-    let paramDefs = this.schema.params.filter(param => !this.implicitParams.includes(param.name as string));
+    const paramDefs = this.schema.params.filter(param => !this.implicitParams.includes(param.name as string));
 
     if (this.schema.forceRecommendedSubdir || pathProvider.requestedDir() === null) {
       this.subdir = this.schema.recommendedSubdir;

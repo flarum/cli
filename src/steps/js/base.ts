@@ -6,7 +6,7 @@ import { PathProvider } from '../../provider/path-provider';
 import { PhpProvider } from '../../provider/php-provider';
 import { Step } from '../step-manager';
 
-const IMPORTS_REGEX = /((^import\s+(?:([\w,{}\s*]+)\s+from)?\s*(?:(?:["'])?([@\w\s\\\/.-]+)\3?(?:["'])?)\s*;?\s*)*)(.*)/m;
+const IMPORTS_REGEX = /((^import\s+(?:([\w,{}\s*]+)\s+from)?\s*(?:(?:["'])?([@\w\s\\.-]+)\3?(?:["'])?)\s*;?\s*)*)(.*)/m;
 const INIT_REGEX = /^(app\.initializers\.add\('[^']+',\s*\(\)\s*=>\s*\{)$/m;
 
 export abstract class BaseJsStep implements Step {

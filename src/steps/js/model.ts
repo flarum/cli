@@ -1,7 +1,3 @@
-import { glob } from 'glob';
-import { Store } from 'mem-fs';
-import { create } from 'mem-fs-editor';
-import { PromptObject } from 'prompts';
 import { ParamProvider } from '../../provider/param-provider';
 import { PathProvider } from '../../provider/path-provider';
 import { BaseJsStep } from './base';
