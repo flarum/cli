@@ -15,6 +15,11 @@ A CLI for developing Flarum extensions</p>
 * [Commands](#commands)
 <!-- tocstop -->
 
+# Introduction
+One of our core values is ***Framework First***, Flarum is as much a framework for extension development as it is a forum platform.
+
+This tool was built to simplify the development of Flarum extensions by automating some repetitive and menial tasks. It allows to generate boilerplate skeleton for a new extension, common backend classes and frontend components, extenders, as well as other maintenance tasks.
+
 # Installation
 <!-- installation -->
 ```sh-session
