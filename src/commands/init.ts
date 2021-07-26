@@ -32,7 +32,7 @@ export default class Init extends BaseCommand {
   }
 
   protected goodbyeMessage() {
-    return 'Extension generation complete! Visit https://docs.flarum.org/extend to learn more about Flarume extension development.';
+    return 'Extension generation complete! Visit https://docs.flarum.org/extend to learn more about Flarum extension development.';
   }
 
   protected async additionalPreRunChecks(extRoot: string) {
