@@ -334,9 +334,15 @@ const frontendTestSpecs: StubTest[] = [
     ],
     expectedExposedParamsDefaultDir: {
       className: 'CustomModel',
+      classNamespace: 'common/models/CustomModel',
+      frontend: 'common',
+      modelPluralSnake: 'custom_models',
     },
     expectedExposedParamsRequestedDir: {
       className: 'CustomModel',
+      classNamespace: `${requestedJsDir}/CustomModel`,
+      frontend: 'common',
+      modelPluralSnake: 'custom_models',
     },
   },
 ];

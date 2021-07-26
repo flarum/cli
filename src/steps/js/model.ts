@@ -1,0 +1,39 @@
+import { glob } from 'glob';
+import { Store } from 'mem-fs';
+import { create } from 'mem-fs-editor';
+import { PromptObject } from 'prompts';
+import { ParamProvider } from '../../provider/param-provider';
+import { PathProvider } from '../../provider/path-provider';
+import { BaseJsStep } from './base';
+
+export class GenerateModelDefinition extends BaseJsStep {
+  type = 'Generate JS Model Definition';
+
+  protected async getDefinition(paramProvider: ParamProvider): string {
+    const className = await paramProvider.get({ name: 'className', type: 'text' });
+    let modelName = await paramProvider.get({ name: 'modelName', type: 'text' });
+
+    if (modelName.includes('-')) {
+      modelName = `['${modelName}']`;
+    } else {
+      modelName = `.${modelName}`;
+    }
+
+    return `app.store.models${modelName} = ${className};`;
+  }
+
+  protected async getImports(frontend: string, pathProvider: PathProvider, paramProvider: ParamProvider): string {
+    const className = await paramProvider.get({ name: 'className', type: 'text' });
+    const classNamespace = await paramProvider.get({ name: 'classNamespace', type: 'text' });
+
+    const importPath = this.importPath(frontend, classNamespace);
+
+    return `import ${className} from '${importPath}';`;
+  }
+
+  exposes = [];
+
+  getExposed(_pathProvider: PathProvider, _paramProvider: ParamProvider): Record<string, unknown> {
+    return {};
+  }
+}
