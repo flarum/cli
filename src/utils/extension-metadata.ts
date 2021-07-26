@@ -1,3 +1,7 @@
+export function extensionId(packageName: string): string {
+  return packageName.replace(/(flarum-ext-)|(flarum-)/, '').replace('/', '-');
+}
+
 export function extensionMetadata(extensionComposerJson: any = {}) {
   const data: any = {};
   data.packageName = extensionComposerJson?.name || '';
@@ -10,8 +14,4 @@ export function extensionMetadata(extensionComposerJson: any = {}) {
   data.extensionId = extensionId(data.packageName);
 
   return data;
-}
-
-export function extensionId(packageName: string): string {
-  return packageName.replace(/(flarum-ext-)|(flarum-)/, '').replace('/', '-');
 }
