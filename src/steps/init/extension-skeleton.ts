@@ -7,6 +7,7 @@ import { ParamProvider } from '../../provider/param-provider';
 import { PathProvider } from '../../provider/path-provider';
 import { PhpProvider } from '../../provider/php-provider';
 import { Step } from '../step-manager';
+import { extensionId } from '../../utils/extension-metadata';
 
 export class ExtensionSkeleton implements Step {
   type = 'Generate extension skeleton';
@@ -114,6 +115,7 @@ export class ExtensionSkeleton implements Step {
       useCss,
       packageNamespace: namespace.replace(/\\/, '\\\\'),
       year: new Date().getFullYear().toString(),
+      extensionId: extensionId(packageName),
     };
 
     fsEditor.copyTpl(pathProvider.boilerplate('skeleton/extension'), pathProvider.ext(''), tpl, undefined, { globOptions: { dot: true } });
