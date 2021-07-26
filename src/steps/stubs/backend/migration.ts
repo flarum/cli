@@ -46,6 +46,6 @@ export class GenerateMigrationStub extends BasePhpStubStep {
     }
     const memMigrations: string[] = fs.all().map(f => f.path).filter(p => p.startsWith(pathProvider.ext('migrations')));
 
-    return getNextMigrationName([...persistedMigrations, ...memMigrations], this.params.name as string);
+    return getNextMigrationName([...persistedMigrations, ...memMigrations], this.params.name as string) + '.php';
   }
 }

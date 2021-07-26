@@ -69,7 +69,7 @@ export abstract class BaseStubStep implements Step {
     this.params = await this.compileParams(fsEditor, pathProvider, paramProvider);
 
     const newFileName = await this.getFileName(fs, pathProvider, paramProvider);
-    const newFilePath = pathProvider.ext(cloneAndFill(this.schema.root || this.defaultRoot, this.params as Record<string, string>), this.subdir, newFileName);
+    const newFilePath = pathProvider.ext(this.schema.root || this.defaultRoot, cloneAndFill(this.subdir, this.params as Record<string, string>), newFileName);
     const stub = cloneAndFill(this.schema.sourceFile, this.params as Record<string, string>);
 
     fsEditor.copyTpl(pathProvider.boilerplate('stubs', stub), newFilePath, this.params);

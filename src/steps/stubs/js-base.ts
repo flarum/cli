@@ -1,11 +1,11 @@
-import { BaseStubStep } from './base';
+import { Store } from 'mem-fs';
 import { Editor } from 'mem-fs-editor';
-import { PromptObject } from 'prompts';
+import { BaseStubStep } from './base';
 import { ParamProvider } from '../../provider/param-provider';
 import { PathProvider } from '../../provider/path-provider';
 
 export abstract class BaseJsStubStep extends BaseStubStep {
-  protected defaultRoot = './js/src/${frontend}';
+  protected defaultRoot = './js/src';
 
   get exposes(): string[] {
     return [...super.exposes, 'className'];
@@ -18,7 +18,11 @@ export abstract class BaseJsStubStep extends BaseStubStep {
   protected async precompileParams(composerJsonContents: any, fsEditor: Editor, pathProvider: PathProvider, paramProvider: ParamProvider): Promise<Record<string, unknown>> {
     const params = await super.precompileParams(composerJsonContents, fsEditor, pathProvider, paramProvider);
 
-    this.subdir = this.schema.recommendedSubdir;
+    if (this.schema.forceRecommendedSubdir || pathProvider.requestedDir() === null) {
+      this.subdir = this.schema.recommendedSubdir;
+    } else {
+      this.subdir = pathProvider.requestedDir()!.slice(`${pathProvider.ext('js/src')}/`.length);
+    }
 
     return params;
   }

@@ -1,6 +1,5 @@
-import { Editor } from 'mem-fs-editor';
+/* eslint-disable no-template-curly-in-string */
 import { Validator } from '../../../utils/validation';
-import { pluralSnakeCaseModel } from '../../../utils/model-name';
 import { BaseJsStubStep } from '../js-base';
 
 export class GenerateModelStub extends BaseJsStubStep {
@@ -9,7 +8,7 @@ export class GenerateModelStub extends BaseJsStubStep {
   protected additionalExposes = [];
 
   protected schema = {
-    recommendedSubdir: 'models',
+    recommendedSubdir: '${frontend}/models',
     sourceFile: 'frontend/model.js',
     params: [
       {

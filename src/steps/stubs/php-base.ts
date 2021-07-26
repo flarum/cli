@@ -1,6 +1,7 @@
-import { BaseStubStep } from './base';
+import { Store } from 'mem-fs';
 import { Editor } from 'mem-fs-editor';
 import { PromptObject } from 'prompts';
+import { BaseStubStep } from './base';
 import { ParamProvider } from '../../provider/param-provider';
 import { PathProvider } from '../../provider/path-provider';
 
@@ -65,7 +66,7 @@ export abstract class BasePhpStubStep extends BaseStubStep {
     if (this.schema.forceRecommendedSubdir || pathProvider.requestedDir() === null) {
       subdir = this.schema.recommendedSubdir.replace('\\', '.').replace('/', '.');
     } else {
-      subdir = pathProvider.requestedDir()!.slice(`${pathProvider.ext('src')}/`.length);
+      subdir = pathProvider.requestedDir()!.slice(`${pathProvider.ext((this.schema.root || this.defaultRoot).replace('./', ''))}/`.length);
     }
 
     this.subdir = subdir.replace('.', '/');
