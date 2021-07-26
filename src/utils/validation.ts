@@ -11,6 +11,10 @@ export class Validator {
     return /^([A-z-._0-9]+)$/.test(s.trim()) || 'Invalid path name: only alphanumerical characters allowed and (._-).';
   }
 
+  public static commandName(s: string) {
+    return /^([A-z-.:_0-9]+)$/.test(s.trim()) || 'Invalid path name: only alphanumerical characters allowed and (._-:).';
+  }
+
   public static migrationName(s: string) {
     return /^\w+$/.test(s.trim()) || 'Field is required; alphanumerical characters, underscores, and spaces only!';
   }

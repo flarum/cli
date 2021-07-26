@@ -5,6 +5,7 @@ import { GenerateEventListenerExtender } from '../../../src/steps/extenders/even
 import { GenerateRoutesExtender } from '../../../src/steps/extenders/route';
 import { GenerateServiceProviderExtender } from '../../../src/steps/extenders/service-provider';
 import { GeneratePolicyExtender } from '../../../src/steps/extenders/policy';
+import { GenerateConsoleCommandExtender } from '../../../src/steps/extenders/console-command';
 import { PathProvider } from '../../../src/provider/path-provider';
 
 interface ExtenderTest {
@@ -48,12 +49,19 @@ const testSpecs: ExtenderTest[] = [
       className: 'CustomServiceProvider',
     },
   },
-  // Event Listener
+  // Policy
   {
     extenderClass: GeneratePolicyExtender,
     params: {
       modelClass: 'Flarum\\CustomModel\\CustomModel',
       policyClass: 'Flarum\\Access\\CustomModelPolicy',
+    },
+  },
+  // Console Command
+  {
+    extenderClass: GenerateConsoleCommandExtender,
+    params: {
+      commandClass: 'Flarum\\Console\\CustomCommand',
     },
   },
 ];

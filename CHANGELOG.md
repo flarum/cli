@@ -13,6 +13,7 @@
 - Repository class generation.
 - Domain Handler class generation.
 - Validator class generation.
+- Console Command class generation with extender.
 - Service Provider class generation with extender.
 - Integration Test class generation.
 

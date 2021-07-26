@@ -14,6 +14,7 @@ import { GenerateJobStub } from '../../../src/steps/stubs/backend/job';
 import { GenerateRepositoryStub } from '../../../src/steps/stubs/backend/repository';
 import { GenerateValidatorStub } from '../../../src/steps/stubs/backend/validator';
 import { GeneratePolicyStub } from '../../../src/steps/stubs/backend/policy';
+import { GenerateCommandStub } from '../../../src/steps/stubs/backend/command';
 import { PathProvider } from '../../../src/provider/path-provider';
 
 interface StubTest {
@@ -179,6 +180,27 @@ const backendTestSpecs: StubTest[] = [
       class: 'Flarum\\Demo\\somePath\\CustomModelPolicy',
       modelClass: 'Flarum\\CustomModel\\CustomModel',
       modelClassName: 'CustomModel',
+    },
+  },
+
+  // Console Command
+  {
+    stubClass: GenerateCommandStub,
+    params: {
+      className: 'CustomCommand',
+      commandName: 'custom:command',
+    },
+    expectedModifiedFilesDefaultDir: [
+      '/ext/src/Console/CustomCommand.php',
+    ],
+    expectedModifiedFilesRequestedDir: [
+      `${requestedDir}/CustomCommand.php`,
+    ],
+    expectedExposedParamsDefaultDir: {
+      class: 'Flarum\\Demo\\Console\\CustomCommand',
+    },
+    expectedExposedParamsRequestedDir: {
+      class: 'Flarum\\Demo\\somePath\\CustomCommand',
     },
   },
 
