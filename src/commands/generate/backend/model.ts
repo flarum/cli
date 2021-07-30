@@ -394,13 +394,13 @@ export default class Model extends BaseCommand {
             [
               {
                 sourceStep: 'model',
-                exposedName: 'modelPluralSnake',
+                exposedName: 'modelPluralKebab',
                 consumedName: 'routePath',
                 modifier: (value: unknown) => `/${value}`,
               },
               {
                 sourceStep: 'model',
-                exposedName: 'modelPluralSnake',
+                exposedName: 'modelPluralKebab',
                 consumedName: 'routeName',
                 modifier: (value: unknown) => `${value}.index`,
               },
@@ -423,13 +423,13 @@ export default class Model extends BaseCommand {
               },
               {
                 sourceStep: 'model',
-                exposedName: 'modelPluralSnake',
+                exposedName: 'modelPluralKebab',
                 consumedName: 'routePath',
                 modifier: (value: unknown) => `/${value}/{id}`,
               },
               {
                 sourceStep: 'model',
-                exposedName: 'modelPluralSnake',
+                exposedName: 'modelPluralKebab',
                 consumedName: 'routeName',
                 modifier: (value: unknown) => `${value}.show`,
               },
@@ -452,13 +452,13 @@ export default class Model extends BaseCommand {
               },
               {
                 sourceStep: 'model',
-                exposedName: 'modelPluralSnake',
+                exposedName: 'modelPluralKebab',
                 consumedName: 'routePath',
                 modifier: (value: unknown) => `/${value}`,
               },
               {
                 sourceStep: 'model',
-                exposedName: 'modelPluralSnake',
+                exposedName: 'modelPluralKebab',
                 consumedName: 'routeName',
                 modifier: (value: unknown) => `${value}.create`,
               },
@@ -481,13 +481,13 @@ export default class Model extends BaseCommand {
               },
               {
                 sourceStep: 'model',
-                exposedName: 'modelPluralSnake',
+                exposedName: 'modelPluralKebab',
                 consumedName: 'routePath',
                 modifier: (value: unknown) => `/${value}/{id}`,
               },
               {
                 sourceStep: 'model',
-                exposedName: 'modelPluralSnake',
+                exposedName: 'modelPluralKebab',
                 consumedName: 'routeName',
                 modifier: (value: unknown) => `${value}.update`,
               },
@@ -510,13 +510,13 @@ export default class Model extends BaseCommand {
               },
               {
                 sourceStep: 'model',
-                exposedName: 'modelPluralSnake',
+                exposedName: 'modelPluralKebab',
                 consumedName: 'routePath',
                 modifier: (value: unknown) => `/${value}/{id}`,
               },
               {
                 sourceStep: 'model',
-                exposedName: 'modelPluralSnake',
+                exposedName: 'modelPluralKebab',
                 consumedName: 'routeName',
                 modifier: (value: unknown) => `${value}.delete`,
               },

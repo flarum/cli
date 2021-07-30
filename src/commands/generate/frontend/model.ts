@@ -30,8 +30,7 @@ export default class Model extends BaseCommand {
             },
             {
               sourceStep: 'model',
-              exposedName: 'modelPluralSnake',
-              consumedName: 'modelName',
+              exposedName: 'modelType',
             },
           ]);
       });

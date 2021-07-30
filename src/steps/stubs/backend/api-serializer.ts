@@ -3,7 +3,7 @@ import { Editor } from 'mem-fs-editor';
 import { ParamProvider } from '../../../provider/param-provider';
 import { PathProvider } from '../../../provider/path-provider';
 import { Validator } from '../../../utils/validation';
-import { pluralSnakeCaseModel } from '../../../utils/model-name';
+import { pluralKebabCaseModel } from '../../../utils/model-name';
 import { BasePhpStubStep } from '../php-base';
 
 export class GenerateApiSerializerStub extends BasePhpStubStep {
@@ -49,7 +49,7 @@ export class GenerateApiSerializerStub extends BasePhpStubStep {
   protected async compileParams(fsEditor: Editor, pathProvider: PathProvider, paramProvider: ParamProvider): Promise<Record<string, unknown>> {
     const params = await super.compileParams(fsEditor, pathProvider, paramProvider);
 
-    params.modelType = pluralSnakeCaseModel(params.modelClassName as string);
+    params.modelType = pluralKebabCaseModel(params.modelClassName as string);
 
     return params;
   }

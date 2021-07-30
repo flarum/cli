@@ -7,15 +7,15 @@ export class GenerateModelDefinition extends BaseJsStep {
 
   protected async getDefinition(paramProvider: ParamProvider): Promise<string> {
     const className: string = await paramProvider.get({ name: 'className', type: 'text' });
-    let modelName: string = await paramProvider.get({ name: 'modelName', type: 'text' });
+    let modelType: string = await paramProvider.get({ name: 'modelType', type: 'text' });
 
-    if (modelName.includes('-')) {
-      modelName = `['${modelName}']`;
+    if (modelType.includes('-')) {
+      modelType = `['${modelType}']`;
     } else {
-      modelName = `.${modelName}`;
+      modelType = `.${modelType}`;
     }
 
-    return `app.store.models${modelName} = ${className};`;
+    return `app.store.models${modelType} = ${className};`;
   }
 
   protected async getImports(frontend: string, pathProvider: PathProvider, paramProvider: ParamProvider): Promise<string> {

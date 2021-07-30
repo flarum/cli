@@ -105,12 +105,14 @@ const backendTestSpecs: StubTest[] = [
       className: 'CustomModel',
       migrationName: 'create_custom_models_table',
       modelPluralSnake: 'custom_models',
+      modelPluralKebab: 'custom-models',
     },
     expectedExposedParamsRequestedDir: {
       class: 'Flarum\\Demo\\somePath\\CustomModel',
       className: 'CustomModel',
       migrationName: 'create_custom_models_table',
       modelPluralSnake: 'custom_models',
+      modelPluralKebab: 'custom-models',
     },
   },
 
@@ -359,13 +361,13 @@ const frontendTestSpecs: StubTest[] = [
       className: 'CustomModel',
       classNamespace: 'common/models/CustomModel',
       frontend: 'common',
-      modelPluralSnake: 'custom_models',
+      modelType: 'custom-models',
     },
     expectedExposedParamsRequestedDir: {
       className: 'CustomModel',
       classNamespace: 'somePath/CustomModel',
       frontend: 'common',
-      modelPluralSnake: 'custom_models',
+      modelType: 'custom-models',
     },
   },
   // Modal

@@ -6,7 +6,7 @@ use Illuminate\Support\Arr;<% if (locals.repositoryClassName) { %>
 use <%= repositoryClass %>;<% } %><% if (locals.validatorClassName) { %>
 use <%= validatorClass %>;<% } %>
 <% const dependencies = [locals.repositoryClassName && [repositoryClassName, 'repository'] || null, locals.validatorClassName && [validatorClassName, 'validator'] || null].filter(item => item !== null) %>
-class CreateTagHandler
+class <%= className %>
 {<% if (locals.repositoryClassName) { %>
     /**
      * @var <%= repositoryClassName %>

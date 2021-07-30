@@ -9,3 +9,10 @@ export function pluralSnakeCaseModel(className: string) {
 
   return name;
 }
+
+export function pluralKebabCaseModel(className: string) {
+  className = pluralize(className.charAt(0).toLowerCase() + className.slice(1));
+  className = s(className).dasherize().s;
+
+  return className;
+}

@@ -2,13 +2,13 @@ import { Editor } from 'mem-fs-editor';
 import { ParamProvider } from '../../../provider/param-provider';
 import { PathProvider } from '../../../provider/path-provider';
 import { Validator } from '../../../utils/validation';
-import { pluralSnakeCaseModel } from '../../../utils/model-name';
+import { pluralSnakeCaseModel, pluralKebabCaseModel } from '../../../utils/model-name';
 import { BasePhpStubStep } from '../php-base';
 
 export class GenerateModelStub extends BasePhpStubStep {
   type = 'Generate Model Class';
 
-  protected additionalExposes = ['migrationName', 'className', 'modelPluralSnake'];
+  protected additionalExposes = ['className', 'migrationName', 'modelPluralSnake', 'modelPluralKebab'];
 
   protected phpClassParams = [];
 
@@ -40,6 +40,7 @@ export class GenerateModelStub extends BasePhpStubStep {
     const params = await super.compileParams(fsEditor, pathProvider, paramProvider);
 
     params.modelPluralSnake = pluralSnakeCaseModel(params.className as string);
+    params.modelPluralKebab = pluralKebabCaseModel(params.className as string);
 
     if (!params.tableName) {
       params.tableName = params.modelPluralSnake;

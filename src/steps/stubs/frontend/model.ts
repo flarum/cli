@@ -4,12 +4,12 @@ import { ParamProvider } from '../../../provider/param-provider';
 import { PathProvider } from '../../../provider/path-provider';
 import { Validator } from '../../../utils/validation';
 import { BaseJsStubStep } from '../js-base';
-import { pluralSnakeCaseModel } from '../../../utils/model-name';
+import { pluralKebabCaseModel } from '../../../utils/model-name';
 
 export class GenerateModelStub extends BaseJsStubStep {
   type = 'Generate Model Class';
 
-  protected additionalExposes = ['frontend', 'modelPluralSnake', 'classNamespace'];
+  protected additionalExposes = ['frontend', 'modelType', 'classNamespace'];
 
   protected schema = {
     recommendedSubdir: '${frontend}/models',
@@ -36,7 +36,7 @@ export class GenerateModelStub extends BaseJsStubStep {
   protected async compileParams(fsEditor: Editor, pathProvider: PathProvider, paramProvider: ParamProvider): Promise<Record<string, unknown>> {
     const params = await super.compileParams(fsEditor, pathProvider, paramProvider);
 
-    params.modelPluralSnake = pluralSnakeCaseModel(params.className as string);
+    params.modelType = pluralKebabCaseModel(params.className as string);
 
     return params;
   }
