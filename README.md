@@ -59,27 +59,27 @@ flarum-cli --help
 
 # Commands
 <!-- commands -->
-* `flarum-cli generate:backend:api-controller [PATH]`
-* `flarum-cli generate:backend:api-serializer [PATH]`
-* `flarum-cli generate:backend:api-serializer-attributes [PATH]`
-* `flarum-cli generate:backend:command [PATH]`
-* `flarum-cli generate:backend:event-listener [PATH]`
-* `flarum-cli generate:backend:handler [PATH]`
-* `flarum-cli generate:backend:integration-test [PATH]`
-* `flarum-cli generate:backend:job [PATH]`
-* `flarum-cli generate:backend:migration [PATH]`
-* `flarum-cli generate:backend:model [PATH]`
-* `flarum-cli generate:backend:policy [PATH]`
-* `flarum-cli generate:backend:repository [PATH]`
-* `flarum-cli generate:backend:route [PATH]`
-* `flarum-cli generate:backend:service-provider [PATH]`
-* `flarum-cli generate:backend:validator [PATH]`
-* `flarum-cli generate:frontend:modal [PATH]`
-* `flarum-cli generate:frontend:model [PATH]`
 * `flarum-cli help [COMMAND]`
-* `flarum-cli infra:backend-testing [PATH]`
+* `flarum-cli infra backend-testing [PATH]`
 * `flarum-cli init [PATH]`
-* `flarum-cli update:js-imports [PATH]`
+* `flarum-cli make backend api-controller [PATH]`
+* `flarum-cli make backend api-serializer [PATH]`
+* `flarum-cli make backend api-serializer-attributes [PATH]`
+* `flarum-cli make backend command [PATH]`
+* `flarum-cli make backend event-listener [PATH]`
+* `flarum-cli make backend handler [PATH]`
+* `flarum-cli make backend integration-test [PATH]`
+* `flarum-cli make backend job [PATH]`
+* `flarum-cli make backend migration [PATH]`
+* `flarum-cli make backend model [PATH]`
+* `flarum-cli make backend policy [PATH]`
+* `flarum-cli make backend repository [PATH]`
+* `flarum-cli make backend route [PATH]`
+* `flarum-cli make backend service-provider [PATH]`
+* `flarum-cli make backend validator [PATH]`
+* `flarum-cli make frontend modal [PATH]`
+* `flarum-cli make frontend model [PATH]`
+* `flarum-cli update js-imports [PATH]`
 <!-- commandsstop -->
 
 ## For Maintainers
