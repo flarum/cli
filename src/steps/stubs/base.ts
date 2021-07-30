@@ -110,7 +110,7 @@ export abstract class BaseStubStep implements Step {
     return params;
   }
 
-  protected abstract async getFileName(_fs: Store, _pathProvider: PathProvider, paramProvider: ParamProvider): Promise<string>;
+  protected abstract getFileName(_fs: Store, _pathProvider: PathProvider, paramProvider: ParamProvider): Promise<string>;
 
   protected composerJsonContents(fsEditor: Editor, pathProvider: PathProvider): any {
     return extensionMetadata(fsEditor.readJSON(pathProvider.ext('composer.json')));
