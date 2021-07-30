@@ -58,17 +58,17 @@
       "@tiagonapoli/oclif-plugin-spaced-commands"
     ],
     "topics": {
-      "generate:backend": {
-        "description": "add backend boilerplate code to an existing Flarum extension"
+      "make:backend": {
+        "description": "Add backend boilerplate code to an existing Flarum extension."
       },
-      "generate:frontend": {
-        "description": "add frontend boilerplate code to an existing Flarum extension"
+      "make:frontend": {
+        "description": "Add frontend boilerplate code to an existing Flarum extension."
       },
-      "generate": {
-        "description": "add boilerplate code to an existing Flarum extension"
+      "make": {
+        "description": "Add boilerplate code to an existing Flarum extension."
       },
       "infra": {
-        "description": "add/modify infrastructure for an existing Flarum extension"
+        "description": "Add/modify infrastructure for an existing Flarum extension."
       }
     }
   },
