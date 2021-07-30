@@ -7,6 +7,8 @@ A CLI for developing Flarum extensions</p>
 <a href="https://npmjs.org/package/flarum-cli"><img alt"Version" src="https://img.shields.io/npm/v/flarum-cli.svg"></a>
 <a href="https://npmjs.org/package/flarum-cli"><img alt"Downloads/week" src="https://img.shields.io/npm/dw/flarum-cli.svg"></a>
 <a href="https://github.com/flarum/flarum-cli/blob/master/package.json"><img alt"License" src="https://img.shields.io/npm/l/flarum-cli.svg"></a>
+<br>
+<img width=720 src="https://sycho9.github.io/flarum-cli.svg" alt="terminal_example">
 </p>
 
 <!-- toc -->
