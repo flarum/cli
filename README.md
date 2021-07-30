@@ -1,4 +1,4 @@
-<p align=center><img alt="flarum-cli" src="https://user-images.githubusercontent.com/20267363/124392516-f32b6780-dced-11eb-87b8-5af0ac0c75cc.png"></p>
+<p align=center><img alt="flarum-cli" width=100 src="https://user-images.githubusercontent.com/20267363/127189519-ed809abd-5990-40b1-96a7-8d3156b78c3e.png"></p>
 <h1 align=center>Flarum CLI</h1><p align=center>
 A CLI for developing Flarum extensions</p>
 
