@@ -16,6 +16,7 @@ import { GenerateValidatorStub } from '../../../src/steps/stubs/backend/validato
 import { GeneratePolicyStub } from '../../../src/steps/stubs/backend/policy';
 import { GenerateCommandStub } from '../../../src/steps/stubs/backend/command';
 import { GenerateModalStub } from '../../../src/steps/stubs/frontend/modal';
+import { GenerateComponentStub } from '../../../src/steps/stubs/frontend/component';
 import { PathProvider } from '../../../src/provider/path-provider';
 
 interface StubTest {
@@ -390,6 +391,28 @@ const frontendTestSpecs: StubTest[] = [
     expectedExposedParamsRequestedDir: {
       className: 'CustomModal',
       frontend: 'forum',
+    },
+  },
+  // Component
+  {
+    stubClass: GenerateComponentStub,
+    params: {
+      frontend: 'admin',
+      className: 'CustomComponent',
+    },
+    expectedModifiedFilesDefaultDir: [
+      '/ext/js/src/admin/components/CustomComponent.js',
+    ],
+    expectedModifiedFilesRequestedDir: [
+      `${requestedJsDir}/CustomComponent.js`,
+    ],
+    expectedExposedParamsDefaultDir: {
+      className: 'CustomComponent',
+      frontend: 'admin',
+    },
+    expectedExposedParamsRequestedDir: {
+      className: 'CustomComponent',
+      frontend: 'admin',
     },
   },
 ];
