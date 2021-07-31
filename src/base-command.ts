@@ -75,7 +75,7 @@ export default abstract class BaseCommand extends Command {
   }
 
   protected goodbyeMessage(): string {
-    return 'Please make sure to check my work, adjust formatting, and test before commiting!!!';
+    return 'Please make sure to check my work, adjust formatting, and test before committing!!!';
   }
 
   protected async additionalPreRunChecks(_extRoot: string) {
