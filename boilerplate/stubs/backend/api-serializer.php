@@ -33,3 +33,4 @@ class <%= className %> extends AbstractSerializer
             // ...
         ];
     }
+}
