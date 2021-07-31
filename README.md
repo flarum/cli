@@ -79,6 +79,7 @@ flarum-cli --help
 * `flarum-cli make backend route [PATH]`
 * `flarum-cli make backend service-provider [PATH]`
 * `flarum-cli make backend validator [PATH]`
+* `flarum-cli make frontend component [PATH]`
 * `flarum-cli make frontend modal [PATH]`
 * `flarum-cli make frontend model [PATH]`
 * `flarum-cli update js-imports [PATH]`
