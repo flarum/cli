@@ -24,7 +24,7 @@ jobs:
           node-version: "14"
 
       - name: Install JS dependencies
-        run: npm ci
+        run: npm i
         working-directory: ./js
 
       - name: Check JS formatting
