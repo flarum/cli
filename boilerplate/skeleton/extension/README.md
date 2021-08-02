@@ -4,7 +4,7 @@
 
 A [Flarum](http://flarum.org) extension. <%= packageDescription %>
 
-### Installation
+## Installation
 
 Install with composer:
 
@@ -12,7 +12,7 @@ Install with composer:
 composer require <%= packageName %>:"*"
 ```
 
-### Updating
+## Updating
 
 ```sh
 composer update <%= packageName %>:"*"
@@ -20,7 +20,7 @@ php flarum migrate
 php flarum cache:clear
 ```
 
-### Links
+## Links
 
 - [Packagist](https://packagist.org/packages/<%= packageName %>)
 - [GitHub](https://github.com/<%= packageName %>)
