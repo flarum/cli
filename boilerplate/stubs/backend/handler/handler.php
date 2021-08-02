@@ -20,7 +20,7 @@ class <%= className %>
 <% } %>
     public function __construct(<%= dependencies.map(item => `${item[0]} $${item[1]}`).join(', ') %>)
     {
-        <%- dependencies.map(item => `$this->${item[1]} = $${item[1]}`).join("\n\t\t") %>
+        <%- dependencies.map(item => `$this->${item[1]} = $${item[1]}`).join(";\n\t\t") + ";" %>
     }
 
     public function handle(<%= handlerCommandClassName %> $command)
