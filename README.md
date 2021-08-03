@@ -60,7 +60,6 @@ flarum-cli --help
 ```
 
 # Commands
-<!-- commands -->
 * `flarum-cli help [COMMAND]`
 * `flarum-cli infra backend-testing [PATH]`
 * `flarum-cli init [PATH]`
@@ -83,7 +82,6 @@ flarum-cli --help
 * `flarum-cli make frontend modal [PATH]`
 * `flarum-cli make frontend model [PATH]`
 * `flarum-cli update js-imports [PATH]`
-<!-- commandsstop -->
 
 ## For Maintainers
 
