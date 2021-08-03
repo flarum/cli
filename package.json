@@ -1,5 +1,5 @@
 {
-  "name": "flarum-cli",
+  "name": "@flarum/cli",
   "description": "A CLI for developing Flarum extensions",
   "version": "1.0.0",
   "author": "Flarum Team",
@@ -7,7 +7,7 @@
     "fl": "bin/run",
     "flarum-cli": "bin/run"
   },
-  "bugs": "https://github.com/flarum/flarum-cli/issues",
+  "bugs": "https://github.com/flarum/cli/issues",
   "devDependencies": {
     "@oclif/dev-cli": "^1.26.0",
     "@oclif/test": "^1.2.8",
@@ -43,7 +43,7 @@
     "stubs",
     "php-subsystem"
   ],
-  "homepage": "https://github.com/flarum/flarum-cli",
+  "homepage": "https://github.com/flarum/cli",
   "keywords": [
     "oclif"
   ],
@@ -72,7 +72,7 @@
       }
     }
   },
-  "repository": "flarum/flarum-cli",
+  "repository": "flarum/cli",
   "scripts": {
     "format": "eslint . --ext .ts --config .eslintrc --fix",
     "postpack": "rm -f oclif.manifest.json",

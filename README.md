@@ -4,9 +4,9 @@ A CLI for developing Flarum extensions</p>
 
 <p align=center>
 <a href="https://oclif.io"><img alt"oclif" src="https://img.shields.io/badge/cli-oclif-brightgreen.svg"></a>
-<a href="https://npmjs.org/package/flarum-cli"><img alt"Version" src="https://img.shields.io/npm/v/flarum-cli.svg"></a>
-<a href="https://npmjs.org/package/flarum-cli"><img alt"Downloads/week" src="https://img.shields.io/npm/dw/flarum-cli.svg"></a>
-<a href="https://github.com/flarum/flarum-cli/blob/master/package.json"><img alt"License" src="https://img.shields.io/npm/l/flarum-cli.svg"></a>
+<a href="https://npmjs.org/package/@flarum/cli"><img alt"Version" src="https://img.shields.io/npm/v/@flarum/cli.svg"></a>
+<a href="https://npmjs.org/package/@flarum/cli"><img alt"Downloads/week" src="https://img.shields.io/npm/dw/@flarum/cli.svg"></a>
+<a href="https://github.com/flarum/cli/blob/master/package.json"><img alt"License" src="https://img.shields.io/npm/l/@flarum/cli.svg"></a>
 <br>
 <img width=720 src="https://sycho9.github.io/flarum-cli.svg" alt="terminal_example">
 </p>
@@ -26,14 +26,14 @@ This tool was built to simplify the development of Flarum extensions by automati
 # Installation
 <!-- installation -->
 ```sh-session
-$ npm install -g flarum-cli
+$ npm install -g @flarum/cli
 ```
 <!-- installationstop -->
 
 # Usage
 <!-- usage -->
 ```sh-session
-$ npm install -g flarum-cli
+$ npm install -g @flarum/cli
 $ flarum-cli COMMAND
 running command...
 $ flarum-cli (-v|--version|version)
@@ -94,7 +94,7 @@ This section is for maintainers of the flarum-cli codebase.
 CLI commands are implemented by [oclif](https://oclif.io/) commands. Reference their documentation for information about the command layer.
 
 Since there's a wide range of stuff that we might want to generate, in Flarum CLI, commands are just a layer for user interaction.
-The base command is implemented at [src/base-command.ts](https://github.com/flarum/flarum-cli/blob/3c90d6321f4750aef954c9d6157b13603d9cfdef/src/base-command.ts#L28-L28), and as you can see, the basic process of all commands is:
+The base command is implemented at [src/base-command.ts](https://github.com/flarum/cli/blob/3c90d6321f4750aef954c9d6157b13603d9cfdef/src/base-command.ts#L28-L28), and as you can see, the basic process of all commands is:
 
 1. Show a welcome message
 2. Get the path of the parent Flarum extension, or fail if not in one
