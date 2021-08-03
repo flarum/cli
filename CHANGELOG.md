@@ -23,7 +23,7 @@
 
 - Migration generation detects table creation migrations (https://github.com/flarum/cli/commit/e443a32e1311795163b0768425910a3fe8aefc9e)
 - Switched to official `mem-fs` package (https://github.com/flarum/cli/commit/f644589f9e9caedac128c383005a58dfc5f696db)
-- Update extension boilerplate flarum core version (https://github.com/flarum/cli/commit/538fcc54646c67abd3951f9c304b8e1e08e29b96)
+- Updated extension skeleton boilerplate (https://github.com/flarum/cli/commit/538fcc54646c67abd3951f9c304b8e1e08e29b96)
 - Extracted abstract base class for php and js stub generation (https://github.com/flarum/cli/commit/13a3d5d6c14c7ed5692b936ebd8398d2b1c0f2d0)
 - Minimal formatting for extender method calls (https://github.com/flarum/cli/commit/a28c8a8b3abb7b258c0624c73d0b75c25f6441be)
 - Filled generated locale file with extension id and link to docs (https://github.com/flarum/cli/commit/2ae530a0cf45826abca2200899e003515de24cd6)
