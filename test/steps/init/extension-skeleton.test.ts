@@ -59,7 +59,7 @@ describe('Test extension skeleton step', function () {
     });
 
     const expected = (await getExpected())
-      .filter(path => !path.includes('/locale'));
+      .filter(path => !path.includes('/locale/'));
 
     expect(getFsPaths(fs).sort()).toStrictEqual(expected);
     expect(getExtFileContents(fs, 'extend.php').includes('Extend\\Locales')).toBe(false);
@@ -88,7 +88,7 @@ describe('Test extension skeleton step', function () {
     });
 
     const expected = (await getExpected())
-      .filter(path => !path.includes('/js'));
+      .filter(path => !path.includes('/js/'));
 
     expect(getFsPaths(fs).sort()).toStrictEqual(expected);
     expect(getExtFileContents(fs, 'extend.php').includes('Extend\\Locales')).toBe(true);
@@ -117,7 +117,7 @@ describe('Test extension skeleton step', function () {
     });
 
     const expected = (await getExpected())
-      .filter(path => !path.includes('/less'));
+      .filter(path => !path.includes('/less/'));
 
     expect(getFsPaths(fs).sort()).toStrictEqual(expected);
     expect(getExtFileContents(fs, 'extend.php').includes('Extend\\Locales')).toBe(true);
@@ -146,7 +146,7 @@ describe('Test extension skeleton step', function () {
     });
 
     const expected = (await getExpected())
-      .filter(path => !path.includes('admin'));
+      .filter(path => (!path.includes('/admin.') || !path.includes('/admin/')));
 
     expect(getFsPaths(fs).sort()).toStrictEqual(expected);
     expect(getExtFileContents(fs, 'extend.php').includes('Extend\\Locales')).toBe(true);
@@ -175,7 +175,7 @@ describe('Test extension skeleton step', function () {
     });
 
     const expected = (await getExpected())
-      .filter(path => !path.includes('forum'));
+      .filter(path => (!path.includes('/forum.') || !path.includes('/forum/')));
 
     expect(getFsPaths(fs).sort()).toStrictEqual(expected);
     expect(getExtFileContents(fs, 'extend.php').includes('Extend\\Locales')).toBe(true);
@@ -204,7 +204,7 @@ describe('Test extension skeleton step', function () {
     });
 
     const expected = (await getExpected())
-      .filter(path => !path.includes('.github/workflows'));
+      .filter(path => !path.includes('/.github/workflows/'));
 
     expect(getFsPaths(fs).sort()).toStrictEqual(expected);
     expect(getExtFileContents(fs, 'extend.php').includes('Extend\\Locales')).toBe(true);
