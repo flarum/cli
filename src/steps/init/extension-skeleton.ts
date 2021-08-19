@@ -99,7 +99,7 @@ export class ExtensionSkeleton implements Step {
       message: 'CSS',
       initial: true,
     });
-    const useActionsCi = await paramProvider.get<string>({
+    const useActionsCi = await paramProvider.get<boolean>({
       name: 'useActionsCi',
       type: 'confirm',
       message: `Use GitHub Actions CI ${chalk.dim('(automatically builds JS, checks JS formatting and runs backend tests)')}`,
