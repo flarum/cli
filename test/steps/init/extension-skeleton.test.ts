@@ -146,7 +146,7 @@ describe('Test extension skeleton step', function () {
     });
 
     const expected = (await getExpected())
-      .filter(path => (!path.includes('/admin.') || !path.includes('/admin/')));
+      .filter(path => !(path.includes('/admin.') || path.includes('/admin/')));
 
     expect(getFsPaths(fs).sort()).toStrictEqual(expected);
     expect(getExtFileContents(fs, 'extend.php').includes('Extend\\Locales')).toBe(true);
@@ -175,7 +175,7 @@ describe('Test extension skeleton step', function () {
     });
 
     const expected = (await getExpected())
-      .filter(path => (!path.includes('/forum.') || !path.includes('/forum/')));
+      .filter(path => !(path.includes('/forum.') || path.includes('/forum/')));
 
     expect(getFsPaths(fs).sort()).toStrictEqual(expected);
     expect(getExtFileContents(fs, 'extend.php').includes('Extend\\Locales')).toBe(true);
