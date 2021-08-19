@@ -110,7 +110,7 @@ export class ExtensionSkeleton implements Step {
       type: () => useActionsCi && 'text',
       message: `Main git branch ${chalk.dim('(JS will automatically build when changes are pushed to GitHub on this branch)')}`,
       // See https://stackoverflow.com/a/12093994/11091039
-      validate: s => /^(?!.*/\.)(?!.*\.\.)(?!/)(?!.*//)(?!.*@\{)(?!.*\\)[^\000-\037\177 ~^:?*[]+/[^\000-\037\177 ~^:?*[]+(?<!\.lock)(?<!/)(?<!\.)$/.test(s.trim()) || 'Invalid git branch',
+      validate: s => new RegExp(String.raw`^(?!.*\/\.)(?!.*\.\.)(?!\/)(?!.*\/\/)(?!.*@\{)(?!.*\\)[^\000-\037\177 ~^:?*[]+(?<!\.lock)(?<!\/)(?<!\.)$`).test(s.trim()) || 'Invalid git branch',
       initial: 'main',
     });
 
