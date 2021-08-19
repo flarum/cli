@@ -26,6 +26,8 @@ describe('Test extension skeleton step', function () {
       useLocale: true,
       useJs: true,
       useCss: true,
+      useActionsCi: true,
+      mainGitBranch: 'main',
     });
 
     const expected = await getExpected();
@@ -52,6 +54,8 @@ describe('Test extension skeleton step', function () {
       useLocale: false,
       useJs: true,
       useCss: true,
+      useActionsCi: true,
+      mainGitBranch: 'main',
     });
 
     const expected = (await getExpected())
@@ -79,6 +83,8 @@ describe('Test extension skeleton step', function () {
       useLocale: true,
       useJs: false,
       useCss: true,
+      useActionsCi: true,
+      mainGitBranch: 'main',
     });
 
     const expected = (await getExpected())
@@ -106,6 +112,8 @@ describe('Test extension skeleton step', function () {
       useLocale: true,
       useJs: true,
       useCss: false,
+      useActionsCi: true,
+      mainGitBranch: 'main',
     });
 
     const expected = (await getExpected())
@@ -133,6 +141,8 @@ describe('Test extension skeleton step', function () {
       useLocale: true,
       useJs: true,
       useCss: true,
+      useActionsCi: true,
+      mainGitBranch: 'main',
     });
 
     const expected = (await getExpected())
@@ -160,6 +170,8 @@ describe('Test extension skeleton step', function () {
       useLocale: true,
       useJs: true,
       useCss: true,
+      useActionsCi: true,
+      mainGitBranch: 'main',
     });
 
     const expected = (await getExpected())
@@ -171,5 +183,63 @@ describe('Test extension skeleton step', function () {
     expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/forum.less')")).toBe(false);
     expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/js/dist/admin.js'")).toBe(true);
     expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/admin.less'")).toBe(true);
+  });
+
+  test('Can exclude Actions CI', async function () {
+    const { fs } = await runStep(ExtensionSkeleton, [], {
+      packageName: 'flarum/test',
+      packageDescription: 'Text ext description',
+      namespace: 'Flarum\\Test',
+      authorName: 'Flarum Team',
+      authorEmail: 'flarum@flarum.org',
+      license: 'MIT',
+      extensionName: 'Flarum Test',
+      admin: true,
+      forum: false,
+      useLocale: true,
+      useJs: true,
+      useCss: true,
+      useActionsCi: false,
+      mainGitBranch: '',
+    });
+
+    const expected = (await getExpected())
+      .filter(path => !path.includes('.github/workflows'));
+
+    expect(getFsPaths(fs).sort()).toStrictEqual(expected);
+    expect(getExtFileContents(fs, 'extend.php').includes('Extend\\Locales')).toBe(true);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/js/dist/forum.js'")).toBe(false);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/forum.less')")).toBe(false);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/js/dist/admin.js'")).toBe(true);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/admin.less'")).toBe(true);
+  });
+
+  test('Can set main git branch for Actions CI', async function () {
+    const { fs } = await runStep(ExtensionSkeleton, [], {
+      packageName: 'flarum/test',
+      packageDescription: 'Text ext description',
+      namespace: 'Flarum\\Test',
+      authorName: 'Flarum Team',
+      authorEmail: 'flarum@flarum.org',
+      license: 'MIT',
+      extensionName: 'Flarum Test',
+      admin: true,
+      forum: true,
+      useLocale: true,
+      useJs: true,
+      useCss: true,
+      useActionsCi: true,
+      mainGitBranch: 'my/prod/branch',
+    });
+
+    const expected = await getExpected();
+
+    expect(getFsPaths(fs).sort()).toStrictEqual(expected);
+    expect(getExtFileContents(fs, 'extend.php').includes('Extend\\Locales')).toBe(true);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/js/dist/forum.js'")).toBe(false);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/forum.less')")).toBe(false);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/js/dist/admin.js'")).toBe(true);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/admin.less'")).toBe(true);
+    expect(getExtFileContents(fs, '.github/workflows/js.yml').includes("'refs/heads/my/prod/branch'")).toBe(true);
   });
 });
