@@ -99,6 +99,20 @@ export class ExtensionSkeleton implements Step {
       message: 'CSS',
       initial: true,
     });
+    const useActionsCi = await paramProvider.get<string>({
+      name: 'useActionsCi',
+      type: 'confirm',
+      message: `Use GitHub Actions CI ${chalk.dim('(automatically builds JS, checks JS formatting and runs backend tests)')}`,
+      initial: true,
+    });
+    const mainGitBranch = await paramProvider.get<string>({
+      name: 'mainGitBranch',
+      type: () => useActionsCi && 'text',
+      message: `Main git branch ${chalk.dim('(JS will automatically build when changes are pushed to GitHub on this branch)')}`,
+      // See https://stackoverflow.com/a/12093994/11091039
+      validate: s => /^(?!.*/\.)(?!.*\.\.)(?!/)(?!.*//)(?!.*@\{)(?!.*\\)[^\000-\037\177 ~^:?*[]+/[^\000-\037\177 ~^:?*[]+(?<!\.lock)(?<!/)(?<!\.)$/.test(s.trim()) || 'Invalid git branch',
+      initial: 'main',
+    });
 
     const tpl = {
       namespace,
@@ -113,6 +127,7 @@ export class ExtensionSkeleton implements Step {
       useLocale,
       useJs,
       useCss,
+      mainGitBranch,
       packageNamespace: namespace.replace(/\\/, '\\\\'),
       year: new Date().getFullYear().toString(),
       extensionId: extensionId(packageName),
@@ -139,6 +154,7 @@ export class ExtensionSkeleton implements Step {
       fsEditor.delete(pathProvider.ext('js/src/forum'));
       fsEditor.delete(pathProvider.ext('js/forum.js'));
     }
+    if (!useActionsCi) fsEditor.delete(pathProvider.ext('.github/workflows'));
 
     return fs;
   }
