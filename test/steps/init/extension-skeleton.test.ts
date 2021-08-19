@@ -195,7 +195,7 @@ describe('Test extension skeleton step', function () {
       license: 'MIT',
       extensionName: 'Flarum Test',
       admin: true,
-      forum: false,
+      forum: true,
       useLocale: true,
       useJs: true,
       useCss: true,
