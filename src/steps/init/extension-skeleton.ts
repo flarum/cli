@@ -107,7 +107,7 @@ export class ExtensionSkeleton implements Step {
     });
     const mainGitBranch = await paramProvider.get<string>({
       name: 'mainGitBranch',
-      type: () => useActionsCi && 'text',
+      type: () => (useActionsCi && 'text'),
       message: `Main git branch ${chalk.dim('(JS will automatically build when changes are pushed to GitHub on this branch)')}`,
       // See https://stackoverflow.com/a/12093994/11091039
       validate: s => new RegExp(String.raw`^(?!.*\/\.)(?!.*\.\.)(?!\/)(?!.*\/\/)(?!.*@\{)(?!.*\\)[^\000-\037\177 ~^:?*[]+(?<!\.lock)(?<!\/)(?<!\.)$`).test(s.trim()) || 'Invalid git branch',
