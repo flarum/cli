@@ -13,6 +13,16 @@ export class BackendTestingInfra extends BaseInfraStep {
   ];
 
   protected jsonToAugment = {
-    'composer.json': ['scripts', 'scripts-description', 'require-dev'],
+    'composer.json': [
+      'scripts.test',
+      'scripts.test:unit',
+      'scripts.test:integration',
+      'scripts.test:setup',
+      'scripts-description.test',
+      'scripts-description.test:unit',
+      'scripts-description.test:integration',
+      'scripts-description.test:setup',
+      'require-dev.flarum/testing',
+    ],
   };
 }

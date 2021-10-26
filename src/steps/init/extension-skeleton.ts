@@ -1,4 +1,4 @@
-import { pick } from '@zodash/pick';
+import pick from 'pick-deep';
 import chalk from 'chalk';
 import { Store } from 'mem-fs';
 import { create } from 'mem-fs-editor';
@@ -162,6 +162,6 @@ export class ExtensionSkeleton implements Step {
   exposes = ['useJs'];
 
   getExposed(_pathProvider: PathProvider, paramProvider: ParamProvider): Record<string, unknown> {
-    return pick(paramProvider.cached(), this.exposes);
+    return pick(paramProvider.cached(), this.exposes) as ReturnType<typeof paramProvider.cached>;
   }
 }

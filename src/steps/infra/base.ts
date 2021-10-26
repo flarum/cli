@@ -1,6 +1,6 @@
+import pick from 'pick-deep';
 import { Store } from 'mem-fs';
 import { create } from 'mem-fs-editor';
-import { pick } from '@zodash/pick';
 import { ParamProvider } from '../../provider/param-provider';
 import { PathProvider } from '../../provider/path-provider';
 import { PhpProvider } from '../../provider/php-provider';

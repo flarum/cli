@@ -1,4 +1,4 @@
-import { pick } from '@zodash/pick';
+import pick from 'pick-deep';
 import { Store } from 'mem-fs';
 import { create, Editor } from 'mem-fs-editor';
 import { PromptObject } from 'prompts';
@@ -78,7 +78,7 @@ export abstract class BaseStubStep implements Step {
   }
 
   getExposed(_pathProvider: PathProvider, _paramProvider: ParamProvider): Record<string, unknown> {
-    return pick(this.params, this.exposes);
+    return pick(this.params, this.exposes) as BaseStubStep['params'];
   }
 
   protected async precompileParams(composerJsonContents: any, _fsEditor: Editor, _pathProvider: PathProvider, _paramProvider: ParamProvider): Promise<Record<string, unknown>> {
