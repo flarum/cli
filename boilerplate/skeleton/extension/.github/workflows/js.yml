@@ -18,15 +18,15 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: "npm"
-          cache-dependency-path: js/package-lock.json
+          cache: "yarn"
+          cache-dependency-path: js/yarn.lock
 
       - name: Install JS dependencies
-        run: npm ci
+        run: yarn install --frozen-lockfile
         working-directory: ./js
 
       - name: Check JS formatting
-        run: npm run format-check
+        run: yarn run format-check
         working-directory: ./js
 
   build-prod:
@@ -46,11 +46,11 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: "npm"
-          cache-dependency-path: js/package-lock.json
+          cache: "yarn"
+          cache-dependency-path: js/yarn.lock
 
-      # Our action will install npm, cd into `./js`, run `npm run build` and
-      # `npm run build-typings`, then commit and upload any changes
+      # Our action will install node, npm and yarn, cd into `./js`, run `yarn run build` (and
+      # `yarn run build-typings` if desired), then commit and upload any changes
       - name: Build production JS
         uses: flarum/action-build@2
         with:
@@ -76,11 +76,11 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: "npm"
-          cache-dependency-path: js/package-lock.json
+          cache: "yarn"
+          cache-dependency-path: js/yarn.lock
 
-      # Our action will install npm, cd into `./js`, run `npm run build` and
-      # `npm run build-typings`, then commit and upload any changes
+      # Our action will install node, npm and yarn, cd into `./js`, run `yarn run build` (and
+      # `yarn run build-typings` if desired). It will NOT commit and upload.
       - name: Build production JS
         uses: flarum/action-build@2
         with:
