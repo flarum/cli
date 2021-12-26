@@ -13,11 +13,11 @@ export function cloneAndFill<T>(obj: T, params: Record<string, string>): T {
 
     const newObj: any = {};
 
-    Object.keys(obj).forEach(key => {
+    for (const key of Object.keys(obj)) {
       const value = obj[key];
 
       newObj[key] = recursiveCopyAndFill(value, params);
-    });
+    }
 
     return newObj;
   };

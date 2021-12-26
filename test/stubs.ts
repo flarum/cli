@@ -1,5 +1,5 @@
 import { Store } from 'mem-fs';
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import { ParamDef, ParamProvider } from '../src/provider/param-provider';
 import { PathProvider } from '../src/provider/path-provider';
 import { ExtenderDef, PhpProvider } from '../src/provider/php-provider';
@@ -28,7 +28,7 @@ interface TestPaths {
 
   ext?: string;
 
-  requestedDir?: string;
+  requestedDir?: string|null;
 }
 
 export function stubPathProviderFactory(paths: TestPaths = {}): PathProvider {

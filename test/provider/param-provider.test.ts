@@ -8,7 +8,7 @@ describe('ParamProvider Works', function () {
     prompt.inject(['Test']);
 
     expect(await provider.get({ name: 'different1', type: 'text', message: '_' })).toStrictEqual('Test');
-    expect(await provider.get({ name: 'different2', type: 'text', message: '_' })).toStrictEqual(undefined);
+    expect(await provider.get({ name: 'different2', type: 'text', message: '_' })).toBeUndefined();
   });
 
   it('Obtains from cache if present', async function () {

@@ -1,7 +1,7 @@
 import { getExtFileContents, getFsPaths, runStep } from '../../utils';
 import { BackendTestingInfra } from '../../../src/steps/infra/backend-testing';
 import get from 'just-safe-get';
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import { PathProvider } from '../../../src/provider/path-provider';
 
 interface InfraTest {
@@ -45,7 +45,7 @@ const testSpecs: InfraTest[] = [
 ];
 
 describe('Infra testing', function () {
-  testSpecs.forEach(spec => {
+  for (const spec of testSpecs) {
     const InfraClass = spec.infraClass;
 
     test(`Touches proper files: ${InfraClass.name}`, async function () {
@@ -64,23 +64,23 @@ describe('Infra testing', function () {
       const initialFilesCallback = (pathProvider: PathProvider) => {
         const initialFiles: any = {};
 
-        Object.keys(spec.initialJson).forEach(path => {
+        for (const path of Object.keys(spec.initialJson)) {
           initialFiles[pathProvider.ext(path)] = spec.initialJson[path];
-        });
+        }
 
         return initialFiles;
       };
 
       const { fs } = await runStep(InfraClass, [], {}, initialFilesCallback);
 
-      Object.keys(spec.expectedJsonEntries).forEach(filePath => {
+      for (const filePath of Object.keys(spec.expectedJsonEntries)) {
         const expectedEntries = spec.expectedJsonEntries[filePath];
         const newJson = JSON.parse(getExtFileContents(fs, filePath));
 
-        Object.keys(expectedEntries).forEach(key => {
+        for (const key of Object.keys(expectedEntries)) {
           expect(get(newJson, key)).toStrictEqual(expectedEntries[key]);
-        });
-      });
+        }
+      }
     });
-  });
+  }
 });

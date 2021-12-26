@@ -1,6 +1,6 @@
 
 import globby from 'globby';
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import { ExtensionSkeleton } from '../../../src/steps/init/extension-skeleton';
 import { getExtFileContents, getFsPaths, runStep } from '../../utils';
 

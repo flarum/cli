@@ -26,7 +26,7 @@ export abstract class BaseExtenderStep implements Step {
 
   exposes = [];
 
-  getExposed() {
+  getExposed(): Record<string, unknown>  {
     return {};
   }
 
@@ -51,9 +51,9 @@ export abstract class BaseExtenderStep implements Step {
     const params: Record<string, string> = {};
 
     const paramDefs = this.schema.params;
-    for (let i = 0; i < paramDefs.length; i++) {
+    for (const paramDef of paramDefs) {
       // eslint-disable-next-line no-await-in-loop
-      params[paramDefs[i].name as string] = await paramProvider.get(paramDefs[i] as PromptObject);
+      params[paramDef.name as string] = await paramProvider.get(paramDef as PromptObject);
     }
 
     return params;

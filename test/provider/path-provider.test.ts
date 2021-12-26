@@ -1,4 +1,4 @@
-import path from 'path';
+import path from 'node:path';
 import { PathFsProvider } from '../../src/provider/path-provider';
 
 describe('PathFsProvider Works', function () {

@@ -27,15 +27,15 @@ export default class Init extends BaseCommand {
       ]);
   }
 
-  protected welcomeMessage() {
+  protected welcomeMessage(): string {
     return yosay('Welcome to a Flarum extension generator\n\n- Flarum Team');
   }
 
-  protected goodbyeMessage() {
+  protected goodbyeMessage(): string {
     return 'Extension generation complete! Visit https://docs.flarum.org/extend to learn more about Flarum extension development.';
   }
 
-  protected async additionalPreRunChecks(extRoot: string) {
+  protected async additionalPreRunChecks(extRoot: string): Promise<void> {
     if (await this.confirmOverrideFiles(extRoot, '**/*', 'Directory not empty. Overwrite?')) {
       this.deleteFiles(extRoot, '**/*');
     }

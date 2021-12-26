@@ -6,7 +6,7 @@ import { ParamProvider } from '../../provider/param-provider';
 import { PathProvider } from '../../provider/path-provider';
 import { PhpProvider } from '../../provider/php-provider';
 import { Step } from '../step-manager';
-import { extensionMetadata } from '../../utils/extension-metadata';
+import { ExtensionMetadata, extensionMetadata } from '../../utils/extension-metadata';
 import { cloneAndFill } from '../../utils/clone-and-fill';
 
 interface UserProvidedParam extends Omit<PromptObject, 'type'> {
@@ -81,7 +81,7 @@ export abstract class BaseStubStep implements Step {
     return pick(this.params, this.exposes) as BaseStubStep['params'];
   }
 
-  protected async precompileParams(composerJsonContents: any, _fsEditor: Editor, _pathProvider: PathProvider, _paramProvider: ParamProvider): Promise<Record<string, unknown>> {
+  protected async precompileParams(composerJsonContents: ExtensionMetadata, _fsEditor: Editor, _pathProvider: PathProvider, _paramProvider: ParamProvider): Promise<Record<string, unknown>> {
     const params: Record<string, string> = {
       extensionId: composerJsonContents.extensionId,
     };
@@ -96,23 +96,23 @@ export abstract class BaseStubStep implements Step {
     const paramDefs = this.schema.params.filter(param =>
       !this.implicitParams.includes(param.name as string) && !Object.keys(params).includes(param.name as string));
 
-    for (let i = 0; i < paramDefs.length; i++) {
+    for (const paramDef of paramDefs) {
       // eslint-disable-next-line no-await-in-loop
-      params[paramDefs[i].name as string] = await paramProvider.get(paramDefs[i] as PromptObject);
+      params[paramDef.name as string] = await paramProvider.get(paramDef as PromptObject);
     }
 
-    this.implicitParams.forEach(implicitParam => {
+    for (const implicitParam of this.implicitParams) {
       if (!params[implicitParam] && paramProvider.has(implicitParam)) {
         params[implicitParam] = paramProvider.cached()[implicitParam] as string;
       }
-    });
+    }
 
     return params;
   }
 
   protected abstract getFileName(_fs: Store, _pathProvider: PathProvider, paramProvider: ParamProvider): Promise<string>;
 
-  protected composerJsonContents(fsEditor: Editor, pathProvider: PathProvider): any {
+  protected composerJsonContents(fsEditor: Editor, pathProvider: PathProvider): ExtensionMetadata {
     return extensionMetadata(fsEditor.readJSON(pathProvider.ext('composer.json')));
   }
 }

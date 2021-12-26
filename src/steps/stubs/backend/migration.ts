@@ -1,4 +1,4 @@
-import { readdirSync } from 'fs';
+import { readdirSync } from 'node:fs';
 import { Store } from 'mem-fs';
 import { Editor } from 'mem-fs-editor';
 import { ParamProvider } from '../../../provider/param-provider';
@@ -28,7 +28,7 @@ export class GenerateMigrationStub extends BasePhpStubStep {
   protected async compileParams(fsEditor: Editor, pathProvider: PathProvider, paramProvider: ParamProvider): Promise<Record<string, unknown>> {
     const params = await super.compileParams(fsEditor, pathProvider, paramProvider);
 
-    const regex = new RegExp(/^create_([A-z0-9_]+)_table$/);
+    const regex = new RegExp(/^create_([\dA-z]+)_table$/);
 
     if (regex.test(params.name as string)) {
       params.tableName = regex.exec(params.name as string)?.pop();
@@ -37,13 +37,14 @@ export class GenerateMigrationStub extends BasePhpStubStep {
     return params;
   }
 
-  protected async getFileName(fs: Store, pathProvider: PathProvider, _paramProvider: ParamProvider) {
+  protected async getFileName(fs: Store, pathProvider: PathProvider, _paramProvider: ParamProvider): Promise<string> {
     let persistedMigrations: string[];
     try {
       persistedMigrations = readdirSync(pathProvider.ext('migrations'));
     } catch {
       persistedMigrations = [];
     }
+
     const memMigrations: string[] = fs.all().map(f => f.path).filter(p => p.startsWith(pathProvider.ext('migrations')));
 
     return getNextMigrationName([...persistedMigrations, ...memMigrations], this.params.name as string) + '.php';

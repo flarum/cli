@@ -2,16 +2,28 @@ export function extensionId(packageName: string): string {
   return packageName.replace(/(flarum-ext-)|(flarum-)/, '').replace('/', '-');
 }
 
-export function extensionMetadata(extensionComposerJson: any = {}) {
-  const data: any = {};
-  data.packageName = extensionComposerJson?.name || '';
-  data.packageDescription = extensionComposerJson?.description || '';
-  data.licenseType = extensionComposerJson?.license || '';
-  data.authorName = '';
-  data.authorEmail = '';
-  data.packageNamespace = (Object.keys(extensionComposerJson?.autoload?.['psr-4'] ?? {})[0] || '').slice(0, -1);
-  data.extensionName = extensionComposerJson?.extra?.['flarum-extension']?.title || '';
-  data.extensionId = extensionId(data.packageName);
+export type ExtensionMetadata = {
+  packageName: string;
+  packageDescription: string;
+  licenseType: string;
+  authorName: string;
+  authorEmail: string;
+  packageNamespace: string;
+  extensionName: string;
+  extensionId: string;
+}
 
-  return data;
+export function extensionMetadata(extensionComposerJson: any = {}): ExtensionMetadata {
+  const packageName = extensionComposerJson?.name || '';
+
+  return {
+    packageName: packageName,
+    packageDescription: extensionComposerJson?.description || '',
+    licenseType: extensionComposerJson?.license || '',
+    authorName: '',
+    authorEmail: '',
+    packageNamespace: (Object.keys(extensionComposerJson?.autoload?.['psr-4'] ?? {})[0] || '').slice(0, -1),
+    extensionName: extensionComposerJson?.extra?.['flarum-extension']?.title || '',
+    extensionId: extensionId(packageName),
+  };
 }

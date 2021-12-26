@@ -5,6 +5,7 @@ import { BaseStubStep } from './base';
 import { ParamProvider } from '../../provider/param-provider';
 import { PathProvider } from '../../provider/path-provider';
 import { cloneAndFill } from '../../utils/clone-and-fill';
+import { ExtensionMetadata } from '../../utils/extension-metadata';
 
 export abstract class BaseJsStubStep extends BaseStubStep {
   protected defaultRoot = './js/src';
@@ -17,16 +18,12 @@ export abstract class BaseJsStubStep extends BaseStubStep {
     return [...super.implicitParams, 'classNamespace'];
   }
 
-  protected async precompileParams(composerJsonContents: any, fsEditor: Editor, pathProvider: PathProvider, paramProvider: ParamProvider): Promise<Record<string, unknown>> {
+  protected async precompileParams(composerJsonContents: ExtensionMetadata, fsEditor: Editor, pathProvider: PathProvider, paramProvider: ParamProvider): Promise<Record<string, unknown>> {
     const params = await super.precompileParams(composerJsonContents, fsEditor, pathProvider, paramProvider);
 
     const paramDefs = this.schema.params.filter(param => !this.implicitParams.includes(param.name as string));
 
-    if (this.schema.forceRecommendedSubdir || pathProvider.requestedDir() === null) {
-      this.subdir = this.schema.recommendedSubdir;
-    } else {
-      this.subdir = pathProvider.requestedDir()!.slice(`${pathProvider.ext('js/src')}/`.length);
-    }
+    this.subdir = this.schema.forceRecommendedSubdir || pathProvider.requestedDir() === null ? this.schema.recommendedSubdir : pathProvider.requestedDir()!.slice(`${pathProvider.ext('js/src')}/`.length);
 
     params.frontend = await paramProvider.get(paramDefs.find(param => param.name === 'frontend') as PromptObject);
     params.className = await paramProvider.get(paramDefs.find(param => param.name === 'className') as PromptObject);

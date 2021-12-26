@@ -1,6 +1,11 @@
 {
   "rules": {
     "unicorn/no-abusive-eslint-disable": "off",
+    "unicorn/no-array-for-each": "off",
+    "unicorn/no-array-callback-reference": "off",
+    "unicorn/prefer-module": "off",
+    "unicorn/no-array-reduce": "off",
+    "unicorn/consistent-function-scoping": ["error", {"checkArrowFunctions": false}],
     "@typescript-eslint/ban-ts-ignore": "off",
     "indent": ["error", 2, {"MemberExpression": 1}],
     "valid-jsdoc": "off",

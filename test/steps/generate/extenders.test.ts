@@ -67,7 +67,7 @@ const testSpecs: ExtenderTest[] = [
 ];
 
 describe('Extender tests', function () {
-  testSpecs.forEach(spec => {
+  for (const spec of testSpecs) {
     test(`Extender test: ${spec.extenderClass.name}`, async function () {
       const initialFilesCallback = (pathProvider: PathProvider) => {
         const initial: Record<string, string> = {};
@@ -82,5 +82,5 @@ return [];
 
       expect(getFsPaths(fs)).toStrictEqual(['/ext/extend.php'].sort());
     });
-  });
+  }
 });

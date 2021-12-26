@@ -1,10 +1,10 @@
-import { Command, flags } from '@oclif/command';
+import { Command, Flags, Interfaces } from '@oclif/core';
 import cli from 'cli-ux';
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import prompts from 'prompts';
 import globby from 'globby';
-import { execSync } from 'child_process';
-import { existsSync, unlinkSync } from 'fs';
+import { execSync } from 'node:child_process';
+import { existsSync, unlinkSync } from 'node:fs';
 import { paramProviderFactory, PROMPTS_OPTIONS } from './provider/param-provider';
 import { StepManager } from './steps/step-manager';
 import { PathFsProvider } from './provider/path-provider';
@@ -12,8 +12,8 @@ import { PhpSubsystemProvider } from './provider/php-provider';
 import chalk from 'chalk';
 
 export default abstract class BaseCommand extends Command {
-  static flags: flags.Input<any> = {
-    help: flags.help({ char: 'h' }),
+  static flags: Interfaces.FlagInput<any> = {
+    help: Flags.help({ char: 'h' }),
   };
 
   static args = [
@@ -25,8 +25,8 @@ export default abstract class BaseCommand extends Command {
 
   protected requireExistingExtension = true;
 
-  async run() {
-    const { args } = this.parse(this.constructor as any);
+  async run(): Promise<void> {
+    const { args } = await this.parse(this.constructor as any);
 
     const path: string|undefined = args.path;
 
@@ -60,7 +60,7 @@ export default abstract class BaseCommand extends Command {
     this.log('\n\n');
     this.log(chalk.bold(chalk.underline(chalk.green('Success! The following steps were completed:'))));
 
-    completed.forEach(stepName => this.log(`- ${chalk.dim(stepName)}`));
+    for (const stepName of completed)  this.log(`- ${chalk.dim(stepName)}`);
 
     this.log('');
 
@@ -78,7 +78,7 @@ export default abstract class BaseCommand extends Command {
     return 'Please make sure to check my work, adjust formatting, and test before committing!!!';
   }
 
-  protected async additionalPreRunChecks(_extRoot: string) {
+  protected async additionalPreRunChecks(_extRoot: string): Promise<void> {
     // Can be implemented if needed.
   }
 
@@ -88,7 +88,7 @@ export default abstract class BaseCommand extends Command {
   // Confirmation
   // ----------------------------------------------------------------
 
-  protected async getFlarumExtensionRoot(currDir: string) {
+  protected async getFlarumExtensionRoot(currDir: string): Promise<string> {
     let currPath = resolve(currDir);
 
     while (currPath !== '/') {
@@ -101,12 +101,12 @@ export default abstract class BaseCommand extends Command {
 
     this.error(
       `${resolve(
-        currDir
-      )} is not located in a valid Flarum extension! Flarum extensions must contain (at a minimum) 'extend.php' and 'composer.json' files.`
+        currDir,
+      )} is not located in a valid Flarum extension! Flarum extensions must contain (at a minimum) 'extend.php' and 'composer.json' files.`,
     );
   }
 
-  protected async confirmExtDir(extRoot: string) {
+  protected async confirmExtDir(extRoot: string): Promise<void> {
     const response = await prompts([
       {
         name: 'verify',
@@ -119,7 +119,7 @@ export default abstract class BaseCommand extends Command {
     if (!response.verify) this.exit();
   }
 
-  protected async ensureComposerInstallRan(extRoot: string) {
+  protected async ensureComposerInstallRan(extRoot: string): Promise<void> {
     if (existsSync(resolve(extRoot, 'vendor/flarum/core/composer.json'))) return;
 
     this.log("This command requires `composer install` to have been ran in your extension's root directory.");
@@ -167,7 +167,7 @@ export default abstract class BaseCommand extends Command {
     return true;
   }
 
-  protected async  deleteFiles(dir: string, pattern: string) {
+  protected async  deleteFiles(dir: string, pattern: string): Promise<void> {
     const pathsToDelete = await globby(resolve(dir, pattern));
 
     pathsToDelete.forEach(unlinkSync);

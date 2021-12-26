@@ -1,14 +1,13 @@
-import {Command, Topic} from '@oclif/config';
-import {Help as HelpDefault} from '@oclif/plugin-help';
+import {Interfaces, Help as HelpDefault} from '@oclif/core';
 import chalk from 'chalk';
 
 const COLON_REGEX = /:/g;
 
-function prepCommand(command: Command) {
-  return Object.assign({}, command, {id: chalk.green(command.id.replace(COLON_REGEX, ' '))});
+function prepCommand(command: Interfaces.Command) {
+  return Object.assign({}, command, {id: chalk.green(command.id?.replace(COLON_REGEX, ' ') ?? '')});
 }
 
-function prepTopic(topic: Topic) {
+function prepTopic(topic: Interfaces.Topic) {
   return Object.assign({}, topic, {name: chalk.green(topic.name.replace(COLON_REGEX, ' '))});
 }
 
@@ -23,19 +22,19 @@ export default class Help extends HelpDefault {
     return colorHeaders(super.formatRoot());
   }
 
-  protected formatCommand(command: Command): string {
+  protected formatCommand(command: Interfaces.Command): string {
     return colorHeaders(super.formatCommand(prepCommand(command)));
   }
 
-  protected formatCommands(commands: Command[]): string {
+  protected formatCommands(commands: Interfaces.Command[]): string {
     return colorHeaders(super.formatCommands(commands.map(prepCommand)));
   }
 
-  protected formatTopic(topic: Topic): string {
+  protected formatTopic(topic: Interfaces.Topic): string {
     return colorHeaders(super.formatTopic(prepTopic(topic)).replace(COLON_REGEX, ' '));
   }
 
-  protected formatTopics(topics: Topic[]): string {
+  protected formatTopics(topics: Interfaces.Topic[]): string {
     return colorHeaders(super.formatTopics(topics.map(prepTopic)));
   }
 }

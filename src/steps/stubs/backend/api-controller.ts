@@ -47,7 +47,7 @@ export class GenerateApiControllerStub extends BasePhpStubStep {
         name: 'handlerCommandClass',
         type: 'text',
         message: `Handler Command Class (${chalk.dim('Vendor\\Path\\Command')}) (Optional)`,
-        validate: (s: string) => !s.length || Validator.class(s),
+        validate: Validator.optionalClass,
         optional: true,
       },
       {

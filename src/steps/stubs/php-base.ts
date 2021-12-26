@@ -4,6 +4,7 @@ import { PromptObject } from 'prompts';
 import { BaseStubStep } from './base';
 import { ParamProvider } from '../../provider/param-provider';
 import { PathProvider } from '../../provider/path-provider';
+import { ExtensionMetadata } from '../../utils/extension-metadata';
 
 export abstract class BasePhpStubStep extends BaseStubStep {
   protected defaultRoot = './src';
@@ -18,7 +19,7 @@ export abstract class BasePhpStubStep extends BaseStubStep {
 
   protected phpClassParams: string[] = [];
 
-  protected async precompileParams(composerJsonContents: any, fsEditor: Editor, pathProvider: PathProvider, paramProvider: ParamProvider): Promise<Record<string, unknown>> {
+  protected async precompileParams(composerJsonContents: ExtensionMetadata, fsEditor: Editor, pathProvider: PathProvider, paramProvider: ParamProvider): Promise<Record<string, unknown>> {
     const params: Record<string, unknown> = {
       ...await super.precompileParams(composerJsonContents, fsEditor, pathProvider, paramProvider),
       classNamespace: this.stubNamespace(composerJsonContents, pathProvider),
@@ -37,9 +38,7 @@ export abstract class BasePhpStubStep extends BaseStubStep {
       classParams.push('class');
     }
 
-    for (let i = 0; i < classParams.length; i++) {
-      const classParam = classParams[i];
-
+    for (const classParam of classParams) {
       const paramDef = this.schema.params.find(param => param.name === classParam);
 
       if (!paramDef) {
@@ -59,15 +58,10 @@ export abstract class BasePhpStubStep extends BaseStubStep {
     return await paramProvider.get<string>({ name: 'className', type: 'text' }) + '.php';
   }
 
-  protected stubNamespace(composerJsonContents: any, pathProvider: PathProvider): string {
+  protected stubNamespace(composerJsonContents: ExtensionMetadata, pathProvider: PathProvider): string {
     const packageNamespace = composerJsonContents.packageNamespace;
 
-    let subdir: string;
-    if (this.schema.forceRecommendedSubdir || pathProvider.requestedDir() === null) {
-      subdir = this.schema.recommendedSubdir.replace('\\', '.').replace('/', '.');
-    } else {
-      subdir = pathProvider.requestedDir()!.slice(`${pathProvider.ext((this.schema.root || this.defaultRoot).replace('./', ''))}/`.length);
-    }
+    const subdir = this.schema.forceRecommendedSubdir || pathProvider.requestedDir() === null ? this.schema.recommendedSubdir.replace('\\', '.').replace('/', '.') : pathProvider.requestedDir()!.slice(`${pathProvider.ext((this.schema.root || this.defaultRoot).replace('./', ''))}/`.length);
 
     this.subdir = subdir.replace('.', '/');
 

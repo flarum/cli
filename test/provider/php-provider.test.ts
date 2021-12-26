@@ -1,4 +1,4 @@
-import path from 'path';
+import path from 'node:path';
 import { ExpressionType, ExtenderDef, ParamTypeType, PhpSubsystemProvider } from '../../src/provider/php-provider';
 
 const extendContent = `<?php

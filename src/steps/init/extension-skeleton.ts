@@ -21,7 +21,7 @@ export class ExtensionSkeleton implements Step {
       name: 'packageName',
       type: 'text',
       message: `Package ${chalk.dim('(vendor/extension-name)')}`,
-      validate: s => /^([0-9a-zA-Z-]{2,})\/([0-9a-zA-Z-]{2,})$/.test(s.trim()) || 'Invalid package name format',
+      validate: s => /^([\dA-Za-z-]{2,})\/([\dA-Za-z-]{2,})$/.test(s.trim()) || 'Invalid package name format',
       format: s => s.toLowerCase(),
     });
     const packageDescription = await paramProvider.get<string>({
@@ -33,7 +33,7 @@ export class ExtensionSkeleton implements Step {
       name: 'namespace',
       type: 'text',
       message: `Package namespace ${chalk.dim('(Vendor\\ExtensionName)')}`,
-      validate: s => /^([0-9a-zA-Z]+)\\([0-9a-zA-Z]+)$/.test(s.trim()) || 'Invalid namespace format',
+      validate: s => /^([\dA-Za-z]+)\\([\dA-Za-z]+)$/.test(s.trim()) || 'Invalid namespace format',
       format: (str: string) =>
         str &&
         str
@@ -50,7 +50,7 @@ export class ExtensionSkeleton implements Step {
       name: 'authorEmail',
       type: 'text',
       message: 'Author email',
-      validate: s => !s || /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(s) || 'Invalid email format',
+      validate: s => !s || /^[\w!#$%&*+./=?^`{|}~’-]+@[\dA-Za-z-]+(?:\.[\dA-Za-z-]+)*$/.test(s) || 'Invalid email format',
     });
     const extensionName = await paramProvider.get<string>({
       name: 'extensionName',
@@ -110,7 +110,7 @@ export class ExtensionSkeleton implements Step {
       type: () => (useActionsCi && 'text'),
       message: `Main git branch ${chalk.dim('(JS will automatically build when changes are pushed to GitHub on this branch)')}`,
       // See https://stackoverflow.com/a/12093994/11091039
-      validate: s => new RegExp(String.raw`^(?!.*\/\.)(?!.*\.\.)(?!\/)(?!.*\/\/)(?!.*@\{)(?!.*\\)[^\000-\037\177 ~^:?*[]+(?<!\.lock)(?<!\/)(?<!\.)$`).test(s.trim()) || 'Invalid git branch',
+      validate: s => /^(?!.*\/\.)(?!.*\.\.)(?!\/)(?!.*\/\/)(?!.*@{)(?!.*\\)[^\000-\037 *:?[^~\177]+(?<!\.lock)(?<!\/)(?<!\.)$/.test(s.trim()) || 'Invalid git branch',
       initial: 'main',
     });
 
@@ -143,17 +143,20 @@ export class ExtensionSkeleton implements Step {
       fsEditor.delete(pathProvider.ext('js/.prettierrc.json'));
       fsEditor.delete(pathProvider.ext('js'));
     }
+
     if (!useCss) fsEditor.delete(pathProvider.ext('less'));
     if (!admin) {
       fsEditor.delete(pathProvider.ext('less/admin.less'));
       fsEditor.delete(pathProvider.ext('js/src/admin'));
       fsEditor.delete(pathProvider.ext('js/admin.js'));
     }
+
     if (!forum) {
       fsEditor.delete(pathProvider.ext('less/forum.less'));
       fsEditor.delete(pathProvider.ext('js/src/forum'));
       fsEditor.delete(pathProvider.ext('js/forum.js'));
     }
+
     if (!useActionsCi) fsEditor.delete(pathProvider.ext('.github/workflows'));
 
     return fs;

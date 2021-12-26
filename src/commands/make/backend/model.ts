@@ -111,7 +111,7 @@ export default class Model extends BaseCommand {
             ],
             {
               classType: 'create',
-            }
+            },
           )
           .namedStep(
             'updateHandlerCommand',
@@ -130,7 +130,7 @@ export default class Model extends BaseCommand {
             ],
             {
               classType: 'update',
-            }
+            },
           )
           .namedStep(
             'deleteHandlerCommand',
@@ -149,7 +149,7 @@ export default class Model extends BaseCommand {
             ],
             {
               classType: 'delete',
-            }
+            },
           );
 
         // Domain Handlers
@@ -268,7 +268,7 @@ export default class Model extends BaseCommand {
             {
               classType: 'list',
               handlerCommandClass: '',
-            }
+            },
           )
           .namedStep(
             'showApiController',
@@ -294,7 +294,7 @@ export default class Model extends BaseCommand {
             {
               classType: 'show',
               handlerCommandClass: '',
-            }
+            },
           )
           .namedStep(
             'createApiController',
@@ -324,7 +324,7 @@ export default class Model extends BaseCommand {
             ],
             {
               classType: 'create',
-            }
+            },
           )
           .namedStep(
             'updateApiController',
@@ -354,7 +354,7 @@ export default class Model extends BaseCommand {
             ],
             {
               classType: 'update',
-            }
+            },
           )
           .namedStep(
             'deleteApiController',
@@ -384,7 +384,7 @@ export default class Model extends BaseCommand {
             ],
             {
               classType: 'delete',
-            }
+            },
           )
           // Routes
           .namedStep(
@@ -409,9 +409,10 @@ export default class Model extends BaseCommand {
                 exposedName: 'class',
                 consumedName: 'routeHandler',
               },
-            ], {
+            ],
+            {
               httpMethod: 'get',
-            }
+            },
           )
           .step(
             new GenerateRoutesExtender(),
@@ -438,9 +439,10 @@ export default class Model extends BaseCommand {
                 exposedName: 'class',
                 consumedName: 'routeHandler',
               },
-            ], {
+            ],
+            {
               httpMethod: 'get',
-            }
+            },
           )
           .step(
             new GenerateRoutesExtender(),
@@ -467,9 +469,10 @@ export default class Model extends BaseCommand {
                 exposedName: 'class',
                 consumedName: 'routeHandler',
               },
-            ], {
+            ],
+            {
               httpMethod: 'post',
-            }
+            },
           )
           .step(
             new GenerateRoutesExtender(),
@@ -496,9 +499,10 @@ export default class Model extends BaseCommand {
                 exposedName: 'class',
                 consumedName: 'routeHandler',
               },
-            ], {
+            ],
+            {
               httpMethod: 'patch',
-            }
+            },
           )
           .step(
             new GenerateRoutesExtender(),
@@ -525,9 +529,10 @@ export default class Model extends BaseCommand {
                 exposedName: 'class',
                 consumedName: 'routeHandler',
               },
-            ], {
+            ],
+            {
               httpMethod: 'delete',
-            }
+            },
           );
       });
   }

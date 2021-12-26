@@ -1,6 +1,6 @@
 import { create as createMemFsEditor } from 'mem-fs-editor';
 import { UpdateJSImports } from '../../../src/steps/update/js-imports';
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import { runStep } from '../../utils';
 import { PathProvider } from '../../../src/provider/path-provider';
 
@@ -65,9 +65,9 @@ describe('Test JS import rewrite', function () {
       initialFiles[pathProvider.ext('/ext/js/src/forum/something.js')] = fileToRewrite;
 
       // JS import step will rewrite based on existing vendor files, so we need to make those.
-      files.forEach(path => {
+      for (const path of files) {
         initialFiles[resolve(pathProvider.ext('vendor/flarum/core/js/src'), path)] = 'Something';
-      });
+      }
 
       return initialFiles;
     });

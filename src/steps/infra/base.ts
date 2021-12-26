@@ -25,15 +25,15 @@ export abstract class BaseInfraStep implements Step {
   async run(fs: Store, pathProvider: PathProvider, _paramProvider: ParamProvider, _phpProvider: PhpProvider): Promise<Store> {
     const fsEditor = create(fs);
 
-    this.filesToReplace.forEach(filePath => {
+    for (const filePath of this.filesToReplace) {
       fsEditor.copy(pathProvider.boilerplate(`skeleton/extension/${filePath}`), pathProvider.ext(filePath));
-    });
+    }
 
     const fakeInitData = extensionMetadata(fsEditor.readJSON(pathProvider.ext('composer.json')));
 
     fakeInitData.packageNamespace = fakeInitData.packageNamespace.replace('\\', '\\\\');
 
-    Object.keys(this.jsonToAugment).forEach(jsonPath => {
+    for (const jsonPath of Object.keys(this.jsonToAugment)) {
       const boilerplatePath = pathProvider.boilerplate('skeleton/extension', jsonPath);
       const boilerplateTmpPath = pathProvider.boilerplate('skeleton/extension', `${jsonPath}.tmp`);
       // We copy it to resolve template tags.
@@ -45,7 +45,7 @@ export abstract class BaseInfraStep implements Step {
       const relevant = pick(boilerplateComposerJson, fieldsToAugment);
 
       fsEditor.extendJSON(pathProvider.ext(jsonPath), relevant);
-    });
+    }
 
     return fs;
   }

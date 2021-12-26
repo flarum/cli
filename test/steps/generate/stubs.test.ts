@@ -298,7 +298,7 @@ const backendTestSpecs: StubTest[] = [
 ];
 
 // Api Controllers
-['normal', 'list', 'show', 'create', 'update', 'delete'].forEach(classType => {
+for (const classType of ['normal', 'list', 'show', 'create', 'update', 'delete']) {
   backendTestSpecs.push({
     stubClass: GenerateApiControllerStub,
     params: {
@@ -320,7 +320,7 @@ const backendTestSpecs: StubTest[] = [
       class: `Flarum\\Demo\\somePath\\${classType}Controller`,
     },
   });
-});
+}
 
 const backendTestsTestSpecs: StubTest[] = [
   // Integration Test
@@ -426,13 +426,13 @@ const sampleComposerJson = {
   },
 };
 
-[
+for (const specDefinition of [
   { requestedDir: requestedDir, testSpecs: backendTestSpecs },
   { requestedDir: requestedTestDir, testSpecs: backendTestsTestSpecs },
   { requestedDir: requestedJsDir, testSpecs: frontendTestSpecs },
-].forEach(specDefinition => {
+]) {
   describe('Backend stub tests', function () {
-    specDefinition.testSpecs.forEach(spec => {
+    for (const spec of specDefinition.testSpecs) {
       describe(`Stub Test: ${spec.stubClass.name}`, function () {
         const initialFilesCallback = (pathProvider: PathProvider) => {
           const initial: Record<string, string> = {};
@@ -456,9 +456,9 @@ const sampleComposerJson = {
           expect(exposedParams).toStrictEqual(spec.expectedExposedParamsRequestedDir);
         });
       });
-    });
+    }
   });
-});
+}
 
 const migrationSpec = {
   stubClass: GenerateMigrationStub,

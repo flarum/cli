@@ -58,6 +58,10 @@ interface StepDependency {
 
 type PredefinedParameters = Record<string, unknown>;
 
+const formatDependencies = (strings: string[]) => strings
+  .map(s => `"${s}"`)
+  .join(', ');
+
 export class StepManager {
   protected steps: Array<StoredStep | AtomicStepManager> = [];
 
@@ -92,8 +96,7 @@ export class StepManager {
     return this;
   }
 
-  atomicGroup(callback: (stepManager: AtomicStepManager) => void) {
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+  atomicGroup(callback: (stepManager: AtomicStepManager) => void): this {
     const atomicCollection = new AtomicStepManager(this.namedSteps, this.exposedParams);
 
     callback(atomicCollection);
@@ -103,33 +106,29 @@ export class StepManager {
     return this;
   }
 
-  protected validateDependencies(step: Step, dependencies: StepDependency[]) {
-    const format = (strings: string[]) => strings
-      .map(s => `"${s}"`)
-      .join(', ');
-
+  protected validateDependencies(step: Step, dependencies: StepDependency[]): void {
     const missingDependencySteps = dependencies
       .map(dep => dep.sourceStep)
       .filter(stepName => !this.namedSteps.has(stepName));
 
     if (missingDependencySteps.length > 0) {
-      throw new Error(`Step of type "${step.type}" depends on nonexistent named steps ${format(missingDependencySteps)}`);
+      throw new Error(`Step of type "${step.type}" depends on nonexistent named steps ${formatDependencies(missingDependencySteps)}`);
     }
 
     const missingDependencyParams: string[] = [];
     const missingDependencyParamSteps: string[] = [];
 
-    dependencies.forEach(dependency => {
+    for (const dependency of dependencies) {
       const sourceStep = this.namedSteps.get(dependency.sourceStep);
 
       if (!sourceStep?.step.exposes.includes(dependency.exposedName) && dependency.exposedName !== '__succeeded') {
         missingDependencyParamSteps.push(sourceStep?.name as string);
         missingDependencyParams.push(dependency.exposedName);
       }
-    });
+    }
 
     if (missingDependencyParamSteps.length > 0) {
-      throw new Error(`Step of type "${step.type}" depends on nonexistent exposed params ${format(missingDependencyParams)} from named steps ${format(missingDependencyParamSteps)}`);
+      throw new Error(`Step of type "${step.type}" depends on nonexistent exposed params ${formatDependencies(missingDependencyParams)} from named steps ${formatDependencies(missingDependencyParamSteps)}`);
     }
   }
 
@@ -139,7 +138,6 @@ export class StepManager {
     for (let i = 0; i < this.steps.length; i++) {
       const storedStep = this.steps[i];
 
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
       if (storedStep instanceof AtomicStepManager) {
         const res = await storedStep.run(pathProvider, paramProviderFactory, phpProvider);
         stepNames.push(...res);
@@ -161,14 +159,14 @@ export class StepManager {
     let allDependenciesRan = true;
     let noRequiredNonFalsyDependenciesAreFalsy = true;
 
-    storedStep.dependencies.forEach(dep => {
+    for (const dep of storedStep.dependencies) {
       if (!this.exposedParams.has(dep.sourceStep)) allDependenciesRan = false;
       const sourceDeps = this.exposedParams.get(dep.sourceStep);
 
       if (dep.exposedName !== '__succeeded' && dep.dontRunIfFalsy && !sourceDeps![dep.exposedName]) {
         noRequiredNonFalsyDependenciesAreFalsy = false;
       }
-    });
+    }
 
     if (!allDependenciesRan || !noRequiredNonFalsyDependenciesAreFalsy) return false;
 
@@ -187,11 +185,7 @@ export class StepManager {
   protected async runStep(storedStep: StoredStep, pathProvider: PathProvider, paramProviderFactory: ParamProviderFactory, phpProvider: PhpProvider, fs: Store = createMemFs()): Promise<Store> {
     const initial: Record<string, unknown> = storedStep.dependencies.reduce((initial, dep) => {
       let depValue;
-      if (dep.exposedName === '__succeeded') {
-        depValue = this.exposedParams.has(dep.sourceStep);
-      } else {
-        depValue = this.exposedParams.get(dep.sourceStep)![dep.exposedName];
-      }
+      depValue = dep.exposedName === '__succeeded' ? this.exposedParams.has(dep.sourceStep) : this.exposedParams.get(dep.sourceStep)![dep.exposedName];
 
       if (dep.modifier) {
         depValue = dep.modifier(depValue);

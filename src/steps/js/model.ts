@@ -9,11 +9,7 @@ export class GenerateModelDefinition extends BaseJsStep {
     const className: string = await paramProvider.get({ name: 'className', type: 'text' });
     let modelType: string = await paramProvider.get({ name: 'modelType', type: 'text' });
 
-    if (modelType.includes('-')) {
-      modelType = `['${modelType}']`;
-    } else {
-      modelType = `.${modelType}`;
-    }
+    modelType = modelType.includes('-') ? `['${modelType}']` : `.${modelType}`;
 
     return `app.store.models${modelType} = ${className};`;
   }

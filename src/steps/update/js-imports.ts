@@ -8,7 +8,7 @@ import { Step } from '../step-manager';
 
 const CORE_JS_NAMESPACES = ['admin', 'common', 'forum'];
 const CORE_NAMESPACE_REGEX = new RegExp(`^(${CORE_JS_NAMESPACES.join('|')})/`);
-const IMPORT_REGEX = /(?<key>import|export)\s+(?:(?<alias>[\w,{}\s*]+)\s+from)?\s*(?:(["'])?(?<ref>[@\w\s\\/.-]+)\3?)\s*;?/gm;
+const IMPORT_REGEX = /(?<key>import|export)\s+(?:(?<alias>[\s\w*,{}]+)\s+from)?\s*(["'])?(?<ref>[\s\w./@\\-]+)\3?\s*;?/gm;
 
 type ImportMap = Record<string, string>;
 
@@ -27,38 +27,34 @@ export class UpdateJSImports implements Step {
     const fsVendorFilePaths = fs.all().map(file => file.path).filter(path => path && vendorRegex.test(path));
     const persistedVendorFilePaths = glob.sync(`${jsSrcDir}/**/*.{js,jsx,ts,tsx}`);
 
-    [...fsVendorFilePaths, ...persistedVendorFilePaths]
-      .forEach(currPath => {
-        const withNamespace = currPath.slice(jsSrcDir.length + 1).replace(/\.(js|jsx|ts|tsx)$/, '');
-        const noNamespace = withNamespace.replace(CORE_NAMESPACE_REGEX, '');
+    for (const currPath of [...fsVendorFilePaths, ...persistedVendorFilePaths]) {
+      const withNamespace = currPath.slice(jsSrcDir.length + 1).replace(/\.(js|jsx|ts|tsx)$/, '');
+      const noNamespace = withNamespace.replace(CORE_NAMESPACE_REGEX, '');
 
-        importMap[`flarum/${noNamespace}`] = `flarum/${withNamespace}`;
-      });
+      importMap[`flarum/${noNamespace}`] = `flarum/${withNamespace}`;
+    }
 
     const srcRegex = new RegExp(`${pathProvider.ext('js/src')}/.*(js|jsx|ts|tsx)`);
     const fsSrcFilePaths = fs.all().map(file => file.path).filter(path => path && srcRegex.test(path));
     const persistedSrcFilePaths = glob.sync(pathProvider.ext('js/src/**/*.{js,jsx,ts,tsx}'));
 
-    [...fsSrcFilePaths, ...persistedSrcFilePaths]
-      .forEach(match => {
-        let fileCounted = false;
-        const currContents = fsEditor.read(match);
-        const newContents = currContents.replace(IMPORT_REGEX, (match, ...args) => {
-          const currImport = args[3] as string;
-          const currImportNoAt = currImport.replace(/^@/, '');
-          const newImport = importMap[currImportNoAt] || currImport;
+    for (const match of [...fsSrcFilePaths, ...persistedSrcFilePaths]) {
+      let fileCounted = false;
+      const currContents = fsEditor.read(match);
+      const newContents = currContents.replace(IMPORT_REGEX, (match, ...args) => {
+        const currImport = args[3] as string;
+        const currImportNoAt = currImport.replace(/^@/, '');
+        const newImport = importMap[currImportNoAt] || currImport;
 
-          if (newImport !== currImport) {
-            if (!fileCounted) {
-              fileCounted = true;
-            }
-          }
+        if (newImport !== currImport && !fileCounted) {
+          fileCounted = true;
+        }
 
-          return match.replace(currImport, newImport);
-        });
-
-        fsEditor.write(match, newContents);
+        return match.replace(currImport, newImport);
       });
+
+      fsEditor.write(match, newContents);
+    }
 
     return fs;
   }

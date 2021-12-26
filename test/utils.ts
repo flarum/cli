@@ -1,6 +1,6 @@
 import { create as createMemFs, Store } from 'mem-fs';
 import { create as createMemFsEditor } from 'mem-fs-editor';
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import { prompt } from 'prompts';
 import { ParamProvider } from '../src/provider/param-provider';
 import { PathProvider } from '../src/provider/path-provider';
@@ -15,11 +15,11 @@ interface StepOutput {
 }
 
 export async function runStep(
-  StepClass: any,
+  StepClass: new () => Step,
   params: unknown[] = [],
   initialParams: Record<string, unknown> = {},
   initialFilesCallback: (pathProvider: PathProvider) => Record<string, string> = () => empty,
-  requestedDir?: string
+  requestedDir: string|null = null,
 ): Promise<StepOutput> {
   const step: Step = new StepClass();
 
@@ -31,9 +31,9 @@ export async function runStep(
 
   const fsEditor = createMemFsEditor(fs);
   const initialFiles = initialFilesCallback(pathProvider);
-  Object.keys(initialFiles).forEach(path => {
+  for (const path of Object.keys(initialFiles)) {
     fsEditor.write(path, initialFiles[path]);
-  });
+  }
 
   const newFs = await step.run(fs, pathProvider, paramProvider, phpProvider);
   const exposedParams = step.getExposed(pathProvider, paramProvider);

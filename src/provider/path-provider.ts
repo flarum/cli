@@ -1,4 +1,4 @@
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 
 export interface PathProvider {
   cwd(...path: string[]): string;

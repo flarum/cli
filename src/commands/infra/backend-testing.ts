@@ -22,7 +22,7 @@ export default class BackendTesting extends BaseCommand {
       ]);
   }
 
-  protected async additionalPreRunChecks(extRoot: string) {
+  protected async additionalPreRunChecks(extRoot: string): Promise<void> {
     await this.confirmOverrideFiles(extRoot, 'tests/integration/setup.php', 'Test infrastructure files already exist. Overwrite with the latest version?');
   }
 }

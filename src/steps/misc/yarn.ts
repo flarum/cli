@@ -1,4 +1,4 @@
-import { execSync } from 'child_process';
+import { execSync } from 'node:child_process';
 import { Store } from 'mem-fs';
 import { ParamProvider } from '../../provider/param-provider';
 import { PathProvider } from '../../provider/path-provider';
@@ -18,7 +18,7 @@ export class YarnInstall implements Step {
 
   exposes = [];
 
-  getExposed() {
+  getExposed(): Record<string, unknown> {
     return {};
   }
 }

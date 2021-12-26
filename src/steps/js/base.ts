@@ -6,8 +6,8 @@ import { PathProvider } from '../../provider/path-provider';
 import { PhpProvider } from '../../provider/php-provider';
 import { Step } from '../step-manager';
 
-const IMPORTS_REGEX = /((^import\s+(?:([\w,{}\s*]+)\s+from)?\s*(?:(?:["'])?([@\w\s\\/.-]+)\3?(?:["'])?)\s*;?\s*)*)(.*)/m;
-const INIT_REGEX = /^(app\.initializers\.add\('[^']+',\s*\(\)\s*=>\s*\{)$/m;
+const IMPORTS_REGEX = /((^import\s+(?:([\s\w*,{}]+)\s+from)?\s*["']?([\s\w./@\\-]+)\3?["']?\s*;?\s*)*)(.*)/m;
+const INIT_REGEX = /^(app\.initializers\.add\('[^']+',\s*\(\)\s*=>\s*{)$/m;
 
 export abstract class BaseJsStep implements Step {
   abstract type: string;
@@ -24,7 +24,7 @@ export abstract class BaseJsStep implements Step {
       frontends = ['admin', 'forum'];
     }
 
-    frontends.forEach(frontend => {
+    for (const frontend of frontends) {
       const fsSrcFilePaths = glob.sync(pathProvider.ext(`js/src/${frontend}/*.{js,jsx,ts,tsx}`));
 
       fsSrcFilePaths.forEach(async match => {
@@ -43,7 +43,7 @@ export abstract class BaseJsStep implements Step {
 
         fsEditor.write(match, newContents);
       });
-    });
+    }
 
     return fs;
   }

@@ -184,7 +184,7 @@ describe('Step Manager Execution', function () {
             {
               sourceStep: 'model',
               exposedName: 'modelClass',
-              consumedName: 'isnt_used_here_but_why_not',
+              consumedName: 'isntUsedHereButWhyNot',
             },
           ]);
       })
@@ -209,7 +209,7 @@ describe('Step Manager Execution', function () {
       [{ modelClass: 'Something' }],
       [{ targetModelClass: 'Something' }],
       [{}],
-      [{ listenerClass: 'Something Else', isnt_used_here_but_why_not: 'Something' }],
+      [{ listenerClass: 'Something Else', isntUsedHereButWhyNot: 'Something' }],
     ]));
 
     expect(commitMethod.mock.calls.length).toBe(6);

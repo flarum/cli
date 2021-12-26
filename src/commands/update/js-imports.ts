@@ -14,7 +14,7 @@ export default class UpdateJsImports extends BaseCommand {
       .step(new UpdateJSImports());
   }
 
-  protected async additionalPreRunChecks(extRoot: string) {
+  protected async additionalPreRunChecks(extRoot: string): Promise<void> {
     await this.ensureComposerInstallRan(extRoot);
   }
 }
