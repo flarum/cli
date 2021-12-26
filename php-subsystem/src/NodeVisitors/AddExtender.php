@@ -32,7 +32,8 @@ class AddExtender extends NodeVisitorAbstract
   {
     if ($node instanceof Node\Stmt\Return_ && $node->expr instanceof Node\Expr\Array_) {
         if (! isset($this->params['extender'])) {
-            throw new \Exception('Invalid Extender Schema');
+            $params = json_encode($this->params);
+            throw new \Exception("Invalid Extender Schema. Provided params: $params");
         }
 
       $extender = $this->getOrCreateExtender($node->expr, $this->params['extender']);
