@@ -240,6 +240,6 @@ describe('Test extension skeleton step', function () {
     expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/forum.less')")).toBe(true);
     expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/js/dist/admin.js'")).toBe(true);
     expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/admin.less'")).toBe(true);
-    expect(getExtFileContents(fs, '.github/workflows/js.yml').includes("'refs/heads/my/prod/branch'")).toBe(true);
+    expect(getExtFileContents(fs, '.github/workflows/frontend.yml').includes("'refs/heads/my/prod/branch'")).toBe(true);
   });
 });

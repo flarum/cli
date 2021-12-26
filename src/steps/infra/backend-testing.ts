@@ -9,7 +9,7 @@ export class BackendTestingInfra extends BaseInfraStep {
     'tests/fixtures/.gitkeep',
     'tests/integration/setup.php',
     'tests/unit/.gitkeep',
-    '.github/workflows/test.yml',
+    '.github/workflows/backend.yml',
   ];
 
   protected jsonToAugment = {
