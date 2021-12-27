@@ -21,15 +21,27 @@
     <% } %>],
     "autoload": {
         "psr-4": {
-            "<%= packageNamespace %>\\": "src/"
+            "<%= packageNamespace.replace(/\\/, '\\\\') %>\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "<%= packageNamespace %>\\Tests\\": "tests/"
+            "<%= packageNamespace.replace(/\\/, '\\\\') %>\\Tests\\": "tests/"
         }
     },
     "extra": {
+        "flarum": {
+            "features": {
+                "enable_bundlewatch": <%= features.enable_bundlewatch %>,
+                "enable_prettier": <%= features.enable_prettier %>,
+                "enable_typescript": <%= features.enable_typescript %>,
+
+                "enable_backend_testing": <%= features.enable_backend_testing %>,
+
+                "enable_editorconfig": <%= features.enable_editorconfig %>,
+                "enable_styleci": <%= features.enable_styleci %> 
+            }
+        },
         "flarum-extension": {
             "title": "<%= extensionName %>",
             "category": "",

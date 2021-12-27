@@ -65,7 +65,7 @@ export abstract class BasePhpStubStep extends BaseStubStep {
 
     this.subdir = subdir.replace('.', '/');
 
-    let namespace = `${packageNamespace}`;
+    let namespace = packageNamespace;
 
     if (this.schema.root === './tests') {
       namespace += '\\tests';

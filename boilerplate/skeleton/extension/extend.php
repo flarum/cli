@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace <%= namespace %>;
+namespace <%= packageNamespace %>;
 
 use Flarum\Extend;
 

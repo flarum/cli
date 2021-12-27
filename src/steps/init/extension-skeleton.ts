@@ -7,7 +7,7 @@ import { ParamProvider } from '../../provider/param-provider';
 import { PathProvider } from '../../provider/path-provider';
 import { PhpProvider } from '../../provider/php-provider';
 import { Step } from '../step-manager';
-import { extensionId } from '../../utils/extension-metadata';
+import { extensionId, extensionMetadata, ExtensionMetadata } from '../../utils/extension-metadata';
 
 export class ExtensionSkeleton implements Step {
   type = 'Generate extension skeleton';
@@ -29,8 +29,8 @@ export class ExtensionSkeleton implements Step {
       type: 'text',
       message: 'Package description',
     });
-    const namespace = await paramProvider.get<string>({
-      name: 'namespace',
+    const packageNamespace = await paramProvider.get<string>({
+      name: 'packageNamespace',
       type: 'text',
       message: `Package namespace ${chalk.dim('(Vendor\\ExtensionName)')}`,
       validate: s => /^([\dA-Za-z]+)\\([\dA-Za-z]+)$/.test(s.trim()) || 'Invalid namespace format',
@@ -114,8 +114,8 @@ export class ExtensionSkeleton implements Step {
       initial: 'main',
     });
 
-    const tpl = {
-      namespace,
+    const tpl: ExtensionMetadata = Object.assign(extensionMetadata(), {
+      packageNamespace,
       packageName,
       packageDescription,
       authorName,
@@ -128,10 +128,12 @@ export class ExtensionSkeleton implements Step {
       useJs,
       useCss,
       mainGitBranch,
-      packageNamespace: namespace.replace(/\\/, '\\\\'),
       year: new Date().getFullYear().toString(),
       extensionId: extensionId(packageName),
-    };
+
+      backend_directory: '.',
+      frontend_directory: './js',
+    });
 
     fsEditor.copyTpl(pathProvider.boilerplate('skeleton/extension'), pathProvider.ext(''), tpl, undefined, { globOptions: { dot: true } });
 

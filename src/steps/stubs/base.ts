@@ -6,7 +6,7 @@ import { ParamProvider } from '../../provider/param-provider';
 import { PathProvider } from '../../provider/path-provider';
 import { PhpProvider } from '../../provider/php-provider';
 import { Step } from '../step-manager';
-import { ExtensionMetadata, extensionMetadata } from '../../utils/extension-metadata';
+import { ComposerJsonSchema, ExtensionMetadata, extensionMetadata } from '../../utils/extension-metadata';
 import { cloneAndFill } from '../../utils/clone-and-fill';
 
 interface UserProvidedParam extends Omit<PromptObject, 'type'> {
@@ -113,6 +113,6 @@ export abstract class BaseStubStep implements Step {
   protected abstract getFileName(_fs: Store, _pathProvider: PathProvider, paramProvider: ParamProvider): Promise<string>;
 
   protected composerJsonContents(fsEditor: Editor, pathProvider: PathProvider): ExtensionMetadata {
-    return extensionMetadata(fsEditor.readJSON(pathProvider.ext('composer.json')));
+    return extensionMetadata(fsEditor.readJSON(pathProvider.ext('composer.json')) as ComposerJsonSchema);
   }
 }

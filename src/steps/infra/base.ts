@@ -4,7 +4,7 @@ import { create } from 'mem-fs-editor';
 import { ParamProvider } from '../../provider/param-provider';
 import { PathProvider } from '../../provider/path-provider';
 import { PhpProvider } from '../../provider/php-provider';
-import { extensionMetadata } from '../../utils/extension-metadata';
+import { ComposerJsonSchema, extensionMetadata } from '../../utils/extension-metadata';
 import { Step } from '../step-manager';
 
 export abstract class BaseInfraStep implements Step {
@@ -29,9 +29,7 @@ export abstract class BaseInfraStep implements Step {
       fsEditor.copy(pathProvider.boilerplate(`skeleton/extension/${filePath}`), pathProvider.ext(filePath));
     }
 
-    const fakeInitData = extensionMetadata(fsEditor.readJSON(pathProvider.ext('composer.json')));
-
-    fakeInitData.packageNamespace = fakeInitData.packageNamespace.replace('\\', '\\\\');
+    const fakeInitData = extensionMetadata(fsEditor.readJSON(pathProvider.ext('composer.json')) as ComposerJsonSchema);
 
     for (const jsonPath of Object.keys(this.jsonToAugment)) {
       const boilerplatePath = pathProvider.boilerplate('skeleton/extension', jsonPath);
