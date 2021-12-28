@@ -10,6 +10,6 @@ jobs:
   run:
     uses: flarum/.github/.github/workflows/REUSABLE_backend.yml@main
     with:
-      enable_backend_testing: <%= features.enable_backend_testing %>
+      enable_backend_testing: <%= modules.backendTesting %>
 
       backend_directory: <%= backend_directory %>

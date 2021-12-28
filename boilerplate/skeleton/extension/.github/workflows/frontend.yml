@@ -10,9 +10,9 @@ jobs:
   run:
     uses: flarum/.github/.github/workflows/REUSABLE_frontend.yml@main
     with:
-      enable_bundlewatch: <%= features.enable_bundlewatch %>
-      enable_prettier: <%= features.enable_prettier %>
-      enable_typescript: <%= features.enable_typescript %> 
+      enable_bundlewatch: <%= modules.bundlewatch %>
+      enable_prettier: <%= modules.prettier %>
+      enable_typescript: <%= modules.typescript %> 
 
       frontend_directory: <%= frontend_directory %>
       main_git_branch: <%= mainGitBranch %>

@@ -30,16 +30,26 @@
         }
     },
     "extra": {
-        "flarum": {
-            "features": {
-                "enable_bundlewatch": <%= features.enable_bundlewatch %>,
-                "enable_prettier": <%= features.enable_prettier %>,
-                "enable_typescript": <%= features.enable_typescript %>,
+        "flarum-cli": {
+            "modules": {
+                "js": <%= modules.js %>,
+                "css": <%= modules.css %>,
+                "locale": <%= modules.locale %>,
 
-                "enable_backend_testing": <%= features.enable_backend_testing %>,
+                "admin": <%= modules.admin %>,
+                "forum": <%= modules.forum %>,
 
-                "enable_editorconfig": <%= features.enable_editorconfig %>,
-                "enable_styleci": <%= features.enable_styleci %> 
+                "gitConf": <%= modules.gitConf %>,
+                "githubActions": <%= modules.githubActions %>,
+
+                "prettier": <%= modules.prettier %>,
+                "typescript": <%= modules.typescript %>,
+                "bundlewatch": <%= modules.bundlewatch %>,
+
+                "backendTesting": <%= modules.backendTesting %>,
+
+                "editorconfig": <%= modules.editorconfig %>,
+                "styleci": <%= modules.styleci %> 
             }
         },
         "flarum-extension": {

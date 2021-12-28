@@ -48,16 +48,8 @@ export type ComposerJsonSchema = {
   // Some others we definitely don't use
   extra?: {
     "flarum-cli"?: {
-      features?: {
-        enable_bundlewatch: boolean;
-        enable_prettier: boolean;
-        enable_typescript: boolean;
-    
-        enable_backend_testing: boolean;
-    
-        enable_editorconfig: boolean;
-        enable_styleci: boolean;
-      }
+      mainGitBranch?: string;
+      modules?: Partial<ExtensionModules>
     };
     "flarum-extension"?: {
       title?: string;
@@ -72,6 +64,27 @@ export type ComposerJsonSchema = {
   // Some others we definitely don't use
 }
 
+export type ExtensionModules = {
+  js: boolean;
+  css: boolean;
+  locale: boolean;
+
+  admin: boolean;
+  forum: boolean;
+
+  gitConf: boolean;
+  githubActions: boolean;
+
+  prettier: boolean;
+  typescript: boolean;
+  bundlewatch: boolean;
+  
+  backendTesting: boolean;
+
+  editorConfig: boolean;
+  styleCi: boolean;
+}
+
 export type ExtensionMetadata = {
   packageName: string;
   packageDescription: string;
@@ -82,23 +95,14 @@ export type ExtensionMetadata = {
   extensionName: string;
   extensionId: string;
 
-  features: {
-    enable_bundlewatch: boolean;
-    enable_prettier: boolean;
-    enable_typescript: boolean;
-
-    enable_backend_testing: boolean;
-
-    enable_editorconfig: boolean;
-    enable_styleci: boolean;
-  };
+  mainGitBranch: string;
 }
 
 export function extensionMetadata(extensionComposerJson: ComposerJsonSchema = {}): ExtensionMetadata {
   const packageName = extensionComposerJson?.name || '';
 
   const flarumConf = extensionComposerJson?.extra?.['flarum-cli'];
-  const features = flarumConf?.features;
+  const modules = flarumConf?.modules;
 
   return {
     packageName: packageName,
@@ -109,15 +113,6 @@ export function extensionMetadata(extensionComposerJson: ComposerJsonSchema = {}
     packageNamespace: (Object.keys(extensionComposerJson?.autoload?.['psr-4'] ?? {})[0] || '').slice(0, -1),
     extensionName: extensionComposerJson?.extra?.['flarum-extension']?.title || '',
     extensionId: extensionId(packageName),
-    features: {
-      enable_bundlewatch: features?.enable_bundlewatch ?? false,
-      enable_prettier: features?.enable_prettier ?? true,
-      enable_typescript: features?.enable_typescript ?? true,
-  
-      enable_backend_testing: features?.enable_backend_testing ?? true,
-  
-      enable_editorconfig: features?.enable_editorconfig ?? true,
-      enable_styleci: features?.enable_styleci ?? true,
-    }
+    mainGitBranch: flarumConf?.mainGitBranch ?? 'main',
   };
 }
