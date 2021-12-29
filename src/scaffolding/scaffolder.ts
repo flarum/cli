@@ -1,72 +1,10 @@
 import globby from 'globby';
 import { resolve } from 'path';
-import { Step } from 'src/steps/step-manager';
 import { jsonLeafPaths } from '../../src/utils/json-leaf-paths';
 import { readTpl } from '../../src/utils/read-tpl';
-import { initStepFactory } from './init-step-factory';
+import { Module } from './module';
 import { getParamName, isComputedParam, TemplateParam } from './template-param';
 
-interface FileOwnership {
-  /**
-   * The path to the file
-   */
-  path: string;
-
-  /**
-   * If any of the needed modules aren't enabled, the file won't be updated.
-   */
-  needsOtherModules?: string[];
-}
-
-interface CommonModule {
-  name: string;
-
-  /**
-   * Whether files belonging to this module should be kept up to date.
-   */
-  updatable: boolean;
-
-  /**
-   * A list of scaffolding files managed by this module.
-   */
-  filesToReplace: (string | FileOwnership)[];
-
-  /**
-   * A map of names of JSON files to keys which should be deep-merged from the scaffolding.
-   */
-  jsonToAugment: Record<string, string[]>;
-
-  /**
-   * An array of names of template params needed by this module.
-   */
-  needsTemplateParams: string[];
-}
-
-interface UntoggleableModule extends CommonModule {
-  /**
-   * Whether this module can be enabled/disabled.
-   */
-  togglable: false;
-}
-
-interface TogglableModule extends CommonModule {
-  /**
-   * Whether this module can be enabled/disabled.
-   */
-  togglable: true;
-
-  /**
-   * Whether this module is enabled or disabled by default.
-   */
-  defaultEnabled: boolean;
-
-  /**
-   * Can only be enabled if these other modules are enabled.
-   */
-  dependsOn: string[];
-}
-
-export type Module = UntoggleableModule | TogglableModule;
 
 export class Scaffolder {
   private templateParams: TemplateParam<unknown>[] = [];
@@ -84,6 +22,16 @@ export class Scaffolder {
   }
 
   registerTemplateParam<T>(templateParam: TemplateParam<T>): this {
+    if (isComputedParam(templateParam)) {
+      const currParams = new Set(this.templateParams.map(p => getParamName(p)));
+      const missingDeps = templateParam.uses.filter(dep => !currParams.has(dep))
+
+      if (missingDeps.length) {
+        throw new Error(`Computed template param "${getParamName(templateParam)}" is missing dependency params: "${missingDeps.join(', ')}".`);
+      }
+    }
+
+
     this.templateParams.push(templateParam);
 
     return this;
@@ -171,17 +119,6 @@ export class Scaffolder {
     const tplData: Record<string, ''> = this.templateParams.reduce((acc, param) => {
       return { ...acc, [getParamName(param)]: '' };
     }, {});
-
-    // Ensure that dependencies present for all computed params.
-    this.templateParams.forEach((p) => {
-      // Can't use filter as filter doesn't type narrow.
-      if (!isComputedParam(p)) return;
-
-      const missingDeps = p.uses.filter((dep) => !(dep in tplData));
-      if (missingDeps.length) {
-        errors.push(`Computed template param "${getParamName(p)}" is missing dependency params: "${missingDeps.join(', ')}".`);
-      }
-    });
 
     // Ensure that every template param is used by at least one module.
     this.templateParams

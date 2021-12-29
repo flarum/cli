@@ -23,6 +23,7 @@ describe('Scaffolder', function () {
       const scaffolder = new Scaffolder(scaffoldDir)
         .registerModule({
           name: 'Everything',
+          shortDescription: 'Test module containing all files',
           togglable: false,
           updatable: false,
           filesToReplace: allFiles.slice(0, -3),
@@ -47,6 +48,7 @@ describe('Scaffolder', function () {
       const scaffolder = new Scaffolder(scaffoldDir)
         .registerModule({
           name: 'Everything',
+          shortDescription: 'Test module containing all files',
           togglable: false,
           updatable: false,
           filesToReplace: [...allFiles, 'src/index.hs'],
@@ -65,6 +67,7 @@ describe('Scaffolder', function () {
       const scaffolder = new Scaffolder(scaffoldDir)
         .registerModule({
           name: 'Everything',
+          shortDescription: 'Test module containing all files',
           togglable: false,
           updatable: false,
           filesToReplace: allFiles,
@@ -83,6 +86,7 @@ describe('Scaffolder', function () {
       const scaffolder = new Scaffolder(scaffoldDir)
         .registerModule({
           name: 'Everything',
+          shortDescription: 'Test module containing all files',
           togglable: false,
           updatable: false,
           filesToReplace: allFiles,
@@ -101,6 +105,7 @@ describe('Scaffolder', function () {
       const scaffolder = new Scaffolder(scaffoldDir)
         .registerModule({
           name: 'Everything',
+          shortDescription: 'Test module containing all files',
           togglable: false,
           updatable: false,
           filesToReplace: filesNoConf,
@@ -124,6 +129,7 @@ describe('Scaffolder', function () {
       const scaffolder = new Scaffolder(scaffoldDir)
         .registerModule({
           name: 'Everything',
+          shortDescription: 'Test module containing all files',
           togglable: false,
           updatable: false,
           filesToReplace: filesNoConf,
@@ -142,6 +148,7 @@ describe('Scaffolder', function () {
       const scaffolder = new Scaffolder(scaffoldDir)
         .registerModule({
           name: 'Everything',
+          shortDescription: 'Test module containing all files',
           togglable: false,
           updatable: false,
           filesToReplace: allFiles,
@@ -159,6 +166,7 @@ describe('Scaffolder', function () {
       const scaffolder = new Scaffolder(scaffoldDir)
         .registerModule({
           name: 'Everything',
+          shortDescription: 'Test module containing all files',
           togglable: false,
           updatable: false,
           filesToReplace: allFiles,
@@ -177,20 +185,20 @@ describe('Scaffolder', function () {
       const scaffolder = new Scaffolder(scaffoldDir)
         .registerModule({
           name: 'Everything',
+          shortDescription: 'Test module containing all files',
           togglable: false,
           updatable: false,
           filesToReplace: filesNoConf,
           jsonToAugment: { 'config1.json': [...configKeys, 'nonexistent.key'] },
           needsTemplateParams: templateParamNames,
         })
-        .registerTemplateParam(templateParams[0])
-        .registerTemplateParam({
-          name: 'someOtherVar',
-          uses: ['missing1', 'missing2'],
-          compute: () => ''
-        });
+        .registerTemplateParam(templateParams[0]);
 
-      expect(async () => await scaffolder.validate()).rejects.toThrow(
+      expect(() => scaffolder.registerTemplateParam({
+        name: 'someOtherVar',
+        uses: ['missing1', 'missing2'],
+        compute: () => ''
+      })).toThrow(
         new Error([`Computed template param "someOtherVar" is missing dependency params: "missing1, missing2".`].join('\n'))
       );
     });
