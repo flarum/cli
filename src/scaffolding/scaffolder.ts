@@ -1,9 +1,11 @@
 import globby from 'globby';
+import { Store } from 'mem-fs';
 import { resolve } from 'path';
+import { PathProvider } from 'src/provider/path-provider';
 import { jsonLeafPaths } from '../../src/utils/json-leaf-paths';
 import { readTpl } from '../../src/utils/read-tpl';
 import { Module } from './module';
-import { getParamName, isComputedParam, TemplateParam } from './template-param';
+import { currParamValues, getParamName, isComputedParam, TemplateParam } from './template-param';
 
 
 export class Scaffolder {
@@ -35,6 +37,10 @@ export class Scaffolder {
     this.templateParams.push(templateParam);
 
     return this;
+  }
+
+  async templateParamVals(fs: Store, pathProvider: PathProvider) {
+    return currParamValues(this.templateParams, fs, pathProvider);
   }
 
   /**

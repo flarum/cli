@@ -12,9 +12,11 @@ describe('Scaffolder', function () {
     const templateParams: TemplateParam<unknown>[] = [
       {
         prompt: { name: 'someVar', type: 'text' },
+        getCurrVal: async () => '',
       },
       {
         prompt: { name: 'someOtherVar', type: 'text' },
+        getCurrVal: async () => '',
       },
     ];
     const templateParamNames = templateParams.map((p) => getParamName(p));

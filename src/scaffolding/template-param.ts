@@ -1,4 +1,6 @@
-import { ParamDef } from 'src/provider/param-provider';
+import { Store } from 'mem-fs';
+import { ParamDef, ParamProvider } from 'src/provider/param-provider';
+import { PathProvider } from 'src/provider/path-provider';
 
 interface PromptTemplateParam<T> {
   /**
@@ -7,7 +9,7 @@ interface PromptTemplateParam<T> {
    */
   prompt: ParamDef;
 
-  // getCurrVal: (pathProvider: PathProvider) => Promise<T>
+  getCurrVal: (fs: Store, pathProvider: PathProvider) => Promise<T>;
 }
 
 interface ComputedTemplateParam<T> {
@@ -25,9 +27,45 @@ export function isPromptParam<T>(param: TemplateParam<T>): param is PromptTempla
 }
 
 export function isComputedParam<T>(param: TemplateParam<T>): param is ComputedTemplateParam<T> {
-    return 'uses' in param;
+  return 'uses' in param;
 }
 
 export function getParamName<T>(param: TemplateParam<T>) {
-    return isComputedParam(param) ? param.name : param.prompt.name;
-};
+  return isComputedParam(param) ? param.name : param.prompt.name;
+}
+
+async function withComputedParamValues(params: TemplateParam<unknown>[], paramVals: Record<string, unknown>): Promise<Record<string, unknown>> {
+  const vals = { ...paramVals };
+
+  const computedParams = params.filter(isComputedParam);
+
+  for (const p of computedParams) {
+    const depValues = p.uses.map((key) => vals[key]);
+
+    vals[p.name] = await p.compute(...depValues);
+  }
+
+  return vals;
+}
+
+export async function promptParamValues(params: TemplateParam<unknown>[], paramProvider: ParamProvider): Promise<Record<string, unknown>> {
+  const promptParams = params.filter(isPromptParam);
+  const paramVals: Record<string, unknown> = {};
+
+  for (const p of promptParams) {
+    paramVals[p.prompt.name] = await paramProvider.get(p.prompt);
+  }
+
+  return withComputedParamValues(params, paramVals);
+}
+
+export async function currParamValues(params: TemplateParam<unknown>[], fs: Store, pathProvider: PathProvider) {
+  const promptParams = params.filter(isPromptParam);
+  const paramVals: Record<string, unknown> = {};
+
+  for (const p of promptParams) {
+    paramVals[p.prompt.name] = await p.getCurrVal(fs, pathProvider);
+  }
+
+  return withComputedParamValues(params, paramVals);
+}
