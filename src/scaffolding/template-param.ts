@@ -1,6 +1,6 @@
 import { ParamDef } from 'src/provider/param-provider';
 
-export interface PromptTemplateParam<T> {
+interface PromptTemplateParam<T> {
   /**
    * A config object to prompt for the param's value.
    * Also contains the param name.
@@ -10,7 +10,7 @@ export interface PromptTemplateParam<T> {
   // getCurrVal: (pathProvider: PathProvider) => Promise<T>
 }
 
-export interface ComputedTemplateParam<T> {
+interface ComputedTemplateParam<T> {
   name: string;
 
   uses: string[];
@@ -19,6 +19,10 @@ export interface ComputedTemplateParam<T> {
 }
 
 export type TemplateParam<T> = PromptTemplateParam<T> | ComputedTemplateParam<T>;
+
+export function isPromptParam<T>(param: TemplateParam<T>): param is PromptTemplateParam<T> {
+  return 'prompt' in param;
+}
 
 export function isComputedParam<T>(param: TemplateParam<T>): param is ComputedTemplateParam<T> {
     return 'uses' in param;
