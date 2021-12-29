@@ -1,5 +1,6 @@
 import { resolve } from 'path';
-import { Scaffolder, TemplateParam } from '../../src/scaffolding/scaffolder';
+import { Scaffolder } from '../../src/scaffolding/scaffolder';
+import { getParamName, TemplateParam } from '../../src/scaffolding/template-param';
 
 describe('Scaffolder', function () {
   describe('Scaffolder.validate', function () {
@@ -16,7 +17,7 @@ describe('Scaffolder', function () {
         prompt: { name: 'someOtherVar', type: 'text' },
       },
     ];
-    const templateParamNames = templateParams.map((p) => p.prompt.name);
+    const templateParamNames = templateParams.map((p) => getParamName(p));
 
     it('errors when files arent owned by modules', async function () {
       const scaffolder = new Scaffolder(scaffoldDir)
@@ -169,6 +170,28 @@ describe('Scaffolder', function () {
 
       expect(async () => await scaffolder.validate()).rejects.toThrow(
         new Error([`Template param "someOtherVar" is defined, but not used by any modules.`].join('\n'))
+      );
+    });
+
+    it('errors when computable template params are missing dependencies', async function () {
+      const scaffolder = new Scaffolder(scaffoldDir)
+        .registerModule({
+          name: 'Everything',
+          togglable: false,
+          updatable: false,
+          filesToReplace: filesNoConf,
+          jsonToAugment: { 'config1.json': [...configKeys, 'nonexistent.key'] },
+          needsTemplateParams: templateParamNames,
+        })
+        .registerTemplateParam(templateParams[0])
+        .registerTemplateParam({
+          name: 'someOtherVar',
+          uses: ['missing1', 'missing2'],
+          compute: () => ''
+        });
+
+      expect(async () => await scaffolder.validate()).rejects.toThrow(
+        new Error([`Computed template param "someOtherVar" is missing dependency params: "missing1, missing2".`].join('\n'))
       );
     });
   });

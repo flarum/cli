@@ -1,16 +1,10 @@
 import globby from 'globby';
 import { resolve } from 'path';
-import { ParamDef } from 'src/provider/param-provider';
+import { Step } from 'src/steps/step-manager';
 import { jsonLeafPaths } from '../../src/utils/json-leaf-paths';
 import { readTpl } from '../../src/utils/read-tpl';
-
-export interface TemplateParam<T> {
-  /**
-   * A config object to prompt for the param's value.
-   * Also contains the param name.
-   */
-  prompt: ParamDef;
-}
+import { initStepFactory } from './init-step-factory';
+import { getParamName, isComputedParam, TemplateParam } from './template-param';
 
 interface FileOwnership {
   /**
@@ -175,18 +169,29 @@ export class Scaffolder {
 
     // Generate template data for future checks
     const tplData: Record<string, ''> = this.templateParams.reduce((acc, param) => {
-      return { ...acc, [param.prompt.name]: '' };
+      return { ...acc, [getParamName(param)]: '' };
     }, {});
+
+    // Ensure that dependencies present for all computed params.
+    this.templateParams.forEach((p) => {
+      // Can't use filter as filter doesn't type narrow.
+      if (!isComputedParam(p)) return;
+
+      const missingDeps = p.uses.filter((dep) => !(dep in tplData));
+      if (missingDeps.length) {
+        errors.push(`Computed template param "${getParamName(p)}" is missing dependency params: "${missingDeps.join(', ')}".`);
+      }
+    });
 
     // Ensure that every template param is used by at least one module.
     this.templateParams
-      .filter((p) => !templateParamsToUsingModules.has(p.prompt.name))
+      .filter((p) => !templateParamsToUsingModules.has(getParamName(p)))
       .forEach((p) => {
-        errors.push(`Template param "${p.prompt.name}" is defined, but not used by any modules.`);
+        errors.push(`Template param "${getParamName(p)}" is defined, but not used by any modules.`);
       });
 
     // Ensure that every module's needed template params are provided.
-    const providedParams = new Set(this.templateParams.map((p) => p.prompt.name));
+    const providedParams = new Set(this.templateParams.map((p) => getParamName(p)));
     [...templateParamsToUsingModules.keys()]
       .filter((paramName) => !providedParams.has(paramName))
       .forEach((paramName) => {
