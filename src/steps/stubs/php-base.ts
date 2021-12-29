@@ -1,8 +1,7 @@
 import { Store } from 'mem-fs';
 import { Editor } from 'mem-fs-editor';
-import { PromptObject } from 'prompts';
 import { BaseStubStep } from './base';
-import { ParamProvider } from '../../provider/param-provider';
+import { ParamDef, ParamProvider } from '../../provider/param-provider';
 import { PathProvider } from '../../provider/path-provider';
 import { ExtensionMetadata } from '../../utils/extension-metadata';
 
@@ -31,7 +30,7 @@ export abstract class BasePhpStubStep extends BaseStubStep {
     const classNameParam = paramDefs.find(param => param.name === 'className');
 
     if (classNameParam) {
-      params.className = await paramProvider.get(classNameParam as PromptObject);
+      params.className = await paramProvider.get(classNameParam as ParamDef);
       params.class = `${params.classNamespace}\\${params.className}`;
       paramDefs = paramDefs.filter(param => param.name !== 'class' && param.name !== 'className');
     } else {
@@ -46,7 +45,7 @@ export abstract class BasePhpStubStep extends BaseStubStep {
       }
 
       // eslint-disable-next-line no-await-in-loop
-      params[classParam] = await paramProvider.get(paramDef as PromptObject);
+      params[classParam] = await paramProvider.get(paramDef as ParamDef);
       params[`${classParam}Name`] = (params[classParam] as string).split('\\').pop();
       paramDefs = paramDefs.filter(param => param.name !== classParam && param.name !== `${classParam}Name`);
     }

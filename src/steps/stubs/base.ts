@@ -1,15 +1,14 @@
 import pick from 'pick-deep';
 import { Store } from 'mem-fs';
 import { create, Editor } from 'mem-fs-editor';
-import { PromptObject } from 'prompts';
-import { ParamProvider } from '../../provider/param-provider';
+import { ParamDef, ParamProvider } from '../../provider/param-provider';
 import { PathProvider } from '../../provider/path-provider';
 import { PhpProvider } from '../../provider/php-provider';
 import { Step } from '../step-manager';
 import { ComposerJsonSchema, ExtensionMetadata, extensionMetadata } from '../../utils/extension-metadata';
 import { cloneAndFill } from '../../utils/clone-and-fill';
 
-interface UserProvidedParam extends Omit<PromptObject, 'type'> {
+interface UserProvidedParam extends Omit<ParamDef, 'type'> {
   type: string;
 }
 
@@ -98,7 +97,7 @@ export abstract class BaseStubStep implements Step {
 
     for (const paramDef of paramDefs) {
       // eslint-disable-next-line no-await-in-loop
-      params[paramDef.name as string] = await paramProvider.get(paramDef as PromptObject);
+      params[paramDef.name as string] = await paramProvider.get(paramDef as ParamDef);
     }
 
     for (const implicitParam of this.implicitParams) {

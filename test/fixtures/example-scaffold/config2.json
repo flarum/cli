@@ -1,0 +1,16 @@
+{
+    "hello": "world",
+    "foo": "bar",
+    "authors": [
+        "George Washington",
+        "Alexander Hamilton",
+        "Thomas Jefferson"
+    ],
+    "nested": {
+        "config": {
+            "string": "a",
+            "boolean": true,
+            "null": null
+        }
+    }
+}

@@ -1,8 +1,7 @@
 import { Store } from 'mem-fs';
 import { Editor } from 'mem-fs-editor';
-import { PromptObject } from 'prompts';
 import { BaseStubStep } from './base';
-import { ParamProvider } from '../../provider/param-provider';
+import { ParamDef, ParamProvider } from '../../provider/param-provider';
 import { PathProvider } from '../../provider/path-provider';
 import { cloneAndFill } from '../../utils/clone-and-fill';
 import { ExtensionMetadata } from '../../utils/extension-metadata';
@@ -25,8 +24,8 @@ export abstract class BaseJsStubStep extends BaseStubStep {
 
     this.subdir = this.schema.forceRecommendedSubdir || pathProvider.requestedDir() === null ? this.schema.recommendedSubdir : pathProvider.requestedDir()!.slice(`${pathProvider.ext('js/src')}/`.length);
 
-    params.frontend = await paramProvider.get(paramDefs.find(param => param.name === 'frontend') as PromptObject);
-    params.className = await paramProvider.get(paramDefs.find(param => param.name === 'className') as PromptObject);
+    params.frontend = await paramProvider.get(paramDefs.find(param => param.name === 'frontend') as ParamDef);
+    params.className = await paramProvider.get(paramDefs.find(param => param.name === 'className') as ParamDef);
 
     this.subdir = cloneAndFill(this.subdir, params as Record<string, string>);
 
