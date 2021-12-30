@@ -106,7 +106,12 @@ export async function promptModulesEnabled(modules: Module[], promptProvider: Pa
   return modulesEnabled;
 }
 
-export async function currModulesEnabled(modules: Module[], fs: Store, pathProvider: PathProvider, cache?: ModuleStatusCache): Promise<Record<string, boolean>> {
+export async function currModulesEnabled(
+  modules: Module[],
+  fs: Store,
+  pathProvider: PathProvider,
+  cache?: ModuleStatusCache
+): Promise<Record<string, boolean>> {
   const modulesEnabled: Record<string, boolean> = {};
 
   for (const m of modules) {
@@ -122,32 +127,37 @@ export async function currModulesEnabled(modules: Module[], fs: Store, pathProvi
   return modulesEnabled;
 }
 
-export async function setModuleValues(modules: Module[], modulesEnabled: Record<string, boolean>, fs: Store, pathProvider: PathProvider, cache: ModuleStatusCache): Promise<void> {
-  for (const m of modules) {
-    if (m.togglable) {
-      cache.set(m.name, modulesEnabled[m.name], fs, pathProvider);
-    }
+export async function setModuleValue(module: Module, enabled: boolean, fs: Store, pathProvider: PathProvider, cache: ModuleStatusCache): Promise<void> {
+  if (module.togglable) {
+    cache.set(module.name, enabled, fs, pathProvider);
   }
 }
 
-export async function applyModule(module: Module, modulesEnabled: Record<string, boolean>, paramVals: Record<string, unknown>, scaffoldDir: string, fs: Store, pathProvider: PathProvider): Promise<Store> {
+export async function applyModule(
+  module: Module,
+  modulesEnabled: Record<string, boolean>,
+  paramVals: Record<string, unknown>,
+  scaffoldDir: string,
+  fs: Store,
+  pathProvider: PathProvider
+): Promise<Store> {
   const fsEditor = create(fs);
 
   // Validate that module can be enabled
   if (!modulesEnabled?.[module.name]) {
-    throw new Error(`Could not apply module "${module.name}", because it is not enabled in the provided module statuses.`)
+    throw new Error(`Could not apply module "${module.name}", because it is not enabled in the provided module statuses.`);
   }
 
   // Validate that all needed params are present
-  const missingParams = module.needsTemplateParams.filter(p => !(p in paramVals));
+  const missingParams = module.needsTemplateParams.filter((p) => !(p in paramVals));
   if (missingParams.length) {
-    throw new Error(`Could not apply module "${module.name}", because the following params are missing: "${missingParams.join(', ')}".`)
+    throw new Error(`Could not apply module "${module.name}", because the following params are missing: "${missingParams.join(', ')}".`);
   }
 
   const tplData = {
     params: paramVals,
     modules: modulesEnabled,
-  }
+  };
 
   for (const file of module.filesToReplace) {
     const path = typeof file === 'string' ? file : file.path;

@@ -4,7 +4,7 @@ import { PathProvider } from '../../src/provider/path-provider';
 import { PhpProvider } from '../../src/provider/php-provider';
 import { Step } from '../../src/steps/step-manager';
 import { renameKeys } from '../../src/utils/rename-keys';
-import { applyModule, Module, ModuleStatusCache, promptModulesEnabled, setModuleValues } from './module';
+import { applyModule, Module, ModuleStatusCache, promptModulesEnabled, setModuleValue } from './module';
 import { promptParamValues, TemplateParam } from './template-param';
 
 export function initStepFactory(scaffoldDir: string, modules: Module[], templateParams: TemplateParam<unknown>[], moduleStatusCache?: ModuleStatusCache): Step {
@@ -26,7 +26,9 @@ export function initStepFactory(scaffoldDir: string, modules: Module[], template
       }
 
       if (moduleStatusCache) {
-        setModuleValues(modules, modulesEnabled, fs, pathProvider, moduleStatusCache);
+        modules.forEach(m => {
+          setModuleValue(m, modulesEnabled[m.name], fs, pathProvider, moduleStatusCache);
+        });
       }
 
       return fs;

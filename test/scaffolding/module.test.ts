@@ -3,7 +3,7 @@ import { create as createStore } from 'mem-fs';
 
 import { paramProviderFactory } from '../../src/provider/param-provider';
 import { PathFsProvider } from '../../src/provider/path-provider';
-import { Module, ModuleStatusCache, currModulesEnabled, promptModulesEnabled, setModuleValues, applyModule } from '../../src/scaffolding/module';
+import { Module, ModuleStatusCache, currModulesEnabled, promptModulesEnabled, setModuleValue, applyModule } from '../../src/scaffolding/module';
 import { resolve } from 'path';
 import { getExtFileContents, getFsPaths } from '../utils';
 import { create } from 'mem-fs-editor';
@@ -108,13 +108,15 @@ describe('Module Utils', function () {
     });
   });
 
-  describe('setModuleValues', function () {
+  describe('setModuleValue', function () {
     it('works', async function () {
       delete _cacheData['non-togglable'];
       delete _cacheData['default-on'];
       delete _cacheData['default-off'];
 
-      await setModuleValues(modules, { 'default-on': false, 'default-off': false }, createStore(), new PathFsProvider({ ext: '' }), cache);
+      await setModuleValue(modules[0], false, createStore(), new PathFsProvider({ ext: '' }), cache);
+      await setModuleValue(modules[1], false, createStore(), new PathFsProvider({ ext: '' }), cache);
+      await setModuleValue(modules[2], false, createStore(), new PathFsProvider({ ext: '' }), cache);
 
       expect(_cacheData).toStrictEqual({
         'default-on': false,
