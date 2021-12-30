@@ -149,6 +149,12 @@ export async function applyModule(
     throw new Error(`Could not apply module "${module.name}", because it is not enabled in the provided module statuses.`);
   }
 
+  // Validate that dependencies are enabled
+  const missingDeps =  module.togglable ? module.dependsOn.filter(dep => !modulesEnabled[dep]) : [];
+  if (missingDeps.length) {
+    throw new Error(`Could not apply module "${module.name}", because the following dependency modules are missing: "${missingDeps.join(', ')}".`);
+  }
+
   // Validate that all needed params are present
   const missingParams = module.needsTemplateParams.filter((p) => !(p in paramVals));
   if (missingParams.length) {

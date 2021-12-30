@@ -145,6 +145,13 @@ describe('applyModule', function () {
     ).rejects.toThrow(new Error('Could not apply module "just-files", because it is not enabled in the provided module statuses.'));
   });
 
+  it('errors if dependencies missing', async function () {
+    const module = {...justFilesModule, togglable: true, defaultEnabled: true, dependsOn: ['missing-dep', 'disabled-dep']};
+    expect(
+      async () => await applyModule(module, { 'just-files': true, 'disabled-dep': false }, {}, scaffoldDir, createStore(), new PathFsProvider({ ext: '/ext' }))
+    ).rejects.toThrow(new Error('Could not apply module "just-files", because the following dependency modules are missing: "missing-dep, disabled-dep".'));
+  });
+
   it('errors if module not present in modulesEnabled', async function () {
     expect(
       async () => await applyModule(justFilesModule, { somethingElse: true }, {}, scaffoldDir, createStore(), new PathFsProvider({ ext: '/ext' }))

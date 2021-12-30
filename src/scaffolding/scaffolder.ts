@@ -66,6 +66,14 @@ export class Scaffolder {
   async validate() {
     const errors: string[] = [];
 
+    const moduleNames = new Set(this.modules.map(m => m.name));
+    for (const module of this.modules) {
+      const missingDeps = module.togglable ? module.dependsOn.filter(dep => !moduleNames.has(dep)) : [];
+      if (missingDeps.length) {
+        errors.push(`Module "${module.name}" depends on modules that are not registered: "${missingDeps.join(', ')}".`);
+      }
+    }
+
     const filesToOwnerModules = new Map<string, string[]>();
     const configKeysToOwnerModules = new Map<string, { fileOwners: string[]; keyOwners: Map<string, string[]> }>();
     const templateParamsToUsingModules = new Map<string, string[]>();

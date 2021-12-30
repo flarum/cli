@@ -21,6 +21,33 @@ describe('Scaffolder', function () {
     ];
     const templateParamNames = templateParams.map((p) => getParamName(p));
 
+
+    it('errors when module dependencies missing', async function () {
+      const scaffolder = new Scaffolder(scaffoldDir)
+        .registerModule({
+          name: 'Everything',
+          shortDescription: 'Test module containing all files',
+          togglable: true,
+          defaultEnabled: true,
+          dependsOn: ['missing1', 'missing2'],
+          updatable: false,
+          filesToReplace: allFiles,
+          jsonToAugment: {},
+          needsTemplateParams: templateParamNames,
+        })
+        .registerTemplateParam(templateParams[0])
+        .registerTemplateParam(templateParams[1]);
+
+      expect(async () => await scaffolder.validate()).rejects.toThrow(
+        new Error(
+          [
+            `Module "Everything" depends on modules that are not registered: "missing1, missing2".`,
+          ].join('\n')
+        )
+      );
+    });
+
+
     it('errors when files arent owned by modules', async function () {
       const scaffolder = new Scaffolder(scaffoldDir)
         .registerModule({
