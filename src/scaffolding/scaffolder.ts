@@ -137,9 +137,15 @@ export class Scaffolder {
       });
 
     // Generate template data for future checks
-    const tplData: Record<string, ''> = this.templateParams.reduce((acc, param) => {
+    const paramVals: Record<string, ''> = this.templateParams.reduce((acc, param) => {
       return { ...acc, [getParamName(param)]: '' };
     }, {});
+
+    const modulesEnabled: Record<string, boolean> = this.modules.reduce((acc, module) => {
+      return {...acc, [module.name]: true};
+    }, {});
+
+    const tplData = {params: paramVals, modules: modulesEnabled};
 
     // Ensure that every template param is used by at least one module.
     this.templateParams
