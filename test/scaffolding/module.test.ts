@@ -189,6 +189,31 @@ describe('applyModule', function () {
     expect(JSON.parse(getExtFileContents(fs, 'config1.json'))).toStrictEqual({ hello: 'val1', nested: { config: { string: 'a' } } });
   });
 
+
+  it('copies over deep data', async function () {
+    const module: Module = {
+      name: 'just-json',
+      togglable: false,
+      updatable: true,
+      shortDescription: '',
+      filesToReplace: [],
+      jsonToAugment: { 'config1.json': ['nested.config', 'hello'] },
+      needsTemplateParams: ['someVar', 'someOtherVar'],
+    };
+
+    const fs = await applyModule(
+      module,
+      { 'just-json': true },
+      { someVar: 'val1', someOtherVar: 'val2' },
+      scaffoldDir,
+      createStore(),
+      new PathFsProvider({ ext: '/ext' })
+    );
+
+    expect(getFsPaths(fs)).toStrictEqual(['/ext/config1.json']);
+    expect(JSON.parse(getExtFileContents(fs, 'config1.json'))).toStrictEqual({ hello: 'val1', nested: { config: { string: 'a' , boolean: true, null: null} } });
+  });
+
   it('populates variables correctly', async function () {
     const module: Module = {
       name: 'with-var',
