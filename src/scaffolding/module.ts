@@ -122,19 +122,19 @@ export async function currModulesEnabled(modules: Module[], fs: Store, pathProvi
   return modulesEnabled;
 }
 
-export async function setModuleValues(modules: Module[], moduleStatuses: Record<string, boolean>, fs: Store, pathProvider: PathProvider, cache: ModuleStatusCache): Promise<void> {
+export async function setModuleValues(modules: Module[], modulesEnabled: Record<string, boolean>, fs: Store, pathProvider: PathProvider, cache: ModuleStatusCache): Promise<void> {
   for (const m of modules) {
     if (m.togglable) {
-      cache.set(m.name, moduleStatuses[m.name], fs, pathProvider);
+      cache.set(m.name, modulesEnabled[m.name], fs, pathProvider);
     }
   }
 }
 
-export async function applyModule(module: Module, moduleStatuses: Record<string, boolean>, paramVals: Record<string, unknown>, scaffoldDir: string, fs: Store, pathProvider: PathProvider): Promise<Store> {
+export async function applyModule(module: Module, modulesEnabled: Record<string, boolean>, paramVals: Record<string, unknown>, scaffoldDir: string, fs: Store, pathProvider: PathProvider): Promise<Store> {
   const fsEditor = create(fs);
 
   // Validate that module can be enabled
-  if (!moduleStatuses?.[module.name]) {
+  if (!modulesEnabled?.[module.name]) {
     throw new Error(`Could not apply module "${module.name}", because it is not enabled in the provided module statuses.`)
   }
 
@@ -146,7 +146,7 @@ export async function applyModule(module: Module, moduleStatuses: Record<string,
 
   const tplData = {
     params: paramVals,
-    modules: moduleStatuses,
+    modules: modulesEnabled,
   }
 
   for (const file of module.filesToReplace) {

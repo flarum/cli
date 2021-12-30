@@ -143,7 +143,7 @@ describe('applyModule', function () {
     ).rejects.toThrow(new Error('Could not apply module "just-files", because it is not enabled in the provided module statuses.'));
   });
 
-  it('errors if module not present in moduleStatuses', async function () {
+  it('errors if module not present in modulesEnabled', async function () {
     expect(
       async () => await applyModule(justFilesModule, { somethingElse: true }, {}, scaffoldDir, createStore(), new PathFsProvider({ ext: '/ext' }))
       ).rejects.toThrow(new Error('Could not apply module "just-files", because it is not enabled in the provided module statuses.'));
