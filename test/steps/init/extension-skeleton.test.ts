@@ -13,7 +13,7 @@ async function getExpected(): Promise<string[]> {
 
 describe('Test extension skeleton step', function () {
   test('Includes all files when requested', async function () {
-    const { fs } = await runStep(ExtensionSkeleton, [], {
+    const { fs } = await runStep(new ExtensionSkeleton, [], {
       packageName: 'flarum/test',
       packageDescription: 'Text ext description',
       namespace: 'Flarum\\Test',
@@ -41,7 +41,7 @@ describe('Test extension skeleton step', function () {
   });
 
   test('Can exclude locales', async function () {
-    const { fs } = await runStep(ExtensionSkeleton, [], {
+    const { fs } = await runStep(new ExtensionSkeleton, [], {
       packageName: 'flarum/test',
       packageDescription: 'Text ext description',
       namespace: 'Flarum\\Test',
@@ -70,7 +70,7 @@ describe('Test extension skeleton step', function () {
   });
 
   test('Can exclude JS completely', async function () {
-    const { fs } = await runStep(ExtensionSkeleton, [], {
+    const { fs } = await runStep(new ExtensionSkeleton, [], {
       packageName: 'flarum/test',
       packageDescription: 'Text ext description',
       namespace: 'Flarum\\Test',
@@ -99,7 +99,7 @@ describe('Test extension skeleton step', function () {
   });
 
   test('Can exclude CSS completely', async function () {
-    const { fs } = await runStep(ExtensionSkeleton, [], {
+    const { fs } = await runStep(new ExtensionSkeleton, [], {
       packageName: 'flarum/test',
       packageDescription: 'Text ext description',
       namespace: 'Flarum\\Test',
@@ -128,7 +128,7 @@ describe('Test extension skeleton step', function () {
   });
 
   test('Can exclude admin portion', async function () {
-    const { fs } = await runStep(ExtensionSkeleton, [], {
+    const { fs } = await runStep(new ExtensionSkeleton, [], {
       packageName: 'flarum/test',
       packageDescription: 'Text ext description',
       namespace: 'Flarum\\Test',
@@ -157,7 +157,7 @@ describe('Test extension skeleton step', function () {
   });
 
   test('Can exclude forum portion', async function () {
-    const { fs } = await runStep(ExtensionSkeleton, [], {
+    const { fs } = await runStep(new ExtensionSkeleton, [], {
       packageName: 'flarum/test',
       packageDescription: 'Text ext description',
       namespace: 'Flarum\\Test',
@@ -186,7 +186,7 @@ describe('Test extension skeleton step', function () {
   });
 
   test('Can exclude Actions CI', async function () {
-    const { fs } = await runStep(ExtensionSkeleton, [], {
+    const { fs } = await runStep(new ExtensionSkeleton, [], {
       packageName: 'flarum/test',
       packageDescription: 'Text ext description',
       namespace: 'Flarum\\Test',
@@ -215,7 +215,7 @@ describe('Test extension skeleton step', function () {
   });
 
   test('Can set main git branch for Actions CI', async function () {
-    const { fs } = await runStep(ExtensionSkeleton, [], {
+    const { fs } = await runStep(new ExtensionSkeleton, [], {
       packageName: 'flarum/test',
       packageDescription: 'Text ext description',
       namespace: 'Flarum\\Test',

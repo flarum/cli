@@ -50,7 +50,7 @@ describe('Infra testing', function () {
 
     test(`Touches proper files: ${InfraClass.name}`, async function () {
       const instance = new InfraClass();
-      const { fs } = await runStep(InfraClass);
+      const { fs } = await runStep(instance);
 
       const expected = [
         ...instance.filesToReplace,
@@ -71,7 +71,7 @@ describe('Infra testing', function () {
         return initialFiles;
       };
 
-      const { fs } = await runStep(InfraClass, [], {}, initialFilesCallback);
+      const { fs } = await runStep(new InfraClass(), [], {}, initialFilesCallback);
 
       for (const filePath of Object.keys(spec.expectedJsonEntries)) {
         const expectedEntries = spec.expectedJsonEntries[filePath];

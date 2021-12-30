@@ -441,7 +441,7 @@ for (const specDefinition of [
         };
 
         test('With default dir', async function () {
-          const { fs, exposedParams } = await runStep(spec.stubClass, Object.values(spec.params), {}, initialFilesCallback);
+          const { fs, exposedParams } = await runStep(new spec.stubClass(), Object.values(spec.params), {}, initialFilesCallback);
 
           expect(getFsPaths(fs)).toStrictEqual([...spec.expectedModifiedFilesDefaultDir, '/ext/composer.json'].sort());
 
@@ -449,7 +449,7 @@ for (const specDefinition of [
         });
 
         test('With requested dir', async function () {
-          const { fs, exposedParams } = await runStep(spec.stubClass, Object.values(spec.params), {}, initialFilesCallback, specDefinition.requestedDir);
+          const { fs, exposedParams } = await runStep(new spec.stubClass(), Object.values(spec.params), {}, initialFilesCallback, specDefinition.requestedDir);
 
           expect(getFsPaths(fs)).toStrictEqual([...spec.expectedModifiedFilesRequestedDir, '/ext/composer.json'].sort());
 
@@ -487,7 +487,7 @@ describe('Stub Test: Migrations', function () {
   };
 
   test('With default dir', async function () {
-    const { fs, exposedParams } = await runStep(migrationSpec.stubClass, Object.values(migrationSpec.params), {}, initialFilesCallback);
+    const { fs, exposedParams } = await runStep(new migrationSpec.stubClass(), Object.values(migrationSpec.params), {}, initialFilesCallback);
 
     expect(getFsPaths(fs)).toStrictEqual([...migrationSpec.expectedModifiedFilesDefaultDir, '/ext/composer.json'].sort());
 
@@ -495,7 +495,7 @@ describe('Stub Test: Migrations', function () {
   });
 
   test('With requested dir', async function () {
-    const { fs, exposedParams } = await runStep(migrationSpec.stubClass, Object.values(migrationSpec.params), {}, initialFilesCallback, requestedDir);
+    const { fs, exposedParams } = await runStep(new migrationSpec.stubClass(), Object.values(migrationSpec.params), {}, initialFilesCallback, requestedDir);
 
     expect(getFsPaths(fs)).toStrictEqual([...migrationSpec.expectedModifiedFilesRequestedDir, '/ext/composer.json'].sort());
 

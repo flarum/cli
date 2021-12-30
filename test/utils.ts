@@ -15,14 +15,12 @@ interface StepOutput {
 }
 
 export async function runStep(
-  StepClass: new () => Step,
+  step: Step,
   params: unknown[] = [],
   initialParams: Record<string, unknown> = {},
   initialFilesCallback: (pathProvider: PathProvider) => Record<string, string> = () => empty,
   requestedDir: string|null = null,
 ): Promise<StepOutput> {
-  const step: Step = new StepClass();
-
   const fs = createMemFs();
   const pathProvider = stubPathProviderFactory({ boilerplate: resolve(__dirname, '../boilerplate'), requestedDir });
   prompt.inject(params);

@@ -78,7 +78,7 @@ return [];
         return initial;
       };
 
-      const { fs } = await runStep(spec.extenderClass, Object.values(spec.params), {}, initialFilesCallback, requestedDir);
+      const { fs } = await runStep(new spec.extenderClass(), Object.values(spec.params), {}, initialFilesCallback, requestedDir);
 
       expect(getFsPaths(fs)).toStrictEqual(['/ext/extend.php'].sort());
     });
