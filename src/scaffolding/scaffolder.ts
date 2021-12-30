@@ -4,17 +4,28 @@ import { resolve } from 'path';
 import { PathProvider } from 'src/provider/path-provider';
 import { jsonLeafPaths } from '../../src/utils/json-leaf-paths';
 import { readTpl } from '../../src/utils/read-tpl';
-import { Module } from './module';
+import { currModulesEnabled, Module, ModuleStatusCache } from './module';
 import { currParamValues, getParamName, isComputedParam, TemplateParam } from './template-param';
-
 
 export class Scaffolder {
   private templateParams: TemplateParam<unknown>[] = [];
   private modules: Module[] = [];
   private scaffoldDir: string;
 
-  constructor(scaffoldDir: string) {
+  private moduleStatusCache?: ModuleStatusCache;
+
+  constructor(scaffoldDir: string);
+  constructor(scaffoldDir: string, getModuleEnabled: ModuleStatusCache['get'], setModuleEnabled: ModuleStatusCache['set']);
+
+  constructor(scaffoldDir: string, getModuleEnabled?: ModuleStatusCache['get'], setModuleEnabled?: ModuleStatusCache['set']) {
     this.scaffoldDir = scaffoldDir;
+
+    if (getModuleEnabled && setModuleEnabled) {
+      this.moduleStatusCache = {
+        get: getModuleEnabled,
+        set: setModuleEnabled,
+      }
+    }
   }
 
   registerModule(module: Module): this {
@@ -41,6 +52,10 @@ export class Scaffolder {
 
   async templateParamVals(fs: Store, pathProvider: PathProvider) {
     return currParamValues(this.templateParams, fs, pathProvider);
+  }
+
+  async modulesEnabled(fs: Store, pathProvider: PathProvider) {
+    return currModulesEnabled(this.modules, fs, pathProvider, this.moduleStatusCache)
   }
 
   /**

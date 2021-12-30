@@ -1,4 +1,7 @@
+import chalk from 'chalk';
 import { Store } from 'mem-fs';
+import { ParamProvider } from 'src/provider/param-provider';
+import { PathProvider } from 'src/provider/path-provider';
 
 interface FileOwnership {
   /**
@@ -65,3 +68,60 @@ interface TogglableModule extends CommonModule {
 }
 
 export type Module = UntoggleableModule | TogglableModule;
+
+export type ModuleStatusCache = {
+  get: (module: string, fs: Store, pathProvider: PathProvider) => Promise<boolean | undefined>;
+  set: (module: string, val: boolean, fs: Store, pathProvider: PathProvider) => Promise<void>;
+};
+
+export async function promptModulesEnabled(modules: Module[], promptProvider: ParamProvider): Promise<Record<string, boolean>> {
+  const modulesEnabled: Record<string, boolean> = {};
+
+  const advanced = await promptProvider.get<boolean>({
+    name: 'advancedInstallation',
+    type: 'confirm',
+    initial: false,
+    message: `Advanced Initialization ${chalk.dim('(fine-tune which features are enabled)')}`,
+  });
+
+  for (const m of modules) {
+    if (!m.togglable) {
+      modulesEnabled[m.name] = true;
+    } else if (!advanced) {
+      modulesEnabled[m.name] = m.defaultEnabled;
+    } else {
+      modulesEnabled[m.name] = await promptProvider.get<boolean>({
+        name: m.name,
+        type: 'confirm',
+        initial: m.defaultEnabled,
+        message: m.shortDescription + (m.longDescription ? chalk.dim(` (${m.longDescription})`) : ''),
+      });
+    }
+  }
+
+  return modulesEnabled;
+}
+
+export async function currModulesEnabled(modules: Module[], fs: Store, pathProvider: PathProvider, cache?: ModuleStatusCache): Promise<Record<string, boolean>> {
+  const modulesEnabled: Record<string, boolean> = {};
+
+  for (const m of modules) {
+    if (!m.togglable) {
+      modulesEnabled[m.name] = true;
+    } else {
+      const cacheVal = await cache?.get(m.name, fs, pathProvider);
+
+      modulesEnabled[m.name] = cacheVal ?? m.defaultEnabled;
+    }
+  }
+
+  return modulesEnabled;
+}
+
+export async function setModuleValues(modules: Module[], moduleStatuses: Record<string, boolean>, fs: Store, pathProvider: PathProvider, cache: ModuleStatusCache): Promise<void> {
+  for (const m of modules) {
+    if (m.togglable) {
+      cache.set(m.name, moduleStatuses[m.name], fs, pathProvider);
+    }
+  }
+}
