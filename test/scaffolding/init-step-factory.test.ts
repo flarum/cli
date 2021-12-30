@@ -1,9 +1,5 @@
-import prompts, { prompt } from 'prompts';
-import { create as createStore } from 'mem-fs';
-
-import { paramProviderFactory } from '../../src/provider/param-provider';
-import { PathFsProvider } from '../../src/provider/path-provider';
-import { Module, ModuleStatusCache, currModulesEnabled, promptModulesEnabled, setModuleValues, applyModule } from '../../src/scaffolding/module';
+import prompts from 'prompts';
+import { Module} from '../../src/scaffolding/module';
 import { TemplateParam } from '../../src/scaffolding/template-param';
 import { initStepFactory } from '../../src/scaffolding/init-step-factory';
 import { resolve } from 'path';
@@ -111,5 +107,24 @@ describe('init step factory', function () {
       '/ext/src/index.ml',
       '/ext/src/index.php',
     ])
+  });
+
+
+
+  it('properly sets cache', async function () {
+    const cache: Record<string, boolean> = {};
+    const step = initStepFactory(scaffoldDir, modules, templateParams, {
+      get: async () => true,
+      set: async (module, enabled) => {cache[module] = enabled}
+    });
+
+    prompts.inject(['Var Value', false]);
+
+    await runStep(step);
+
+    expect(cache).toStrictEqual({
+      'sourceFiles': true,
+      'config': false
+    })
   });
 });
