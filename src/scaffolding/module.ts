@@ -16,7 +16,7 @@ interface FileOwnership {
   /**
    * If any of the needed modules aren't enabled, the file won't be updated.
    */
-  needsOneOfModules?: string[];
+  needsOtherModules?: string[];
 }
 
 interface CommonModule {
@@ -139,7 +139,8 @@ export async function applyModule(
   paramVals: Record<string, unknown>,
   scaffoldDir: string,
   fs: Store,
-  pathProvider: PathProvider
+  pathProvider: PathProvider,
+  isInitial = false,
 ): Promise<Store> {
   const fsEditor = create(fs);
 
@@ -154,6 +155,10 @@ export async function applyModule(
     throw new Error(`Could not apply module "${module.name}", because the following params are missing: "${missingParams.join(', ')}".`);
   }
 
+  if (!isInitial && !module.updatable) {
+    throw new Error(`Cannot update module "${module.name}", as it is not updatable, and the project has already been initialized.`)
+  }
+
   const tplData = {
     params: paramVals,
     modules: modulesEnabled,
@@ -161,7 +166,11 @@ export async function applyModule(
 
   for (const file of module.filesToReplace) {
     const path = typeof file === 'string' ? file : file.path;
-    fsEditor.copyTpl(resolve(scaffoldDir, path), pathProvider.ext(path), tplData);
+    const needsOtherModules = typeof file === 'string' ? [] : file.needsOtherModules ?? [];
+
+    if (!needsOtherModules.some((dep) => !modulesEnabled[dep])) {
+      fsEditor.copyTpl(resolve(scaffoldDir, path), pathProvider.ext(path), tplData);
+    }
   }
 
   for (const jsonPath of Object.keys(module.jsonToAugment)) {

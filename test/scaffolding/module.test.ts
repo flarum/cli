@@ -191,7 +191,6 @@ describe('applyModule', function () {
     expect(JSON.parse(getExtFileContents(fs, 'config1.json'))).toStrictEqual({ hello: 'val1', nested: { config: { string: 'a' } } });
   });
 
-
   it('copies over deep data', async function () {
     const module: Module = {
       name: 'just-json',
@@ -274,5 +273,105 @@ describe('applyModule', function () {
       other: 'keep this',
       nested: { config: { string: 'hello', boolean: true }, somethingElse: 7 },
     });
+  });
+
+  it('doesnt copy over files if they depend on module without status info', async function () {
+    const module: Module = {
+      name: 'files-need-modules',
+      togglable: false,
+      updatable: true,
+      shortDescription: '',
+      filesToReplace: ['readme.md', {path: '.gitignore', needsOtherModules: ['missingModule']}],
+      jsonToAugment: {},
+      needsTemplateParams: [],
+    };
+
+    const fs = await applyModule(
+      module,
+      { 'files-need-modules': true },
+      {},
+      scaffoldDir,
+      createStore(),
+      new PathFsProvider({ ext: '/ext' })
+    );
+
+    expect(getFsPaths(fs)).toStrictEqual(['/ext/readme.md']);
+  });
+
+  it('doesnt copy over files if they depend on disabled modules', async function () {
+    const module: Module = {
+      name: 'files-need-modules',
+      togglable: false,
+      updatable: true,
+      shortDescription: '',
+      filesToReplace: ['readme.md', {path: '.gitignore', needsOtherModules: ['disabledModule']}],
+      jsonToAugment: {},
+      needsTemplateParams: [],
+    };
+
+    const fs = await applyModule(
+      module,
+      { 'files-need-modules': true, disabledModule: false },
+      {},
+      scaffoldDir,
+      createStore(),
+      new PathFsProvider({ ext: '/ext' })
+    );
+
+    expect(getFsPaths(fs)).toStrictEqual(['/ext/readme.md']);
+  });
+
+  it('copies over files if they depend on enabled modules', async function () {
+    const module: Module = {
+      name: 'files-need-modules',
+      togglable: false,
+      updatable: true,
+      shortDescription: '',
+      filesToReplace: ['readme.md', {path: '.gitignore', needsOtherModules: ['enabledModule']}],
+      jsonToAugment: {},
+      needsTemplateParams: [],
+    };
+
+    const fs = await applyModule(
+      module,
+      { 'files-need-modules': true, enabledModule: true },
+      {},
+      scaffoldDir,
+      createStore(),
+      new PathFsProvider({ ext: '/ext' })
+    );
+
+    expect(getFsPaths(fs)).toStrictEqual(['/ext/.gitignore', '/ext/readme.md']);
+  });
+
+  it('doesnt error when initializing non-updatable module', async function () {
+    const module: Module = {...justFilesModule, updatable: false};
+
+    const fs = await applyModule(
+      module,
+      { 'just-files': true },
+      {},
+      scaffoldDir,
+      createStore(),
+      new PathFsProvider({ ext: '/ext' }),
+      true
+    );
+
+    expect(getFsPaths(fs)).toStrictEqual(['/ext/.gitignore', '/ext/readme.md']);
+  });
+
+  it('errors when trying to update non-updatable module', async function () {
+    const module: Module = {...justFilesModule, updatable: false}
+
+    expect(async () => {
+      const fs = await applyModule(
+        module,
+        { 'just-files': true },
+        {},
+        scaffoldDir,
+        createStore(),
+        new PathFsProvider({ ext: '/ext' })
+      );
+    }).rejects.toThrow('Cannot update module "just-files", as it is not updatable, and the project has already been initialized.');
   });
 });
