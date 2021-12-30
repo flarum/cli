@@ -1,6 +1,6 @@
 {
-    "hello": "<%= someVar %>",
-    "foo": "<%= someOtherVar %>",
+    "hello": "<%= params.someVar %>",
+    "foo": "<%= params.someOtherVar %>",
     "authors": [
         "George Washington",
         "Alexander Hamilton",

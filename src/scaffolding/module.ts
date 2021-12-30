@@ -1,7 +1,11 @@
 import chalk from 'chalk';
 import { Store } from 'mem-fs';
-import { ParamProvider } from 'src/provider/param-provider';
-import { PathProvider } from 'src/provider/path-provider';
+import { create } from 'mem-fs-editor';
+import { resolve } from 'path';
+import pick from 'pick-deep';
+import { ParamProvider } from '../../src/provider/param-provider';
+import { PathProvider } from '../../src/provider/path-provider';
+import { readTpl } from '../../src/utils/read-tpl';
 
 interface FileOwnership {
   /**
@@ -124,4 +128,42 @@ export async function setModuleValues(modules: Module[], moduleStatuses: Record<
       cache.set(m.name, moduleStatuses[m.name], fs, pathProvider);
     }
   }
+}
+
+export async function applyModule(module: Module, moduleStatuses: Record<string, boolean>, paramVals: Record<string, unknown>, scaffoldDir: string, fs: Store, pathProvider: PathProvider): Promise<Store> {
+  const fsEditor = create(fs);
+
+  // Validate that module can be enabled
+  if (!moduleStatuses?.[module.name]) {
+    throw new Error(`Could not apply module "${module.name}", because it is not enabled in the provided module statuses.`)
+  }
+
+  // Validate that all needed params are present
+  const missingParams = module.needsTemplateParams.filter(p => !(p in paramVals));
+  if (missingParams.length) {
+    throw new Error(`Could not apply module "${module.name}", because the following params are missing: "${missingParams.join(', ')}".`)
+  }
+
+  const tplData = {
+    params: paramVals,
+    modules: moduleStatuses,
+  }
+
+  for (const file of module.filesToReplace) {
+    const path = typeof file === 'string' ? file : file.path;
+    fsEditor.copyTpl(resolve(scaffoldDir, path), pathProvider.ext(path), tplData);
+  }
+
+  for (const jsonPath of Object.keys(module.jsonToAugment)) {
+    const scaffoldContents = readTpl(resolve(scaffoldDir, jsonPath), tplData);
+    const scaffoldContentsJson = JSON.parse(scaffoldContents);
+
+    const fieldsToAugment = module.jsonToAugment[jsonPath];
+    const relevant = pick(scaffoldContentsJson, fieldsToAugment);
+    console.log(relevant);
+
+    fsEditor.extendJSON(pathProvider.ext(jsonPath), relevant);
+  }
+
+  return fs;
 }

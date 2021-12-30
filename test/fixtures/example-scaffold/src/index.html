@@ -1,1 +1,1 @@
-<%= someVar %>
+<%= params.someVar %>
