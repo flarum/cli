@@ -1,11 +1,14 @@
 import globby from 'globby';
 import { Store } from 'mem-fs';
 import { resolve } from 'path';
-import { PathProvider } from 'src/provider/path-provider';
-import { jsonLeafPaths } from '../../src/utils/json-leaf-paths';
-import { readTpl } from '../../src/utils/read-tpl';
+import { PathProvider } from '../provider/path-provider';
+import { Step } from '../steps/step-manager';
+import { jsonLeafPaths } from '../utils/json-leaf-paths';
+import { readTpl } from '..//utils/read-tpl';
+import { initStepFactory } from './init-step-factory';
 import { currModulesEnabled, Module, ModuleStatusCache } from './module';
 import { currParamValues, getParamName, isComputedParam, TemplateParam } from './template-param';
+import { infraStepFactory } from './infra-step-factory';
 
 export class Scaffolder {
   private templateParams: TemplateParam<unknown>[] = [];
@@ -44,10 +47,18 @@ export class Scaffolder {
       }
     }
 
-
     this.templateParams.push(templateParam);
 
     return this;
+  }
+
+  genInitStep(): Step {
+    return initStepFactory(this.scaffoldDir, this.modules, this.templateParams, this.moduleStatusCache);
+  }
+
+
+  genInfraStep(module: string): Step {
+    return infraStepFactory(this.scaffoldDir, module, this.modules, this.templateParams, this.moduleStatusCache);
   }
 
   async templateParamVals(fs: Store, pathProvider: PathProvider) {
