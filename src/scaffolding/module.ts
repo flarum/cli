@@ -160,7 +160,6 @@ export async function applyModule(module: Module, modulesEnabled: Record<string,
 
     const fieldsToAugment = module.jsonToAugment[jsonPath];
     const relevant = pick(scaffoldContentsJson, fieldsToAugment);
-    console.log(relevant);
 
     fsEditor.extendJSON(pathProvider.ext(jsonPath), relevant);
   }
