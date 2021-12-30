@@ -30,7 +30,7 @@ describe('Template Param Utils', function() {
         {
             name: 'param3',
             uses: ['param1', 'param2'],
-            compute: (param1: string, param2: number) => param1.slice(0, param2)
+            compute: (_path: PathProvider, param1: string, param2: number) => param1.slice(0, param2)
         }
     ];
 
@@ -45,7 +45,7 @@ describe('Template Param Utils', function() {
     it('promptParamValues works', async function() {   
         prompt.inject(['Test', 3]);
 
-        expect(await promptParamValues(templateParams, paramProviderFactory({}))).toStrictEqual({
+        expect(await promptParamValues(templateParams, new PathFsProvider({ext: ''}), paramProviderFactory({}))).toStrictEqual({
             param1: 'Test',
             param2: 3,
             param3: 'Tes'

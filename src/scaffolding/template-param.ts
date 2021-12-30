@@ -17,7 +17,7 @@ interface ComputedTemplateParam<T> {
 
   uses: string[];
 
-  compute: (...args: any[]) => T;
+  compute: (pathProvider: PathProvider, ...args: any[]) => T;
 }
 
 export type TemplateParam<T> = PromptTemplateParam<T> | ComputedTemplateParam<T>;
@@ -34,7 +34,7 @@ export function getParamName<T>(param: TemplateParam<T>) {
   return isComputedParam(param) ? param.name : param.prompt.name;
 }
 
-async function withComputedParamValues(params: TemplateParam<unknown>[], paramVals: Record<string, unknown>): Promise<Record<string, unknown>> {
+async function withComputedParamValues(params: TemplateParam<unknown>[], pathProvider: PathProvider, paramVals: Record<string, unknown>): Promise<Record<string, unknown>> {
   const vals = { ...paramVals };
 
   const computedParams = params.filter(isComputedParam);
@@ -42,13 +42,13 @@ async function withComputedParamValues(params: TemplateParam<unknown>[], paramVa
   for (const p of computedParams) {
     const depValues = p.uses.map((key) => vals[key]);
 
-    vals[p.name] = await p.compute(...depValues);
+    vals[p.name] = await p.compute(pathProvider, ...depValues);
   }
 
   return vals;
 }
 
-export async function promptParamValues(params: TemplateParam<unknown>[], paramProvider: ParamProvider): Promise<Record<string, unknown>> {
+export async function promptParamValues(params: TemplateParam<unknown>[], pathProvider: PathProvider, paramProvider: ParamProvider): Promise<Record<string, unknown>> {
   const promptParams = params.filter(isPromptParam);
   const paramVals: Record<string, unknown> = {};
 
@@ -56,7 +56,7 @@ export async function promptParamValues(params: TemplateParam<unknown>[], paramP
     paramVals[p.prompt.name] = await paramProvider.get(p.prompt);
   }
 
-  return withComputedParamValues(params, paramVals);
+  return withComputedParamValues(params, pathProvider, paramVals);
 }
 
 export async function currParamValues(params: TemplateParam<unknown>[], fs: Store, pathProvider: PathProvider) {
@@ -67,5 +67,5 @@ export async function currParamValues(params: TemplateParam<unknown>[], fs: Stor
     paramVals[p.prompt.name] = await p.getCurrVal(fs, pathProvider);
   }
 
-  return withComputedParamValues(params, paramVals);
+  return withComputedParamValues(params, pathProvider, paramVals);
 }
