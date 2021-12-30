@@ -1,4 +1,4 @@
-import { getFsPaths, runStep } from '../../utils';
+import { getFsPaths, runStep } from '../../boilersmith/utils';
 
 import { GenerateEventListenerStub } from '../../../src/steps/stubs/backend/event-listener';
 import { GenerateApiControllerStub } from '../../../src/steps/stubs/backend/api-controller';
@@ -17,7 +17,7 @@ import { GeneratePolicyStub } from '../../../src/steps/stubs/backend/policy';
 import { GenerateCommandStub } from '../../../src/steps/stubs/backend/command';
 import { GenerateModalStub } from '../../../src/steps/stubs/frontend/modal';
 import { GenerateComponentStub } from '../../../src/steps/stubs/frontend/component';
-import { PathProvider } from '../../../src/provider/path-provider';
+import { PathProvider } from 'boilersmith/path-provider';
 
 interface StubTest {
   stubClass: any;

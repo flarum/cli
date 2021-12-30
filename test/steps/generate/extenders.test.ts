@@ -1,4 +1,4 @@
-import { getFsPaths, runStep } from '../../utils';
+import { getFsPaths, runStep } from '../../boilersmith/utils';
 
 import { GenerateApiSerializerAttributesExtender } from '../../../src/steps/extenders/api-serializer';
 import { GenerateEventListenerExtender } from '../../../src/steps/extenders/event';
@@ -6,7 +6,7 @@ import { GenerateRoutesExtender } from '../../../src/steps/extenders/route';
 import { GenerateServiceProviderExtender } from '../../../src/steps/extenders/service-provider';
 import { GeneratePolicyExtender } from '../../../src/steps/extenders/policy';
 import { GenerateConsoleCommandExtender } from '../../../src/steps/extenders/console-command';
-import { PathProvider } from '../../../src/provider/path-provider';
+import { PathProvider } from 'boilersmith/path-provider';
 
 interface ExtenderTest {
   extenderClass: any;

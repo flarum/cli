@@ -1,8 +1,8 @@
 import { create as createMemFsEditor } from 'mem-fs-editor';
 import { UpdateJSImports } from '../../../src/steps/update/js-imports';
 import { resolve } from 'node:path';
-import { runStep } from '../../utils';
-import { PathProvider } from '../../../src/provider/path-provider';
+import { runStep } from '../../boilersmith/utils';
+import { PathProvider } from 'boilersmith/path-provider';
 
 const files = [
   // admin

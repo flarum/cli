@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { PathFsProvider } from '../../src/provider/path-provider';
+import { PathFsProvider } from 'boilersmith/path-provider';
 
 describe('PathFsProvider Works', function () {
   test('Returns paths as expected', async function () {

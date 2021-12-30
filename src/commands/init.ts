@@ -1,4 +1,4 @@
-import { StepManager } from '../steps/step-manager';
+import { StepManager } from 'boilersmith/step-manager';
 import { ExtensionSkeleton } from '../steps/init/extension-skeleton';
 import { ComposerInstall } from '../steps/misc/composer';
 import { YarnInstall } from '../steps/misc/yarn';

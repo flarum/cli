@@ -1,4 +1,4 @@
-import { StepManager } from '../../../steps/step-manager';
+import { StepManager } from 'boilersmith/step-manager';
 import BaseCommand from '../../../base-command';
 import { GenerateRoutesExtender } from '../../../steps/extenders/route';
 

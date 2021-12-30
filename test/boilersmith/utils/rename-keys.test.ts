@@ -1,4 +1,4 @@
-import { renameKeys } from '../../src/utils/rename-keys';
+import { renameKeys } from 'boilersmith/utils/rename-keys';
 
 
 describe('rename-keys', function () {

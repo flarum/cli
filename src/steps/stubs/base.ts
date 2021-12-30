@@ -1,10 +1,10 @@
 import pick from 'pick-deep';
 import { Store } from 'mem-fs';
 import { create, Editor } from 'mem-fs-editor';
-import { ParamDef, ParamProvider } from '../../provider/param-provider';
-import { PathProvider } from '../../provider/path-provider';
+import { ParamDef, ParamProvider } from 'boilersmith/param-provider';
+import { PathProvider } from 'boilersmith/path-provider';
 import { PhpProvider } from '../../provider/php-provider';
-import { Step } from '../step-manager';
+import { Step } from 'boilersmith/step-manager';
 import { ComposerJsonSchema, ExtensionMetadata, extensionMetadata } from '../../utils/extension-metadata';
 import { cloneAndFill } from '../../utils/clone-and-fill';
 

@@ -1,8 +1,8 @@
 import { Store } from 'mem-fs';
-import { ParamProvider } from '../../src/provider/param-provider';
-import { PathProvider } from '../../src/provider/path-provider';
-import { PhpProvider } from '../../src/provider/php-provider';
-import { Step } from '../../src/steps/step-manager';
+import { ParamProvider } from 'boilersmith/param-provider';
+import { PathProvider } from '../path-provider';
+import { PhpProvider } from '../../provider/php-provider';
+import { Step } from '../step-manager';
 import { applyModule, Module, ModuleStatusCache, promptModulesEnabled, setModuleValue } from './module';
 import { promptParamValues, TemplateParam } from './template-param';
 

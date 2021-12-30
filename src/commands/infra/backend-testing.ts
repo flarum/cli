@@ -1,4 +1,4 @@
-import { StepManager } from '../../steps/step-manager';
+import { StepManager } from 'boilersmith/step-manager';
 import { ComposerInstall } from '../../steps/misc/composer';
 import BaseCommand from '../../base-command';
 import { BackendTestingInfra } from '../../steps/infra/backend-testing';

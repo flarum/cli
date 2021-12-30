@@ -5,9 +5,9 @@ import prompts from 'prompts';
 import globby from 'globby';
 import { execSync } from 'node:child_process';
 import { existsSync, unlinkSync } from 'node:fs';
-import { paramProviderFactory, PROMPTS_OPTIONS } from './provider/param-provider';
-import { StepManager } from './steps/step-manager';
-import { PathFsProvider } from './provider/path-provider';
+import { paramProviderFactory, PROMPTS_OPTIONS } from 'boilersmith/param-provider';
+import { StepManager } from 'boilersmith/step-manager';
+import { PathFsProvider } from 'boilersmith/path-provider';
 import { PhpSubsystemProvider } from './provider/php-provider';
 import chalk from 'chalk';
 

@@ -1,9 +1,9 @@
 import { Store } from 'mem-fs';
 import { resolve } from 'node:path';
-import { ParamDef, ParamProvider } from '../src/provider/param-provider';
-import { PathProvider } from '../src/provider/path-provider';
-import { ExtenderDef, PhpProvider } from '../src/provider/php-provider';
-import { Step } from '../src/steps/step-manager';
+import { ParamDef, ParamProvider } from 'boilersmith/param-provider';
+import { PathProvider } from 'boilersmith/path-provider';
+import { ExtenderDef, PhpProvider } from '../../src/provider/php-provider';
+import { Step } from 'boilersmith/step-manager';
 
 export function stubStepFactory(type: string, composable = true, paramsConsumed: ParamDef[] = [], paramsExposed: Record<string, unknown> = {}): Step {
   return {

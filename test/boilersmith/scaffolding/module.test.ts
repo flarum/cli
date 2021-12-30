@@ -1,9 +1,9 @@
 import { prompt } from 'prompts';
 import { create as createStore } from 'mem-fs';
 
-import { paramProviderFactory } from '../../src/provider/param-provider';
-import { PathFsProvider } from '../../src/provider/path-provider';
-import { Module, ModuleStatusCache, currModulesEnabled, promptModulesEnabled, setModuleValue, applyModule } from '../../src/scaffolding/module';
+import { paramProviderFactory } from 'boilersmith/param-provider';
+import { PathFsProvider } from 'boilersmith/path-provider';
+import { Module, ModuleStatusCache, currModulesEnabled, promptModulesEnabled, setModuleValue, applyModule } from 'boilersmith/scaffolding/module';
 import { resolve } from 'path';
 import { getExtFileContents, getFsPaths } from '../utils';
 import { create } from 'mem-fs-editor';

@@ -1,9 +1,9 @@
 import { Store } from 'mem-fs';
 import { create } from 'mem-fs-editor';
-import { ParamDef, ParamProvider } from '../../provider/param-provider';
-import { PathProvider } from '../../provider/path-provider';
+import { ParamDef, ParamProvider } from 'boilersmith/param-provider';
+import { PathProvider } from 'boilersmith/path-provider';
 import { ExtenderDef, PhpProvider } from '../../provider/php-provider';
-import { Step } from '../step-manager';
+import { Step } from 'boilersmith/step-manager';
 import { cloneAndFill } from '../../utils/clone-and-fill';
 
 interface UserProvidedParam extends Omit<ParamDef, 'type'> {

@@ -1,4 +1,4 @@
-import { StepManager } from '../../steps/step-manager';
+import { StepManager } from 'boilersmith/step-manager';
 import { UpdateJSImports } from '../../steps/update/js-imports';
 import BaseCommand from '../../base-command';
 

@@ -1,4 +1,4 @@
-import { jsonLeafPaths } from '../../src/utils/json-leaf-paths';
+import { jsonLeafPaths } from 'boilersmith/utils/json-leaf-paths';
 
 describe('json-leaf-paths', function () {
   describe('non-nested', function () {

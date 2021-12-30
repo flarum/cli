@@ -23,15 +23,19 @@
     "@types/string": "0.0.31",
     "@types/yosay": "^0.0.29",
     "babel-jest": "^27.4.5",
+    "babel-plugin-module-resolver": "^4.1.0",
     "chai": "^4.3.3",
     "eslint": "^7.32.0",
     "eslint-config-oclif": "^4.0.0",
     "eslint-config-oclif-typescript": "1.0.2",
+    "eslint-import-resolver-babel-module": "^5.3.1",
+    "eslint-plugin-import": "^2.25.3",
     "globby": "^10.0.2",
     "jest": "^27.4.5",
     "jest-extended": "^1.2.0",
     "ts-jest": "^27.1.2",
     "ts-node": "^8.10.2",
+    "tsconfig-paths": "^3.12.0",
     "typescript": "^3.9.9"
   },
   "engines": {
@@ -85,12 +89,13 @@
   },
   "repository": "flarum/cli",
   "scripts": {
+    "oclif-dev": "node -r tsconfig-paths/register node_modules/.bin/oclif-dev",
     "format": "eslint . --ext .ts --config .eslintrc --fix",
     "postpack": "rm -f oclif.manifest.json",
     "posttest": "eslint . --ext .ts --config .eslintrc",
-    "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
+    "prepack": "rm -rf lib && tsc -b && yarn oclif-dev manifest && yarn oclif-dev readme",
     "test": "jest",
-    "version": "oclif-dev readme && git add README.md"
+    "version": "yarn oclif-dev readme && git add README.md"
   },
   "types": "lib/index.d.ts",
   "dependencies": {

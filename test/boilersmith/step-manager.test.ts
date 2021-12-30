@@ -1,8 +1,8 @@
 /* eslint-disable max-nested-callbacks */
 import { prompt } from 'prompts';
-import { paramProviderFactory as defaultPPFac } from '../../src/provider/param-provider';
-import { StepManager } from '../../src/steps/step-manager';
-import { stubPathProviderFactory, stubPhpProviderFactory, stubStepFactory } from '../stubs';
+import { paramProviderFactory as defaultPPFac } from 'boilersmith/param-provider';
+import { StepManager } from 'boilersmith/step-manager';
+import { stubPathProviderFactory, stubPhpProviderFactory, stubStepFactory } from './stubs';
 
 describe('Step Manager Validation', function () {
   describe('dependencies on nonexistent steps will cause errors', function () {

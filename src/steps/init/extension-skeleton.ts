@@ -3,10 +3,10 @@ import chalk from 'chalk';
 import { Store } from 'mem-fs';
 import { create } from 'mem-fs-editor';
 import licenseList from 'spdx-license-list/simple';
-import { ParamProvider } from '../../provider/param-provider';
-import { PathProvider } from '../../provider/path-provider';
+import { ParamProvider } from 'boilersmith/param-provider';
+import { PathProvider } from 'boilersmith/path-provider';
 import { PhpProvider } from '../../provider/php-provider';
-import { Step } from '../step-manager';
+import { Step } from 'boilersmith/step-manager';
 import { extensionId, extensionMetadata, ExtensionMetadata } from '../../utils/extension-metadata';
 
 export class ExtensionSkeleton implements Step {

@@ -2,9 +2,9 @@ import { prompt } from 'prompts';
 import { create as createStore, Store } from 'mem-fs';
 import { create } from 'mem-fs-editor';
 import { resolve } from 'path';
-import { paramProviderFactory } from '../../src/provider/param-provider';
-import { PathFsProvider, PathProvider } from '../../src/provider/path-provider';
-import { currParamValues, getParamName, promptParamValues, TemplateParam } from '../../src/scaffolding/template-param';
+import { paramProviderFactory } from 'boilersmith/param-provider';
+import { PathFsProvider, PathProvider } from 'boilersmith/path-provider';
+import { currParamValues, getParamName, promptParamValues, TemplateParam } from 'boilersmith/scaffolding/template-param';
 
 describe('Template Param Utils', function() {
     const templateParams: TemplateParam<unknown>[] = [

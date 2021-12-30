@@ -1,11 +1,11 @@
 import pick from 'pick-deep';
 import { Store } from 'mem-fs';
 import { create } from 'mem-fs-editor';
-import { ParamProvider } from '../../provider/param-provider';
-import { PathProvider } from '../../provider/path-provider';
+import { ParamProvider } from 'boilersmith/param-provider';
+import { PathProvider } from 'boilersmith/path-provider';
 import { PhpProvider } from '../../provider/php-provider';
 import { ComposerJsonSchema, extensionMetadata } from '../../utils/extension-metadata';
-import { Step } from '../step-manager';
+import { Step } from 'boilersmith/step-manager';
 
 export abstract class BaseInfraStep implements Step {
   abstract type: string;

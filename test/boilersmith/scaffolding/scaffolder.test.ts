@@ -1,6 +1,6 @@
 import { resolve } from 'path';
-import { Scaffolder } from '../../src/scaffolding/scaffolder';
-import { getParamName, TemplateParam } from '../../src/scaffolding/template-param';
+import { Scaffolder } from 'boilersmith/scaffolding/scaffolder';
+import { getParamName, TemplateParam } from 'boilersmith/scaffolding/template-param';
 
 describe('Scaffolder', function () {
   describe('Scaffolder.validate', function () {

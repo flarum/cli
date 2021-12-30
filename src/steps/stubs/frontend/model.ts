@@ -1,7 +1,7 @@
 /* eslint-disable no-template-curly-in-string */
 import { Editor } from 'mem-fs-editor';
-import { ParamProvider } from '../../../provider/param-provider';
-import { PathProvider } from '../../../provider/path-provider';
+import { ParamProvider } from 'boilersmith/param-provider';
+import { PathProvider } from 'boilersmith/path-provider';
 import { Validator } from '../../../utils/validation';
 import { BaseJsStubStep } from '../js-base';
 import { pluralKebabCaseModel } from '../../../utils/model-name';

@@ -1,5 +1,5 @@
 import { resolve } from "path";
-import { readTpl } from "../../src/utils/read-tpl";
+import { readTpl } from "boilersmith/utils/read-tpl";
 
 describe('read-tpl', function () {
   it('errors when data missing', function() {

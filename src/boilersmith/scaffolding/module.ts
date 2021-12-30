@@ -3,9 +3,9 @@ import { Store } from 'mem-fs';
 import { create } from 'mem-fs-editor';
 import { resolve } from 'path';
 import pick from 'pick-deep';
-import { ParamProvider } from '../../src/provider/param-provider';
-import { PathProvider } from '../../src/provider/path-provider';
-import { readTpl } from '../../src/utils/read-tpl';
+import { ParamProvider } from 'boilersmith/param-provider';
+import { PathProvider } from 'boilersmith/path-provider';
+import { readTpl } from 'boilersmith/utils/read-tpl';
 
 interface FileOwnership {
   /**
@@ -140,7 +140,7 @@ export async function applyModule(
   scaffoldDir: string,
   fs: Store,
   pathProvider: PathProvider,
-  isInitial = false,
+  isInitial = false
 ): Promise<Store> {
   const fsEditor = create(fs);
 
@@ -150,7 +150,7 @@ export async function applyModule(
   }
 
   // Validate that dependencies are enabled
-  const missingDeps =  module.togglable ? module.dependsOn.filter(dep => !modulesEnabled[dep]) : [];
+  const missingDeps = module.togglable ? module.dependsOn.filter((dep) => !modulesEnabled[dep]) : [];
   if (missingDeps.length) {
     throw new Error(`Could not apply module "${module.name}", because the following dependency modules are missing: "${missingDeps.join(', ')}".`);
   }
@@ -162,7 +162,7 @@ export async function applyModule(
   }
 
   if (!isInitial && !module.updatable) {
-    throw new Error(`Cannot update module "${module.name}", as it is not updatable, and the project has already been initialized.`)
+    throw new Error(`Cannot update module "${module.name}", as it is not updatable, and the project has already been initialized.`);
   }
 
   const tplData = {

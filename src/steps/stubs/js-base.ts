@@ -1,8 +1,8 @@
 import { Store } from 'mem-fs';
 import { Editor } from 'mem-fs-editor';
 import { BaseStubStep } from './base';
-import { ParamDef, ParamProvider } from '../../provider/param-provider';
-import { PathProvider } from '../../provider/path-provider';
+import { ParamDef, ParamProvider } from 'boilersmith/param-provider';
+import { PathProvider } from 'boilersmith/path-provider';
 import { cloneAndFill } from '../../utils/clone-and-fill';
 import { ExtensionMetadata } from '../../utils/extension-metadata';
 

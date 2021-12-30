@@ -1,5 +1,5 @@
-import { ParamProvider } from '../../provider/param-provider';
-import { PathProvider } from '../../provider/path-provider';
+import { ParamProvider } from 'boilersmith/param-provider';
+import { PathProvider } from 'boilersmith/path-provider';
 import { BaseJsStep } from './base';
 
 export class GenerateModelDefinition extends BaseJsStep {

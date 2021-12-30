@@ -1,7 +1,7 @@
 import prompts from 'prompts';
-import { Module} from '../../src/scaffolding/module';
-import { TemplateParam } from '../../src/scaffolding/template-param';
-import { initStepFactory } from '../../src/scaffolding/init-step-factory';
+import { Module} from 'boilersmith/scaffolding/module';
+import { TemplateParam } from 'boilersmith/scaffolding/template-param';
+import { initStepFactory } from 'boilersmith/scaffolding/init-step-factory';
 import { resolve } from 'path';
 import { getFsPaths, runStep } from '../utils';
 

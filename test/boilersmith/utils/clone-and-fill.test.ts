@@ -1,5 +1,5 @@
 /* eslint-disable no-template-curly-in-string */
-import { cloneAndFill } from '../../src/utils/clone-and-fill';
+import { cloneAndFill } from '../../../src/utils/clone-and-fill';
 
 describe('clone-and-fill', function () {
   it('Doesnt affect empty string', function () {

@@ -1,6 +1,6 @@
 import { Store } from 'mem-fs';
-import { ParamDef, ParamProvider } from '../../src/provider/param-provider';
-import { PathProvider } from '../../src/provider/path-provider';
+import { ParamDef, ParamProvider } from 'boilersmith/param-provider';
+import { PathProvider } from '../path-provider';
 
 interface PromptTemplateParam<T> {
   /**

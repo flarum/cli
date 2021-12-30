@@ -1,10 +1,10 @@
 import globby from 'globby';
 import { Store } from 'mem-fs';
 import { resolve } from 'path';
-import { PathProvider } from '../provider/path-provider';
-import { Step } from '../steps/step-manager';
-import { jsonLeafPaths } from '../utils/json-leaf-paths';
-import { readTpl } from '..//utils/read-tpl';
+import { PathProvider } from '../path-provider';
+import { Step } from '../step-manager';
+import { jsonLeafPaths } from 'boilersmith/utils/json-leaf-paths';
+import { readTpl } from 'boilersmith/utils/read-tpl';
 import { initStepFactory } from './init-step-factory';
 import { currModulesEnabled, Module, ModuleStatusCache } from './module';
 import { currParamValues, getParamName, isComputedParam, TemplateParam } from './template-param';

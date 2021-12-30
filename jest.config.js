@@ -11,4 +11,7 @@ module.exports = {
   transform: {
     '^.+\\.(ts|tsx|js|jsx)$': 'ts-jest',
   },
+  moduleNameMapper: {
+    "^boilersmith/(.*)": "<rootDir>/src/boilersmith/$1"
+  }
 };

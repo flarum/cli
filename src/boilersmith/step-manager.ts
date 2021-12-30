@@ -1,8 +1,8 @@
 /* eslint-disable no-await-in-loop */
 import { create as createMemFs, Store } from 'mem-fs';
 import { create as createMemFsEditor } from 'mem-fs-editor';
-import { ParamProvider, ParamProviderFactory } from '../provider/param-provider';
-import { PathProvider } from '../provider/path-provider';
+import { ParamProvider, ParamProviderFactory } from './param-provider';
+import { PathProvider } from './path-provider';
 import { PhpProvider } from '../provider/php-provider';
 
 export interface Step {

@@ -1,6 +1,6 @@
 /* eslint-disable no-warning-comments */
 import pluralize from 'pluralize';
-import { StepManager } from '../../../steps/step-manager';
+import { StepManager } from 'boilersmith/step-manager';
 import BaseCommand from '../../../base-command';
 import { GenerateModelStub } from '../../../steps/stubs/backend/model';
 import { GenerateMigrationStub } from '../../../steps/stubs/backend/migration';

@@ -2,7 +2,7 @@
 import globby from 'globby';
 import { resolve } from 'node:path';
 import { ExtensionSkeleton } from '../../../src/steps/init/extension-skeleton';
-import { getExtFileContents, getFsPaths, runStep } from '../../utils';
+import { getExtFileContents, getFsPaths, runStep } from '../../boilersmith/utils';
 
 async function getExpected(): Promise<string[]> {
   const skeletonDir = resolve(`${__dirname}/../../../boilerplate/skeleton/extension`);

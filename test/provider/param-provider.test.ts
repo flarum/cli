@@ -1,5 +1,5 @@
 import { prompt } from 'prompts';
-import { ParamProvider } from '../../src/provider/param-provider';
+import { ParamProvider } from 'boilersmith/param-provider';
 
 describe('ParamProvider Works', function () {
   it('Reads values from prompts properly', async function () {

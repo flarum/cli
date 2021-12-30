@@ -2,9 +2,9 @@ import { create as createMemFs, Store } from 'mem-fs';
 import { create as createMemFsEditor } from 'mem-fs-editor';
 import { resolve } from 'node:path';
 import { prompt } from 'prompts';
-import { ParamProvider } from '../src/provider/param-provider';
-import { PathProvider } from '../src/provider/path-provider';
-import { Step } from '../src/steps/step-manager';
+import { ParamProvider } from 'boilersmith/param-provider';
+import { PathProvider } from 'boilersmith/path-provider';
+import { Step } from 'boilersmith/step-manager';
 import { stubPathProviderFactory, stubPhpProviderFactory } from './stubs';
 
 const empty = {};
@@ -22,7 +22,7 @@ export async function runStep(
   requestedDir: string|null = null,
 ): Promise<StepOutput> {
   const fs = createMemFs();
-  const pathProvider = stubPathProviderFactory({ boilerplate: resolve(__dirname, '../boilerplate'), requestedDir });
+  const pathProvider = stubPathProviderFactory({ boilerplate: resolve(__dirname, '../../boilerplate'), requestedDir });
   prompt.inject(params);
   const paramProvider = new ParamProvider(initialParams);
   const phpProvider = stubPhpProviderFactory();

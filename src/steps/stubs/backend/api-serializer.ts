@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import { Editor } from 'mem-fs-editor';
-import { ParamProvider } from '../../../provider/param-provider';
-import { PathProvider } from '../../../provider/path-provider';
+import { ParamProvider } from 'boilersmith/param-provider';
+import { PathProvider } from 'boilersmith/path-provider';
 import { Validator } from '../../../utils/validation';
 import { pluralKebabCaseModel } from '../../../utils/model-name';
 import { BasePhpStubStep } from '../php-base';

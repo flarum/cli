@@ -1,8 +1,8 @@
-import { getExtFileContents, getFsPaths, runStep } from '../../utils';
+import { getExtFileContents, getFsPaths, runStep } from '../../boilersmith/utils';
 import { BackendTestingInfra } from '../../../src/steps/infra/backend-testing';
 import get from 'just-safe-get';
 import { resolve } from 'node:path';
-import { PathProvider } from '../../../src/provider/path-provider';
+import { PathProvider } from 'boilersmith/path-provider';
 
 interface InfraTest {
   infraClass: any;
