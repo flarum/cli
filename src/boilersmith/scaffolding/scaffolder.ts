@@ -62,6 +62,10 @@ export class Scaffolder<TN extends string = string, MN extends string = string> 
     return infraStepFactory(this.scaffoldDir, module, this.modules, this.templateParams, this.moduleStatusCache);
   }
 
+  async templateParamVal<T>(param: TN, fs: Store, paths: Paths): Promise<T> {
+    return (await currParamValues(this.templateParams, fs, paths))[param] as T;
+  }
+
   async templateParamVals(fs: Store, paths: Paths): Promise<Record<TN, unknown>> {
     return currParamValues(this.templateParams, fs, paths);
   }
