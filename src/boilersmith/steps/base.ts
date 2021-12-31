@@ -4,9 +4,9 @@ import { create, Editor } from 'mem-fs-editor';
 import { ParamDef, IO } from 'boilersmith/io';
 import { Paths } from 'boilersmith/paths';
 import { Step } from 'boilersmith/step-manager';
-import { ComposerJsonSchema, ExtensionMetadata, extensionMetadata } from '../../utils/extension-metadata';
-import { cloneAndFill } from '../../utils/clone-and-fill';
-import { FlarumProviders } from '../../providers';
+import { cloneAndFill } from '../utils/clone-and-fill';
+import { resolve } from 'path';
+import { Scaffolder } from 'boilersmith/scaffolding/scaffolder';
 
 interface UserProvidedParam extends Omit<ParamDef, 'type'> {
   type: string;
@@ -15,7 +15,7 @@ interface UserProvidedParam extends Omit<ParamDef, 'type'> {
 export interface StubGenerationSchema {
   /**
    * A period-delimited subdirectory for where the stub should be
-   * located relative to the extension PHP src.
+   * located relative to the package root.
    */
   recommendedSubdir: string;
 
@@ -37,7 +37,13 @@ export interface StubGenerationSchema {
   params: UserProvidedParam[];
 }
 
-export abstract class BaseStubStep implements Step<FlarumProviders> {
+export abstract class BaseStubStep<Providers extends {} = {}, ScaffolderT extends Scaffolder = Scaffolder> implements Step<Providers> {
+  protected stubDir: string;
+
+  constructor(stubDir: string, scaffolder: ScaffolderT) {
+    this.stubDir = stubDir;
+  }
+
   abstract type: string;
 
   protected abstract defaultRoot: string;
@@ -60,9 +66,9 @@ export abstract class BaseStubStep implements Step<FlarumProviders> {
 
   protected params: Record<string, unknown> = {};
 
-  protected subdir !: string;
+  protected subdir!: string;
 
-  async run(fs: Store, paths: Paths, io: IO, providers: FlarumProviders): Promise<Store> {
+  async run(fs: Store, paths: Paths, io: IO, _providers: Providers): Promise<Store> {
     const fsEditor = create(fs);
 
     this.params = await this.compileParams(fsEditor, paths, io);
@@ -71,6 +77,8 @@ export abstract class BaseStubStep implements Step<FlarumProviders> {
     const newFilePath = paths.package(this.schema.root || this.defaultRoot, this.subdir, newFileName);
     const stub = cloneAndFill(this.schema.sourceFile, this.params as Record<string, string>);
 
+    fsEditor.copyTpl(resolve(this.stubDir, stub), newFilePath, this.params);
+
     return fs;
   }
 
@@ -78,20 +86,18 @@ export abstract class BaseStubStep implements Step<FlarumProviders> {
     return pick(this.params, this.exposes) as BaseStubStep['params'];
   }
 
-  protected async precompileParams(composerJsonContents: ExtensionMetadata, _fsEditor: Editor, _paths: Paths, _paramProvider: IO): Promise<Record<string, unknown>> {
-    const params: Record<string, string> = {
-      extensionId: composerJsonContents.extensionId,
-    };
+  protected async precompileParams(_fsEditor: Editor, _paths: Paths, _paramProvider: IO): Promise<Record<string, unknown>> {
+    const params: Record<string, string> = {};
 
     return params;
   }
 
   protected async compileParams(fsEditor: Editor, paths: Paths, io: IO): Promise<Record<string, unknown>> {
-    const composerJsonContents = this.composerJsonContents(fsEditor, paths);
-    const params: Record<string, unknown> = await this.precompileParams(composerJsonContents, fsEditor, paths, io);
+    const params: Record<string, unknown> = await this.precompileParams(fsEditor, paths, io);
 
-    const paramDefs = this.schema.params.filter(param =>
-      !this.implicitParams.includes(param.name as string) && !Object.keys(params).includes(param.name as string));
+    const paramDefs = this.schema.params.filter(
+      (param) => !this.implicitParams.includes(param.name as string) && !Object.keys(params).includes(param.name as string)
+    );
 
     for (const paramDef of paramDefs) {
       // eslint-disable-next-line no-await-in-loop
@@ -108,8 +114,4 @@ export abstract class BaseStubStep implements Step<FlarumProviders> {
   }
 
   protected abstract getFileName(_fs: Store, _paths: Paths, io: IO): Promise<string>;
-
-  protected composerJsonContents(fsEditor: Editor, paths: Paths): ExtensionMetadata {
-    return extensionMetadata(fsEditor.readJSON(paths.package('composer.json')) as ComposerJsonSchema);
-  }
 }
