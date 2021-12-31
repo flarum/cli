@@ -1,3 +1,5 @@
+import { ExtensionModules } from "../steps/gen-ext-scaffolder";
+
 export function extensionId(packageName: string): string {
   return packageName.replace(/(flarum-ext-)|(flarum-)/, '').replace('/', '-');
 }
@@ -49,7 +51,7 @@ export type ComposerJsonSchema = {
   extra?: {
     "flarum-cli"?: {
       mainGitBranch?: string;
-      modules?: Partial<ExtensionModules>
+      modules?: Record<ExtensionModules, boolean>;
     };
     "flarum-extension"?: {
       title?: string;
