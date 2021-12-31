@@ -9,7 +9,7 @@ interface PromptTemplateParam<T, N extends string = string> {
    */
   prompt: ParamDef<N>;
 
-  getCurrVal: (fs: Store, paths: Paths) => Promise<T>;
+  getCurrVal: (fs: Store, paths: Paths) => Promise<T|undefined>;
 }
 
 interface ComputedTemplateParam<T, N extends string = string> {
@@ -20,7 +20,7 @@ interface ComputedTemplateParam<T, N extends string = string> {
   compute: (paths: Paths, ...args: any[]) => Promise<T>;
 }
 
-export type TemplateParam<T, N extends string = string> = PromptTemplateParam<T, N> | ComputedTemplateParam<T, N>;
+export type TemplateParam<T = unknown, N extends string = string> = PromptTemplateParam<T, N> | ComputedTemplateParam<T, N>;
 
 export function isPromptParam<T, N extends string>(param: TemplateParam<T, N>): param is PromptTemplateParam<T, N> {
   return 'prompt' in param;
@@ -34,7 +34,7 @@ export function getParamName<T, N extends string>(param: TemplateParam<T, N>): N
   return isComputedParam(param) ? param.name : param.prompt.name;
 }
 
-async function withComputedParamValues(params: TemplateParam<unknown>[], paths: Paths, paramVals: Record<string, unknown>): Promise<Record<string, unknown>> {
+async function withComputedParamValues(params: TemplateParam[], paths: Paths, paramVals: Record<string, unknown>): Promise<Record<string, unknown>> {
   const vals = { ...paramVals };
 
   const computedParams = params.filter(isComputedParam);
@@ -48,7 +48,7 @@ async function withComputedParamValues(params: TemplateParam<unknown>[], paths: 
   return vals;
 }
 
-export async function promptParamValues(params: TemplateParam<unknown>[], paths: Paths, io: IO): Promise<Record<string, unknown>> {
+export async function promptParamValues(params: TemplateParam[], paths: Paths, io: IO): Promise<Record<string, unknown>> {
   const promptParams = params.filter(isPromptParam);
   const paramVals: Record<string, unknown> = {};
 
@@ -59,12 +59,12 @@ export async function promptParamValues(params: TemplateParam<unknown>[], paths:
   return withComputedParamValues(params, paths, paramVals);
 }
 
-export async function currParamValues(params: TemplateParam<unknown>[], fs: Store, paths: Paths) {
+export async function currParamValues(params: TemplateParam[], fs: Store, paths: Paths, io: IO) {
   const promptParams = params.filter(isPromptParam);
   const paramVals: Record<string, unknown> = {};
 
   for (const p of promptParams) {
-    paramVals[p.prompt.name] = await p.getCurrVal(fs, paths);
+    paramVals[p.prompt.name] = await p.getCurrVal(fs, paths) ?? await io.getParam(p.prompt);
   }
 
   return withComputedParamValues(params, paths, paramVals);

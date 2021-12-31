@@ -11,6 +11,7 @@ import { currParamValues, getParamName, isComputedParam, TemplateParam } from '.
 import { infraStepFactory } from './infra-step-factory';
 import { renameKeys } from 'boilersmith/utils/rename-keys';
 import { cloneAndFill } from 'boilersmith/utils/clone-and-fill';
+import { IO } from 'boilersmith/io';
 
 export class Scaffolder<TN extends string = string, MN extends string = string> {
   private templateParams: TemplateParam<unknown, TN>[] = [];
@@ -62,12 +63,12 @@ export class Scaffolder<TN extends string = string, MN extends string = string> 
     return infraStepFactory(this.scaffoldDir, module, this.modules, this.templateParams, this.moduleStatusCache);
   }
 
-  async templateParamVal<T>(param: TN, fs: Store, paths: Paths): Promise<T> {
-    return (await currParamValues(this.templateParams, fs, paths))[param] as T;
+  async templateParamVal<T>(param: TN, fs: Store, paths: Paths, io: IO): Promise<T> {
+    return (await currParamValues(this.templateParams, fs, paths, io))[param] as T;
   }
 
-  async templateParamVals(fs: Store, paths: Paths): Promise<Record<TN, unknown>> {
-    return currParamValues(this.templateParams, fs, paths);
+  async templateParamVals(fs: Store, paths: Paths, io: IO): Promise<Record<TN, unknown>> {
+    return currParamValues(this.templateParams, fs, paths, io);
   }
 
   async modulesEnabled(fs: Store, paths: Paths): Promise<Record<MN, boolean>> {

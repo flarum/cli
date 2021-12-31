@@ -9,7 +9,7 @@ export function infraStepFactory<Providers extends {} = {}>(
   scaffoldDir: string,
   moduleName: string,
   modules: Module[],
-  templateParams: TemplateParam<unknown>[],
+  templateParams: TemplateParam[],
   moduleStatusCache?: ModuleStatusCache
 ): Step<Providers> {
   const module = modules.find(m => m.name === moduleName);

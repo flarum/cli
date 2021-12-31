@@ -1,13 +1,13 @@
-import { prompt } from 'prompts';
+import { prompt, prompts } from 'prompts';
 import { create as createStore, Store } from 'mem-fs';
 import { create } from 'mem-fs-editor';
 import { resolve } from 'path';
-import { promptsIOFactory } from 'boilersmith/io';
+import { PromptsIO, promptsIOFactory } from 'boilersmith/io';
 import { NodePaths, Paths } from 'boilersmith/paths';
 import { currParamValues, getParamName, promptParamValues, TemplateParam } from 'boilersmith/scaffolding/template-param';
 
 describe('Template Param Utils', function() {
-    const templateParams: TemplateParam<unknown>[] = [
+    const templateParams: TemplateParam[] = [
         {
             prompt: {
                 name: 'param1',
@@ -35,10 +35,28 @@ describe('Template Param Utils', function() {
     ];
 
     it('currParamValues works', async function() {
-        expect(await currParamValues(templateParams, createStore(), new NodePaths({package: resolve(__dirname, '../fixtures')}))).toStrictEqual({
+        expect(await currParamValues(templateParams, createStore(), new NodePaths({package: resolve(__dirname, '../fixtures')}), new PromptsIO({}))).toStrictEqual({
             param1: `Hello world!\n\n<%= requiredMessage %>`,
             param2: 8,
             param3: 'Hello wo'
+        })
+    });
+
+
+    it('currParamValues falls back to prompt if not available', async function() {
+        const params: TemplateParam[] = [...templateParams, {
+            prompt: {name: 'param4', type: 'text', message: 'Param 4'},
+            getCurrVal: async () => undefined
+        }]
+
+        prompt.inject(['param4Val']);
+
+
+        expect(await currParamValues(params, createStore(), new NodePaths({package: resolve(__dirname, '../fixtures')}), new PromptsIO({}))).toStrictEqual({
+            param1: `Hello world!\n\n<%= requiredMessage %>`,
+            param2: 8,
+            param3: 'Hello wo',
+            param4: 'param4Val'
         })
     });
 

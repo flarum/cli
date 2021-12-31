@@ -19,7 +19,7 @@ export abstract class BasePhpStubStep extends FlarumBaseStubStep {
   protected async precompileParams(fs: Store, paths: Paths, io: IO): Promise<Record<string, unknown>> {  
     const params: Record<string, unknown> = {
       ...await super.precompileParams(fs, paths, io),
-      classNamespace: this.stubNamespace(await this.scaffolder.templateParamVal('packageNamespace', fs, paths), paths),
+      classNamespace: this.stubNamespace(await this.scaffolder.templateParamVal('packageNamespace', fs, paths, io), paths),
     };
 
     let paramDefs = this.schema.params.filter(param => !this.implicitParams.includes(param.name as string));

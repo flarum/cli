@@ -6,7 +6,7 @@ import { renameKeys } from '../utils/rename-keys';
 import { applyModule, Module, ModuleStatusCache, promptModulesEnabled, setModuleValue } from './module';
 import { promptParamValues, TemplateParam } from './template-param';
 
-export function initStepFactory<Providers extends {} = {}>(scaffoldDir: string, modules: Module[], templateParams: TemplateParam<unknown>[], moduleStatusCache?: ModuleStatusCache): Step<Providers> {
+export function initStepFactory<Providers extends {} = {}>(scaffoldDir: string, modules: Module[], templateParams: TemplateParam[], moduleStatusCache?: ModuleStatusCache): Step<Providers> {
   let modulesEnabled: Record<string, boolean>;
 
   return {

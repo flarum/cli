@@ -40,7 +40,7 @@ describe('init step factory', function () {
     },
   ];
 
-  const templateParams: TemplateParam<unknown>[] = [
+  const templateParams: TemplateParam[] = [
     {
       prompt: {
         name: 'someVar',
