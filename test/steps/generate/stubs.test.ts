@@ -17,7 +17,8 @@ import { GeneratePolicyStub } from '../../../src/steps/stubs/backend/policy';
 import { GenerateCommandStub } from '../../../src/steps/stubs/backend/command';
 import { GenerateModalStub } from '../../../src/steps/stubs/frontend/modal';
 import { GenerateComponentStub } from '../../../src/steps/stubs/frontend/component';
-import { PathProvider } from 'boilersmith/path-provider';
+import { stubPhpProviderFactory } from '../../utils';
+import { Paths } from 'boilersmith/paths';
 
 interface StubTest {
   stubClass: any;
@@ -45,12 +46,8 @@ const backendTestSpecs: StubTest[] = [
       className: 'MutateDatabaseSave',
       eventClass: '\\Flarum\\Post\\Event\\Saving',
     },
-    expectedModifiedFilesDefaultDir: [
-      '/ext/src/Listener/MutateDatabaseSave.php',
-    ],
-    expectedModifiedFilesRequestedDir: [
-      `${requestedDir}/MutateDatabaseSave.php`,
-    ],
+    expectedModifiedFilesDefaultDir: ['/ext/src/Listener/MutateDatabaseSave.php'],
+    expectedModifiedFilesRequestedDir: [`${requestedDir}/MutateDatabaseSave.php`],
     expectedExposedParamsDefaultDir: {
       class: 'Flarum\\Demo\\Listener\\MutateDatabaseSave',
       eventClass: '\\Flarum\\Post\\Event\\Saving',
@@ -68,12 +65,8 @@ const backendTestSpecs: StubTest[] = [
       className: 'PotatoSerializer',
       modelClass: '\\Flarum\\Potato\\Potato',
     },
-    expectedModifiedFilesDefaultDir: [
-      '/ext/src/Api/Serializer/PotatoSerializer.php',
-    ],
-    expectedModifiedFilesRequestedDir: [
-      `${requestedDir}/PotatoSerializer.php`,
-    ],
+    expectedModifiedFilesDefaultDir: ['/ext/src/Api/Serializer/PotatoSerializer.php'],
+    expectedModifiedFilesRequestedDir: [`${requestedDir}/PotatoSerializer.php`],
     expectedExposedParamsDefaultDir: {
       class: 'Flarum\\Demo\\Api\\Serializer\\PotatoSerializer',
       className: 'PotatoSerializer',
@@ -95,12 +88,8 @@ const backendTestSpecs: StubTest[] = [
       className: 'CustomModel',
       tableName: 'custom_models',
     },
-    expectedModifiedFilesDefaultDir: [
-      '/ext/src/CustomModel.php',
-    ],
-    expectedModifiedFilesRequestedDir: [
-      `${requestedDir}/CustomModel.php`,
-    ],
+    expectedModifiedFilesDefaultDir: ['/ext/src/CustomModel.php'],
+    expectedModifiedFilesRequestedDir: [`${requestedDir}/CustomModel.php`],
     expectedExposedParamsDefaultDir: {
       class: 'Flarum\\Demo\\CustomModel',
       className: 'CustomModel',
@@ -124,12 +113,8 @@ const backendTestSpecs: StubTest[] = [
       className: 'CustomModelRepository',
       modelClass: 'Flarum\\CustomModel\\CustomModel',
     },
-    expectedModifiedFilesDefaultDir: [
-      '/ext/src/CustomModelRepository.php',
-    ],
-    expectedModifiedFilesRequestedDir: [
-      `${requestedDir}/CustomModelRepository.php`,
-    ],
+    expectedModifiedFilesDefaultDir: ['/ext/src/CustomModelRepository.php'],
+    expectedModifiedFilesRequestedDir: [`${requestedDir}/CustomModelRepository.php`],
     expectedExposedParamsDefaultDir: {
       class: 'Flarum\\Demo\\CustomModelRepository',
       modelClass: 'Flarum\\CustomModel\\CustomModel',
@@ -148,12 +133,8 @@ const backendTestSpecs: StubTest[] = [
     params: {
       className: 'CustomModelValidator',
     },
-    expectedModifiedFilesDefaultDir: [
-      '/ext/src/CustomModelValidator.php',
-    ],
-    expectedModifiedFilesRequestedDir: [
-      `${requestedDir}/CustomModelValidator.php`,
-    ],
+    expectedModifiedFilesDefaultDir: ['/ext/src/CustomModelValidator.php'],
+    expectedModifiedFilesRequestedDir: [`${requestedDir}/CustomModelValidator.php`],
     expectedExposedParamsDefaultDir: {
       class: 'Flarum\\Demo\\CustomModelValidator',
     },
@@ -169,12 +150,8 @@ const backendTestSpecs: StubTest[] = [
       className: 'CustomModelPolicy',
       modelClass: 'Flarum\\CustomModel\\CustomModel',
     },
-    expectedModifiedFilesDefaultDir: [
-      '/ext/src/Access/CustomModelPolicy.php',
-    ],
-    expectedModifiedFilesRequestedDir: [
-      `${requestedDir}/CustomModelPolicy.php`,
-    ],
+    expectedModifiedFilesDefaultDir: ['/ext/src/Access/CustomModelPolicy.php'],
+    expectedModifiedFilesRequestedDir: [`${requestedDir}/CustomModelPolicy.php`],
     expectedExposedParamsDefaultDir: {
       class: 'Flarum\\Demo\\Access\\CustomModelPolicy',
       modelClass: 'Flarum\\CustomModel\\CustomModel',
@@ -194,12 +171,8 @@ const backendTestSpecs: StubTest[] = [
       className: 'CustomCommand',
       commandName: 'custom:command',
     },
-    expectedModifiedFilesDefaultDir: [
-      '/ext/src/Console/CustomCommand.php',
-    ],
-    expectedModifiedFilesRequestedDir: [
-      `${requestedDir}/CustomCommand.php`,
-    ],
+    expectedModifiedFilesDefaultDir: ['/ext/src/Console/CustomCommand.php'],
+    expectedModifiedFilesRequestedDir: [`${requestedDir}/CustomCommand.php`],
     expectedExposedParamsDefaultDir: {
       class: 'Flarum\\Demo\\Console\\CustomCommand',
     },
@@ -214,12 +187,8 @@ const backendTestSpecs: StubTest[] = [
     params: {
       className: 'CustomServiceProvider',
     },
-    expectedModifiedFilesDefaultDir: [
-      '/ext/src/CustomServiceProvider.php',
-    ],
-    expectedModifiedFilesRequestedDir: [
-      `${requestedDir}/CustomServiceProvider.php`,
-    ],
+    expectedModifiedFilesDefaultDir: ['/ext/src/CustomServiceProvider.php'],
+    expectedModifiedFilesRequestedDir: [`${requestedDir}/CustomServiceProvider.php`],
     expectedExposedParamsDefaultDir: {
       class: 'Flarum\\Demo\\CustomServiceProvider',
     },
@@ -234,12 +203,8 @@ const backendTestSpecs: StubTest[] = [
     params: {
       className: 'CustomJob',
     },
-    expectedModifiedFilesDefaultDir: [
-      '/ext/src/Job/CustomJob.php',
-    ],
-    expectedModifiedFilesRequestedDir: [
-      `${requestedDir}/CustomJob.php`,
-    ],
+    expectedModifiedFilesDefaultDir: ['/ext/src/Job/CustomJob.php'],
+    expectedModifiedFilesRequestedDir: [`${requestedDir}/CustomJob.php`],
     expectedExposedParamsDefaultDir: {
       class: 'Flarum\\Demo\\Job\\CustomJob',
     },
@@ -255,12 +220,8 @@ const backendTestSpecs: StubTest[] = [
       className: 'CustomBusCommand',
       classType: 'create',
     },
-    expectedModifiedFilesDefaultDir: [
-      '/ext/src/Command/CustomBusCommand.php',
-    ],
-    expectedModifiedFilesRequestedDir: [
-      `${requestedDir}/CustomBusCommand.php`,
-    ],
+    expectedModifiedFilesDefaultDir: ['/ext/src/Command/CustomBusCommand.php'],
+    expectedModifiedFilesRequestedDir: [`${requestedDir}/CustomBusCommand.php`],
     expectedExposedParamsDefaultDir: {
       class: 'Flarum\\Demo\\Command\\CustomBusCommand',
       className: 'CustomBusCommand',
@@ -282,12 +243,8 @@ const backendTestSpecs: StubTest[] = [
       validatorClass: 'Flarum\\Demo\\CustomModelRepository',
       repositoryClass: 'Flarum\\Demo\\CustomModelValidator',
     },
-    expectedModifiedFilesDefaultDir: [
-      '/ext/src/Command/CustomBusCommandHandler.php',
-    ],
-    expectedModifiedFilesRequestedDir: [
-      `${requestedDir}/CustomBusCommandHandler.php`,
-    ],
+    expectedModifiedFilesDefaultDir: ['/ext/src/Command/CustomBusCommandHandler.php'],
+    expectedModifiedFilesRequestedDir: [`${requestedDir}/CustomBusCommandHandler.php`],
     expectedExposedParamsDefaultDir: {
       class: 'Flarum\\Demo\\Command\\CustomBusCommandHandler',
     },
@@ -307,12 +264,8 @@ for (const classType of ['normal', 'list', 'show', 'create', 'update', 'delete']
       handlerCommandClass: `Flarum\\Demo\\Custom${classType}`,
       classType,
     },
-    expectedModifiedFilesDefaultDir: [
-      `/ext/src/Api/Controller/${classType}Controller.php`,
-    ],
-    expectedModifiedFilesRequestedDir: [
-      `${requestedDir}/${classType}Controller.php`,
-    ],
+    expectedModifiedFilesDefaultDir: [`/ext/src/Api/Controller/${classType}Controller.php`],
+    expectedModifiedFilesRequestedDir: [`${requestedDir}/${classType}Controller.php`],
     expectedExposedParamsDefaultDir: {
       class: `Flarum\\Demo\\Api\\Controller\\${classType}Controller`,
     },
@@ -329,12 +282,8 @@ const backendTestsTestSpecs: StubTest[] = [
     params: {
       className: 'ListPotatoesTest',
     },
-    expectedModifiedFilesDefaultDir: [
-      '/ext/tests/integration/api/ListPotatoesTest.php',
-    ],
-    expectedModifiedFilesRequestedDir: [
-      `${requestedTestDir}/ListPotatoesTest.php`,
-    ],
+    expectedModifiedFilesDefaultDir: ['/ext/tests/integration/api/ListPotatoesTest.php'],
+    expectedModifiedFilesRequestedDir: [`${requestedTestDir}/ListPotatoesTest.php`],
     expectedExposedParamsDefaultDir: {
       class: 'Flarum\\Demo\\tests\\integration\\api\\ListPotatoesTest',
     },
@@ -352,12 +301,8 @@ const frontendTestSpecs: StubTest[] = [
       frontend: 'common',
       className: 'CustomModel',
     },
-    expectedModifiedFilesDefaultDir: [
-      '/ext/js/src/common/models/CustomModel.js',
-    ],
-    expectedModifiedFilesRequestedDir: [
-      `${requestedJsDir}/CustomModel.js`,
-    ],
+    expectedModifiedFilesDefaultDir: ['/ext/js/src/common/models/CustomModel.js'],
+    expectedModifiedFilesRequestedDir: [`${requestedJsDir}/CustomModel.js`],
     expectedExposedParamsDefaultDir: {
       className: 'CustomModel',
       classNamespace: 'common/models/CustomModel',
@@ -378,12 +323,8 @@ const frontendTestSpecs: StubTest[] = [
       frontend: 'forum',
       className: 'CustomModal',
     },
-    expectedModifiedFilesDefaultDir: [
-      '/ext/js/src/forum/components/CustomModal.js',
-    ],
-    expectedModifiedFilesRequestedDir: [
-      `${requestedJsDir}/CustomModal.js`,
-    ],
+    expectedModifiedFilesDefaultDir: ['/ext/js/src/forum/components/CustomModal.js'],
+    expectedModifiedFilesRequestedDir: [`${requestedJsDir}/CustomModal.js`],
     expectedExposedParamsDefaultDir: {
       className: 'CustomModal',
       frontend: 'forum',
@@ -400,12 +341,8 @@ const frontendTestSpecs: StubTest[] = [
       frontend: 'admin',
       className: 'CustomComponent',
     },
-    expectedModifiedFilesDefaultDir: [
-      '/ext/js/src/admin/components/CustomComponent.js',
-    ],
-    expectedModifiedFilesRequestedDir: [
-      `${requestedJsDir}/CustomComponent.js`,
-    ],
+    expectedModifiedFilesDefaultDir: ['/ext/js/src/admin/components/CustomComponent.js'],
+    expectedModifiedFilesRequestedDir: [`${requestedJsDir}/CustomComponent.js`],
     expectedExposedParamsDefaultDir: {
       className: 'CustomComponent',
       frontend: 'admin',
@@ -434,14 +371,14 @@ for (const specDefinition of [
   describe('Backend stub tests', function () {
     for (const spec of specDefinition.testSpecs) {
       describe(`Stub Test: ${spec.stubClass.name}`, function () {
-        const initialFilesCallback = (pathProvider: PathProvider) => {
+        const initialFilesCallback = (paths: Paths) => {
           const initial: Record<string, string> = {};
-          initial[pathProvider.ext('composer.json')] = JSON.stringify(sampleComposerJson);
+          initial[paths.package('composer.json')] = JSON.stringify(sampleComposerJson);
           return initial;
         };
 
         test('With default dir', async function () {
-          const { fs, exposedParams } = await runStep(new spec.stubClass(), Object.values(spec.params), {}, initialFilesCallback);
+          const { fs, exposedParams } = await runStep(new spec.stubClass(), {}, Object.values(spec.params), {}, initialFilesCallback);
 
           expect(getFsPaths(fs)).toStrictEqual([...spec.expectedModifiedFilesDefaultDir, '/ext/composer.json'].sort());
 
@@ -449,7 +386,14 @@ for (const specDefinition of [
         });
 
         test('With requested dir', async function () {
-          const { fs, exposedParams } = await runStep(new spec.stubClass(), Object.values(spec.params), {}, initialFilesCallback, specDefinition.requestedDir);
+          const { fs, exposedParams } = await runStep(
+            new spec.stubClass(),
+            {},
+            Object.values(spec.params),
+            {},
+            initialFilesCallback,
+            specDefinition.requestedDir
+          );
 
           expect(getFsPaths(fs)).toStrictEqual([...spec.expectedModifiedFilesRequestedDir, '/ext/composer.json'].sort());
 
@@ -465,29 +409,29 @@ const migrationSpec = {
   params: {
     name: 'new migration',
   },
-  expectedModifiedFilesDefaultDir: [
-    '/ext/migrations/2020_01_01_000000_new_migration.php',
-  ],
-  expectedModifiedFilesRequestedDir: [
-    '/ext/migrations/2020_01_01_000000_new_migration.php',
-  ],
+  expectedModifiedFilesDefaultDir: ['/ext/migrations/2020_01_01_000000_new_migration.php'],
+  expectedModifiedFilesRequestedDir: ['/ext/migrations/2020_01_01_000000_new_migration.php'],
   expectedExposedParamsDefaultDir: {},
   expectedExposedParamsRequestedDir: {},
 };
 
 describe('Stub Test: Migrations', function () {
-  jest
-    .useFakeTimers('modern')
-    .setSystemTime(new Date('2020-01-01T03:24:00').getTime());
+  jest.useFakeTimers('modern').setSystemTime(new Date('2020-01-01T03:24:00').getTime());
 
-  const initialFilesCallback = (pathProvider: PathProvider) => {
+  const initialFilesCallback = (paths: Paths) => {
     const initial: Record<string, string> = {};
-    initial[pathProvider.ext('composer.json')] = JSON.stringify(sampleComposerJson);
+    initial[paths.package('composer.json')] = JSON.stringify(sampleComposerJson);
     return initial;
   };
 
   test('With default dir', async function () {
-    const { fs, exposedParams } = await runStep(new migrationSpec.stubClass(), Object.values(migrationSpec.params), {}, initialFilesCallback);
+    const { fs, exposedParams } = await runStep(
+      new migrationSpec.stubClass(),
+      { php: stubPhpProviderFactory() },
+      Object.values(migrationSpec.params),
+      {},
+      initialFilesCallback
+    );
 
     expect(getFsPaths(fs)).toStrictEqual([...migrationSpec.expectedModifiedFilesDefaultDir, '/ext/composer.json'].sort());
 
@@ -495,7 +439,14 @@ describe('Stub Test: Migrations', function () {
   });
 
   test('With requested dir', async function () {
-    const { fs, exposedParams } = await runStep(new migrationSpec.stubClass(), Object.values(migrationSpec.params), {}, initialFilesCallback, requestedDir);
+    const { fs, exposedParams } = await runStep(
+      new migrationSpec.stubClass(),
+      { php: stubPhpProviderFactory() },
+      Object.values(migrationSpec.params),
+      {},
+      initialFilesCallback,
+      requestedDir
+    );
 
     expect(getFsPaths(fs)).toStrictEqual([...migrationSpec.expectedModifiedFilesRequestedDir, '/ext/composer.json'].sort());
 

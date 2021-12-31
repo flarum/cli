@@ -1,23 +1,23 @@
 import { glob } from 'glob';
 import { Store } from 'mem-fs';
 import { create } from 'mem-fs-editor';
-import { ParamProvider } from 'boilersmith/param-provider';
-import { PathProvider } from 'boilersmith/path-provider';
-import { PhpProvider } from '../../provider/php-provider';
+import { IO } from 'boilersmith/io';
+import { Paths } from 'boilersmith/paths';
 import { Step } from 'boilersmith/step-manager';
+import { FlarumProviders } from '../../providers';
 
 const IMPORTS_REGEX = /((^import\s+(?:([\s\w*,{}]+)\s+from)?\s*["']?([\s\w./@\\-]+)\3?["']?\s*;?\s*)*)(.*)/m;
 const INIT_REGEX = /^(app\.initializers\.add\('[^']+',\s*\(\)\s*=>\s*{)$/m;
 
-export abstract class BaseJsStep implements Step {
+export abstract class BaseJsStep implements Step<FlarumProviders> {
   abstract type: string;
 
   composable = true;
 
-  async run(fs: Store, pathProvider: PathProvider, paramProvider: ParamProvider, _phpProvider: PhpProvider): Promise<Store> {
+  async run(fs: Store, paths: Paths, io: IO, _providers: FlarumProviders): Promise<Store> {
     const fsEditor = create(fs);
 
-    const frontend: string = await paramProvider.get({ name: 'frontend', type: 'text' });
+    const frontend: string = await io.getParam({ name: 'frontend', type: 'text' });
     let frontends: string[] = [frontend];
 
     if (frontend === 'common') {
@@ -25,7 +25,7 @@ export abstract class BaseJsStep implements Step {
     }
 
     for (const frontend of frontends) {
-      const fsSrcFilePaths = glob.sync(pathProvider.ext(`js/src/${frontend}/*.{js,jsx,ts,tsx}`));
+      const fsSrcFilePaths = glob.sync(paths.package(`js/src/${frontend}/*.{js,jsx,ts,tsx}`));
 
       fsSrcFilePaths.forEach(async match => {
         /**
@@ -34,8 +34,8 @@ export abstract class BaseJsStep implements Step {
 
         const currContents = fsEditor.read(match);
 
-        const imports = await this.getImports(frontend, pathProvider, paramProvider);
-        const definition = await this.getDefinition(paramProvider);
+        const imports = await this.getImports(frontend, paths, io);
+        const definition = await this.getDefinition(io);
 
         const newContents = currContents
           .replace(INIT_REGEX, `$1\n  ${definition}\n`)
@@ -48,9 +48,9 @@ export abstract class BaseJsStep implements Step {
     return fs;
   }
 
-  protected abstract getDefinition(paramProvider: ParamProvider): Promise<string>;
+  protected abstract getDefinition(io: IO): Promise<string>;
 
-  protected abstract getImports(frontend: string, pathProvider: PathProvider, paramProvider: ParamProvider): Promise<string>;
+  protected abstract getImports(frontend: string, paths: Paths, io: IO): Promise<string>;
 
   protected importPath(frontend: string, classNamespace: string): string {
     let path = `../${classNamespace}`;
@@ -62,7 +62,7 @@ export abstract class BaseJsStep implements Step {
 
   exposes = [];
 
-  getExposed(_pathProvider: PathProvider, _paramProvider: ParamProvider): Record<string, unknown> {
+  getExposed(_paths: Paths, _paramProvider: IO): Record<string, unknown> {
     return {};
   }
 }

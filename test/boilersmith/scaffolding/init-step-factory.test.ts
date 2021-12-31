@@ -52,7 +52,7 @@ describe('init step factory', function () {
     {
       name: 'someOtherVar',
       uses: [],
-      compute: async (pathProvider) => pathProvider.ext(),
+      compute: async (paths) => paths.package(),
     }
   ]
 
@@ -63,7 +63,7 @@ describe('init step factory', function () {
 
     prompts.inject(['Var Value', true, true, true]);
 
-    const {fs} = await runStep(step);
+    const {fs} = await runStep(step, {});
 
     expect(getFsPaths(fs).sort()).toStrictEqual([
       '/ext/.gitignore',
@@ -83,7 +83,7 @@ describe('init step factory', function () {
 
     prompts.inject(['Var Value', true, false, false]);
 
-    const {fs} = await runStep(step);
+    const {fs} = await runStep(step, {});
 
     expect(getFsPaths(fs).sort()).toStrictEqual([
       '/ext/.gitignore',
@@ -96,7 +96,7 @@ describe('init step factory', function () {
 
     prompts.inject(['Var Value', false]);
 
-    const {fs} = await runStep(step);
+    const {fs} = await runStep(step, {});
 
     expect(getFsPaths(fs).sort()).toStrictEqual([
       '/ext/.gitignore',
@@ -120,7 +120,7 @@ describe('init step factory', function () {
 
     prompts.inject(['Var Value', false]);
 
-    await runStep(step);
+    await runStep(step, {});
 
     expect(cache).toStrictEqual({
       'sourceFiles': true,

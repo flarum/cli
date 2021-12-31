@@ -1,8 +1,8 @@
 /* eslint-disable max-nested-callbacks */
 import { prompt } from 'prompts';
-import { paramProviderFactory as defaultPPFac } from 'boilersmith/param-provider';
+import { promptsIOFactory as defaultPPFac } from 'boilersmith/io';
 import { StepManager } from 'boilersmith/step-manager';
-import { stubPathProviderFactory, stubPhpProviderFactory, stubStepFactory } from './stubs';
+import { stubPathsFactory, stubStepFactory } from './utils';
 
 describe('Step Manager Validation', function () {
   describe('dependencies on nonexistent steps will cause errors', function () {
@@ -151,10 +151,10 @@ describe('Step Manager Validation', function () {
 });
 
 describe('Step Manager Execution', function () {
-  const paramProviderFactory = jest.fn(defaultPPFac);
+  const promptsIOFactory = jest.fn(defaultPPFac);
 
   beforeEach(() => {
-    paramProviderFactory.mockClear();
+    promptsIOFactory.mockClear();
   });
 
   test('Can run a complex but valid sequence of steps, params properly passed to dependencies', async function () {
@@ -188,7 +188,7 @@ describe('Step Manager Execution', function () {
             },
           ]);
       })
-      .run(stubPathProviderFactory(), paramProviderFactory, stubPhpProviderFactory());
+      .run(stubPathsFactory(), promptsIOFactory, {});
 
     // Tests that all steps run, and that they do so in order.
     expect(results).toStrictEqual([
@@ -202,7 +202,7 @@ describe('Step Manager Execution', function () {
     ]);
 
     // Tests that params are shared properly.
-    expect(JSON.stringify(paramProviderFactory.mock.calls)).toStrictEqual(JSON.stringify([
+    expect(JSON.stringify(promptsIOFactory.mock.calls)).toStrictEqual(JSON.stringify([
       [{}],
       [{}],
       [{}],
@@ -232,7 +232,7 @@ describe('Step Manager Execution', function () {
           dontRunIfFalsy: true,
         },
       ])
-      .run(stubPathProviderFactory(), paramProviderFactory, stubPhpProviderFactory());
+      .run(stubPathsFactory(), promptsIOFactory, {});
 
     expect(results).toStrictEqual([
       'Standalone',
@@ -241,7 +241,7 @@ describe('Step Manager Execution', function () {
     ]);
 
     // Tests that params are shared properly.
-    expect(JSON.stringify(paramProviderFactory.mock.calls)).toStrictEqual(JSON.stringify([
+    expect(JSON.stringify(promptsIOFactory.mock.calls)).toStrictEqual(JSON.stringify([
       [{}],
       [{ __succeeded: true }],
       [{ context: 'Confirm Step' }],  // Prompt for confirmation of optional step
@@ -262,7 +262,7 @@ describe('Step Manager Execution', function () {
           .step(stubStepFactory('Atomic not optional'))
           .step(stubStepFactory('Atomic optional runs'), { optional: true });
       })
-      .run(stubPathProviderFactory(), paramProviderFactory, stubPhpProviderFactory());
+      .run(stubPathsFactory(), promptsIOFactory, {});
 
     expect(results).toStrictEqual([
       'Optional runs',
@@ -291,7 +291,7 @@ describe('Step Manager Execution', function () {
             exposedName: 'something else',
           },
         ])
-        .run(stubPathProviderFactory(), paramProviderFactory, stubPhpProviderFactory());
+        .run(stubPathsFactory(), promptsIOFactory, {});
 
       expect(results).toStrictEqual([
         'Generate Model',
@@ -332,7 +332,7 @@ describe('Step Manager Execution', function () {
               },
             ]);
         })
-        .run(stubPathProviderFactory(), paramProviderFactory, stubPhpProviderFactory());
+        .run(stubPathsFactory(), promptsIOFactory, {});
 
       expect(results).toStrictEqual([
         'Generate Model',
@@ -376,7 +376,7 @@ describe('Step Manager Execution', function () {
           dontRunIfFalsy: false,
         },
       ])
-      .run(stubPathProviderFactory(), paramProviderFactory, stubPhpProviderFactory());
+      .run(stubPathsFactory(), promptsIOFactory, {});
 
     expect(results).toStrictEqual([
       'Generate Model',

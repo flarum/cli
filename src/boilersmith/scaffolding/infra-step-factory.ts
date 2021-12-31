@@ -1,18 +1,17 @@
 import { Store } from 'mem-fs';
-import { ParamProvider } from 'boilersmith/param-provider';
-import { PathProvider } from '../path-provider';
-import { PhpProvider } from '../../provider/php-provider';
+import { IO } from 'boilersmith/io';
+import { Paths } from '../paths';
 import { Step } from '../step-manager';
 import { applyModule, Module, ModuleStatusCache, promptModulesEnabled, setModuleValue } from './module';
 import { promptParamValues, TemplateParam } from './template-param';
 
-export function infraStepFactory(
+export function infraStepFactory<Providers extends {} = {}>(
   scaffoldDir: string,
   moduleName: string,
   modules: Module[],
   templateParams: TemplateParam<unknown>[],
   moduleStatusCache?: ModuleStatusCache
-): Step {
+): Step<Providers> {
   const module = modules.find(m => m.name === moduleName);
   if (!module) {
     throw new Error(`Module ${moduleName} not found`);
@@ -23,14 +22,14 @@ export function infraStepFactory(
 
     composable: true,
 
-    async run(fs: Store, pathProvider: PathProvider, paramProvider: ParamProvider, _phpProvider: PhpProvider): Promise<Store> {
-      const paramVals = await promptParamValues(templateParams, pathProvider, paramProvider);
-      const modulesEnabled = await promptModulesEnabled(modules, paramProvider);
+    async run(fs: Store, paths: Paths, io: IO, _providers: Providers): Promise<Store> {
+      const paramVals = await promptParamValues(templateParams, paths, io);
+      const modulesEnabled = await promptModulesEnabled(modules, io);
 
-      applyModule(module, modulesEnabled, paramVals, scaffoldDir, fs, pathProvider, false);
+      applyModule(module, modulesEnabled, paramVals, scaffoldDir, fs, paths, false);
 
       if (moduleStatusCache) {
-        setModuleValue(module, true, fs, pathProvider, moduleStatusCache);
+        setModuleValue(module, true, fs, paths, moduleStatusCache);
       }
 
       return fs;
@@ -38,7 +37,7 @@ export function infraStepFactory(
 
     exposes: [],
 
-    getExposed(_pathProvider: PathProvider, _paramProvider: ParamProvider): Record<string, unknown> {
+    getExposed(_paths: Paths, _paramProvider: IO): Record<string, unknown> {
       return {};
     },
   };

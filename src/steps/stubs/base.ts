@@ -1,12 +1,12 @@
 import pick from 'pick-deep';
 import { Store } from 'mem-fs';
 import { create, Editor } from 'mem-fs-editor';
-import { ParamDef, ParamProvider } from 'boilersmith/param-provider';
-import { PathProvider } from 'boilersmith/path-provider';
-import { PhpProvider } from '../../provider/php-provider';
+import { ParamDef, IO } from 'boilersmith/io';
+import { Paths } from 'boilersmith/paths';
 import { Step } from 'boilersmith/step-manager';
 import { ComposerJsonSchema, ExtensionMetadata, extensionMetadata } from '../../utils/extension-metadata';
 import { cloneAndFill } from '../../utils/clone-and-fill';
+import { FlarumProviders } from '../../providers';
 
 interface UserProvidedParam extends Omit<ParamDef, 'type'> {
   type: string;
@@ -37,7 +37,7 @@ export interface StubGenerationSchema {
   params: UserProvidedParam[];
 }
 
-export abstract class BaseStubStep implements Step {
+export abstract class BaseStubStep implements Step<FlarumProviders> {
   abstract type: string;
 
   protected abstract defaultRoot: string;
@@ -62,25 +62,23 @@ export abstract class BaseStubStep implements Step {
 
   protected subdir !: string;
 
-  async run(fs: Store, pathProvider: PathProvider, paramProvider: ParamProvider, _phpProvider: PhpProvider): Promise<Store> {
+  async run(fs: Store, paths: Paths, io: IO, providers: FlarumProviders): Promise<Store> {
     const fsEditor = create(fs);
 
-    this.params = await this.compileParams(fsEditor, pathProvider, paramProvider);
+    this.params = await this.compileParams(fsEditor, paths, io);
 
-    const newFileName = await this.getFileName(fs, pathProvider, paramProvider);
-    const newFilePath = pathProvider.ext(this.schema.root || this.defaultRoot, this.subdir, newFileName);
+    const newFileName = await this.getFileName(fs, paths, io);
+    const newFilePath = paths.package(this.schema.root || this.defaultRoot, this.subdir, newFileName);
     const stub = cloneAndFill(this.schema.sourceFile, this.params as Record<string, string>);
-
-    fsEditor.copyTpl(pathProvider.boilerplate('stubs', stub), newFilePath, this.params);
 
     return fs;
   }
 
-  getExposed(_pathProvider: PathProvider, _paramProvider: ParamProvider): Record<string, unknown> {
+  getExposed(_paths: Paths, _paramProvider: IO): Record<string, unknown> {
     return pick(this.params, this.exposes) as BaseStubStep['params'];
   }
 
-  protected async precompileParams(composerJsonContents: ExtensionMetadata, _fsEditor: Editor, _pathProvider: PathProvider, _paramProvider: ParamProvider): Promise<Record<string, unknown>> {
+  protected async precompileParams(composerJsonContents: ExtensionMetadata, _fsEditor: Editor, _paths: Paths, _paramProvider: IO): Promise<Record<string, unknown>> {
     const params: Record<string, string> = {
       extensionId: composerJsonContents.extensionId,
     };
@@ -88,30 +86,30 @@ export abstract class BaseStubStep implements Step {
     return params;
   }
 
-  protected async compileParams(fsEditor: Editor, pathProvider: PathProvider, paramProvider: ParamProvider): Promise<Record<string, unknown>> {
-    const composerJsonContents = this.composerJsonContents(fsEditor, pathProvider);
-    const params: Record<string, unknown> = await this.precompileParams(composerJsonContents, fsEditor, pathProvider, paramProvider);
+  protected async compileParams(fsEditor: Editor, paths: Paths, io: IO): Promise<Record<string, unknown>> {
+    const composerJsonContents = this.composerJsonContents(fsEditor, paths);
+    const params: Record<string, unknown> = await this.precompileParams(composerJsonContents, fsEditor, paths, io);
 
     const paramDefs = this.schema.params.filter(param =>
       !this.implicitParams.includes(param.name as string) && !Object.keys(params).includes(param.name as string));
 
     for (const paramDef of paramDefs) {
       // eslint-disable-next-line no-await-in-loop
-      params[paramDef.name as string] = await paramProvider.get(paramDef as ParamDef);
+      params[paramDef.name as string] = await io.getParam(paramDef as ParamDef);
     }
 
     for (const implicitParam of this.implicitParams) {
-      if (!params[implicitParam] && paramProvider.has(implicitParam)) {
-        params[implicitParam] = paramProvider.cached()[implicitParam] as string;
+      if (!params[implicitParam] && io.hasCached(implicitParam)) {
+        params[implicitParam] = io.cached()[implicitParam] as string;
       }
     }
 
     return params;
   }
 
-  protected abstract getFileName(_fs: Store, _pathProvider: PathProvider, paramProvider: ParamProvider): Promise<string>;
+  protected abstract getFileName(_fs: Store, _paths: Paths, io: IO): Promise<string>;
 
-  protected composerJsonContents(fsEditor: Editor, pathProvider: PathProvider): ExtensionMetadata {
-    return extensionMetadata(fsEditor.readJSON(pathProvider.ext('composer.json')) as ComposerJsonSchema);
+  protected composerJsonContents(fsEditor: Editor, paths: Paths): ExtensionMetadata {
+    return extensionMetadata(fsEditor.readJSON(paths.package('composer.json')) as ComposerJsonSchema);
   }
 }

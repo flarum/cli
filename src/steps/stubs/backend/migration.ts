@@ -1,8 +1,8 @@
 import { readdirSync } from 'node:fs';
 import { Store } from 'mem-fs';
 import { Editor } from 'mem-fs-editor';
-import { ParamProvider } from 'boilersmith/param-provider';
-import { PathProvider } from 'boilersmith/path-provider';
+import { IO } from 'boilersmith/io';
+import { Paths } from 'boilersmith/paths';
 import { Validator } from '../../../utils/validation';
 import { getNextMigrationName } from '../../../utils/migration';
 import { BasePhpStubStep } from '../php-base';
@@ -25,8 +25,8 @@ export class GenerateMigrationStub extends BasePhpStubStep {
     ],
   }
 
-  protected async compileParams(fsEditor: Editor, pathProvider: PathProvider, paramProvider: ParamProvider): Promise<Record<string, unknown>> {
-    const params = await super.compileParams(fsEditor, pathProvider, paramProvider);
+  protected async compileParams(fsEditor: Editor, paths: Paths, io: IO): Promise<Record<string, unknown>> {
+    const params = await super.compileParams(fsEditor, paths, io);
 
     const regex = new RegExp(/^create_([\dA-z]+)_table$/);
 
@@ -37,15 +37,15 @@ export class GenerateMigrationStub extends BasePhpStubStep {
     return params;
   }
 
-  protected async getFileName(fs: Store, pathProvider: PathProvider, _paramProvider: ParamProvider): Promise<string> {
+  protected async getFileName(fs: Store, paths: Paths, _paramProvider: IO): Promise<string> {
     let persistedMigrations: string[];
     try {
-      persistedMigrations = readdirSync(pathProvider.ext('migrations'));
+      persistedMigrations = readdirSync(paths.package('migrations'));
     } catch {
       persistedMigrations = [];
     }
 
-    const memMigrations: string[] = fs.all().map(f => f.path).filter(p => p.startsWith(pathProvider.ext('migrations')));
+    const memMigrations: string[] = fs.all().map(f => f.path).filter(p => p.startsWith(paths.package('migrations')));
 
     return getNextMigrationName([...persistedMigrations, ...memMigrations], this.params.name as string) + '.php';
   }

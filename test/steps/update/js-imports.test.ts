@@ -2,7 +2,7 @@ import { create as createMemFsEditor } from 'mem-fs-editor';
 import { UpdateJSImports } from '../../../src/steps/update/js-imports';
 import { resolve } from 'node:path';
 import { runStep } from '../../boilersmith/utils';
-import { PathProvider } from 'boilersmith/path-provider';
+import { Paths } from 'boilersmith/paths';
 
 const files = [
   // admin
@@ -59,14 +59,14 @@ import X from 'flarum/forum/components/DiscussionListItem';`;
 
 describe('Test JS import rewrite', function () {
   test('Rewrites imports properly', async function () {
-    const { fs } = await runStep(new UpdateJSImports(), [], {}, (pathProvider: PathProvider) => {
+    const { fs } = await runStep(new UpdateJSImports(), {}, [], {}, (paths: Paths) => {
       const initialFiles: Record<string, string> = {};
 
-      initialFiles[pathProvider.ext('/ext/js/src/forum/something.js')] = fileToRewrite;
+      initialFiles[paths.package('/ext/js/src/forum/something.js')] = fileToRewrite;
 
       // JS import step will rewrite based on existing vendor files, so we need to make those.
       for (const path of files) {
-        initialFiles[resolve(pathProvider.ext('vendor/flarum/core/js/src'), path)] = 'Something';
+        initialFiles[resolve(paths.package('vendor/flarum/core/js/src'), path)] = 'Something';
       }
 
       return initialFiles;

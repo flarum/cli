@@ -1,7 +1,7 @@
 /* eslint-disable no-template-curly-in-string */
 import chalk from 'chalk';
 import { Validator } from '../../utils/validation';
-import { ParamTypeType, ExpressionType } from '../../provider/php-provider';
+import { ParamTypeType, ExpressionType } from '../../providers/php-provider';
 import { BaseExtenderStep, ExtenderGenerationSchema } from './base';
 
 export class GenerateApiSerializerAttributesExtender extends BaseExtenderStep {

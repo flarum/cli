@@ -1,13 +1,12 @@
 import { Store } from 'mem-fs';
-import { ParamProvider } from 'boilersmith/param-provider';
-import { PathProvider } from '../path-provider';
-import { PhpProvider } from '../../provider/php-provider';
+import { IO } from 'boilersmith/io';
+import { Paths } from '../paths';
 import { Step } from '../step-manager';
 import { renameKeys } from '../utils/rename-keys';
 import { applyModule, Module, ModuleStatusCache, promptModulesEnabled, setModuleValue } from './module';
 import { promptParamValues, TemplateParam } from './template-param';
 
-export function initStepFactory(scaffoldDir: string, modules: Module[], templateParams: TemplateParam<unknown>[], moduleStatusCache?: ModuleStatusCache): Step {
+export function initStepFactory<Providers extends {} = {}>(scaffoldDir: string, modules: Module[], templateParams: TemplateParam<unknown>[], moduleStatusCache?: ModuleStatusCache): Step<Providers> {
   let modulesEnabled: Record<string, boolean>;
 
   return {
@@ -15,19 +14,19 @@ export function initStepFactory(scaffoldDir: string, modules: Module[], template
 
     composable: true,
 
-    async run(fs: Store, pathProvider: PathProvider, paramProvider: ParamProvider, _phpProvider: PhpProvider): Promise<Store> {
-      const paramVals = await promptParamValues(templateParams, pathProvider, paramProvider);
-      modulesEnabled = await promptModulesEnabled(modules, paramProvider);
+    async run<Providers>(fs: Store, paths: Paths, io: IO, _providers: Providers): Promise<Store> {
+      const paramVals = await promptParamValues(templateParams, paths, io);
+      modulesEnabled = await promptModulesEnabled(modules, io);
 
       for (const m of modules) {
         if (modulesEnabled[m.name]) {
-          applyModule(m, modulesEnabled, paramVals, scaffoldDir, fs, pathProvider);
+          applyModule(m, modulesEnabled, paramVals, scaffoldDir, fs, paths);
         }
       }
 
       if (moduleStatusCache) {
         modules.forEach(m => {
-          setModuleValue(m, modulesEnabled[m.name], fs, pathProvider, moduleStatusCache);
+          setModuleValue(m, modulesEnabled[m.name], fs, paths, moduleStatusCache);
         });
       }
 
@@ -36,7 +35,7 @@ export function initStepFactory(scaffoldDir: string, modules: Module[], template
 
     exposes: modules.map((m) => `modules.${m.name}`),
 
-    getExposed(_pathProvider: PathProvider, _paramProvider: ParamProvider): Record<string, unknown> {
+    getExposed(_paths: Paths, _paramProvider: IO): Record<string, unknown> {
       return renameKeys(modulesEnabled, k => `modules.${k}`);
     },
   };

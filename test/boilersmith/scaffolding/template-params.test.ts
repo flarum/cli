@@ -2,8 +2,8 @@ import { prompt } from 'prompts';
 import { create as createStore, Store } from 'mem-fs';
 import { create } from 'mem-fs-editor';
 import { resolve } from 'path';
-import { paramProviderFactory } from 'boilersmith/param-provider';
-import { PathFsProvider, PathProvider } from 'boilersmith/path-provider';
+import { promptsIOFactory } from 'boilersmith/io';
+import { NodePaths, Paths } from 'boilersmith/paths';
 import { currParamValues, getParamName, promptParamValues, TemplateParam } from 'boilersmith/scaffolding/template-param';
 
 describe('Template Param Utils', function() {
@@ -14,9 +14,9 @@ describe('Template Param Utils', function() {
                 type: 'text',
                 message: 'Param 1'
             },
-            getCurrVal: async (fs: Store, pathProvider: PathProvider) => {
+            getCurrVal: async (fs: Store, paths: Paths) => {
                 const editor = create(fs);
-                return editor.read(resolve(pathProvider.ext(), 'sample.tpl'))
+                return editor.read(resolve(paths.package(), 'sample.tpl'))
             }
         },
         {
@@ -30,12 +30,12 @@ describe('Template Param Utils', function() {
         {
             name: 'param3',
             uses: ['param1', 'param2'],
-            compute: (_path: PathProvider, param1: string, param2: number) => param1.slice(0, param2)
+            compute: (_path: Paths, param1: string, param2: number) => param1.slice(0, param2)
         }
     ];
 
     it('currParamValues works', async function() {
-        expect(await currParamValues(templateParams, createStore(), new PathFsProvider({ext: resolve(__dirname, '../fixtures')}))).toStrictEqual({
+        expect(await currParamValues(templateParams, createStore(), new NodePaths({package: resolve(__dirname, '../fixtures')}))).toStrictEqual({
             param1: `Hello world!\n\n<%= requiredMessage %>`,
             param2: 8,
             param3: 'Hello wo'
@@ -45,7 +45,7 @@ describe('Template Param Utils', function() {
     it('promptParamValues works', async function() {   
         prompt.inject(['Test', 3]);
 
-        expect(await promptParamValues(templateParams, new PathFsProvider({ext: ''}), paramProviderFactory({}))).toStrictEqual({
+        expect(await promptParamValues(templateParams, new NodePaths({package: ''}), promptsIOFactory({}))).toStrictEqual({
             param1: 'Test',
             param2: 3,
             param3: 'Tes'

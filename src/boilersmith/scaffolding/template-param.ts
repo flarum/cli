@@ -1,6 +1,6 @@
 import { Store } from 'mem-fs';
-import { ParamDef, ParamProvider } from 'boilersmith/param-provider';
-import { PathProvider } from '../path-provider';
+import { ParamDef, IO } from 'boilersmith/io';
+import { Paths } from '../paths';
 
 interface PromptTemplateParam<T> {
   /**
@@ -9,7 +9,7 @@ interface PromptTemplateParam<T> {
    */
   prompt: ParamDef;
 
-  getCurrVal: (fs: Store, pathProvider: PathProvider) => Promise<T>;
+  getCurrVal: (fs: Store, paths: Paths) => Promise<T>;
 }
 
 interface ComputedTemplateParam<T> {
@@ -17,7 +17,7 @@ interface ComputedTemplateParam<T> {
 
   uses: string[];
 
-  compute: (pathProvider: PathProvider, ...args: any[]) => T;
+  compute: (paths: Paths, ...args: any[]) => T;
 }
 
 export type TemplateParam<T> = PromptTemplateParam<T> | ComputedTemplateParam<T>;
@@ -34,7 +34,7 @@ export function getParamName<T>(param: TemplateParam<T>) {
   return isComputedParam(param) ? param.name : param.prompt.name;
 }
 
-async function withComputedParamValues(params: TemplateParam<unknown>[], pathProvider: PathProvider, paramVals: Record<string, unknown>): Promise<Record<string, unknown>> {
+async function withComputedParamValues(params: TemplateParam<unknown>[], paths: Paths, paramVals: Record<string, unknown>): Promise<Record<string, unknown>> {
   const vals = { ...paramVals };
 
   const computedParams = params.filter(isComputedParam);
@@ -42,30 +42,30 @@ async function withComputedParamValues(params: TemplateParam<unknown>[], pathPro
   for (const p of computedParams) {
     const depValues = p.uses.map((key) => vals[key]);
 
-    vals[p.name] = await p.compute(pathProvider, ...depValues);
+    vals[p.name] = await p.compute(paths, ...depValues);
   }
 
   return vals;
 }
 
-export async function promptParamValues(params: TemplateParam<unknown>[], pathProvider: PathProvider, paramProvider: ParamProvider): Promise<Record<string, unknown>> {
+export async function promptParamValues(params: TemplateParam<unknown>[], paths: Paths, io: IO): Promise<Record<string, unknown>> {
   const promptParams = params.filter(isPromptParam);
   const paramVals: Record<string, unknown> = {};
 
   for (const p of promptParams) {
-    paramVals[p.prompt.name] = await paramProvider.get(p.prompt);
+    paramVals[p.prompt.name] = await io.getParam(p.prompt);
   }
 
-  return withComputedParamValues(params, pathProvider, paramVals);
+  return withComputedParamValues(params, paths, paramVals);
 }
 
-export async function currParamValues(params: TemplateParam<unknown>[], fs: Store, pathProvider: PathProvider) {
+export async function currParamValues(params: TemplateParam<unknown>[], fs: Store, paths: Paths) {
   const promptParams = params.filter(isPromptParam);
   const paramVals: Record<string, unknown> = {};
 
   for (const p of promptParams) {
-    paramVals[p.prompt.name] = await p.getCurrVal(fs, pathProvider);
+    paramVals[p.prompt.name] = await p.getCurrVal(fs, paths);
   }
 
-  return withComputedParamValues(params, pathProvider, paramVals);
+  return withComputedParamValues(params, paths, paramVals);
 }

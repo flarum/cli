@@ -5,10 +5,10 @@ import prompts from 'prompts';
 import globby from 'globby';
 import { execSync } from 'node:child_process';
 import { existsSync, unlinkSync } from 'node:fs';
-import { paramProviderFactory, PROMPTS_OPTIONS } from 'boilersmith/param-provider';
+import { promptsIOFactory, PROMPTS_OPTIONS } from 'boilersmith/io';
 import { StepManager } from 'boilersmith/step-manager';
-import { PathFsProvider } from 'boilersmith/path-provider';
-import { PhpSubsystemProvider } from './provider/php-provider';
+import { NodePaths } from 'boilersmith/paths';
+import { PhpSubsystemProvider } from './providers/php-provider';
 import chalk from 'chalk';
 
 export default abstract class BaseCommand extends Command {
@@ -47,15 +47,15 @@ export default abstract class BaseCommand extends Command {
 
     await this.additionalPreRunChecks(extRoot);
 
-    const pathProvider = new PathFsProvider({
+    const paths = new NodePaths({
       requestedDir: path,
-      ext: extRoot,
+      package: extRoot,
     });
 
     const phpProvider = new PhpSubsystemProvider(resolve(__dirname, '../php-subsystem/index.php'));
 
     const completed = await this.steps(new StepManager())
-      .run(pathProvider, paramProviderFactory, phpProvider);
+      .run(paths, promptsIOFactory, phpProvider);
 
     this.log('\n\n');
     this.log(chalk.bold(chalk.underline(chalk.green('Success! The following steps were completed:'))));

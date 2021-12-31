@@ -192,7 +192,7 @@ For example:
         },
       ]);
   })
-  .run(stubPathProviderFactory(), paramProviderFactory, stubPhpProviderFactory());
+  .run(stubPathsFactory(), promptsIOFactory, stubPhpProviderFactory());
 ```
 
 

@@ -3,9 +3,8 @@ import chalk from 'chalk';
 import { Store } from 'mem-fs';
 import { create } from 'mem-fs-editor';
 import licenseList from 'spdx-license-list/simple';
-import { ParamProvider } from 'boilersmith/param-provider';
-import { PathProvider } from 'boilersmith/path-provider';
-import { PhpProvider } from '../../provider/php-provider';
+import { IO } from 'boilersmith/io';
+import { Paths } from 'boilersmith/paths';
 import { Step } from 'boilersmith/step-manager';
 import { extensionId, extensionMetadata, ExtensionMetadata } from '../../utils/extension-metadata';
 
@@ -14,22 +13,22 @@ export class ExtensionSkeleton implements Step {
 
   composable = true;
 
-  async run(fs: Store, pathProvider: PathProvider, paramProvider: ParamProvider, _phpProvider: PhpProvider): Promise<Store> {
+  async run(fs: Store, paths: Paths, io: IO, _providers: {}): Promise<Store> {
     const fsEditor = create(fs);
 
-    const packageName = await paramProvider.get<string>({
+    const packageName = await io.getParam<string>({
       name: 'packageName',
       type: 'text',
       message: `Package ${chalk.dim('(vendor/extension-name)')}`,
       validate: s => /^([\dA-Za-z-]{2,})\/([\dA-Za-z-]{2,})$/.test(s.trim()) || 'Invalid package name format',
       format: s => s.toLowerCase(),
     });
-    const packageDescription = await paramProvider.get<string>({
+    const packageDescription = await io.getParam<string>({
       name: 'packageDescription',
       type: 'text',
       message: 'Package description',
     });
-    const packageNamespace = await paramProvider.get<string>({
+    const packageNamespace = await io.getParam<string>({
       name: 'packageNamespace',
       type: 'text',
       message: `Package namespace ${chalk.dim('(Vendor\\ExtensionName)')}`,
@@ -41,18 +40,18 @@ export class ExtensionSkeleton implements Step {
           .map(s => s[0].toUpperCase() + s.slice(1))
           .join('\\'),
     });
-    const authorName = await paramProvider.get<string>({
+    const authorName = await io.getParam<string>({
       name: 'authorName',
       type: 'text',
       message: 'Author name',
     });
-    const authorEmail = await paramProvider.get<string>({
+    const authorEmail = await io.getParam<string>({
       name: 'authorEmail',
       type: 'text',
       message: 'Author email',
       validate: s => !s || /^[\w!#$%&*+./=?^`{|}~’-]+@[\dA-Za-z-]+(?:\.[\dA-Za-z-]+)*$/.test(s) || 'Invalid email format',
     });
-    const extensionName = await paramProvider.get<string>({
+    const extensionName = await io.getParam<string>({
       name: 'extensionName',
       type: 'text',
       message: 'Extension name',
@@ -63,49 +62,49 @@ export class ExtensionSkeleton implements Step {
           .map((s: string) => (s.length > 3 ? s[0].toUpperCase() + s.slice(1) : s))
           .join(' '),
     });
-    const licenseType = await paramProvider.get<string>({
+    const licenseType = await io.getParam<string>({
       name: 'license',
       type: 'autocomplete',
       message: 'License',
       choices: [...licenseList as Set<string>].map(e => ({ title: e, value: e })),
     });
-    const admin = await paramProvider.get<boolean>({
+    const admin = await io.getParam<boolean>({
       name: 'admin',
       type: 'confirm',
       message: 'Admin CSS & JS',
       initial: true,
     });
-    const forum = await paramProvider.get<boolean>({
+    const forum = await io.getParam<boolean>({
       name: 'forum',
       type: 'confirm',
       message: 'Forum CSS & JS',
       initial: true,
     });
-    const useLocale = await paramProvider.get<boolean>({
+    const useLocale = await io.getParam<boolean>({
       name: 'useLocale',
       type: 'confirm',
       message: 'Locale',
       initial: true,
     });
-    const useJs = await paramProvider.get<boolean>({
+    const useJs = await io.getParam<boolean>({
       name: 'useJs',
       type: () => (admin || forum) && 'confirm',
       message: 'Javascript',
       initial: true,
     });
-    const useCss = await paramProvider.get<boolean>({
+    const useCss = await io.getParam<boolean>({
       name: 'useCss',
       type: () => (admin || forum) && 'confirm',
       message: 'CSS',
       initial: true,
     });
-    const useActionsCi = await paramProvider.get<boolean>({
+    const useActionsCi = await io.getParam<boolean>({
       name: 'useActionsCi',
       type: 'confirm',
       message: `Use GitHub Actions CI ${chalk.dim('(automatically builds JS, checks JS formatting and runs backend tests)')}`,
       initial: true,
     });
-    const mainGitBranch = await paramProvider.get<string>({
+    const mainGitBranch = await io.getParam<string>({
       name: 'mainGitBranch',
       type: () => (useActionsCi && 'text'),
       message: `Main git branch ${chalk.dim('(JS will automatically build when changes are pushed to GitHub on this branch)')}`,
@@ -135,38 +134,36 @@ export class ExtensionSkeleton implements Step {
       frontend_directory: './js',
     });
 
-    fsEditor.copyTpl(pathProvider.boilerplate('skeleton/extension'), pathProvider.ext(''), tpl, undefined, { globOptions: { dot: true } });
-
     const license = await require(`spdx-license-list/licenses/${licenseType}`);
-    fsEditor.write(pathProvider.ext('LICENSE.md'), license.licenseText);
+    fsEditor.write(paths.package('LICENSE.md'), license.licenseText);
 
-    if (!useLocale) fsEditor.delete(pathProvider.ext('locale'));
+    if (!useLocale) fsEditor.delete(paths.package('locale'));
     if (!useJs) {
-      fsEditor.delete(pathProvider.ext('js/.prettierrc.json'));
-      fsEditor.delete(pathProvider.ext('js'));
+      fsEditor.delete(paths.package('js/.prettierrc.json'));
+      fsEditor.delete(paths.package('js'));
     }
 
-    if (!useCss) fsEditor.delete(pathProvider.ext('less'));
+    if (!useCss) fsEditor.delete(paths.package('less'));
     if (!admin) {
-      fsEditor.delete(pathProvider.ext('less/admin.less'));
-      fsEditor.delete(pathProvider.ext('js/src/admin'));
-      fsEditor.delete(pathProvider.ext('js/admin.js'));
+      fsEditor.delete(paths.package('less/admin.less'));
+      fsEditor.delete(paths.package('js/src/admin'));
+      fsEditor.delete(paths.package('js/admin.js'));
     }
 
     if (!forum) {
-      fsEditor.delete(pathProvider.ext('less/forum.less'));
-      fsEditor.delete(pathProvider.ext('js/src/forum'));
-      fsEditor.delete(pathProvider.ext('js/forum.js'));
+      fsEditor.delete(paths.package('less/forum.less'));
+      fsEditor.delete(paths.package('js/src/forum'));
+      fsEditor.delete(paths.package('js/forum.js'));
     }
 
-    if (!useActionsCi) fsEditor.delete(pathProvider.ext('.github/workflows'));
+    if (!useActionsCi) fsEditor.delete(paths.package('.github/workflows'));
 
     return fs;
   }
 
   exposes = ['useJs'];
 
-  getExposed(_pathProvider: PathProvider, paramProvider: ParamProvider): Record<string, unknown> {
-    return pick(paramProvider.cached(), this.exposes) as ReturnType<typeof paramProvider.cached>;
+  getExposed(_paths: Paths, io: IO): Record<string, unknown> {
+    return pick(io.cached(), this.exposes) as ReturnType<typeof io.cached>;
   }
 }

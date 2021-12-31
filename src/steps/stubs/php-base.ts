@@ -1,8 +1,8 @@
 import { Store } from 'mem-fs';
 import { Editor } from 'mem-fs-editor';
 import { BaseStubStep } from './base';
-import { ParamDef, ParamProvider } from 'boilersmith/param-provider';
-import { PathProvider } from 'boilersmith/path-provider';
+import { ParamDef, IO } from 'boilersmith/io';
+import { Paths } from 'boilersmith/paths';
 import { ExtensionMetadata } from '../../utils/extension-metadata';
 
 export abstract class BasePhpStubStep extends BaseStubStep {
@@ -18,10 +18,10 @@ export abstract class BasePhpStubStep extends BaseStubStep {
 
   protected phpClassParams: string[] = [];
 
-  protected async precompileParams(composerJsonContents: ExtensionMetadata, fsEditor: Editor, pathProvider: PathProvider, paramProvider: ParamProvider): Promise<Record<string, unknown>> {
+  protected async precompileParams(composerJsonContents: ExtensionMetadata, fsEditor: Editor, paths: Paths, io: IO): Promise<Record<string, unknown>> {
     const params: Record<string, unknown> = {
-      ...await super.precompileParams(composerJsonContents, fsEditor, pathProvider, paramProvider),
-      classNamespace: this.stubNamespace(composerJsonContents, pathProvider),
+      ...await super.precompileParams(composerJsonContents, fsEditor, paths, io),
+      classNamespace: this.stubNamespace(composerJsonContents, paths),
     };
 
     let paramDefs = this.schema.params.filter(param => !this.implicitParams.includes(param.name as string));
@@ -30,7 +30,7 @@ export abstract class BasePhpStubStep extends BaseStubStep {
     const classNameParam = paramDefs.find(param => param.name === 'className');
 
     if (classNameParam) {
-      params.className = await paramProvider.get(classNameParam as ParamDef);
+      params.className = await io.getParam(classNameParam as ParamDef);
       params.class = `${params.classNamespace}\\${params.className}`;
       paramDefs = paramDefs.filter(param => param.name !== 'class' && param.name !== 'className');
     } else {
@@ -45,7 +45,7 @@ export abstract class BasePhpStubStep extends BaseStubStep {
       }
 
       // eslint-disable-next-line no-await-in-loop
-      params[classParam] = await paramProvider.get(paramDef as ParamDef);
+      params[classParam] = await io.getParam(paramDef as ParamDef);
       params[`${classParam}Name`] = (params[classParam] as string).split('\\').pop();
       paramDefs = paramDefs.filter(param => param.name !== classParam && param.name !== `${classParam}Name`);
     }
@@ -53,14 +53,14 @@ export abstract class BasePhpStubStep extends BaseStubStep {
     return params;
   }
 
-  protected async getFileName(_fs: Store, _pathProvider: PathProvider, paramProvider: ParamProvider): Promise<string> {
-    return await paramProvider.get<string>({ name: 'className', type: 'text' }) + '.php';
+  protected async getFileName(_fs: Store, _paths: Paths, io: IO): Promise<string> {
+    return await io.getParam<string>({ name: 'className', type: 'text' }) + '.php';
   }
 
-  protected stubNamespace(composerJsonContents: ExtensionMetadata, pathProvider: PathProvider): string {
+  protected stubNamespace(composerJsonContents: ExtensionMetadata, paths: Paths): string {
     const packageNamespace = composerJsonContents.packageNamespace;
 
-    const subdir = this.schema.forceRecommendedSubdir || pathProvider.requestedDir() === null ? this.schema.recommendedSubdir.replace('\\', '.').replace('/', '.') : pathProvider.requestedDir()!.slice(`${pathProvider.ext((this.schema.root || this.defaultRoot).replace('./', ''))}/`.length);
+    const subdir = this.schema.forceRecommendedSubdir || paths.requestedDir() === null ? this.schema.recommendedSubdir.replace('\\', '.').replace('/', '.') : paths.requestedDir()!.slice(`${paths.package((this.schema.root || this.defaultRoot).replace('./', ''))}/`.length);
 
     this.subdir = subdir.replace('.', '/');
 

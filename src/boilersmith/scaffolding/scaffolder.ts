@@ -1,7 +1,7 @@
 import globby from 'globby';
 import { Store } from 'mem-fs';
 import { resolve } from 'path';
-import { PathProvider } from '../path-provider';
+import { Paths } from '../paths';
 import { Step } from '../step-manager';
 import { jsonLeafPaths } from 'boilersmith/utils/json-leaf-paths';
 import { readTpl } from 'boilersmith/utils/read-tpl';
@@ -52,21 +52,21 @@ export class Scaffolder {
     return this;
   }
 
-  genInitStep(): Step {
+  genInitStep<Providers extends {} = {}>(): Step<Providers> {
     return initStepFactory(this.scaffoldDir, this.modules, this.templateParams, this.moduleStatusCache);
   }
 
 
-  genInfraStep(module: string): Step {
+  genInfraStep<Providers extends {} = {}>(module: string): Step<Providers> {
     return infraStepFactory(this.scaffoldDir, module, this.modules, this.templateParams, this.moduleStatusCache);
   }
 
-  async templateParamVals(fs: Store, pathProvider: PathProvider) {
-    return currParamValues(this.templateParams, fs, pathProvider);
+  async templateParamVals(fs: Store, paths: Paths) {
+    return currParamValues(this.templateParams, fs, paths);
   }
 
-  async modulesEnabled(fs: Store, pathProvider: PathProvider) {
-    return currModulesEnabled(this.modules, fs, pathProvider, this.moduleStatusCache)
+  async modulesEnabled(fs: Store, paths: Paths) {
+    return currModulesEnabled(this.modules, fs, paths, this.moduleStatusCache)
   }
 
   /**

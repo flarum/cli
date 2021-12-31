@@ -1,8 +1,8 @@
 import { Store } from 'mem-fs';
 import { Editor } from 'mem-fs-editor';
 import { BaseStubStep } from './base';
-import { ParamDef, ParamProvider } from 'boilersmith/param-provider';
-import { PathProvider } from 'boilersmith/path-provider';
+import { ParamDef, IO } from 'boilersmith/io';
+import { Paths } from 'boilersmith/paths';
 import { cloneAndFill } from '../../utils/clone-and-fill';
 import { ExtensionMetadata } from '../../utils/extension-metadata';
 
@@ -17,15 +17,15 @@ export abstract class BaseJsStubStep extends BaseStubStep {
     return [...super.implicitParams, 'classNamespace'];
   }
 
-  protected async precompileParams(composerJsonContents: ExtensionMetadata, fsEditor: Editor, pathProvider: PathProvider, paramProvider: ParamProvider): Promise<Record<string, unknown>> {
-    const params = await super.precompileParams(composerJsonContents, fsEditor, pathProvider, paramProvider);
+  protected async precompileParams(composerJsonContents: ExtensionMetadata, fsEditor: Editor, paths: Paths, io: IO): Promise<Record<string, unknown>> {
+    const params = await super.precompileParams(composerJsonContents, fsEditor, paths, io);
 
     const paramDefs = this.schema.params.filter(param => !this.implicitParams.includes(param.name as string));
 
-    this.subdir = this.schema.forceRecommendedSubdir || pathProvider.requestedDir() === null ? this.schema.recommendedSubdir : pathProvider.requestedDir()!.slice(`${pathProvider.ext('js/src')}/`.length);
+    this.subdir = this.schema.forceRecommendedSubdir || paths.requestedDir() === null ? this.schema.recommendedSubdir : paths.requestedDir()!.slice(`${paths.package('js/src')}/`.length);
 
-    params.frontend = await paramProvider.get(paramDefs.find(param => param.name === 'frontend') as ParamDef);
-    params.className = await paramProvider.get(paramDefs.find(param => param.name === 'className') as ParamDef);
+    params.frontend = await io.getParam(paramDefs.find(param => param.name === 'frontend') as ParamDef);
+    params.className = await io.getParam(paramDefs.find(param => param.name === 'className') as ParamDef);
 
     this.subdir = cloneAndFill(this.subdir, params as Record<string, string>);
 
@@ -34,7 +34,7 @@ export abstract class BaseJsStubStep extends BaseStubStep {
     return params;
   }
 
-  protected async getFileName(_fs: Store, _pathProvider: PathProvider, paramProvider: ParamProvider): Promise<string> {
-    return await paramProvider.get<string>({ name: 'className', type: 'text' }) + '.js';
+  protected async getFileName(_fs: Store, _paths: Paths, io: IO): Promise<string> {
+    return await io.getParam<string>({ name: 'className', type: 'text' }) + '.js';
   }
 }

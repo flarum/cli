@@ -1,11 +1,10 @@
 /* eslint-disable no-await-in-loop */
 import { create as createMemFs, Store } from 'mem-fs';
 import { create as createMemFsEditor } from 'mem-fs-editor';
-import { ParamProvider, ParamProviderFactory } from './param-provider';
-import { PathProvider } from './path-provider';
-import { PhpProvider } from '../provider/php-provider';
+import { IO, IOFactory } from './io';
+import { Paths } from './paths';
 
-export interface Step {
+export interface Step<Providers extends {} = {}> {
   /**
    * A short string describing what the step does.
    */
@@ -23,14 +22,14 @@ export interface Step {
    */
   exposes: string[];
 
-  run: (fs: Store, pathProvider: PathProvider, paramProvider: ParamProvider, phpProvider: PhpProvider) => Promise<Store>;
+  run: (fs: Store, paths: Paths, io: IO, providers: Providers) => Promise<Store>;
 
   /**
    * Return an object of exposed params.
    *
-   * The pathProvider and paramProvider will be the same objects provided to the `run` method.
+   * The paths and io will be the same objects provided to the `run` method.
    */
-  getExposed(pathProvider: PathProvider, paramProvider: ParamProvider): Record<string, unknown>;
+  getExposed(paths: Paths, io: IO): Record<string, unknown>;
 }
 
 interface ShouldRunConfig {
@@ -40,9 +39,9 @@ interface ShouldRunConfig {
 
 }
 
-interface StoredStep {
+interface StoredStep<Providers extends {} = {}> {
   name?: string;
-  step: Step;
+  step: Step<Providers>;
   shouldRun: ShouldRunConfig;
   dependencies: StepDependency[];
   predefinedParams: PredefinedParameters;
@@ -62,17 +61,17 @@ const formatDependencies = (strings: string[]) => strings
   .map(s => `"${s}"`)
   .join(', ');
 
-export class StepManager {
-  protected steps: Array<StoredStep | AtomicStepManager> = [];
+export class StepManager<Providers extends {} = {}> {
+  protected steps: Array<StoredStep<Providers> | AtomicStepManager<Providers>> = [];
 
-  protected namedSteps = new Map<string, StoredStep>();
+  protected namedSteps = new Map<string, StoredStep<Providers>>();
 
   protected exposedParams = new Map<string, Record<string, unknown>>();
 
   /**
    * A step is an incremental operation that updates the filesystem.
    */
-  step(step: Step, shouldRun: ShouldRunConfig = {}, dependencies: StepDependency[] = [], predefinedParams: PredefinedParameters = {}): this {
+  step(step: Step<Providers>, shouldRun: ShouldRunConfig = {}, dependencies: StepDependency[] = [], predefinedParams: PredefinedParameters = {}): this {
     this.validateDependencies(step, dependencies);
 
     this.steps = [...this.steps, { step, shouldRun, dependencies, predefinedParams }];
@@ -80,7 +79,7 @@ export class StepManager {
     return this;
   }
 
-  namedStep(name: string, step: Step, shouldRun: ShouldRunConfig = {}, dependencies: StepDependency[] = [], predefinedParams: PredefinedParameters = {}): this {
+  namedStep(name: string, step: Step<Providers>, shouldRun: ShouldRunConfig = {}, dependencies: StepDependency[] = [], predefinedParams: PredefinedParameters = {}): this {
     if (this.namedSteps.has(name)) {
       throw new Error(`Named steps must have unique names. A step with name "${name}" already exists.`);
     }
@@ -96,7 +95,7 @@ export class StepManager {
     return this;
   }
 
-  atomicGroup(callback: (stepManager: AtomicStepManager) => void): this {
+  atomicGroup(callback: (stepManager: AtomicStepManager<Providers>) => void): this {
     const atomicCollection = new AtomicStepManager(this.namedSteps, this.exposedParams);
 
     callback(atomicCollection);
@@ -106,7 +105,7 @@ export class StepManager {
     return this;
   }
 
-  protected validateDependencies(step: Step, dependencies: StepDependency[]): void {
+  protected validateDependencies(step: Step<Providers>, dependencies: StepDependency[]): void {
     const missingDependencySteps = dependencies
       .map(dep => dep.sourceStep)
       .filter(stepName => !this.namedSteps.has(stepName));
@@ -132,19 +131,19 @@ export class StepManager {
     }
   }
 
-  async run(pathProvider: PathProvider, paramProviderFactory: ParamProviderFactory, phpProvider: PhpProvider): Promise<string[]> {
+  async run(paths: Paths, promptsIOFactory: IOFactory, providers: Providers): Promise<string[]> {
     const stepNames: string[] = [];
 
     for (let i = 0; i < this.steps.length; i++) {
       const storedStep = this.steps[i];
 
       if (storedStep instanceof AtomicStepManager) {
-        const res = await storedStep.run(pathProvider, paramProviderFactory, phpProvider);
+        const res = await storedStep.run(paths, promptsIOFactory, providers);
         stepNames.push(...res);
       } else {
-        const shouldRun: boolean = await this.stepShouldRun(storedStep, paramProviderFactory);
+        const shouldRun: boolean = await this.stepShouldRun(storedStep, promptsIOFactory);
         if (!shouldRun) continue;
-        const fs = await this.runStep(storedStep, pathProvider, paramProviderFactory, phpProvider);
+        const fs = await this.runStep(storedStep, paths, promptsIOFactory, providers);
 
         await this.commit(fs);
 
@@ -155,7 +154,7 @@ export class StepManager {
     return stepNames;
   }
 
-  protected async stepShouldRun(storedStep: StoredStep, paramProviderFactory: ParamProviderFactory): Promise<boolean> {
+  protected async stepShouldRun(storedStep: StoredStep<Providers>, promptsIOFactory: IOFactory): Promise<boolean> {
     let allDependenciesRan = true;
     let noRequiredNonFalsyDependenciesAreFalsy = true;
 
@@ -172,7 +171,7 @@ export class StepManager {
 
     if (!storedStep.shouldRun.optional) return true;
 
-    const promptConfirm = await paramProviderFactory({ context: 'Confirm Step' }).get<boolean>({
+    const promptConfirm = await promptsIOFactory({ context: 'Confirm Step' }).getParam<boolean>({
       name: 'execute_step',
       message: storedStep.shouldRun.confirmationMessage || `Run step of type "${storedStep.step.type}"?`,
       initial: storedStep.shouldRun.default || false,
@@ -182,7 +181,7 @@ export class StepManager {
     return promptConfirm;
   }
 
-  protected async runStep(storedStep: StoredStep, pathProvider: PathProvider, paramProviderFactory: ParamProviderFactory, phpProvider: PhpProvider, fs: Store = createMemFs()): Promise<Store> {
+  protected async runStep(storedStep: StoredStep<Providers>, paths: Paths, promptsIOFactory: IOFactory, providers: Providers, fs: Store = createMemFs()): Promise<Store> {
     const initial: Record<string, unknown> = storedStep.dependencies.reduce((initial, dep) => {
       let depValue;
       depValue = dep.exposedName === '__succeeded' ? this.exposedParams.has(dep.sourceStep) : this.exposedParams.get(dep.sourceStep)![dep.exposedName];
@@ -196,12 +195,12 @@ export class StepManager {
       return initial;
     }, {} as Record<string, unknown>);
 
-    const paramProvider = paramProviderFactory({ ...initial, ...storedStep.predefinedParams });
+    const io = promptsIOFactory({ ...initial, ...storedStep.predefinedParams });
 
-    const newFs = await storedStep.step.run(fs, pathProvider, paramProvider, phpProvider);
+    const newFs = await storedStep.step.run(fs, paths, io, providers);
 
     if (storedStep.name) {
-      this.exposedParams.set(storedStep.name, storedStep.step.getExposed(pathProvider, paramProvider));
+      this.exposedParams.set(storedStep.name, storedStep.step.getExposed(paths, io));
     }
 
     return newFs;
@@ -220,14 +219,14 @@ export class StepManager {
   }
 }
 
-class AtomicStepManager extends StepManager {
-  constructor(parentNamedSteps: Map<string, StoredStep>, parentExposedParams: Map<string, Record<string, unknown>>) {
+class AtomicStepManager<Providers extends {} = {}> extends StepManager<Providers> {
+  constructor(parentNamedSteps: Map<string, StoredStep<Providers>>, parentExposedParams: Map<string, Record<string, unknown>>) {
     super();
     this.namedSteps = parentNamedSteps;
     this.exposedParams = parentExposedParams;
   }
 
-  step(step: Step, shouldRun: ShouldRunConfig = {}, dependencies: StepDependency[] = [], predefinedParams: PredefinedParameters = {}): this {
+  step(step: Step<Providers>, shouldRun: ShouldRunConfig = {}, dependencies: StepDependency[] = [], predefinedParams: PredefinedParameters = {}): this {
     if (!step.composable) {
       throw new Error(`Step of type "${step.type}" is not composable, and cannot be added to an atomic group.`);
     }
@@ -235,7 +234,7 @@ class AtomicStepManager extends StepManager {
     return super.step(step, shouldRun, dependencies, predefinedParams);
   }
 
-  namedStep(name: string, step: Step, shouldRun: ShouldRunConfig = {}, dependencies: StepDependency[] = [], predefinedParams: PredefinedParameters = {}): this {
+  namedStep(name: string, step: Step<Providers>, shouldRun: ShouldRunConfig = {}, dependencies: StepDependency[] = [], predefinedParams: PredefinedParameters = {}): this {
     if (!step.composable) {
       throw new Error(`Step of type "${step.type}" is not composable, and cannot be added to an atomic group.`);
     }
@@ -243,22 +242,22 @@ class AtomicStepManager extends StepManager {
     return super.namedStep(name, step, shouldRun, dependencies, predefinedParams);
   }
 
-  atomicGroup(_callback: (stepManager: AtomicStepManager) => void): this {
+  atomicGroup(_callback: (stepManager: AtomicStepManager<Providers>) => void): this {
     throw new Error("Atomic groups can't be nested.");
   }
 
-  async run(pathProvider: PathProvider, paramProviderFactory: ParamProviderFactory, phpProvider: PhpProvider): Promise<string[]> {
+  async run(paths: Paths, promptsIOFactory: IOFactory, providers: Providers): Promise<string[]> {
     let fs = createMemFs();
 
     const stepNames: string[] = [];
 
     for (let i = 0; i < this.steps.length; i++) {
-      const storedStep = this.steps[i] as StoredStep;
+      const storedStep = this.steps[i] as StoredStep<Providers>;
 
-      const shouldRun: boolean = await this.stepShouldRun(storedStep, paramProviderFactory);
+      const shouldRun: boolean = await this.stepShouldRun(storedStep, promptsIOFactory);
       if (!shouldRun) continue;
 
-      fs = await this.runStep(storedStep, pathProvider, paramProviderFactory, phpProvider, fs);
+      fs = await this.runStep(storedStep, paths, promptsIOFactory, providers, fs);
 
       stepNames.push(storedStep.step.type);
     }

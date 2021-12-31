@@ -2,10 +2,56 @@ import { create as createMemFs, Store } from 'mem-fs';
 import { create as createMemFsEditor } from 'mem-fs-editor';
 import { resolve } from 'node:path';
 import { prompt } from 'prompts';
-import { ParamProvider } from 'boilersmith/param-provider';
-import { PathProvider } from 'boilersmith/path-provider';
+import { ParamDef, PromptsIO, IO} from 'boilersmith/io';
+import { Paths } from 'boilersmith/paths';
 import { Step } from 'boilersmith/step-manager';
-import { stubPathProviderFactory, stubPhpProviderFactory } from './stubs';
+
+export function stubStepFactory<Providers extends {} = {}>(type: string, composable = true, paramsConsumed: ParamDef[] = [], paramsExposed: Record<string, unknown> = {}): Step<Providers> {
+  return {
+    type,
+    composable,
+    exposes: Object.keys(paramsExposed),
+    async run(fs: Store, _paths: Paths, io: IO, _providers: Providers): Promise<Store> {
+      paramsConsumed.forEach(io.getParam);
+
+      return fs;
+    },
+    getExposed(_paths: Paths, _paramProvider: IO): Record<string, unknown> {
+      return paramsExposed;
+    },
+  };
+}
+
+interface TestPaths {
+  cwd?: string;
+
+  package?: string;
+
+  requestedDir?: string | null;
+
+  monorepo?: string;
+}
+
+export function stubPathsFactory(paths: TestPaths = {}): Paths {
+  return {
+    cwd(...path: string[]): string {
+      return resolve(paths.cwd || '/cwd', ...path);
+    },
+
+    package(...path: string[]): string {
+      return resolve(paths.package || '/ext', ...path);
+    },
+
+    requestedDir(...path: string[]): string | null {
+      return paths.requestedDir ? resolve(paths.requestedDir, ...path) : null;
+    },
+
+    monorepo(...path: string[]): string | null {
+      return paths.monorepo ? resolve(paths.monorepo, ...path) : null;
+    },
+  };
+}
+
 
 const empty = {};
 
@@ -14,27 +60,27 @@ interface StepOutput {
   exposedParams: Record<string, unknown>;
 }
 
-export async function runStep(
-  step: Step,
+export async function runStep<Providers extends {} = {}>(
+  step: Step<Providers>,
+  providers: Providers,
   params: unknown[] = [],
   initialParams: Record<string, unknown> = {},
-  initialFilesCallback: (pathProvider: PathProvider) => Record<string, string> = () => empty,
+  initialFilesCallback: (paths: Paths) => Record<string, string> = () => empty,
   requestedDir: string|null = null,
 ): Promise<StepOutput> {
   const fs = createMemFs();
-  const pathProvider = stubPathProviderFactory({ boilerplate: resolve(__dirname, '../../boilerplate'), requestedDir });
+  const paths = stubPathsFactory({ requestedDir });
   prompt.inject(params);
-  const paramProvider = new ParamProvider(initialParams);
-  const phpProvider = stubPhpProviderFactory();
+  const io = new PromptsIO(initialParams);
 
   const fsEditor = createMemFsEditor(fs);
-  const initialFiles = initialFilesCallback(pathProvider);
+  const initialFiles = initialFilesCallback(paths);
   for (const path of Object.keys(initialFiles)) {
     fsEditor.write(path, initialFiles[path]);
   }
 
-  const newFs = await step.run(fs, pathProvider, paramProvider, phpProvider);
-  const exposedParams = step.getExposed(pathProvider, paramProvider);
+  const newFs = await step.run(fs, paths, io, providers);
+  const exposedParams = step.getExposed(paths, io);
 
   return { fs: newFs, exposedParams };
 }

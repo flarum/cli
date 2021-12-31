@@ -3,16 +3,24 @@ import { exit } from '@oclif/errors';
 
 export type ParamDef = Omit<PromptObject, 'name'> & { name: string };
 
+export interface IO {
+  getParam<T>(param: ParamDef): Promise<T>;
+
+  hasCached(name: string): boolean;
+
+  cached(): Record<string, unknown>;
+}
+
 export const PROMPTS_OPTIONS: Options = { onCancel: () => exit() };
 
-export class ParamProvider {
+export class PromptsIO implements IO {
   private cache = new Map<string, unknown>();
 
   constructor(initial: Record<string, unknown> = {}) {
     this.cache = new Map(Object.entries(initial));
   }
 
-  async get<T>(paramDef: ParamDef): Promise<T> {
+  async getParam<T>(paramDef: ParamDef): Promise<T> {
     const paramName = paramDef.name as string;
 
     if (this.cache.has(paramName)) {
@@ -27,7 +35,7 @@ export class ParamProvider {
     return resValue;
   }
 
-  has(name: string): boolean {
+  hasCached(name: string): boolean {
     return this.cache.has(name);
   }
 
@@ -42,8 +50,8 @@ export class ParamProvider {
   }
 }
 
-export type ParamProviderFactory = (initial: Record<string, unknown>) => ParamProvider;
+export type IOFactory = (initial: Record<string, unknown>) => IO;
 
-export const paramProviderFactory: ParamProviderFactory = (initial = {}) => {
-  return new ParamProvider(initial);
+export const promptsIOFactory: IOFactory = (initial = {}) => {
+  return new PromptsIO(initial);
 };

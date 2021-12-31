@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { ExpressionType, ExtenderDef, ParamTypeType, PhpSubsystemProvider } from '../../src/provider/php-provider';
+import { ExpressionType, ExtenderDef, ParamTypeType, PhpSubsystemProvider } from '../../src/providers/php-provider';
 
 const extendContent = `<?php
 namespace Muralf\\Dummy;

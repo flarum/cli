@@ -1,9 +1,8 @@
 import { glob } from 'glob';
 import { Store } from 'mem-fs';
 import { create } from 'mem-fs-editor';
-import { ParamProvider } from 'boilersmith/param-provider';
-import { PathProvider } from 'boilersmith/path-provider';
-import { PhpProvider } from '../../provider/php-provider';
+import { IO } from 'boilersmith/io';
+import { Paths } from 'boilersmith/paths';
 import { Step } from 'boilersmith/step-manager';
 
 const CORE_JS_NAMESPACES = ['admin', 'common', 'forum'];
@@ -17,11 +16,11 @@ export class UpdateJSImports implements Step {
 
   composable = false;
 
-  async run(fs: Store, pathProvider: PathProvider, _paramProvider: ParamProvider, _phpProvider: PhpProvider): Promise<Store> {
+  async run(fs: Store, paths: Paths, _paramProvider: IO, _providers: {}): Promise<Store> {
     const fsEditor = create(fs);
 
     const importMap: ImportMap = {};
-    const jsSrcDir = pathProvider.ext('vendor/flarum/core/js/src');
+    const jsSrcDir = paths.package('vendor/flarum/core/js/src');
 
     const vendorRegex = new RegExp(`${jsSrcDir}/.*(js|jsx|ts|tsx)`);
     const fsVendorFilePaths = fs.all().map(file => file.path).filter(path => path && vendorRegex.test(path));
@@ -34,9 +33,9 @@ export class UpdateJSImports implements Step {
       importMap[`flarum/${noNamespace}`] = `flarum/${withNamespace}`;
     }
 
-    const srcRegex = new RegExp(`${pathProvider.ext('js/src')}/.*(js|jsx|ts|tsx)`);
+    const srcRegex = new RegExp(`${paths.package('js/src')}/.*(js|jsx|ts|tsx)`);
     const fsSrcFilePaths = fs.all().map(file => file.path).filter(path => path && srcRegex.test(path));
-    const persistedSrcFilePaths = glob.sync(pathProvider.ext('js/src/**/*.{js,jsx,ts,tsx}'));
+    const persistedSrcFilePaths = glob.sync(paths.package('js/src/**/*.{js,jsx,ts,tsx}'));
 
     for (const match of [...fsSrcFilePaths, ...persistedSrcFilePaths]) {
       let fileCounted = false;
@@ -61,7 +60,7 @@ export class UpdateJSImports implements Step {
 
   exposes = [];
 
-  getExposed(_pathProvider: PathProvider, _paramProvider: ParamProvider): Record<string, unknown> {
+  getExposed(_paths: Paths, _paramProvider: IO): Record<string, unknown> {
     return {};
   }
 }

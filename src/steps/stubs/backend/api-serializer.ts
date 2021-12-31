@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import { Editor } from 'mem-fs-editor';
-import { ParamProvider } from 'boilersmith/param-provider';
-import { PathProvider } from 'boilersmith/path-provider';
+import { IO } from 'boilersmith/io';
+import { Paths } from 'boilersmith/paths';
 import { Validator } from '../../../utils/validation';
 import { pluralKebabCaseModel } from '../../../utils/model-name';
 import { BasePhpStubStep } from '../php-base';
@@ -46,8 +46,8 @@ export class GenerateApiSerializerStub extends BasePhpStubStep {
     ],
   }
 
-  protected async compileParams(fsEditor: Editor, pathProvider: PathProvider, paramProvider: ParamProvider): Promise<Record<string, unknown>> {
-    const params = await super.compileParams(fsEditor, pathProvider, paramProvider);
+  protected async compileParams(fsEditor: Editor, paths: Paths, io: IO): Promise<Record<string, unknown>> {
+    const params = await super.compileParams(fsEditor, paths, io);
 
     params.modelType = pluralKebabCaseModel(params.modelClassName as string);
 

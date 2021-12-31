@@ -2,7 +2,7 @@ import { getExtFileContents, getFsPaths, runStep } from '../../boilersmith/utils
 import { BackendTestingInfra } from '../../../src/steps/infra/backend-testing';
 import get from 'just-safe-get';
 import { resolve } from 'node:path';
-import { PathProvider } from 'boilersmith/path-provider';
+import { Paths } from 'boilersmith/paths';
 
 interface InfraTest {
   infraClass: any;
@@ -50,7 +50,7 @@ describe('Infra testing', function () {
 
     test(`Touches proper files: ${InfraClass.name}`, async function () {
       const instance = new InfraClass();
-      const { fs } = await runStep(instance);
+      const { fs } = await runStep(instance, {});
 
       const expected = [
         ...instance.filesToReplace,
@@ -61,17 +61,17 @@ describe('Infra testing', function () {
     });
 
     test(`Coincides with expected JSON content: ${spec}`, async function () {
-      const initialFilesCallback = (pathProvider: PathProvider) => {
+      const initialFilesCallback = (paths: Paths) => {
         const initialFiles: any = {};
 
         for (const path of Object.keys(spec.initialJson)) {
-          initialFiles[pathProvider.ext(path)] = spec.initialJson[path];
+          initialFiles[paths.package(path)] = spec.initialJson[path];
         }
 
         return initialFiles;
       };
 
-      const { fs } = await runStep(new InfraClass(), [], {}, initialFilesCallback);
+      const { fs } = await runStep(new InfraClass(), {}, [], {}, initialFilesCallback);
 
       for (const filePath of Object.keys(spec.expectedJsonEntries)) {
         const expectedEntries = spec.expectedJsonEntries[filePath];

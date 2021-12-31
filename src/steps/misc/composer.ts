@@ -1,8 +1,8 @@
 import { execSync } from 'node:child_process';
 import { Store } from 'mem-fs';
-import { ParamProvider } from 'boilersmith/param-provider';
-import { PathProvider } from 'boilersmith/path-provider';
-import { PhpProvider } from '../../provider/php-provider';
+import { IO } from 'boilersmith/io';
+import { Paths } from 'boilersmith/paths';
+import { PhpProvider } from '../../providers/php-provider';
 import { Step } from 'boilersmith/step-manager';
 
 export class ComposerInstall implements Step {
@@ -10,8 +10,8 @@ export class ComposerInstall implements Step {
 
   composable = false;
 
-  async run(fs: Store, pathProvider: PathProvider, _paramProvider: ParamProvider, _phpProvider: PhpProvider): Promise<Store> {
-    execSync('composer update', { cwd: pathProvider.ext('') });
+  async run(fs: Store, paths: Paths, _paramProvider: IO, _providers: {}): Promise<Store> {
+    execSync('composer update', { cwd: paths.package('') });
 
     return fs;
   }

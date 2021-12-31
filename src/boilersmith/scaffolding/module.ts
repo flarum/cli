@@ -3,8 +3,8 @@ import { Store } from 'mem-fs';
 import { create } from 'mem-fs-editor';
 import { resolve } from 'path';
 import pick from 'pick-deep';
-import { ParamProvider } from 'boilersmith/param-provider';
-import { PathProvider } from 'boilersmith/path-provider';
+import { IO } from 'boilersmith/io';
+import { Paths } from 'boilersmith/paths';
 import { readTpl } from 'boilersmith/utils/read-tpl';
 
 interface FileOwnership {
@@ -74,14 +74,14 @@ interface TogglableModule extends CommonModule {
 export type Module = UntoggleableModule | TogglableModule;
 
 export type ModuleStatusCache = {
-  get: (module: string, fs: Store, pathProvider: PathProvider) => Promise<boolean | undefined>;
-  set: (module: string, val: boolean, fs: Store, pathProvider: PathProvider) => Promise<void>;
+  get: (module: string, fs: Store, paths: Paths) => Promise<boolean | undefined>;
+  set: (module: string, val: boolean, fs: Store, paths: Paths) => Promise<void>;
 };
 
-export async function promptModulesEnabled(modules: Module[], promptProvider: ParamProvider): Promise<Record<string, boolean>> {
+export async function promptModulesEnabled(modules: Module[], promptProvider: IO): Promise<Record<string, boolean>> {
   const modulesEnabled: Record<string, boolean> = {};
 
-  const advanced = await promptProvider.get<boolean>({
+  const advanced = await promptProvider.getParam<boolean>({
     name: 'advancedInstallation',
     type: 'confirm',
     initial: false,
@@ -94,7 +94,7 @@ export async function promptModulesEnabled(modules: Module[], promptProvider: Pa
     } else if (!advanced) {
       modulesEnabled[m.name] = m.defaultEnabled;
     } else {
-      modulesEnabled[m.name] = await promptProvider.get<boolean>({
+      modulesEnabled[m.name] = await promptProvider.getParam<boolean>({
         name: m.name,
         type: 'confirm',
         initial: m.defaultEnabled,
@@ -109,7 +109,7 @@ export async function promptModulesEnabled(modules: Module[], promptProvider: Pa
 export async function currModulesEnabled(
   modules: Module[],
   fs: Store,
-  pathProvider: PathProvider,
+  paths: Paths,
   cache?: ModuleStatusCache
 ): Promise<Record<string, boolean>> {
   const modulesEnabled: Record<string, boolean> = {};
@@ -118,7 +118,7 @@ export async function currModulesEnabled(
     if (!m.togglable) {
       modulesEnabled[m.name] = true;
     } else {
-      const cacheVal = await cache?.get(m.name, fs, pathProvider);
+      const cacheVal = await cache?.get(m.name, fs, paths);
 
       modulesEnabled[m.name] = cacheVal ?? m.defaultEnabled;
     }
@@ -127,9 +127,9 @@ export async function currModulesEnabled(
   return modulesEnabled;
 }
 
-export async function setModuleValue(module: Module, enabled: boolean, fs: Store, pathProvider: PathProvider, cache: ModuleStatusCache): Promise<void> {
+export async function setModuleValue(module: Module, enabled: boolean, fs: Store, paths: Paths, cache: ModuleStatusCache): Promise<void> {
   if (module.togglable) {
-    cache.set(module.name, enabled, fs, pathProvider);
+    cache.set(module.name, enabled, fs, paths);
   }
 }
 
@@ -139,7 +139,7 @@ export async function applyModule(
   paramVals: Record<string, unknown>,
   scaffoldDir: string,
   fs: Store,
-  pathProvider: PathProvider,
+  paths: Paths,
   isInitial = false
 ): Promise<Store> {
   const fsEditor = create(fs);
@@ -175,7 +175,7 @@ export async function applyModule(
     const needsOtherModules = typeof file === 'string' ? [] : file.needsOtherModules ?? [];
 
     if (!needsOtherModules.some((dep) => !modulesEnabled[dep])) {
-      fsEditor.copyTpl(resolve(scaffoldDir, path), pathProvider.ext(path), tplData);
+      fsEditor.copyTpl(resolve(scaffoldDir, path), paths.package(path), tplData);
     }
   }
 
@@ -186,7 +186,7 @@ export async function applyModule(
     const fieldsToAugment = module.jsonToAugment[jsonPath];
     const relevant = pick(scaffoldContentsJson, fieldsToAugment);
 
-    fsEditor.extendJSON(pathProvider.ext(jsonPath), relevant);
+    fsEditor.extendJSON(paths.package(jsonPath), relevant);
   }
 
   return fs;

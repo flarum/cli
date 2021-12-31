@@ -6,10 +6,13 @@ import { GenerateRoutesExtender } from '../../../src/steps/extenders/route';
 import { GenerateServiceProviderExtender } from '../../../src/steps/extenders/service-provider';
 import { GeneratePolicyExtender } from '../../../src/steps/extenders/policy';
 import { GenerateConsoleCommandExtender } from '../../../src/steps/extenders/console-command';
-import { PathProvider } from 'boilersmith/path-provider';
+import { FlarumProviders } from '../../../src/providers';
+import { Step } from '../../../src/boilersmith/step-manager';
+import { Paths } from 'boilersmith/paths';
+import {stubPhpProviderFactory} from '../../utils'
 
 interface ExtenderTest {
-  extenderClass: any;
+  extenderClass: new () => Step<FlarumProviders>;
 
   params: Record<string, unknown>;
 }
@@ -69,16 +72,16 @@ const testSpecs: ExtenderTest[] = [
 describe('Extender tests', function () {
   for (const spec of testSpecs) {
     test(`Extender test: ${spec.extenderClass.name}`, async function () {
-      const initialFilesCallback = (pathProvider: PathProvider) => {
+      const initialFilesCallback = (paths: Paths) => {
         const initial: Record<string, string> = {};
-        initial[pathProvider.ext('extend.php')] = `<?php
+        initial[paths.package('extend.php')] = `<?php
 
 return [];
 `;
         return initial;
       };
 
-      const { fs } = await runStep(new spec.extenderClass(), Object.values(spec.params), {}, initialFilesCallback, requestedDir);
+      const { fs } = await runStep(new spec.extenderClass(), {php: stubPhpProviderFactory()}, Object.values(spec.params), {}, initialFilesCallback, requestedDir);
 
       expect(getFsPaths(fs)).toStrictEqual(['/ext/extend.php'].sort());
     });
