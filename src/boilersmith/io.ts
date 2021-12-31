@@ -1,7 +1,7 @@
 import prompt, { Options, PromptObject } from 'prompts';
 import { exit } from '@oclif/errors';
 
-export type ParamDef = Omit<PromptObject, 'name'> & { name: string };
+export type ParamDef<N extends string = string> = Omit<PromptObject<N>, 'name'> & { name: N };
 
 export interface IO {
   getParam<T>(param: ParamDef): Promise<T>;

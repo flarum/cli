@@ -19,8 +19,8 @@ interface FileOwnership {
   needsOtherModules?: string[];
 }
 
-interface CommonModule {
-  name: string;
+interface CommonModule<N extends string> {
+  name: N;
 
   shortDescription: string;
 
@@ -47,14 +47,14 @@ interface CommonModule {
   needsTemplateParams: string[];
 }
 
-interface UntoggleableModule extends CommonModule {
+interface UntoggleableModule<N extends string> extends CommonModule<N> {
   /**
    * Whether this module can be enabled/disabled.
    */
   togglable: false;
 }
 
-interface TogglableModule extends CommonModule {
+interface TogglableModule<N extends string> extends CommonModule<N> {
   /**
    * Whether this module can be enabled/disabled.
    */
@@ -71,14 +71,14 @@ interface TogglableModule extends CommonModule {
   dependsOn: string[];
 }
 
-export type Module = UntoggleableModule | TogglableModule;
+export type Module<N extends string = string> = UntoggleableModule<N> | TogglableModule<N>;
 
 export type ModuleStatusCache = {
   get: (module: string, fs: Store, paths: Paths) => Promise<boolean | undefined>;
   set: (module: string, val: boolean, fs: Store, paths: Paths) => Promise<void>;
 };
 
-export async function promptModulesEnabled(modules: Module[], promptProvider: IO): Promise<Record<string, boolean>> {
+export async function promptModulesEnabled<N extends string>(modules: Module<N>[], promptProvider: IO): Promise<Record<N, boolean>> {
   const modulesEnabled: Record<string, boolean> = {};
 
   const advanced = await promptProvider.getParam<boolean>({
@@ -106,12 +106,12 @@ export async function promptModulesEnabled(modules: Module[], promptProvider: IO
   return modulesEnabled;
 }
 
-export async function currModulesEnabled(
-  modules: Module[],
+export async function currModulesEnabled<N extends string>(
+  modules: Module<N>[],
   fs: Store,
   paths: Paths,
   cache?: ModuleStatusCache
-): Promise<Record<string, boolean>> {
+): Promise<Record<N, boolean>> {
   const modulesEnabled: Record<string, boolean> = {};
 
   for (const m of modules) {
@@ -133,10 +133,10 @@ export async function setModuleValue(module: Module, enabled: boolean, fs: Store
   }
 }
 
-export async function applyModule(
-  module: Module,
+export async function applyModule<MN extends string, TN extends string>(
+  module: Module<MN>,
   modulesEnabled: Record<string, boolean>,
-  paramVals: Record<string, unknown>,
+  paramVals: Record<TN, unknown>,
   scaffoldDir: string,
   fs: Store,
   paths: Paths,

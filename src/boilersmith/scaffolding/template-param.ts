@@ -2,35 +2,35 @@ import { Store } from 'mem-fs';
 import { ParamDef, IO } from 'boilersmith/io';
 import { Paths } from '../paths';
 
-interface PromptTemplateParam<T> {
+interface PromptTemplateParam<T, N extends string = string> {
   /**
    * A config object to prompt for the param's value.
    * Also contains the param name.
    */
-  prompt: ParamDef;
+  prompt: ParamDef<N>;
 
   getCurrVal: (fs: Store, paths: Paths) => Promise<T>;
 }
 
-interface ComputedTemplateParam<T> {
-  name: string;
+interface ComputedTemplateParam<T, N extends string = string> {
+  name: N;
 
   uses: string[];
 
   compute: (paths: Paths, ...args: any[]) => T;
 }
 
-export type TemplateParam<T> = PromptTemplateParam<T> | ComputedTemplateParam<T>;
+export type TemplateParam<T, N extends string = string> = PromptTemplateParam<T, N> | ComputedTemplateParam<T, N>;
 
-export function isPromptParam<T>(param: TemplateParam<T>): param is PromptTemplateParam<T> {
+export function isPromptParam<T, N extends string>(param: TemplateParam<T, N>): param is PromptTemplateParam<T, N> {
   return 'prompt' in param;
 }
 
-export function isComputedParam<T>(param: TemplateParam<T>): param is ComputedTemplateParam<T> {
+export function isComputedParam<T, N extends string>(param: TemplateParam<T, N>): param is ComputedTemplateParam<T, N> {
   return 'uses' in param;
 }
 
-export function getParamName<T>(param: TemplateParam<T>) {
+export function getParamName<T, N extends string>(param: TemplateParam<T, N>): N {
   return isComputedParam(param) ? param.name : param.prompt.name;
 }
 

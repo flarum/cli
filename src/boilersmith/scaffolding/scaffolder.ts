@@ -10,9 +10,9 @@ import { currModulesEnabled, Module, ModuleStatusCache } from './module';
 import { currParamValues, getParamName, isComputedParam, TemplateParam } from './template-param';
 import { infraStepFactory } from './infra-step-factory';
 
-export class Scaffolder {
-  private templateParams: TemplateParam<unknown>[] = [];
-  private modules: Module[] = [];
+export class Scaffolder<TN extends string = string, MN extends string = string> {
+  private templateParams: TemplateParam<unknown, TN>[] = [];
+  private modules: Module<MN>[] = [];
   private scaffoldDir: string;
 
   private moduleStatusCache?: ModuleStatusCache;
@@ -27,20 +27,20 @@ export class Scaffolder {
       this.moduleStatusCache = {
         get: getModuleEnabled,
         set: setModuleEnabled,
-      }
+      };
     }
   }
 
-  registerModule(module: Module): this {
+  registerModule(module: Module<MN>): this {
     this.modules.push(module);
 
     return this;
   }
 
-  registerTemplateParam<T>(templateParam: TemplateParam<T>): this {
+  registerTemplateParam<T>(templateParam: TemplateParam<T, TN>): this {
     if (isComputedParam(templateParam)) {
-      const currParams = new Set(this.templateParams.map(p => getParamName(p)));
-      const missingDeps = templateParam.uses.filter(dep => !currParams.has(dep))
+      const currParams = new Set(this.templateParams.map((p) => getParamName(p)));
+      const missingDeps = templateParam.uses.filter((dep) => !currParams.has(dep as TN));
 
       if (missingDeps.length) {
         throw new Error(`Computed template param "${getParamName(templateParam)}" is missing dependency params: "${missingDeps.join(', ')}".`);
@@ -56,17 +56,16 @@ export class Scaffolder {
     return initStepFactory(this.scaffoldDir, this.modules, this.templateParams, this.moduleStatusCache);
   }
 
-
   genInfraStep<Providers extends {} = {}>(module: string): Step<Providers> {
     return infraStepFactory(this.scaffoldDir, module, this.modules, this.templateParams, this.moduleStatusCache);
   }
 
-  async templateParamVals(fs: Store, paths: Paths) {
+  async templateParamVals(fs: Store, paths: Paths): Promise<Record<TN, unknown>> {
     return currParamValues(this.templateParams, fs, paths);
   }
 
-  async modulesEnabled(fs: Store, paths: Paths) {
-    return currModulesEnabled(this.modules, fs, paths, this.moduleStatusCache)
+  async modulesEnabled(fs: Store, paths: Paths): Promise<Record<MN, boolean>> {
+    return currModulesEnabled(this.modules, fs, paths, this.moduleStatusCache);
   }
 
   /**
@@ -77,17 +76,17 @@ export class Scaffolder {
   async validate() {
     const errors: string[] = [];
 
-    const moduleNames = new Set(this.modules.map(m => m.name));
+    const moduleNames = new Set(this.modules.map((m) => m.name));
     for (const module of this.modules) {
-      const missingDeps = module.togglable ? module.dependsOn.filter(dep => !moduleNames.has(dep)) : [];
+      const missingDeps = module.togglable ? module.dependsOn.filter((dep) => !moduleNames.has(dep as MN)) : [];
       if (missingDeps.length) {
         errors.push(`Module "${module.name}" depends on modules that are not registered: "${missingDeps.join(', ')}".`);
       }
     }
 
-    const filesToOwnerModules = new Map<string, string[]>();
-    const configKeysToOwnerModules = new Map<string, { fileOwners: string[]; keyOwners: Map<string, string[]> }>();
-    const templateParamsToUsingModules = new Map<string, string[]>();
+    const filesToOwnerModules = new Map<string, MN[]>();
+    const configKeysToOwnerModules = new Map<string, { fileOwners: MN[]; keyOwners: Map<string, MN[]> }>();
+    const templateParamsToUsingModules = new Map<TN, MN[]>();
 
     for (const module of this.modules) {
       module.filesToReplace.forEach((file) => {
@@ -99,13 +98,13 @@ export class Scaffolder {
 
       module.needsTemplateParams.forEach((paramName) => {
         const currModules = filesToOwnerModules.get(paramName) ?? [];
-        templateParamsToUsingModules.set(paramName, [...currModules, module.name]);
+        templateParamsToUsingModules.set(paramName as TN, [...currModules, module.name]);
       });
 
       Object.keys(module.jsonToAugment).forEach((jsonPath) => {
         const ownedKeys = module.jsonToAugment[jsonPath];
 
-        const currJsonData = configKeysToOwnerModules.get(jsonPath) ?? { fileOwners: [], keyOwners: new Map<string, string[]>() };
+        const currJsonData = configKeysToOwnerModules.get(jsonPath) ?? { fileOwners: [], keyOwners: new Map<string, MN[]>() };
 
         currJsonData.fileOwners.push(module.name);
 
@@ -161,10 +160,10 @@ export class Scaffolder {
     }, {});
 
     const modulesEnabled: Record<string, boolean> = this.modules.reduce((acc, module) => {
-      return {...acc, [module.name]: true};
+      return { ...acc, [module.name]: true };
     }, {});
 
-    const tplData = {params: paramVals, modules: modulesEnabled};
+    const tplData = { params: paramVals, modules: modulesEnabled };
 
     // Ensure that every template param is used by at least one module.
     this.templateParams
