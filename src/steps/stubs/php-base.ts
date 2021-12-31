@@ -1,11 +1,14 @@
 import { Store } from 'mem-fs';
 import { Editor } from 'mem-fs-editor';
-import { BaseStubStep } from './base';
+import { BaseStubStep } from 'boilersmith/steps/base';
 import { ParamDef, IO } from 'boilersmith/io';
 import { Paths } from 'boilersmith/paths';
-import { ExtensionMetadata } from '../../utils/extension-metadata';
+import { Scaffolder } from 'boilersmith/scaffolding/scaffolder';
+import { FlarumBaseStubStep } from './flarum-base';
+import { FlarumProviders } from 'src/providers';
+import { genExtScaffolder } from '../gen-ext-scaffolder';
 
-export abstract class BasePhpStubStep extends BaseStubStep {
+export abstract class BasePhpStubStep extends FlarumBaseStubStep {
   protected defaultRoot = './src';
 
   get exposes(): string[] {
@@ -18,10 +21,10 @@ export abstract class BasePhpStubStep extends BaseStubStep {
 
   protected phpClassParams: string[] = [];
 
-  protected async precompileParams(composerJsonContents: ExtensionMetadata, fsEditor: Editor, paths: Paths, io: IO): Promise<Record<string, unknown>> {
+  protected async precompileParams(fs: Store, paths: Paths, io: IO): Promise<Record<string, unknown>> {  
     const params: Record<string, unknown> = {
-      ...await super.precompileParams(composerJsonContents, fsEditor, paths, io),
-      classNamespace: this.stubNamespace(composerJsonContents, paths),
+      ...await super.precompileParams(fs, paths, io),
+      classNamespace: this.stubNamespace(await this.scaffolder.templateParamVal('packageNamespace', fs, paths), paths),
     };
 
     let paramDefs = this.schema.params.filter(param => !this.implicitParams.includes(param.name as string));
@@ -57,9 +60,7 @@ export abstract class BasePhpStubStep extends BaseStubStep {
     return await io.getParam<string>({ name: 'className', type: 'text' }) + '.php';
   }
 
-  protected stubNamespace(composerJsonContents: ExtensionMetadata, paths: Paths): string {
-    const packageNamespace = composerJsonContents.packageNamespace;
-
+  protected stubNamespace(packageNamespace: string, paths: Paths): string {
     const subdir = this.schema.forceRecommendedSubdir || paths.requestedDir() === null ? this.schema.recommendedSubdir.replace('\\', '.').replace('/', '.') : paths.requestedDir()!.slice(`${paths.package((this.schema.root || this.defaultRoot).replace('./', ''))}/`.length);
 
     this.subdir = subdir.replace('.', '/');

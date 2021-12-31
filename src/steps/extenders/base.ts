@@ -2,9 +2,9 @@ import { Store } from 'mem-fs';
 import { create } from 'mem-fs-editor';
 import { ParamDef, IO } from 'boilersmith/io';
 import { Paths } from 'boilersmith/paths';
-import { ExtenderDef, PhpProvider } from '../../providers/php-provider';
+import { ExtenderDef } from '../../providers/php-provider';
 import { Step } from 'boilersmith/step-manager';
-import { cloneAndFill } from '../../utils/clone-and-fill';
+import { cloneAndFill } from 'boilersmith/utils/clone-and-fill';
 import { FlarumProviders } from 'src/providers';
 
 interface UserProvidedParam extends Omit<ParamDef, 'type'> {

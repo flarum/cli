@@ -1,12 +1,10 @@
 import { Store } from 'mem-fs';
-import { Editor } from 'mem-fs-editor';
-import { BaseStubStep } from './base';
 import { ParamDef, IO } from 'boilersmith/io';
 import { Paths } from 'boilersmith/paths';
-import { cloneAndFill } from '../../utils/clone-and-fill';
-import { ExtensionMetadata } from '../../utils/extension-metadata';
+import { cloneAndFill } from '../../boilersmith/utils/clone-and-fill';
+import { FlarumBaseStubStep } from './flarum-base';
 
-export abstract class BaseJsStubStep extends BaseStubStep {
+export abstract class BaseJsStubStep extends FlarumBaseStubStep {
   protected defaultRoot = './js/src';
 
   get exposes(): string[] {
@@ -17,8 +15,8 @@ export abstract class BaseJsStubStep extends BaseStubStep {
     return [...super.implicitParams, 'classNamespace'];
   }
 
-  protected async precompileParams(composerJsonContents: ExtensionMetadata, fsEditor: Editor, paths: Paths, io: IO): Promise<Record<string, unknown>> {
-    const params = await super.precompileParams(composerJsonContents, fsEditor, paths, io);
+  protected async precompileParams(fs: Store, paths: Paths, io: IO): Promise<Record<string, unknown>> {
+    const params = await super.precompileParams(fs, paths, io);
 
     const paramDefs = this.schema.params.filter(param => !this.implicitParams.includes(param.name as string));
 
