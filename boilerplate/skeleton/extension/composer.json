@@ -21,12 +21,12 @@
     <% } %>],
     "autoload": {
         "psr-4": {
-            "<%= packageNamespace.replace(/\\/, '\\\\') %>\\": "src/"
+            "<%= packageNamespaceEscapedSlash %>\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "<%= packageNamespace.replace(/\\/, '\\\\') %>\\Tests\\": "tests/"
+            "<%= packageNamespaceEscapedSlash %>\\Tests\\": "tests/"
         }
     },
     "extra": {
