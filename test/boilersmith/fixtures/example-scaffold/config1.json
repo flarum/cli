@@ -1,6 +1,7 @@
 {
     "hello": "<%= params.someVar %>",
     "foo": "<%= params.someOtherVar %>",
+    "<%= params.varKey %>++": "const",
     "authors": [
         "George Washington",
         "Alexander Hamilton",

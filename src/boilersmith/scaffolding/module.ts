@@ -6,6 +6,8 @@ import pick from 'pick-deep';
 import { IO } from 'boilersmith/io';
 import { Paths } from 'boilersmith/paths';
 import { readTpl } from 'boilersmith/utils/read-tpl';
+import { cloneAndFill } from 'boilersmith/utils/clone-and-fill';
+import { renameKeys } from 'boilersmith/utils/rename-keys';
 
 interface FileOwnership {
   /**
@@ -179,11 +181,13 @@ export async function applyModule<MN extends string, TN extends string>(
     }
   }
 
-  for (const jsonPath of Object.keys(module.jsonToAugment)) {
+  const tplDataFlat = {...renameKeys(tplData.modules, (k) => `modules.${k}`), ...renameKeys(tplData.params, (k) => `params.${k}`)} as Record<string, string>;
+  const jsonPaths = cloneAndFill(module.jsonToAugment, tplDataFlat);
+  for (const jsonPath in jsonPaths) {
     const scaffoldContents = readTpl(resolve(scaffoldDir, jsonPath), tplData);
     const scaffoldContentsJson = JSON.parse(scaffoldContents);
 
-    const fieldsToAugment = module.jsonToAugment[jsonPath];
+    const fieldsToAugment = jsonPaths[jsonPath];
     const relevant = pick(scaffoldContentsJson, fieldsToAugment);
 
     fsEditor.extendJSON(paths.package(jsonPath), relevant);

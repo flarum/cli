@@ -9,6 +9,8 @@ import { initStepFactory } from './init-step-factory';
 import { currModulesEnabled, Module, ModuleStatusCache } from './module';
 import { currParamValues, getParamName, isComputedParam, TemplateParam } from './template-param';
 import { infraStepFactory } from './infra-step-factory';
+import { renameKeys } from 'boilersmith/utils/rename-keys';
+import { cloneAndFill } from 'boilersmith/utils/clone-and-fill';
 
 export class Scaffolder<TN extends string = string, MN extends string = string> {
   private templateParams: TemplateParam<unknown, TN>[] = [];
@@ -76,6 +78,18 @@ export class Scaffolder<TN extends string = string, MN extends string = string> 
   async validate() {
     const errors: string[] = [];
 
+    // Generate template data for future checks
+    const paramVals: Record<string, ''> = this.templateParams.reduce((acc, param) => {
+      return { ...acc, [getParamName(param)]: '' };
+    }, {});
+
+    const modulesEnabled: Record<string, boolean> = this.modules.reduce((acc, module) => {
+      return { ...acc, [module.name]: true };
+    }, {});
+
+    const tplData = { params: paramVals, modules: modulesEnabled };
+    const tplDataFlat = {...renameKeys(tplData.modules, (k) => `modules.${k}`), ...renameKeys(tplData.params, (k) => `params.${k}`)} as Record<string, string>;
+
     const moduleNames = new Set(this.modules.map((m) => m.name));
     for (const module of this.modules) {
       const missingDeps = module.togglable ? module.dependsOn.filter((dep) => !moduleNames.has(dep as MN)) : [];
@@ -102,7 +116,7 @@ export class Scaffolder<TN extends string = string, MN extends string = string> 
       });
 
       Object.keys(module.jsonToAugment).forEach((jsonPath) => {
-        const ownedKeys = module.jsonToAugment[jsonPath];
+        const ownedKeys = cloneAndFill(module.jsonToAugment, tplDataFlat)[jsonPath];
 
         const currJsonData = configKeysToOwnerModules.get(jsonPath) ?? { fileOwners: [], keyOwners: new Map<string, MN[]>() };
 
@@ -153,17 +167,6 @@ export class Scaffolder<TN extends string = string, MN extends string = string> 
       .forEach((path) => {
         errors.push(`File "${path}" is not owned by any module.`);
       });
-
-    // Generate template data for future checks
-    const paramVals: Record<string, ''> = this.templateParams.reduce((acc, param) => {
-      return { ...acc, [getParamName(param)]: '' };
-    }, {});
-
-    const modulesEnabled: Record<string, boolean> = this.modules.reduce((acc, module) => {
-      return { ...acc, [module.name]: true };
-    }, {});
-
-    const tplData = { params: paramVals, modules: modulesEnabled };
 
     // Ensure that every template param is used by at least one module.
     this.templateParams

@@ -181,21 +181,21 @@ describe('applyModule', function () {
       updatable: true,
       shortDescription: '',
       filesToReplace: [],
-      jsonToAugment: { 'config1.json': ['nested.config.string', 'hello'] },
+      jsonToAugment: { 'config1.json': ['nested.config.string', 'hello', '${params.varKey}++'] },
       needsTemplateParams: ['someVar', 'someOtherVar'],
     };
 
     const fs = await applyModule(
       module,
       { 'just-json': true },
-      { someVar: 'val1', someOtherVar: 'val2' },
+      { someVar: 'val1', someOtherVar: 'val2', varKey: 'OCaml' },
       scaffoldDir,
       createStore(),
       new NodePaths({ package: '/ext' })
     );
 
     expect(getFsPaths(fs)).toStrictEqual(['/ext/config1.json']);
-    expect(JSON.parse(getExtFileContents(fs, 'config1.json'))).toStrictEqual({ hello: 'val1', nested: { config: { string: 'a' } } });
+    expect(JSON.parse(getExtFileContents(fs, 'config1.json'))).toStrictEqual({ hello: 'val1', 'OCaml++': 'const', nested: { config: { string: 'a' } } });
   });
 
   it('copies over deep data', async function () {
