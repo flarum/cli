@@ -21,7 +21,7 @@ describe('Scaffolder', function () {
       {
         name: 'varKey',
         uses: [],
-        compute: () => 'OCaml',
+        compute: async() => 'OCaml',
       },
     ];
     const templateParamNames = templateParams.map((p) => getParamName(p));
@@ -239,7 +239,7 @@ describe('Scaffolder', function () {
         scaffolder.registerTemplateParam({
           name: 'someOtherVar',
           uses: ['missing1', 'missing2'],
-          compute: () => '',
+          compute: async() => '',
         })
       ).toThrow(new Error([`Computed template param "someOtherVar" is missing dependency params: "missing1, missing2".`].join('\n')));
     });

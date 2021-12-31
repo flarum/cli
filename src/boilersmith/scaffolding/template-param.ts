@@ -17,7 +17,7 @@ interface ComputedTemplateParam<T, N extends string = string> {
 
   uses: string[];
 
-  compute: (paths: Paths, ...args: any[]) => T;
+  compute: (paths: Paths, ...args: any[]) => Promise<T>;
 }
 
 export type TemplateParam<T, N extends string = string> = PromptTemplateParam<T, N> | ComputedTemplateParam<T, N>;

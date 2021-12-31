@@ -30,7 +30,7 @@ describe('Template Param Utils', function() {
         {
             name: 'param3',
             uses: ['param1', 'param2'],
-            compute: (_path: Paths, param1: string, param2: number) => param1.slice(0, param2)
+            compute: async(_path: Paths, param1: string, param2: number) => param1.slice(0, param2)
         }
     ];
 
