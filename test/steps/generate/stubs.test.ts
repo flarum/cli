@@ -17,11 +17,15 @@ import { GeneratePolicyStub } from '../../../src/steps/stubs/backend/policy';
 import { GenerateCommandStub } from '../../../src/steps/stubs/backend/command';
 import { GenerateModalStub } from '../../../src/steps/stubs/frontend/modal';
 import { GenerateComponentStub } from '../../../src/steps/stubs/frontend/component';
+import { genExtScaffolder } from '../../../src/steps/gen-ext-scaffolder';
 import { stubPhpProviderFactory } from '../../utils';
 import { Paths } from 'boilersmith/paths';
+import { Step } from 'boilersmith/step-manager';
+import { Scaffolder } from 'boilersmith/scaffolding/scaffolder';
+import { resolve } from 'path';
 
 interface StubTest {
-  stubClass: any;
+  stubClass: new (stubDir: string, scaffolder: Scaffolder) => Step;
 
   params: Record<string, unknown>;
 
@@ -377,8 +381,11 @@ for (const specDefinition of [
           return initial;
         };
 
+        const scaffolder = genExtScaffolder();
+        const stubDir = resolve(__dirname, '../../../boilerplate/stubs');
+
         test('With default dir', async function () {
-          const { fs, exposedParams } = await runStep(new spec.stubClass(), {}, Object.values(spec.params), {}, initialFilesCallback);
+          const { fs, exposedParams } = await runStep(new spec.stubClass(stubDir, scaffolder), {}, Object.values(spec.params), {}, initialFilesCallback);
 
           expect(getFsPaths(fs)).toStrictEqual([...spec.expectedModifiedFilesDefaultDir, '/ext/composer.json'].sort());
 
@@ -387,7 +394,7 @@ for (const specDefinition of [
 
         test('With requested dir', async function () {
           const { fs, exposedParams } = await runStep(
-            new spec.stubClass(),
+            new spec.stubClass(stubDir, scaffolder),
             {},
             Object.values(spec.params),
             {},
@@ -404,7 +411,7 @@ for (const specDefinition of [
   });
 }
 
-const migrationSpec = {
+const migrationSpec: StubTest = {
   stubClass: GenerateMigrationStub,
   params: {
     name: 'new migration',
@@ -424,9 +431,12 @@ describe('Stub Test: Migrations', function () {
     return initial;
   };
 
+  const scaffolder = genExtScaffolder();
+  const stubDir = resolve(__dirname, '../../../boilerplate/stubs');
+
   test('With default dir', async function () {
     const { fs, exposedParams } = await runStep(
-      new migrationSpec.stubClass(),
+      new migrationSpec.stubClass(stubDir, scaffolder),
       { php: stubPhpProviderFactory() },
       Object.values(migrationSpec.params),
       {},
@@ -440,7 +450,7 @@ describe('Stub Test: Migrations', function () {
 
   test('With requested dir', async function () {
     const { fs, exposedParams } = await runStep(
-      new migrationSpec.stubClass(),
+      new migrationSpec.stubClass(stubDir, scaffolder),
       { php: stubPhpProviderFactory() },
       Object.values(migrationSpec.params),
       {},

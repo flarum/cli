@@ -1,12 +1,7 @@
 import { Store } from 'mem-fs';
-import { Editor } from 'mem-fs-editor';
-import { BaseStubStep } from 'boilersmith/steps/base';
 import { ParamDef, IO } from 'boilersmith/io';
 import { Paths } from 'boilersmith/paths';
-import { Scaffolder } from 'boilersmith/scaffolding/scaffolder';
 import { FlarumBaseStubStep } from './flarum-base';
-import { FlarumProviders } from 'src/providers';
-import { genExtScaffolder } from '../gen-ext-scaffolder';
 
 export abstract class BasePhpStubStep extends FlarumBaseStubStep {
   protected defaultRoot = './src';

@@ -1,6 +1,6 @@
 import { IO } from "boilersmith/io";
 import { Paths } from "boilersmith/paths";
-import { BaseStubStep } from "boilersmith/steps/base";
+import { BaseStubStep } from "boilersmith/steps/stub-base";
 import { Store } from "mem-fs";
 import { FlarumProviders } from "../../providers";
 import { genExtScaffolder } from "../gen-ext-scaffolder";

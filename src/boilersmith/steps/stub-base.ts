@@ -15,10 +15,14 @@ interface UserProvidedParam extends Omit<ParamDef, 'type'> {
 export interface StubGenerationSchema {
   /**
    * A period-delimited subdirectory for where the stub should be
-   * located relative to the package root.
+   * located relative to the package root (IE `schema.root`).
    */
   recommendedSubdir: string;
 
+  /**
+   * Create the file in the recommended subdir regardless
+   * of the current requested dir.
+   */
   forceRecommendedSubdir?: boolean;
 
   /**
@@ -40,8 +44,11 @@ export interface StubGenerationSchema {
 export abstract class BaseStubStep<Providers extends {} = {}, ScaffolderT extends Scaffolder = Scaffolder> implements Step<Providers> {
   protected stubDir: string;
 
+  protected scaffolder: ScaffolderT;
+
   constructor(stubDir: string, scaffolder: ScaffolderT) {
     this.stubDir = stubDir;
+    this.scaffolder = scaffolder;
   }
 
   abstract type: string;
@@ -71,7 +78,7 @@ export abstract class BaseStubStep<Providers extends {} = {}, ScaffolderT extend
   async run(fs: Store, paths: Paths, io: IO, _providers: Providers): Promise<Store> {
     const fsEditor = create(fs);
 
-    this.params = await this.compileParams(fsEditor, paths, io);
+    this.params = await this.compileParams(fs, paths, io);
 
     const newFileName = await this.getFileName(fs, paths, io);
     const newFilePath = paths.package(this.schema.root || this.defaultRoot, this.subdir, newFileName);
@@ -86,14 +93,12 @@ export abstract class BaseStubStep<Providers extends {} = {}, ScaffolderT extend
     return pick(this.params, this.exposes) as BaseStubStep['params'];
   }
 
-  protected async precompileParams(_fsEditor: Editor, _paths: Paths, _paramProvider: IO): Promise<Record<string, unknown>> {
-    const params: Record<string, string> = {};
-
-    return params;
+  protected async precompileParams(fs: Store, _paths: Paths, _paramProvider: IO): Promise<Record<string, unknown>> {
+    return {};
   }
 
-  protected async compileParams(fsEditor: Editor, paths: Paths, io: IO): Promise<Record<string, unknown>> {
-    const params: Record<string, unknown> = await this.precompileParams(fsEditor, paths, io);
+  protected async compileParams(fs: Store, paths: Paths, io: IO): Promise<Record<string, unknown>> {
+    const params: Record<string, unknown> = await this.precompileParams(fs, paths, io);
 
     const paramDefs = this.schema.params.filter(
       (param) => !this.implicitParams.includes(param.name as string) && !Object.keys(params).includes(param.name as string)
