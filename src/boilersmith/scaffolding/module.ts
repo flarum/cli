@@ -91,8 +91,11 @@ export async function promptModulesEnabled<N extends string>(modules: Module<N>[
   });
 
   for (const m of modules) {
+    const missingDeps = !m.togglable || m.dependsOn.some((dep) => !modulesEnabled[dep]);
     if (!m.togglable) {
       modulesEnabled[m.name] = true;
+    } else if (missingDeps) {
+      modulesEnabled[m.name] = false;
     } else if (!advanced) {
       modulesEnabled[m.name] = m.defaultEnabled;
     } else {
@@ -129,7 +132,13 @@ export async function currModulesEnabled<N extends string>(
   return modulesEnabled;
 }
 
-export async function setModuleValue<MN extends string>(module: Module<MN>, enabled: boolean, fs: Store, paths: Paths, cache: ModuleStatusCache<MN>): Promise<void> {
+export async function setModuleValue<MN extends string>(
+  module: Module<MN>,
+  enabled: boolean,
+  fs: Store,
+  paths: Paths,
+  cache: ModuleStatusCache<MN>
+): Promise<void> {
   if (module.togglable) {
     cache.set(module, enabled, fs, paths);
   }
@@ -181,7 +190,7 @@ export async function applyModule<MN extends string, TN extends string>(
     }
   }
 
-  const tplDataFlat = {...renameKeys(tplData.modules, (k) => `modules.${k}`), ...renameKeys(tplData.params, (k) => `params.${k}`)} as Record<string, string>;
+  const tplDataFlat = { ...renameKeys(tplData.modules, (k) => `modules.${k}`), ...renameKeys(tplData.params, (k) => `params.${k}`) } as Record<string, string>;
   const jsonPaths = cloneAndFill(module.jsonToAugment, tplDataFlat);
   for (const jsonPath in jsonPaths) {
     const scaffoldContents = readTpl(resolve(scaffoldDir, jsonPath), tplData);
