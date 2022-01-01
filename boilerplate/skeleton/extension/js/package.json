@@ -1,5 +1,5 @@
 {
-  "name": "@<%= packageName %>",
+  "name": "@<%= params.packageName %>",
   "version": "0.0.0",
   "private": true,
   "prettier": "@flarum/prettier-config",
@@ -18,7 +18,7 @@
   "scripts": {
     "dev": "webpack --mode development --watch",
     "build": "webpack --mode production",
-    "analyze": "cross-env ANALYZER=true npm run build",
+    "analyze": "cross-env ANALYZER=true yarn build",
     "format": "prettier --write src",
     "format-check": "prettier --check src",
     "check-typings": "tsc --noEmit --emitDeclarationOnly false",

@@ -1,24 +1,24 @@
 <?php
 
 /*
- * This file is part of <%= packageName %>.
+ * This file is part of <%= params.packageName %>.
  *
- * Copyright (c) <%= year %> <%= authorName %>.
+ * Copyright (c) <%= params.year %> <%= params.authorName %>.
  *
  * For the full copyright and license information, please view the LICENSE.md
  * file that was distributed with this source code.
  */
 
-namespace <%= packageNamespace %>;
+namespace <%= params.packageNamespace %>;
 
 use Flarum\Extend;
 
 return [
-    <% if (forum) { %>(new Extend\Frontend('forum'))
-        <% if (useJs) { %>->js(__DIR__.'/js/dist/forum.js')<% if (!useCss) { %>,<% } %><% } %>
-        <% if (useCss) { %>->css(__DIR__.'/less/forum.less'),<% } %><% } %>
-    <% if (admin) { %>(new Extend\Frontend('admin'))
-        <% if (useJs) { %>->js(__DIR__.'/js/dist/admin.js')<% if (!useCss) { %>,<% } %><% } %>
-        <% if (useCss) { %>->css(__DIR__.'/less/admin.less'),<% } %><% } %>
-    <% if (useLocale) { %>new Extend\Locales(__DIR__.'/locale'),<% } %>
+    <% if (modules.js || modules.css) { %>(new Extend\Frontend('forum'))
+        <% if (modules.js) { %>->js(__DIR__.'/js/dist/forum.js')<% if (!modules.css) { %>,<% } %><% } %>
+        <% if (modules.css) { %>->css(__DIR__.'/less/forum.less'),<% } %><% } %>
+    <% if (modules.js || modules.css) { %>(new Extend\Frontend('admin'))
+        <% if (modules.js) { %>->js(__DIR__.'/js/dist/admin.js')<% if (!modules.css) { %>,<% } %><% } %>
+        <% if (modules.css) { %>->css(__DIR__.'/less/admin.less'),<% } %><% } %>
+    <% if (modules.locale) { %>new Extend\Locales(__DIR__.'/locale'),<% } %>
 ];

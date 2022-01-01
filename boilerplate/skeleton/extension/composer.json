@@ -1,37 +1,37 @@
 {
-    "name": "<%= packageName %>",<% if (packageDescription) { %>
-    "description": "<%= packageDescription %>",<% } %>
+    "name": "<%= params.packageName %>",<% if (params.packageDescription) { %>
+    "description": "<%= params.packageDescription %>",<% } %>
     "keywords": [
         "flarum"
     ],
     "type": "flarum-extension",
-    "license": "<%= licenseType %>",
+    "license": "<%= params.licenseType %>",
     "require": {
         "flarum/core": "^1.0.0"
     },
     "require-dev": {
         "flarum/testing": "^1.0.0"
     },
-    "authors": [<% if (authorName && authorEmail) { %>
+    "authors": [<% if (params.authorName) { %>
         {
-            "name": "<%= authorName %>",<% if (authorEmail) { %>
-            "email": "<%= authorEmail %>",<% } %>
+            "name": "<%= params.authorName %>",<% if (params.authorEmail) { %>
+            "email": "<%= params.authorEmail %>",<% } %>
             "role": "Developer"
         }
     <% } %>],
     "autoload": {
         "psr-4": {
-            "<%= packageNamespaceEscapedSlash %>\\": "src/"
+            "<%= params.packageNamespaceEscapedSlash %>\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "<%= packageNamespaceEscapedSlash %>\\Tests\\": "tests/"
+            "<%= params.packageNamespaceEscapedSlash %>\\Tests\\": "tests/"
         }
     },
     "extra": {
         "flarum-extension": {
-            "title": "<%= extensionName %>",
+            "title": "<%= params.extensionName %>",
             "category": "",
             "icon": {
                 "name": "",

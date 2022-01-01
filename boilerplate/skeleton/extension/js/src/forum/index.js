@@ -1,3 +1,3 @@
-app.initializers.add('<%= packageName %>', () => {
-  console.log('[<%= packageName %>] Hello, forum!');
+app.initializers.add('<%= params.packageName %>', () => {
+  console.log('[<%= params.packageName %>] Hello, forum!');
 });

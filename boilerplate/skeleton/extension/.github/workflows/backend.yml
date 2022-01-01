@@ -12,4 +12,4 @@ jobs:
     with:
       enable_backend_testing: <%= modules.backendTesting %>
 
-      backend_directory: <%= backend_directory %>
+      backend_directory: <%= params.backendDirectory %>

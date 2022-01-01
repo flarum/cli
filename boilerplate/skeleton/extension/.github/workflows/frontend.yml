@@ -12,9 +12,9 @@ jobs:
     with:
       enable_bundlewatch: <%= modules.bundlewatch %>
       enable_prettier: <%= modules.prettier %>
-      enable_typescript: <%= modules.typescript %> 
+      enable_typescript: <%= modules.typescript %>
 
-      frontend_directory: <%= frontend_directory %>
-      main_git_branch: <%= mainGitBranch %>
+      frontend_directory: <%= params.frontendDirectory %>
+      main_git_branch: <%= params.mainGitBranch %>
     secrets:
       bundlewatch_github_token: ${{ secrets.BUNDLEWATCH_GITHUB_TOKEN }}
