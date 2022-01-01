@@ -116,6 +116,7 @@
     "pick-deep": "^1.0.0",
     "pluralize": "^8.0.0",
     "prompts": "^2.4.0",
+    "simple-git": "^2.48.0",
     "spdx-license-list": "^6.4.0",
     "string": "^3.3.3",
     "tslib": "^1.14.1",
