@@ -115,7 +115,7 @@ describe('init step factory', function () {
     const cache: Record<string, boolean> = {};
     const step = initStepFactory(scaffoldDir, modules, templateParams, {
       get: async () => true,
-      set: async (module, enabled) => {cache[module] = enabled}
+      set: async (module, enabled) => {cache[module.name] = enabled}
     });
 
     prompts.inject(['Var Value', false]);

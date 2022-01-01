@@ -75,9 +75,9 @@ interface TogglableModule<N extends string> extends CommonModule<N> {
 
 export type Module<N extends string = string> = UntoggleableModule<N> | TogglableModule<N>;
 
-export type ModuleStatusCache = {
-  get: (module: string, fs: Store, paths: Paths) => Promise<boolean | undefined>;
-  set: (module: string, val: boolean, fs: Store, paths: Paths) => Promise<void>;
+export type ModuleStatusCache<N extends string = string> = {
+  get: (module: Module<N>, fs: Store, paths: Paths) => Promise<boolean | undefined>;
+  set: (module: Module<N>, val: boolean, fs: Store, paths: Paths) => Promise<void>;
 };
 
 export async function promptModulesEnabled<N extends string>(modules: Module<N>[], promptProvider: IO): Promise<Record<N, boolean>> {
@@ -97,7 +97,7 @@ export async function promptModulesEnabled<N extends string>(modules: Module<N>[
       modulesEnabled[m.name] = m.defaultEnabled;
     } else {
       modulesEnabled[m.name] = await promptProvider.getParam<boolean>({
-        name: m.name,
+        name: `modules.${m.name}`,
         type: 'confirm',
         initial: m.defaultEnabled,
         message: m.shortDescription + (m.longDescription ? chalk.dim(` (${m.longDescription})`) : ''),
@@ -120,7 +120,7 @@ export async function currModulesEnabled<N extends string>(
     if (!m.togglable) {
       modulesEnabled[m.name] = true;
     } else {
-      const cacheVal = await cache?.get(m.name, fs, paths);
+      const cacheVal = await cache?.get(m, fs, paths);
 
       modulesEnabled[m.name] = cacheVal ?? m.defaultEnabled;
     }
@@ -131,7 +131,7 @@ export async function currModulesEnabled<N extends string>(
 
 export async function setModuleValue(module: Module, enabled: boolean, fs: Store, paths: Paths, cache: ModuleStatusCache): Promise<void> {
   if (module.togglable) {
-    cache.set(module.name, enabled, fs, paths);
+    cache.set(module, enabled, fs, paths);
   }
 }
 

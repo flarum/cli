@@ -12,9 +12,9 @@ describe('Module Utils', function () {
   const _cacheData: Record<string, boolean> = {};
 
   const cache: ModuleStatusCache = {
-    get: async (module) => _cacheData[module],
+    get: async (module) => _cacheData[module.name],
     set: async (module, val) => {
-      _cacheData[module] = val;
+      _cacheData[module.name] = val;
     },
   };
 
