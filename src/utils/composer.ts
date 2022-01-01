@@ -1,8 +1,7 @@
+import { Paths } from "boilersmith/paths";
+import { Store } from "mem-fs";
+import { create } from "mem-fs-editor";
 import { ExtensionModules } from "../steps/gen-ext-scaffolder";
-
-export function extensionId(packageName: string): string {
-  return packageName.replace(/(flarum-ext-)|(flarum-)/, '').replace('/', '-');
-}
 
 export type ComposerJsonSchema = {
   name?: string;
@@ -64,4 +63,8 @@ export type ComposerJsonSchema = {
     }
   }
   // Some others we definitely don't use
+}
+
+export function getComposerJson(fs: Store, paths: Paths): ComposerJsonSchema {
+  return create(fs).readJSON(paths.package('composer.json')) as ComposerJsonSchema;
 }
