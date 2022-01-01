@@ -4,7 +4,7 @@ import { create as createMemFsEditor } from 'mem-fs-editor';
 import { IO, IOFactory } from './io';
 import { Paths } from './paths';
 
-export interface Step<Providers extends {} = {}> {
+export interface Step<Providers extends {} = {}, Exposes extends string = string> {
   /**
    * A short string describing what the step does.
    */
@@ -20,7 +20,7 @@ export interface Step<Providers extends {} = {}> {
   /**
    * A list of names of params that this step exposes to other steps.
    */
-  exposes: string[];
+  exposes: Exposes[];
 
   run: (fs: Store, paths: Paths, io: IO, providers: Providers) => Promise<Store>;
 
@@ -29,7 +29,7 @@ export interface Step<Providers extends {} = {}> {
    *
    * The paths and io will be the same objects provided to the `run` method.
    */
-  getExposed(paths: Paths, io: IO): Record<string, unknown>;
+  getExposed(paths: Paths, io: IO): Record<Exposes, unknown>;
 }
 
 interface ShouldRunConfig {

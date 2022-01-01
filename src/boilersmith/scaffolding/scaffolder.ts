@@ -18,20 +18,14 @@ export class Scaffolder<TN extends string = string, MN extends string = string> 
   private modules: Module<MN>[] = [];
   private scaffoldDir: string;
 
-  private moduleStatusCache?: ModuleStatusCache;
+  private moduleStatusCache?: ModuleStatusCache<MN>;
 
   constructor(scaffoldDir: string);
-  constructor(scaffoldDir: string, getModuleEnabled: ModuleStatusCache['get'], setModuleEnabled: ModuleStatusCache['set']);
+  constructor(scaffoldDir: string, moduleStatusCache: ModuleStatusCache<MN>);
 
-  constructor(scaffoldDir: string, getModuleEnabled?: ModuleStatusCache['get'], setModuleEnabled?: ModuleStatusCache['set']) {
+  constructor(scaffoldDir: string, moduleStatusCache?: ModuleStatusCache<MN>) {
     this.scaffoldDir = scaffoldDir;
-
-    if (getModuleEnabled && setModuleEnabled) {
-      this.moduleStatusCache = {
-        get: getModuleEnabled,
-        set: setModuleEnabled,
-      };
-    }
+    this.moduleStatusCache = moduleStatusCache;
   }
 
   registerModule(module: Module<MN>): this {
@@ -72,7 +66,7 @@ export class Scaffolder<TN extends string = string, MN extends string = string> 
   }
 
   async modulesEnabled(fs: Store, paths: Paths): Promise<Record<MN, boolean>> {
-    return currModulesEnabled(this.modules, fs, paths, this.moduleStatusCache);
+    return currModulesEnabled<MN>(this.modules, fs, paths, this.moduleStatusCache);
   }
 
   /**

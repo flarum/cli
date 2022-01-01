@@ -5,12 +5,12 @@ import { Step } from '../step-manager';
 import { applyModule, Module, ModuleStatusCache, promptModulesEnabled, setModuleValue } from './module';
 import { promptParamValues, TemplateParam } from './template-param';
 
-export function infraStepFactory<Providers extends {} = {}>(
+export function infraStepFactory<MN extends string, Providers extends {} = {}>(
   scaffoldDir: string,
   moduleName: string,
-  modules: Module[],
+  modules: Module<MN>[],
   templateParams: TemplateParam[],
-  moduleStatusCache?: ModuleStatusCache
+  moduleStatusCache?: ModuleStatusCache<MN>
 ): Step<Providers> {
   const module = modules.find(m => m.name === moduleName);
   if (!module) {

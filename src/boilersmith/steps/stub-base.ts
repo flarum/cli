@@ -41,12 +41,12 @@ export interface StubGenerationSchema {
   params: UserProvidedParam[];
 }
 
-export abstract class BaseStubStep<Providers extends {} = {}, ScaffolderT extends Scaffolder = Scaffolder> implements Step<Providers> {
+export abstract class BaseStubStep<Providers extends {} = {}, PN extends string = string, MN extends string = string> implements Step<Providers> {
   protected stubDir: string;
 
-  protected scaffolder: ScaffolderT;
+  protected scaffolder: Scaffolder<PN, MN>;
 
-  constructor(stubDir: string, scaffolder: ScaffolderT) {
+  constructor(stubDir: string, scaffolder: Scaffolder<PN, MN>) {
     this.stubDir = stubDir;
     this.scaffolder = scaffolder;
   }
@@ -90,7 +90,7 @@ export abstract class BaseStubStep<Providers extends {} = {}, ScaffolderT extend
   }
 
   getExposed(_paths: Paths, _paramProvider: IO): Record<string, unknown> {
-    return pick(this.params, this.exposes) as BaseStubStep['params'];
+    return pick(this.params, this.exposes) as Record<string, unknown>;
   }
 
   protected async precompileParams(fs: Store, _paths: Paths, _paramProvider: IO): Promise<Record<string, unknown>> {

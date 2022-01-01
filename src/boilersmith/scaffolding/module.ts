@@ -75,7 +75,7 @@ interface TogglableModule<N extends string> extends CommonModule<N> {
 
 export type Module<N extends string = string> = UntoggleableModule<N> | TogglableModule<N>;
 
-export type ModuleStatusCache<N extends string = string> = {
+export type ModuleStatusCache<N extends string> = {
   get: (module: Module<N>, fs: Store, paths: Paths) => Promise<boolean | undefined>;
   set: (module: Module<N>, val: boolean, fs: Store, paths: Paths) => Promise<void>;
 };
@@ -112,7 +112,7 @@ export async function currModulesEnabled<N extends string>(
   modules: Module<N>[],
   fs: Store,
   paths: Paths,
-  cache?: ModuleStatusCache
+  cache?: ModuleStatusCache<N>
 ): Promise<Record<N, boolean>> {
   const modulesEnabled: Record<string, boolean> = {};
 
@@ -129,7 +129,7 @@ export async function currModulesEnabled<N extends string>(
   return modulesEnabled;
 }
 
-export async function setModuleValue(module: Module, enabled: boolean, fs: Store, paths: Paths, cache: ModuleStatusCache): Promise<void> {
+export async function setModuleValue<MN extends string>(module: Module<MN>, enabled: boolean, fs: Store, paths: Paths, cache: ModuleStatusCache<MN>): Promise<void> {
   if (module.togglable) {
     cache.set(module, enabled, fs, paths);
   }

@@ -11,7 +11,7 @@ import { create } from 'mem-fs-editor';
 describe('Module Utils', function () {
   const _cacheData: Record<string, boolean> = {};
 
-  const cache: ModuleStatusCache = {
+  const cache: ModuleStatusCache<string> = {
     get: async (module) => _cacheData[module.name],
     set: async (module, val) => {
       _cacheData[module.name] = val;
