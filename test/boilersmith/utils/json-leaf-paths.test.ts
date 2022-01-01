@@ -38,7 +38,7 @@ describe('json-leaf-paths', function () {
     it('doesnt look for leaves in arrays', function () {
       const paths = jsonLeafPaths(['hello', 'world', 'foo', 'bar']);
 
-      expect(paths).toStrictEqual([]);
+      expect(paths).toStrictEqual(['']);
     });
   });
 
@@ -66,6 +66,7 @@ describe('json-leaf-paths', function () {
       'hello',
       'hyphenated-path.hi',
       'hyphenated-path.foo',
+      'hyphenated-path.spam',
       'hyphenated-path.more.nested.deeper.than.reasonable',
       'hyphenated-path.more.nested.deeper.than.number',
     ]);

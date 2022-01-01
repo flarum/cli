@@ -7,7 +7,7 @@ describe('Scaffolder', function () {
     const scaffoldDir = resolve(__dirname, '../fixtures/example-scaffold');
     const allFiles = ['src/index.html', 'src/index.js', 'src/index.php', 'src/index.ml', '.gitignore', 'config1.json', 'config2.json', 'readme.md'];
     const filesNoConf = allFiles.filter((p) => p !== 'config1.json');
-    const configKeys = ['hello', 'foo', '${params.varKey}++', 'nested.config.string', 'nested.config.boolean', 'nested.config.null'];
+    const configKeys = ['hello', 'foo', 'authors', '${params.varKey}++', 'nested.config.string', 'nested.config.boolean', 'nested.config.null'];
 
     const templateParams: TemplateParam<string, 'someVar' | 'someOtherVar' | 'varKey'>[] = [
       {
