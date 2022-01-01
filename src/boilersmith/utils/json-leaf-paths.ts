@@ -8,7 +8,8 @@ interface JSONSchemaArray extends Array<JSONSchema> {}
 
 function inner(o: JSONSchema, prefix: string[]): string[] {
   if (o instanceof Array) {
-    return [];
+    // Placed separately in case we eventually decide to support leaves in arrays.
+    return [prefix.join('.')];
   }
   else if (o && typeof o === 'object') {
     return Object.entries(o).map(([k, v]) => inner(v, [...prefix, k])).flat();
