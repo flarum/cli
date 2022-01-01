@@ -85,7 +85,7 @@ export class Scaffolder<TN extends string = string, MN extends string = string> 
 
     // Generate template data for future checks
     const paramVals: Record<string, ''> = this.templateParams.reduce((acc, param) => {
-      return { ...acc, [getParamName(param)]: '' };
+      return { ...acc, [getParamName(param)]: 'TEST' };
     }, {});
 
     const modulesEnabled: Record<string, boolean> = this.modules.reduce((acc, module) => {
