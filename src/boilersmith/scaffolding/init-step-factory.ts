@@ -19,8 +19,8 @@ export function initStepFactory<Providers extends {} = {}>(scaffoldDir: string, 
       modulesEnabled = await promptModulesEnabled(modules, io);
 
       for (const m of modules) {
-        if (modulesEnabled[m.name]) {
-          applyModule(m, modulesEnabled, paramVals, scaffoldDir, fs, paths);
+        if (modulesEnabled[m.name] && (!m.togglable || !m.dependsOn.some(dep => !modulesEnabled[dep]))) {
+          applyModule(m, modulesEnabled, paramVals, scaffoldDir, fs, paths, true);
         }
       }
 
