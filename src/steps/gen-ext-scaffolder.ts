@@ -1,9 +1,10 @@
 import { Paths } from 'boilersmith/paths';
-import { Module } from 'boilersmith/scaffolding/module';
+import { Module, ModuleStatusCache } from 'boilersmith/scaffolding/module';
 import { Scaffolder } from 'boilersmith/scaffolding/scaffolder';
 import { TemplateParam } from 'boilersmith/scaffolding/template-param';
 import chalk from 'chalk';
 import { Store } from 'mem-fs';
+import { create } from 'mem-fs-editor';
 import { resolve } from 'path';
 import simpleGit from 'simple-git';
 import spdxLicenseListSimple from 'spdx-license-list/simple';
@@ -382,7 +383,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         togglable: true,
         defaultEnabled: true,
         shortDescription: 'Auto-format frontend code with Prettier.',
-        dependsOn: [],
+        dependsOn: ['js'],
         filesToReplace: [],
         jsonToAugment: {
           'js/package.json': ['prettier', 'devDependencies.prettier', 'devDependencies.@flarum/prettier-config', 'scripts.format', 'scripts.format-check'],
@@ -397,7 +398,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         togglable: true,
         defaultEnabled: true,
         shortDescription: 'Support TypeScript in frontend code.',
-        dependsOn: [],
+        dependsOn: ['js'],
         filesToReplace: ['js/tsconfig.json'],
         jsonToAugment: {
           'js/package.json': [
@@ -419,7 +420,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         togglable: true,
         defaultEnabled: false,
         shortDescription: 'Enable Bundlewatch Checks',
-        dependsOn: [],
+        dependsOn: ['js'],
         filesToReplace: [],
         jsonToAugment: {},
         needsTemplateParams: [],
@@ -439,7 +440,6 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
           'tests/fixtures/.gitkeep',
           'tests/integration/setup.php',
           'tests/unit/.gitkeep',
-          '.github/workflows/backend.yml',
         ],
         jsonToAugment: {
           'composer.json': [
@@ -492,7 +492,27 @@ let cached: Scaffolder<ExtensionParams, ExtensionModules>;
 export function genExtScaffolder(): Scaffolder<ExtensionParams, ExtensionModules> {
   if (cached) return cached;
 
-  const scaffolder = new Scaffolder<ExtensionParams, ExtensionModules>(resolve(__dirname, '../../boilerplate/skeleton/extension'));
+  const moduleStatusCache: ModuleStatusCache<ExtensionModules> = {
+    get: async(module: Module<ExtensionModules>, fs: Store, paths: Paths) => {
+      const json = getComposerJson(fs, paths);
+      return !module.togglable || (json?.extra?.['flarum-cli']?.modules?.[module.name] ?? module.defaultEnabled);
+    },
+    set: async(module: Module<ExtensionModules>, enabled: boolean, fs: Store, paths: Paths) => {
+      const json = {
+        extra: {
+          'flarum-cli': {
+            modules: {
+              [module.name]: enabled,
+            }
+          }
+        }
+      };
+
+      create(fs).extendJSON(paths.package('composer.json'), json);
+    },
+  }
+
+  const scaffolder = new Scaffolder<ExtensionParams, ExtensionModules>(resolve(__dirname, '../../boilerplate/skeleton/extension'), moduleStatusCache);
 
   for (const name of EXTENSION_MODULES) {
     scaffolder.registerModule(moduleNameToDef(name));
