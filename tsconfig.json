@@ -5,7 +5,7 @@
     "importHelpers": true,
     "module": "commonjs",
     "outDir": "lib",
-    "rootDir": "src",
+    "rootDir": ".",
     "strict": true,
     "target": "es2017",
     "typeRoots": [
@@ -20,6 +20,6 @@
     }
   },
   "include": [
-    "src/**/*", "tests/**/*"
+    "src/**/*", "test/**/*"
   ]
 }
