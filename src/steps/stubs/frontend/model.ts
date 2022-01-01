@@ -5,6 +5,7 @@ import { Paths } from 'boilersmith/paths';
 import { Validator } from '../../../utils/validation';
 import { BaseJsStubStep } from '../js-base';
 import { pluralKebabCaseModel } from '../../../utils/model-name';
+import { Store } from 'mem-fs';
 
 export class GenerateModelStub extends BaseJsStubStep {
   type = 'Generate Model Class';
@@ -33,8 +34,8 @@ export class GenerateModelStub extends BaseJsStubStep {
     ],
   }
 
-  protected async compileParams(fsEditor: Editor, paths: Paths, io: IO): Promise<Record<string, unknown>> {
-    const params = await super.compileParams(fsEditor, paths, io);
+  protected async compileParams(fs: Store, paths: Paths, io: IO): Promise<Record<string, unknown>> {
+    const params = await super.compileParams(fs, paths, io);
 
     params.modelType = pluralKebabCaseModel(params.className as string);
 

@@ -18,14 +18,13 @@ import { GenerateCommandStub } from '../../../src/steps/stubs/backend/command';
 import { GenerateModalStub } from '../../../src/steps/stubs/frontend/modal';
 import { GenerateComponentStub } from '../../../src/steps/stubs/frontend/component';
 import { genExtScaffolder } from '../../../src/steps/gen-ext-scaffolder';
+import { FlarumBaseStubStep } from '../../../src/steps/stubs/flarum-base';
 import { stubPhpProviderFactory } from '../../utils';
 import { Paths } from 'boilersmith/paths';
-import { Step } from 'boilersmith/step-manager';
-import { Scaffolder } from 'boilersmith/scaffolding/scaffolder';
 import { resolve } from 'path';
 
 interface StubTest {
-  stubClass: new (stubDir: string, scaffolder: Scaffolder) => Step;
+  stubClass: new (stubDir: string, scaffolder: ReturnType<typeof genExtScaffolder>) => FlarumBaseStubStep;
 
   params: Record<string, unknown>;
 
@@ -385,7 +384,7 @@ for (const specDefinition of [
         const stubDir = resolve(__dirname, '../../../boilerplate/stubs');
 
         test('With default dir', async function () {
-          const { fs, exposedParams } = await runStep(new spec.stubClass(stubDir, scaffolder), {}, Object.values(spec.params), {}, initialFilesCallback);
+          const { fs, exposedParams } = await runStep(new spec.stubClass(stubDir, scaffolder), {php: stubPhpProviderFactory()}, Object.values(spec.params), {}, initialFilesCallback);
 
           expect(getFsPaths(fs)).toStrictEqual([...spec.expectedModifiedFilesDefaultDir, '/ext/composer.json'].sort());
 
@@ -395,7 +394,7 @@ for (const specDefinition of [
         test('With requested dir', async function () {
           const { fs, exposedParams } = await runStep(
             new spec.stubClass(stubDir, scaffolder),
-            {},
+            {php: stubPhpProviderFactory()},
             Object.values(spec.params),
             {},
             initialFilesCallback,

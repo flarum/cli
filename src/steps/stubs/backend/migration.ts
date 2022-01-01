@@ -25,8 +25,8 @@ export class GenerateMigrationStub extends BasePhpStubStep {
     ],
   }
 
-  protected async compileParams(fsEditor: Editor, paths: Paths, io: IO): Promise<Record<string, unknown>> {
-    const params = await super.compileParams(fsEditor, paths, io);
+  protected async compileParams(fs: Store, paths: Paths, io: IO): Promise<Record<string, unknown>> {
+    const params = await super.compileParams(fs, paths, io);
 
     const regex = new RegExp(/^create_([\dA-z]+)_table$/);
 

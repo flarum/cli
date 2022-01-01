@@ -4,6 +4,7 @@ import { Paths } from 'boilersmith/paths';
 import { Validator } from '../../../utils/validation';
 import { pluralSnakeCaseModel, pluralKebabCaseModel } from '../../../utils/model-name';
 import { BasePhpStubStep } from '../php-base';
+import { Store } from 'mem-fs';
 
 export class GenerateModelStub extends BasePhpStubStep {
   type = 'Generate Model Class';
@@ -36,8 +37,8 @@ export class GenerateModelStub extends BasePhpStubStep {
     ],
   }
 
-  protected async compileParams(fsEditor: Editor, paths: Paths, io: IO): Promise<Record<string, unknown>> {
-    const params = await super.compileParams(fsEditor, paths, io);
+  protected async compileParams(fs: Store, paths: Paths, io: IO): Promise<Record<string, unknown>> {
+    const params = await super.compileParams(fs, paths, io);
 
     params.modelPluralSnake = pluralSnakeCaseModel(params.className as string);
     params.modelPluralKebab = pluralKebabCaseModel(params.className as string);

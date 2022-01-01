@@ -5,6 +5,7 @@ import { Paths } from 'boilersmith/paths';
 import { Validator } from '../../../utils/validation';
 import { pluralKebabCaseModel } from '../../../utils/model-name';
 import { BasePhpStubStep } from '../php-base';
+import { Store } from 'mem-fs';
 
 export class GenerateApiSerializerStub extends BasePhpStubStep {
   type = 'Generate Api Serializer Class';
@@ -46,8 +47,8 @@ export class GenerateApiSerializerStub extends BasePhpStubStep {
     ],
   }
 
-  protected async compileParams(fsEditor: Editor, paths: Paths, io: IO): Promise<Record<string, unknown>> {
-    const params = await super.compileParams(fsEditor, paths, io);
+  protected async compileParams(fs: Store, paths: Paths, io: IO): Promise<Record<string, unknown>> {
+    const params = await super.compileParams(fs, paths, io);
 
     params.modelType = pluralKebabCaseModel(params.modelClassName as string);
 
