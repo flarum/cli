@@ -173,7 +173,7 @@ export async function applyModule<MN extends string, TN extends string>(
   }
 
   if (!isInitial && !module.updatable) {
-    throw new Error(`Cannot update module "${module.name}", as it is not updatable, and the project has already been initialized.`);
+    throw new Error(`Cannot update module "${module.name}", as it is not updatable, and has already been initialized.`);
   }
 
   const tplData = {

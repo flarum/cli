@@ -26,10 +26,12 @@ export function infraStepFactory<MN extends string, Providers extends {} = {}>(
       const paramVals = await promptParamValues(templateParams, paths, io);
       const modulesEnabled = await promptModulesEnabled(modules, io);
 
-      applyModule(module, modulesEnabled, paramVals, scaffoldDir, fs, paths, false);
+      const initializing = !modulesEnabled[module.name];
+      applyModule(module, modulesEnabled, paramVals, scaffoldDir, fs, paths, initializing);
 
       if (moduleStatusCache) {
         setModuleValue(module, true, fs, paths, moduleStatusCache);
+
       }
 
       return fs;

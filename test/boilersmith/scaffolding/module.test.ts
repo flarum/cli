@@ -379,6 +379,6 @@ describe('applyModule', function () {
         createStore(),
         new NodePaths({ package: '/ext' })
       );
-    }).rejects.toThrow('Cannot update module "just-files", as it is not updatable, and the project has already been initialized.');
+    }).rejects.toThrow('Cannot update module "just-files", as it is not updatable, and has already been initialized.');
   });
 });
