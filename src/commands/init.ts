@@ -3,8 +3,8 @@ import { ComposerInstall } from '../steps/misc/composer';
 import { YarnInstall } from '../steps/misc/yarn';
 import BaseCommand from '../base-command';
 import yosay from 'yosay';
-import { FlarumProviders } from 'src/providers';
-import { genExtScaffolder } from 'src/steps/gen-ext-scaffolder';
+import { FlarumProviders } from '../providers';
+import { genExtScaffolder } from '../steps/gen-ext-scaffolder';
 
 export default class Init extends BaseCommand {
   static description = 'Create a new Flarum extension';

@@ -1,8 +1,8 @@
 import { StepManager } from 'boilersmith/step-manager';
 import { ComposerInstall } from '../steps/misc/composer';
 import BaseCommand from '../base-command';
-import { FlarumProviders } from 'src/providers';
-import { EXTENSION_MODULES, genExtScaffolder } from 'src/steps/gen-ext-scaffolder';
+import { FlarumProviders } from '../providers';
+import { EXTENSION_MODULES, genExtScaffolder } from '../steps/gen-ext-scaffolder';
 
 export default class Infra extends BaseCommand {
   static description = 'Add/Update backend testing infrastructure';

@@ -13,8 +13,8 @@ import { GenerateApiControllerStub } from '../../../steps/stubs/backend/api-cont
 import { GenerateHandlerStub } from '../../../steps/stubs/backend/handler';
 import { GenerateHandlerCommandStub } from '../../../steps/stubs/backend/handler-command';
 import { GenerateRoutesExtender } from '../../../steps/extenders/route';
-import { FlarumProviders } from 'src/providers';
-import { genExtScaffolder } from 'src/steps/gen-ext-scaffolder';
+import { FlarumProviders } from '../../../providers';
+import { genExtScaffolder } from '../../../steps/gen-ext-scaffolder';
 
 export default class Model extends BaseCommand {
   static description = 'Generate a model class';

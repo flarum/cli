@@ -1,6 +1,6 @@
 import { StepManager } from 'boilersmith/step-manager';
-import { FlarumProviders } from 'src/providers';
-import { genExtScaffolder } from 'src/steps/gen-ext-scaffolder';
+import { FlarumProviders } from '../../../providers';
+import { genExtScaffolder } from '../../../steps/gen-ext-scaffolder';
 import BaseCommand from '../../../base-command';
 import { GenerateValidatorStub } from '../../../steps/stubs/backend/validator';
 

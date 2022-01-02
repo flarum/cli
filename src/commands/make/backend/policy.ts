@@ -2,8 +2,8 @@ import { StepManager } from 'boilersmith/step-manager';
 import BaseCommand from '../../../base-command';
 import { GeneratePolicyStub } from '../../../steps/stubs/backend/policy';
 import { GeneratePolicyExtender } from '../../../steps/extenders/policy';
-import { FlarumProviders } from 'src/providers';
-import { genExtScaffolder } from 'src/steps/gen-ext-scaffolder';
+import { FlarumProviders } from '../../../providers';
+import { genExtScaffolder } from '../../../steps/gen-ext-scaffolder';
 
 export default class Policy extends BaseCommand {
   static description = 'Generate a policy class';

@@ -2,8 +2,8 @@ import { StepManager } from 'boilersmith/step-manager';
 import BaseCommand from '../../../base-command';
 import { GenerateApiControllerStub } from '../../../steps/stubs/backend/api-controller';
 import { GenerateRoutesExtender } from '../../../steps/extenders/route';
-import { genExtScaffolder } from 'src/steps/gen-ext-scaffolder';
-import { FlarumProviders } from 'src/providers';
+import { genExtScaffolder } from '../../../steps/gen-ext-scaffolder';
+import { FlarumProviders } from '../../../providers';
 
 export default class ApiController extends BaseCommand {
   static description = 'Generate an API controller class';

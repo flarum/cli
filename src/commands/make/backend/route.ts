@@ -1,5 +1,5 @@
 import { StepManager } from 'boilersmith/step-manager';
-import { FlarumProviders } from 'src/providers';
+import { FlarumProviders } from '../../../providers';
 import BaseCommand from '../../../base-command';
 import { GenerateRoutesExtender } from '../../../steps/extenders/route';
 

@@ -5,7 +5,7 @@ import { Paths } from 'boilersmith/paths';
 import { ExtenderDef } from '../../providers/php-provider';
 import { Step } from 'boilersmith/step-manager';
 import { cloneAndFill } from 'boilersmith/utils/clone-and-fill';
-import { FlarumProviders } from 'src/providers';
+import { FlarumProviders } from '../../providers';
 
 interface UserProvidedParam extends Omit<ParamDef, 'type'> {
   type: string;

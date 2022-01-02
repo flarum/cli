@@ -2,8 +2,8 @@ import { StepManager } from 'boilersmith/step-manager';
 import BaseCommand from '../../../base-command';
 import { GenerateHandlerCommandStub } from '../../../steps/stubs/backend/handler-command';
 import { GenerateHandlerStub } from '../../../steps/stubs/backend/handler';
-import { FlarumProviders } from 'src/providers';
-import { genExtScaffolder } from 'src/steps/gen-ext-scaffolder';
+import { FlarumProviders } from '../../../providers';
+import { genExtScaffolder } from '../../../steps/gen-ext-scaffolder';
 
 export default class ApiController extends BaseCommand {
   static description = 'Generate a domain logic handler class';

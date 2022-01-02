@@ -2,8 +2,8 @@ import { StepManager } from 'boilersmith/step-manager';
 import BaseCommand from '../../../base-command';
 import { GenerateCommandStub } from '../../../steps/stubs/backend/command';
 import { GenerateConsoleCommandExtender } from '../../../steps/extenders/console-command';
-import { FlarumProviders } from 'src/providers';
-import { genExtScaffolder } from 'src/steps/gen-ext-scaffolder';
+import { FlarumProviders } from '../../../providers';
+import { genExtScaffolder } from '../../../steps/gen-ext-scaffolder';
 
 export default class Command extends BaseCommand {
   static description = 'Generate a console command class';

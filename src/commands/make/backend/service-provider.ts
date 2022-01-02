@@ -2,8 +2,8 @@ import { StepManager } from 'boilersmith/step-manager';
 import BaseCommand from '../../../base-command';
 import { GenerateServiceProviderStub } from '../../../steps/stubs/backend/service-provider';
 import { GenerateServiceProviderExtender } from '../../../steps/extenders/service-provider';
-import { FlarumProviders } from 'src/providers';
-import { genExtScaffolder } from 'src/steps/gen-ext-scaffolder';
+import { FlarumProviders } from '../../../providers';
+import { genExtScaffolder } from '../../../steps/gen-ext-scaffolder';
 
 export default class ServiceProvider extends BaseCommand {
   static description = 'Generate a service provider class';
