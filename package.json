@@ -57,7 +57,7 @@
     "oclif"
   ],
   "license": "MIT",
-  "main": "lib/src/index.js",
+  "main": "./lib/index.js",
   "oclif": {
     "additionalHelpFlags": [
       "-h"
@@ -65,9 +65,9 @@
     "additionalVersionFlags": [
       "-v"
     ],
-    "commands": "./lib/src/commands",
+    "commands": "./lib/commands",
     "bin": "flarum-cli",
-    "helpClass": "./lib/src/help",
+    "helpClass": "./lib/help",
     "topicSeparator": " ",
     "topics": {
       "make backend": {
