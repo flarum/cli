@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import prompts from 'prompts';
 import globby from 'globby';
 import { execSync } from 'node:child_process';
-import { existsSync, unlinkSync } from 'node:fs';
+import { existsSync, readFileSync, unlinkSync } from 'node:fs';
 import { PromptsIO, PROMPTS_OPTIONS } from 'boilersmith/io';
 import { StepManager } from 'boilersmith/step-manager';
 import { NodePaths } from 'boilersmith/paths';
@@ -97,11 +97,21 @@ export default abstract class BaseCommand extends Command {
   // Confirmation
   // ----------------------------------------------------------------
 
+  protected isFlarumCore(path: string): boolean {
+    try {
+      const composerJsonPath = resolve(path, 'composer.json');
+      const val = JSON.parse(readFileSync(composerJsonPath, 'utf8'));
+      return val.name === 'flarum/core';
+    } catch {
+      return false;
+    }
+  }
+
   protected async getFlarumExtensionRoot(currDir: string): Promise<string> {
     let currPath = resolve(currDir);
 
     while (currPath !== '/') {
-      if (existsSync(resolve(currPath, 'composer.json')) && existsSync(resolve(currPath, 'extend.php'))) {
+      if (existsSync(resolve(currPath, 'composer.json')) && (existsSync(resolve(currPath, 'extend.php')) || this.isFlarumCore(currPath))) {
         return currPath;
       }
 
@@ -111,7 +121,7 @@ export default abstract class BaseCommand extends Command {
     this.error(
       `${resolve(
         currDir,
-      )} is not located in a valid Flarum extension! Flarum extensions must contain (at a minimum) 'extend.php' and 'composer.json' files.`,
+      )} is not located in a valid Flarum package! Flarum extensions must contain (at a minimum) 'extend.php' and 'composer.json' files.`,
     );
   }
 
@@ -120,7 +130,7 @@ export default abstract class BaseCommand extends Command {
       {
         name: 'verify',
         type: 'confirm',
-        message: `Work in Flarum extension located at ${resolve(extRoot)}?`,
+        message: `Work in Flarum package located at ${resolve(extRoot)}?`,
         initial: true,
       },
     ], PROMPTS_OPTIONS);
