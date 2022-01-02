@@ -4,6 +4,7 @@ import { YarnInstall } from '../steps/misc/yarn';
 import BaseCommand from '../base-command';
 import yosay from 'yosay';
 import { FlarumProviders } from 'src/providers';
+import { genExtScaffolder } from 'src/steps/gen-ext-scaffolder';
 
 export default class Init extends BaseCommand {
   static description = 'Create a new Flarum extension';
@@ -16,7 +17,7 @@ export default class Init extends BaseCommand {
 
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
     return stepManager
-      .namedStep('skeleton', new ExtensionSkeleton(), {})
+      .namedStep('skeleton', genExtScaffolder().genInitStep())
       .step(new ComposerInstall(), { optional: true, confirmationMessage: 'Run `composer install`? (recommended)', default: true})
       .step(new YarnInstall(), { optional: true, confirmationMessage: 'Run `yarn install`? (recommended)', default: true }, [
         {
