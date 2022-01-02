@@ -151,7 +151,7 @@ function paramNamesToDef(name: ExtensionParams): TemplateParam<string, Extension
     return {
       name,
       uses: ['licenseType'],
-      compute: async (_paths, licenseType: string) => (licenseType ? require(`spdx-license-list/licenses/${licenseType}`) : ''),
+      compute: async (_paths, licenseType: string) => (licenseType ? require(`spdx-license-list/licenses/${licenseType}`).licenseText : ''),
     };
 
   case 'packageNamespaceEscapedSlash':
