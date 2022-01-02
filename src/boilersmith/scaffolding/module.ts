@@ -8,6 +8,7 @@ import { Paths } from 'boilersmith/paths';
 import { readTpl } from 'boilersmith/utils/read-tpl';
 import { cloneAndFill } from 'boilersmith/utils/clone-and-fill';
 import { renameKeys } from 'boilersmith/utils/rename-keys';
+import { condFormat } from 'boilersmith/utils/cond-format';
 
 interface FileOwnership {
   /**
@@ -80,14 +81,14 @@ export type ModuleStatusCache<N extends string> = {
   set: (module: Module<N>, val: boolean, fs: Store, paths: Paths) => Promise<void>;
 };
 
-export async function promptModulesEnabled<N extends string>(modules: Module<N>[], promptProvider: IO): Promise<Record<N, boolean>> {
+export async function promptModulesEnabled<N extends string>(modules: Module<N>[], io: IO): Promise<Record<N, boolean>> {
   const modulesEnabled: Record<string, boolean> = {};
 
-  const advanced = await promptProvider.getParam<boolean>({
+  const advanced = await io.getParam<boolean>({
     name: 'advancedInstallation',
     type: 'confirm',
     initial: false,
-    message: `Advanced Initialization ${chalk.dim('(fine-tune which features are enabled)')}`,
+    message: `Advanced Initialization ${condFormat(io.supportsAnsiColor, chalk.dim, '(fine-tune which features are enabled)')}`,
   });
 
   for (const m of modules) {
@@ -98,11 +99,11 @@ export async function promptModulesEnabled<N extends string>(modules: Module<N>[
       modulesEnabled[m.name] = false;
     } else if (advanced) {
       // eslint-disable-next-line no-await-in-loop
-      modulesEnabled[m.name] = await promptProvider.getParam<boolean>({
+      modulesEnabled[m.name] = await io.getParam<boolean>({
         name: `modules.${m.name}`,
         type: 'confirm',
         initial: m.defaultEnabled,
-        message: m.shortDescription + (m.longDescription ? chalk.dim(` (${m.longDescription})`) : ''),
+        message: m.shortDescription + (m.longDescription ? condFormat(io.supportsAnsiColor, chalk.dim, ` (${m.longDescription})`) : ''),
       });
     } else {
       modulesEnabled[m.name] = m.defaultEnabled;

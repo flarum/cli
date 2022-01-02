@@ -7,6 +7,8 @@ export type ParamDef<N extends string = string> = Omit<PromptObject<N>, 'name'> 
 export type Message = { type: 'info' | 'warning' | 'error', message: string };
 
 export interface IO {
+  supportsAnsiColor: boolean;
+
   /**
    * Prompt the user for some input data.
    */
@@ -37,6 +39,8 @@ export interface IO {
 export const PROMPTS_OPTIONS: Options = { onCancel: () => exit() };
 
 export class PromptsIO implements IO {
+  public supportsAnsiColor = true;
+
   private cache = new Map<string, unknown>();
   private messages: Message[] = [];
 
