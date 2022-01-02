@@ -2,8 +2,8 @@ import { Store } from 'mem-fs';
 import { IO } from 'boilersmith/io';
 import { Paths } from '../paths';
 import { DefaultProviders, Step } from '../step-manager';
-import { applyModule, Module, ModuleStatusCache, promptModulesEnabled, setModuleValue } from './module';
-import { promptParamValues, TemplateParam } from './template-param';
+import { applyModule, currModulesEnabled, Module, ModuleStatusCache, setModuleValue } from './module';
+import { currParamValues, TemplateParam } from './template-param';
 
 export function infraStepFactory<MN extends string, Providers extends DefaultProviders>(
   scaffoldDir: string,
@@ -23,8 +23,8 @@ export function infraStepFactory<MN extends string, Providers extends DefaultPro
     composable: true,
 
     async run(fs: Store, paths: Paths, io: IO, _providers: Providers): Promise<Store> {
-      const paramVals = await promptParamValues(templateParams, paths, io);
-      const modulesEnabled = await promptModulesEnabled(modules, io);
+      const paramVals = await currParamValues(templateParams, fs, paths, io);
+      const modulesEnabled = await currModulesEnabled(modules, fs, paths, moduleStatusCache);
 
       const initializing = !modulesEnabled[module.name];
       applyModule(module, modulesEnabled, paramVals, scaffoldDir, fs, paths, initializing);
