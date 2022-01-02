@@ -14,7 +14,7 @@ function assertUnreachable(_x: never): never {
   throw new Error("Didn't expect to get here");
 }
 
-const EXTENSION_PARAMS = [
+export const EXTENSION_PARAMS = [
   'packageName',
   'packageDescription',
   'packageNamespace',
@@ -215,7 +215,7 @@ function paramNamesToDef(name: ExtensionParams): TemplateParam<string, Extension
   return assertUnreachable(name);
 }
 
-const EXTENSION_MODULES = [
+export const EXTENSION_MODULES = [
   'core',
   'icon',
 
