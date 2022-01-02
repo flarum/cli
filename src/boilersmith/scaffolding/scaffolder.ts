@@ -69,6 +69,10 @@ export class Scaffolder<TN extends string = string, MN extends string = string> 
     return currModulesEnabled<MN>(this.modules, fs, paths, this.moduleStatusCache);
   }
 
+  moduleFiles(moduleName: MN): string[] {
+    return this.modules.find(m => m.name === moduleName)?.filesToReplace.map(f => typeof f === 'string' ? f : f.path) ?? [];
+  }
+
   /**
    * Confirm that all files and configuration keys in the scaffolding dir
    * are owned by at least one module, and that no modules own nonexistent

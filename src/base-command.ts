@@ -156,8 +156,9 @@ export default abstract class BaseCommand extends Command {
    * If true, files should be overriden.
    * If user says no, will exit and not return anything.
    */
-  protected async confirmOverrideFiles(dir: string, pattern: string, confirmationMessage: string): Promise<boolean> {
-    const files = await globby(resolve(dir, pattern));
+  protected async confirmOverrideFiles(dir: string, pattern: string | string[], confirmationMessage: string): Promise<boolean> {
+    const paths = Array.isArray(pattern) ? pattern : [pattern];
+    const files = await globby(paths.map(p => resolve(dir, p)));
 
     const empty = files.length === 0 || (files.length === 1 && files[0] === '.git');
 
