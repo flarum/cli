@@ -5,7 +5,6 @@
     "moduleResolution": "node",
     "importHelpers": true,
     "module": "commonjs",
-    "outDir": "lib",
     "rootDir": ".",
     "strict": true,
     "target": "es2017",
