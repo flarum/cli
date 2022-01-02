@@ -1,4 +1,6 @@
 import { StepManager } from 'boilersmith/step-manager';
+import { FlarumProviders } from 'src/providers';
+import { genExtScaffolder } from 'src/steps/gen-ext-scaffolder';
 import BaseCommand from '../../../base-command';
 import { GenerateIntegrationTestStub } from '../../../steps/stubs/backend/integration-test';
 
@@ -9,11 +11,11 @@ export default class IntegrationTest extends BaseCommand {
 
   static args = [...BaseCommand.args];
 
-  protected steps(stepManager: StepManager): StepManager {
+  protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
     return stepManager
       .atomicGroup(stepManager => {
         stepManager
-          .namedStep('test', new GenerateIntegrationTestStub());
+          .namedStep('test', new GenerateIntegrationTestStub(this.STUB_PATH, genExtScaffolder()));
       });
   }
 }

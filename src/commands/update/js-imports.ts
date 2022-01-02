@@ -1,6 +1,7 @@
 import { StepManager } from 'boilersmith/step-manager';
 import { UpdateJSImports } from '../../steps/update/js-imports';
 import BaseCommand from '../../base-command';
+import { FlarumProviders } from 'src/providers';
 
 export default class UpdateJsImports extends BaseCommand {
   static description = 'Updates JS imports from core to use proper namespaces';
@@ -9,7 +10,7 @@ export default class UpdateJsImports extends BaseCommand {
 
   static args = [...BaseCommand.args];
 
-  protected steps(stepManager: StepManager): StepManager {
+  protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
     return stepManager
       .step(new UpdateJSImports());
   }

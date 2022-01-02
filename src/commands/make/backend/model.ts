@@ -13,6 +13,8 @@ import { GenerateApiControllerStub } from '../../../steps/stubs/backend/api-cont
 import { GenerateHandlerStub } from '../../../steps/stubs/backend/handler';
 import { GenerateHandlerCommandStub } from '../../../steps/stubs/backend/handler-command';
 import { GenerateRoutesExtender } from '../../../steps/extenders/route';
+import { FlarumProviders } from 'src/providers';
+import { genExtScaffolder } from 'src/steps/gen-ext-scaffolder';
 
 export default class Model extends BaseCommand {
   static description = 'Generate a model class';
@@ -21,19 +23,19 @@ export default class Model extends BaseCommand {
 
   static args = [...BaseCommand.args];
 
-  protected steps(stepManager: StepManager): StepManager {
+  protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
     return stepManager
       .atomicGroup(stepManager => {
         stepManager
-          .namedStep('model', new GenerateModelStub())
-          .step(new GenerateMigrationStub(), { optional: true, confirmationMessage: 'Generate corresponding Migration?', default: true }, [
+          .namedStep('model', new GenerateModelStub(this.STUB_PATH, genExtScaffolder()))
+          .step(new GenerateMigrationStub(this.STUB_PATH, genExtScaffolder()), { optional: true, confirmationMessage: 'Generate corresponding Migration?', default: true }, [
             {
               sourceStep: 'model',
               exposedName: 'migrationName',
               consumedName: 'name',
             },
           ])
-          .namedStep('serializer', new GenerateApiSerializerStub(), { optional: true, confirmationMessage: 'Generate corresponding API Serializer?', default: true }, [
+          .namedStep('serializer', new GenerateApiSerializerStub(this.STUB_PATH, genExtScaffolder()), { optional: true, confirmationMessage: 'Generate corresponding API Serializer?', default: true }, [
             {
               sourceStep: 'model',
               exposedName: 'class',
@@ -46,7 +48,7 @@ export default class Model extends BaseCommand {
               modifier: (modelClassName: unknown) => `${modelClassName as string}Serializer`,
             },
           ])
-          .namedStep('validator', new GenerateValidatorStub(), { optional: true, confirmationMessage: 'Generate corresponding Validator?', default: true }, [
+          .namedStep('validator', new GenerateValidatorStub(this.STUB_PATH, genExtScaffolder()), { optional: true, confirmationMessage: 'Generate corresponding Validator?', default: true }, [
             {
               sourceStep: 'model',
               exposedName: 'className',
@@ -54,7 +56,7 @@ export default class Model extends BaseCommand {
               modifier: (modelClassName: unknown) => `${modelClassName as string}Validator`,
             },
           ])
-          .namedStep('repository', new GenerateRepositoryStub(), { optional: true, confirmationMessage: 'Generate corresponding Repository?', default: true }, [
+          .namedStep('repository', new GenerateRepositoryStub(this.STUB_PATH, genExtScaffolder()), { optional: true, confirmationMessage: 'Generate corresponding Repository?', default: true }, [
             {
               sourceStep: 'model',
               exposedName: 'class',
@@ -67,7 +69,7 @@ export default class Model extends BaseCommand {
               modifier: (modelClassName: unknown) => `${modelClassName as string}Repository`,
             },
           ])
-          .namedStep('policy', new GeneratePolicyStub(), { optional: true, confirmationMessage: 'Generate corresponding Policy?', default: true }, [
+          .namedStep('policy', new GeneratePolicyStub(this.STUB_PATH, genExtScaffolder()), { optional: true, confirmationMessage: 'Generate corresponding Policy?', default: true }, [
             {
               sourceStep: 'model',
               exposedName: 'class',
@@ -100,7 +102,7 @@ export default class Model extends BaseCommand {
         stepManager
           .namedStep(
             'createHandlerCommand',
-            new GenerateHandlerCommandStub(),
+            new GenerateHandlerCommandStub(this.STUB_PATH, genExtScaffolder()),
             { optional: true, confirmationMessage: 'Generate corresponding Domain Handlers?', default: true },
             [
               {
@@ -115,7 +117,7 @@ export default class Model extends BaseCommand {
           )
           .namedStep(
             'updateHandlerCommand',
-            new GenerateHandlerCommandStub(),
+            new GenerateHandlerCommandStub(this.STUB_PATH, genExtScaffolder()),
             {},
             [
               {
@@ -134,7 +136,7 @@ export default class Model extends BaseCommand {
           )
           .namedStep(
             'deleteHandlerCommand',
-            new GenerateHandlerCommandStub(),
+            new GenerateHandlerCommandStub(this.STUB_PATH, genExtScaffolder()),
             {},
             [
               {
@@ -154,7 +156,7 @@ export default class Model extends BaseCommand {
 
         // Domain Handlers
         stepManager
-          .step(new GenerateHandlerStub(), {}, [
+          .step(new GenerateHandlerStub(this.STUB_PATH, genExtScaffolder()), {}, [
             {
               sourceStep: 'createHandlerCommand',
               exposedName: '__succeeded',
@@ -184,7 +186,7 @@ export default class Model extends BaseCommand {
               exposedName: 'classType',
             },
           ])
-          .step(new GenerateHandlerStub(), {}, [
+          .step(new GenerateHandlerStub(this.STUB_PATH, genExtScaffolder()), {}, [
             {
               sourceStep: 'updateHandlerCommand',
               exposedName: '__succeeded',
@@ -214,7 +216,7 @@ export default class Model extends BaseCommand {
               exposedName: 'classType',
             },
           ])
-          .step(new GenerateHandlerStub(), {}, [
+          .step(new GenerateHandlerStub(this.STUB_PATH, genExtScaffolder()), {}, [
             {
               sourceStep: 'deleteHandlerCommand',
               exposedName: '__succeeded',
@@ -246,7 +248,7 @@ export default class Model extends BaseCommand {
         stepManager
           .namedStep(
             'listApiController',
-            new GenerateApiControllerStub(),
+            new GenerateApiControllerStub(this.STUB_PATH, genExtScaffolder()),
             { optional: true, confirmationMessage: 'Generate corresponding CRUD API Controllers?', default: true },
             [
               {
@@ -272,7 +274,7 @@ export default class Model extends BaseCommand {
           )
           .namedStep(
             'showApiController',
-            new GenerateApiControllerStub(),
+            new GenerateApiControllerStub(this.STUB_PATH, genExtScaffolder()),
             {},
             [
               {
@@ -298,7 +300,7 @@ export default class Model extends BaseCommand {
           )
           .namedStep(
             'createApiController',
-            new GenerateApiControllerStub(),
+            new GenerateApiControllerStub(this.STUB_PATH, genExtScaffolder()),
             {},
             [
               {
@@ -328,7 +330,7 @@ export default class Model extends BaseCommand {
           )
           .namedStep(
             'updateApiController',
-            new GenerateApiControllerStub(),
+            new GenerateApiControllerStub(this.STUB_PATH, genExtScaffolder()),
             {},
             [
               {
@@ -358,7 +360,7 @@ export default class Model extends BaseCommand {
           )
           .namedStep(
             'deleteApiController',
-            new GenerateApiControllerStub(),
+            new GenerateApiControllerStub(this.STUB_PATH, genExtScaffolder()),
             {},
             [
               {

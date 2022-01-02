@@ -2,6 +2,8 @@ import { StepManager } from 'boilersmith/step-manager';
 import BaseCommand from '../../../base-command';
 import { GenerateServiceProviderStub } from '../../../steps/stubs/backend/service-provider';
 import { GenerateServiceProviderExtender } from '../../../steps/extenders/service-provider';
+import { FlarumProviders } from 'src/providers';
+import { genExtScaffolder } from 'src/steps/gen-ext-scaffolder';
 
 export default class ServiceProvider extends BaseCommand {
   static description = 'Generate a service provider class';
@@ -10,11 +12,11 @@ export default class ServiceProvider extends BaseCommand {
 
   static args = [...BaseCommand.args];
 
-  protected steps(stepManager: StepManager): StepManager {
+  protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
     return stepManager
       .atomicGroup(stepManager => {
         stepManager
-          .namedStep('provider', new GenerateServiceProviderStub())
+          .namedStep('provider', new GenerateServiceProviderStub(this.STUB_PATH, genExtScaffolder()))
           .step(new GenerateServiceProviderExtender(), { optional: true, confirmationMessage: 'Generate corresponding extender?', default: true }, [
             {
               sourceStep: 'provider',

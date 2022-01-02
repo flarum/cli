@@ -2,6 +2,8 @@ import { StepManager } from 'boilersmith/step-manager';
 import BaseCommand from '../../../base-command';
 import { GenerateHandlerCommandStub } from '../../../steps/stubs/backend/handler-command';
 import { GenerateHandlerStub } from '../../../steps/stubs/backend/handler';
+import { FlarumProviders } from 'src/providers';
+import { genExtScaffolder } from 'src/steps/gen-ext-scaffolder';
 
 export default class ApiController extends BaseCommand {
   static description = 'Generate a domain logic handler class';
@@ -10,12 +12,12 @@ export default class ApiController extends BaseCommand {
 
   static args = [...BaseCommand.args];
 
-  protected steps(stepManager: StepManager): StepManager {
+  protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
     return stepManager
       .atomicGroup(stepManager => {
         stepManager
-          .namedStep('handlerCommand', new GenerateHandlerCommandStub())
-          .step(new GenerateHandlerStub(), {}, [
+          .namedStep('handlerCommand', new GenerateHandlerCommandStub(this.STUB_PATH, genExtScaffolder()))
+          .step(new GenerateHandlerStub(this.STUB_PATH, genExtScaffolder()), {}, [
             {
               sourceStep: 'handlerCommand',
               exposedName: 'className',

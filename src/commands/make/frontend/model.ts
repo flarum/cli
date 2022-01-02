@@ -2,6 +2,8 @@ import { StepManager } from 'boilersmith/step-manager';
 import BaseCommand from '../../../base-command';
 import { GenerateModelStub } from '../../../steps/stubs/frontend/model';
 import { GenerateModelDefinition } from '../../../steps/js/model';
+import { FlarumProviders } from 'src/providers';
+import { genExtScaffolder } from 'src/steps/gen-ext-scaffolder';
 
 export default class Model extends BaseCommand {
   static description = 'Generate a model class';
@@ -10,11 +12,11 @@ export default class Model extends BaseCommand {
 
   static args = [...BaseCommand.args];
 
-  protected steps(stepManager: StepManager): StepManager {
+  protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
     return stepManager
       .atomicGroup(stepManager => {
         stepManager
-          .namedStep('model', new GenerateModelStub())
+          .namedStep('model', new GenerateModelStub(this.STUB_PATH, genExtScaffolder()))
           .step(new GenerateModelDefinition(), {}, [
             {
               sourceStep: 'model',
