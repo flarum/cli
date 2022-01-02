@@ -10,8 +10,14 @@ import { StepManager } from 'boilersmith/step-manager';
 import { NodePaths } from 'boilersmith/paths';
 import { PhpSubsystemProvider } from './providers/php-provider';
 import chalk from 'chalk';
+import { FlarumProviders } from './providers';
 
 export default abstract class BaseCommand extends Command {
+  protected STUB_PATH = resolve(__dirname, '../boilerplate/stubs/');
+
+  protected args!: Record<string, any>;
+  protected flags: any;
+
   static flags: Interfaces.FlagInput<any> = {
     help: Flags.help({ char: 'h' }),
   };
@@ -26,9 +32,12 @@ export default abstract class BaseCommand extends Command {
   protected requireExistingExtension = true;
 
   async run(): Promise<void> {
-    const { args } = await this.parse(this.constructor as any);
+    const { args, flags } = await this.parse(this.constructor as any);
 
-    const path: string|undefined = args.path;
+    this.args = args;
+    this.flags = flags;
+
+    const path: string | undefined = args.path;
 
     const welcomeMessage = this.welcomeMessage();
     if (welcomeMessage) {
@@ -54,13 +63,13 @@ export default abstract class BaseCommand extends Command {
 
     const phpProvider = new PhpSubsystemProvider(resolve(__dirname, '../php-subsystem/index.php'));
 
-    const completed = await this.steps(new StepManager())
-      .run(paths, promptsIOFactory, phpProvider);
+    const completed = await this.steps(new StepManager<FlarumProviders>())
+      .run(paths, promptsIOFactory, { php: phpProvider });
 
     this.log('\n\n');
     this.log(chalk.bold(chalk.underline(chalk.green('Success! The following steps were completed:'))));
 
-    for (const stepName of completed)  this.log(`- ${chalk.dim(stepName)}`);
+    for (const stepName of completed) this.log(`- ${chalk.dim(stepName)}`);
 
     this.log('');
 
@@ -82,7 +91,7 @@ export default abstract class BaseCommand extends Command {
     // Can be implemented if needed.
   }
 
-  protected abstract steps(stepManager: StepManager): StepManager;
+  protected abstract steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders>;
 
   // ----------------------------------------------------------------
   // Confirmation
@@ -167,7 +176,7 @@ export default abstract class BaseCommand extends Command {
     return true;
   }
 
-  protected async  deleteFiles(dir: string, pattern: string): Promise<void> {
+  protected async deleteFiles(dir: string, pattern: string): Promise<void> {
     const pathsToDelete = await globby(resolve(dir, pattern));
 
     pathsToDelete.forEach(unlinkSync);
