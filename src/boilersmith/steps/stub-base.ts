@@ -1,11 +1,11 @@
 import pick from 'pick-deep';
 import { Store } from 'mem-fs';
-import { create, Editor } from 'mem-fs-editor';
+import { create } from 'mem-fs-editor';
 import { ParamDef, IO } from 'boilersmith/io';
 import { Paths } from 'boilersmith/paths';
-import { Step } from 'boilersmith/step-manager';
+import { DefaultProviders, Step } from 'boilersmith/step-manager';
 import { cloneAndFill } from '../utils/clone-and-fill';
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import { Scaffolder } from 'boilersmith/scaffolding/scaffolder';
 
 interface UserProvidedParam extends Omit<ParamDef, 'type'> {
@@ -41,7 +41,7 @@ export interface StubGenerationSchema {
   params: UserProvidedParam[];
 }
 
-export abstract class BaseStubStep<Providers extends {} = {}, PN extends string = string, MN extends string = string> implements Step<Providers> {
+export abstract class BaseStubStep<Providers extends DefaultProviders, PN extends string = string, MN extends string = string> implements Step<Providers> {
   protected stubDir: string;
 
   protected scaffolder: Scaffolder<PN, MN>;
@@ -93,7 +93,7 @@ export abstract class BaseStubStep<Providers extends {} = {}, PN extends string 
     return pick(this.params, this.exposes) as Record<string, unknown>;
   }
 
-  protected async precompileParams(fs: Store, _paths: Paths, _paramProvider: IO): Promise<Record<string, unknown>> {
+  protected async precompileParams(_fs: Store, _paths: Paths, _paramProvider: IO): Promise<Record<string, unknown>> {
     return {};
   }
 
@@ -101,7 +101,7 @@ export abstract class BaseStubStep<Providers extends {} = {}, PN extends string 
     const params: Record<string, unknown> = await this.precompileParams(fs, paths, io);
 
     const paramDefs = this.schema.params.filter(
-      (param) => !this.implicitParams.includes(param.name as string) && !Object.keys(params).includes(param.name as string)
+      param => !this.implicitParams.includes(param.name as string) && !Object.keys(params).includes(param.name as string),
     );
 
     for (const paramDef of paramDefs) {

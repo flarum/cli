@@ -4,7 +4,10 @@ import { create as createMemFsEditor } from 'mem-fs-editor';
 import { IO, IOFactory } from './io';
 import { Paths } from './paths';
 
-export interface Step<Providers extends {} = {}, Exposes extends string = string> {
+// eslint-disable-next-line @typescript-eslint/ban-types
+export type DefaultProviders = {};
+
+export interface Step<Providers extends DefaultProviders = DefaultProviders, Exposes extends string = string> {
   /**
    * A short string describing what the step does.
    */
@@ -39,7 +42,7 @@ interface ShouldRunConfig {
 
 }
 
-interface StoredStep<Providers extends {} = {}> {
+interface StoredStep<Providers extends DefaultProviders> {
   name?: string;
   step: Step<Providers>;
   shouldRun: ShouldRunConfig;
@@ -61,7 +64,7 @@ const formatDependencies = (strings: string[]) => strings
   .map(s => `"${s}"`)
   .join(', ');
 
-export class StepManager<Providers extends {} = {}> {
+export class StepManager<Providers extends DefaultProviders> {
   protected steps: Array<StoredStep<Providers> | AtomicStepManager<Providers>> = [];
 
   protected namedSteps = new Map<string, StoredStep<Providers>>();
@@ -219,7 +222,7 @@ export class StepManager<Providers extends {} = {}> {
   }
 }
 
-class AtomicStepManager<Providers extends {} = {}> extends StepManager<Providers> {
+class AtomicStepManager<Providers> extends StepManager<Providers> {
   constructor(parentNamedSteps: Map<string, StoredStep<Providers>>, parentExposedParams: Map<string, Record<string, unknown>>) {
     super();
     this.namedSteps = parentNamedSteps;

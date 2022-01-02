@@ -1,4 +1,4 @@
-import { StepManager } from 'boilersmith/step-manager';
+import { DefaultProviders, StepManager } from 'boilersmith/step-manager';
 import BaseCommand from '../../../base-command';
 import { GenerateApiControllerStub } from '../../../steps/stubs/backend/api-controller';
 import { GenerateRoutesExtender } from '../../../steps/extenders/route';
@@ -10,7 +10,7 @@ export default class ApiController extends BaseCommand {
 
   static args = [...BaseCommand.args];
 
-  protected steps(stepManager: StepManager): StepManager {
+  protected steps(stepManager: StepManager<DefaultProviders>): StepManager<DefaultProviders> {
     return stepManager
       .atomicGroup(stepManager => {
         stepManager

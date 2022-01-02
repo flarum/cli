@@ -4,7 +4,7 @@ import { create as createStore } from 'mem-fs';
 import { promptsIOFactory } from 'boilersmith/io';
 import { NodePaths } from 'boilersmith/paths';
 import { Module, ModuleStatusCache, currModulesEnabled, promptModulesEnabled, setModuleValue, applyModule } from 'boilersmith/scaffolding/module';
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import { getExtFileContents, getFsPaths } from '../utils';
 import { create } from 'mem-fs-editor';
 
@@ -12,7 +12,7 @@ describe('Module Utils', function () {
   const _cacheData: Record<string, boolean> = {};
 
   const cache: ModuleStatusCache<string> = {
-    get: async (module) => _cacheData[module.name],
+    get: async module => _cacheData[module.name],
     set: async (module, val) => {
       _cacheData[module.name] = val;
     },
@@ -140,36 +140,36 @@ describe('applyModule', function () {
   };
 
   it('errors if module marked as disabled', async function () {
-    expect(
-      async () => await applyModule(justFilesModule, { 'just-files': false }, {}, scaffoldDir, createStore(), new NodePaths({ package: '/ext' }))
+    expect(async () =>
+      applyModule(justFilesModule, { 'just-files': false }, {}, scaffoldDir, createStore(), new NodePaths({ package: '/ext' })),
     ).rejects.toThrow(new Error('Could not apply module "just-files", because it is not enabled in the provided module statuses.'));
   });
 
   it('errors if dependencies missing', async function () {
-    const module = {...justFilesModule, togglable: true, defaultEnabled: true, dependsOn: ['missing-dep', 'disabled-dep']};
-    expect(
-      async () => await applyModule(module, { 'just-files': true, 'disabled-dep': false }, {}, scaffoldDir, createStore(), new NodePaths({ package: '/ext' }))
+    const module = { ...justFilesModule, togglable: true, defaultEnabled: true, dependsOn: ['missing-dep', 'disabled-dep'] };
+    expect(async () =>
+      applyModule(module, { 'just-files': true, 'disabled-dep': false }, {}, scaffoldDir, createStore(), new NodePaths({ package: '/ext' })),
     ).rejects.toThrow(new Error('Could not apply module "just-files", because the following dependency modules are missing: "missing-dep, disabled-dep".'));
   });
 
   it('errors if module not present in modulesEnabled', async function () {
-    expect(
-      async () => await applyModule(justFilesModule, { somethingElse: true }, {}, scaffoldDir, createStore(), new NodePaths({ package: '/ext' }))
-      ).rejects.toThrow(new Error('Could not apply module "just-files", because it is not enabled in the provided module statuses.'));
+    expect(async () =>
+      applyModule(justFilesModule, { somethingElse: true }, {}, scaffoldDir, createStore(), new NodePaths({ package: '/ext' })),
+    ).rejects.toThrow(new Error('Could not apply module "just-files", because it is not enabled in the provided module statuses.'));
   });
 
   it('errors if missing template params', async function () {
-    const module = {...justFilesModule, needsTemplateParams: ['missing']};
-  
-    expect(
-      async () => await applyModule(module, { 'just-files': true }, {somethingElse: '42'}, scaffoldDir, createStore(), new NodePaths({ package: '/ext' }))
-      ).rejects.toThrow(new Error('Could not apply module "just-files", because the following params are missing: "missing".'));
+    const module = { ...justFilesModule, needsTemplateParams: ['missing'] };
+
+    expect(async () =>
+      applyModule(module, { 'just-files': true }, { somethingElse: '42' }, scaffoldDir, createStore(), new NodePaths({ package: '/ext' })),
+    ).rejects.toThrow(new Error('Could not apply module "just-files", because the following params are missing: "missing".'));
   });
 
   it('copies over files', async function () {
     const fs = await applyModule(justFilesModule, { 'just-files': true }, {}, scaffoldDir, createStore(), new NodePaths({ package: '/ext' }));
 
-    expect(getFsPaths(fs)).toStrictEqual(justFilesModule.filesToReplace.map((p) => `/ext/${p}`));
+    expect(getFsPaths(fs)).toStrictEqual(justFilesModule.filesToReplace.map(p => `/ext/${p}`));
     expect(getExtFileContents(fs, '.gitignore')).toStrictEqual('node_modules');
     expect(getExtFileContents(fs, 'readme.md')).toStrictEqual('# Sample Scaffolding');
   });
@@ -191,7 +191,7 @@ describe('applyModule', function () {
       { someVar: 'val1', someOtherVar: 'val2', varKey: 'OCaml' },
       scaffoldDir,
       createStore(),
-      new NodePaths({ package: '/ext' })
+      new NodePaths({ package: '/ext' }),
     );
 
     expect(getFsPaths(fs)).toStrictEqual(['/ext/config1.json']);
@@ -215,11 +215,11 @@ describe('applyModule', function () {
       { someVar: 'val1', someOtherVar: 'val2' },
       scaffoldDir,
       createStore(),
-      new NodePaths({ package: '/ext' })
+      new NodePaths({ package: '/ext' }),
     );
 
     expect(getFsPaths(fs)).toStrictEqual(['/ext/config1.json']);
-    expect(JSON.parse(getExtFileContents(fs, 'config1.json'))).toStrictEqual({ hello: 'val1', nested: { config: { string: 'a' , boolean: true, null: null} } });
+    expect(JSON.parse(getExtFileContents(fs, 'config1.json'))).toStrictEqual({ hello: 'val1', nested: { config: { string: 'a', boolean: true, null: null } } });
   });
 
   it('populates variables correctly', async function () {
@@ -239,7 +239,7 @@ describe('applyModule', function () {
       { someVar: 5, someOtherVar: false },
       scaffoldDir,
       createStore(),
-      new NodePaths({ package: '/ext' })
+      new NodePaths({ package: '/ext' }),
     );
 
     expect(getFsPaths(fs)).toStrictEqual(['/ext/config1.json', '/ext/src/index.ml']);
@@ -288,19 +288,12 @@ describe('applyModule', function () {
       togglable: false,
       updatable: true,
       shortDescription: '',
-      filesToReplace: ['readme.md', {path: '.gitignore', needsOtherModules: ['missingModule']}],
+      filesToReplace: ['readme.md', { path: '.gitignore', needsOtherModules: ['missingModule'] }],
       jsonToAugment: {},
       needsTemplateParams: [],
     };
 
-    const fs = await applyModule(
-      module,
-      { 'files-need-modules': true },
-      {},
-      scaffoldDir,
-      createStore(),
-      new NodePaths({ package: '/ext' })
-    );
+    const fs = await applyModule(module, { 'files-need-modules': true }, {}, scaffoldDir, createStore(), new NodePaths({ package: '/ext' }));
 
     expect(getFsPaths(fs)).toStrictEqual(['/ext/readme.md']);
   });
@@ -311,7 +304,7 @@ describe('applyModule', function () {
       togglable: false,
       updatable: true,
       shortDescription: '',
-      filesToReplace: ['readme.md', {path: '.gitignore', needsOtherModules: ['disabledModule']}],
+      filesToReplace: ['readme.md', { path: '.gitignore', needsOtherModules: ['disabledModule'] }],
       jsonToAugment: {},
       needsTemplateParams: [],
     };
@@ -322,7 +315,7 @@ describe('applyModule', function () {
       {},
       scaffoldDir,
       createStore(),
-      new NodePaths({ package: '/ext' })
+      new NodePaths({ package: '/ext' }),
     );
 
     expect(getFsPaths(fs)).toStrictEqual(['/ext/readme.md']);
@@ -334,7 +327,7 @@ describe('applyModule', function () {
       togglable: false,
       updatable: true,
       shortDescription: '',
-      filesToReplace: ['readme.md', {path: '.gitignore', needsOtherModules: ['enabledModule']}],
+      filesToReplace: ['readme.md', { path: '.gitignore', needsOtherModules: ['enabledModule'] }],
       jsonToAugment: {},
       needsTemplateParams: [],
     };
@@ -345,40 +338,25 @@ describe('applyModule', function () {
       {},
       scaffoldDir,
       createStore(),
-      new NodePaths({ package: '/ext' })
+      new NodePaths({ package: '/ext' }),
     );
 
     expect(getFsPaths(fs)).toStrictEqual(['/ext/.gitignore', '/ext/readme.md']);
   });
 
   it('doesnt error when initializing non-updatable module', async function () {
-    const module: Module = {...justFilesModule, updatable: false};
+    const module: Module = { ...justFilesModule, updatable: false };
 
-    const fs = await applyModule(
-      module,
-      { 'just-files': true },
-      {},
-      scaffoldDir,
-      createStore(),
-      new NodePaths({ package: '/ext' }),
-      true
-    );
+    const fs = await applyModule(module, { 'just-files': true }, {}, scaffoldDir, createStore(), new NodePaths({ package: '/ext' }), true);
 
     expect(getFsPaths(fs)).toStrictEqual(['/ext/.gitignore', '/ext/readme.md']);
   });
 
   it('errors when trying to update non-updatable module', async function () {
-    const module: Module = {...justFilesModule, updatable: false}
+    const module: Module = { ...justFilesModule, updatable: false };
 
     expect(async () => {
-      const fs = await applyModule(
-        module,
-        { 'just-files': true },
-        {},
-        scaffoldDir,
-        createStore(),
-        new NodePaths({ package: '/ext' })
-      );
+      await applyModule(module, { 'just-files': true }, {}, scaffoldDir, createStore(), new NodePaths({ package: '/ext' }));
     }).rejects.toThrow('Cannot update module "just-files", as it is not updatable, and has already been initialized.');
   });
 });

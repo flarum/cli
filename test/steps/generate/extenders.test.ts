@@ -9,10 +9,10 @@ import { GenerateConsoleCommandExtender } from '../../../src/steps/extenders/con
 import { FlarumProviders } from '../../../src/providers';
 import { Step } from '../../../src/boilersmith/step-manager';
 import { Paths } from 'boilersmith/paths';
-import {stubPhpProviderFactory} from '../../utils'
+import {stubPhpProviderFactory} from '../../utils';
 
 interface ExtenderTest {
-  extenderClass: new () => Step<FlarumProviders>;
+  ExtenderClass: new () => Step<FlarumProviders>;
 
   params: Record<string, unknown>;
 }
@@ -22,7 +22,7 @@ const requestedDir = '/ext/src/somePath';
 const testSpecs: ExtenderTest[] = [
   // Event Listener
   {
-    extenderClass: GenerateEventListenerExtender,
+    ExtenderClass: GenerateEventListenerExtender,
     params: {
       eventClass: 'Flarum\\Post\\Event\\Saving',
       listenerClass: 'Flarum\\Demo\\Listener\\SaveToDb',
@@ -30,7 +30,7 @@ const testSpecs: ExtenderTest[] = [
   },
   // API Attributes
   {
-    extenderClass: GenerateApiSerializerAttributesExtender,
+    ExtenderClass: GenerateApiSerializerAttributesExtender,
     params: {
       serializerClass: 'Flarum\\Api\\Serializer\\UserSerializer',
       modelClass: 'Flarum\\User\\User',
@@ -38,7 +38,7 @@ const testSpecs: ExtenderTest[] = [
   },
   // Route
   {
-    extenderClass: GenerateRoutesExtender,
+    ExtenderClass: GenerateRoutesExtender,
     params: {
       routePath: '/potatoes',
       routeName: 'potatoes.index',
@@ -47,14 +47,14 @@ const testSpecs: ExtenderTest[] = [
   },
   // Service Provider
   {
-    extenderClass: GenerateServiceProviderExtender,
+    ExtenderClass: GenerateServiceProviderExtender,
     params: {
       className: 'CustomServiceProvider',
     },
   },
   // Policy
   {
-    extenderClass: GeneratePolicyExtender,
+    ExtenderClass: GeneratePolicyExtender,
     params: {
       modelClass: 'Flarum\\CustomModel\\CustomModel',
       policyClass: 'Flarum\\Access\\CustomModelPolicy',
@@ -62,7 +62,7 @@ const testSpecs: ExtenderTest[] = [
   },
   // Console Command
   {
-    extenderClass: GenerateConsoleCommandExtender,
+    ExtenderClass: GenerateConsoleCommandExtender,
     params: {
       commandClass: 'Flarum\\Console\\CustomCommand',
     },
@@ -71,7 +71,7 @@ const testSpecs: ExtenderTest[] = [
 
 describe('Extender tests', function () {
   for (const spec of testSpecs) {
-    test(`Extender test: ${spec.extenderClass.name}`, async function () {
+    test(`Extender test: ${spec.ExtenderClass.name}`, async function () {
       const initialFilesCallback = (paths: Paths) => {
         const initial: Record<string, string> = {};
         initial[paths.package('extend.php')] = `<?php
@@ -81,7 +81,7 @@ return [];
         return initial;
       };
 
-      const { fs } = await runStep(new spec.extenderClass(), {php: stubPhpProviderFactory()}, Object.values(spec.params), {}, initialFilesCallback, requestedDir);
+      const { fs } = await runStep(new spec.ExtenderClass(), {php: stubPhpProviderFactory()}, Object.values(spec.params), {}, initialFilesCallback, requestedDir);
 
       expect(getFsPaths(fs)).toStrictEqual(['/ext/extend.php'].sort());
     });

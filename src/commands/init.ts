@@ -1,9 +1,9 @@
 import { StepManager } from 'boilersmith/step-manager';
-import { ExtensionSkeleton } from '../steps/init/extension-skeleton';
 import { ComposerInstall } from '../steps/misc/composer';
 import { YarnInstall } from '../steps/misc/yarn';
 import BaseCommand from '../base-command';
 import yosay from 'yosay';
+import { FlarumProviders } from 'src/providers';
 
 export default class Init extends BaseCommand {
   static description = 'Create a new Flarum extension';
@@ -14,7 +14,7 @@ export default class Init extends BaseCommand {
 
   protected requireExistingExtension = false;
 
-  protected steps(stepManager: StepManager): StepManager {
+  protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
     return stepManager
       .namedStep('skeleton', new ExtensionSkeleton(), {})
       .step(new ComposerInstall(), { optional: true, confirmationMessage: 'Run `composer install`? (recommended)', default: true})

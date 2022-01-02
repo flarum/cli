@@ -4,9 +4,9 @@ import { resolve } from 'node:path';
 import { prompt } from 'prompts';
 import { ParamDef, PromptsIO, IO} from 'boilersmith/io';
 import { Paths } from 'boilersmith/paths';
-import { Step } from 'boilersmith/step-manager';
+import { DefaultProviders, Step } from 'boilersmith/step-manager';
 
-export function stubStepFactory<Providers extends {} = {}>(type: string, composable = true, paramsConsumed: ParamDef[] = [], paramsExposed: Record<string, unknown> = {}): Step<Providers> {
+export function stubStepFactory<Providers extends DefaultProviders>(type: string, composable = true, paramsConsumed: ParamDef[] = [], paramsExposed: Record<string, unknown> = {}): Step<Providers> {
   return {
     type,
     composable,
@@ -52,7 +52,6 @@ export function stubPathsFactory(paths: TestPaths = {}): Paths {
   };
 }
 
-
 const empty = {};
 
 interface StepOutput {
@@ -60,7 +59,7 @@ interface StepOutput {
   exposedParams: Record<string, unknown>;
 }
 
-export async function runStep<Providers extends {} = {}>(
+export async function runStep<Providers extends DefaultProviders>(
   step: Step<Providers>,
   providers: Providers,
   params: unknown[] = [],

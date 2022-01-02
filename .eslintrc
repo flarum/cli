@@ -11,7 +11,10 @@
     "valid-jsdoc": "off",
     "semi": [2, "always"],
     "max-params": ["error", 6],
-    "object-curly-spacing": "off"
+    "object-curly-spacing": "off",
+    "import/no-unresolved": "error",
+    "node/no-missing-import": "off",  // We have other rules for this.
+    "no-template-curly-in-string": "off"  // We use this for clone-and-fill
   },
   "extends": [
     "oclif",
@@ -20,8 +23,12 @@
     "plugin:import/warnings"
   ],
   "settings": {
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx"]
+    },
     "import/resolver": {
-      "babel-module": {}
+      "babel-module": {},
+      "typescript": {}
     }
   }
 }

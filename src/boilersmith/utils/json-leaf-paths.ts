@@ -4,15 +4,16 @@ interface JSONSchemaObject {
   [key: string]: JSONSchema;
 }
 
-interface JSONSchemaArray extends Array<JSONSchema> {}
+type JSONSchemaArray = Array<JSONSchema>
 
 function inner(o: JSONSchema, prefix: string[]): string[] {
-  if (o instanceof Array) {
+  if (Array.isArray(o)) {
     // Placed separately in case we eventually decide to support leaves in arrays.
     return [prefix.join('.')];
   }
-  else if (o && typeof o === 'object') {
-    return Object.entries(o).map(([k, v]) => inner(v, [...prefix, k])).flat();
+
+  if (o && typeof o === 'object') {
+    return Object.entries(o).flatMap(([k, v]) => inner(v, [...prefix, k]));
   }
 
   return [prefix.join('.')];

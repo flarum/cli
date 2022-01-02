@@ -1,7 +1,7 @@
 import { StepManager } from 'boilersmith/step-manager';
-import { ComposerInstall } from '../../steps/misc/composer';
-import BaseCommand from '../../base-command';
-import { BackendTestingInfra } from '../../steps/infra/backend-testing';
+import { ComposerInstall } from '../steps/misc/composer';
+import BaseCommand from '../base-command';
+import { FlarumProviders } from 'src/providers';
 
 export default class BackendTesting extends BaseCommand {
   static description = 'Add/Update backend testing infrastructure';
@@ -10,7 +10,7 @@ export default class BackendTesting extends BaseCommand {
 
   static args = [...BaseCommand.args];
 
-  protected steps(stepManager: StepManager): StepManager {
+  protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
     return stepManager
       .namedStep('testing', new BackendTestingInfra())
       .step(new ComposerInstall(), { optional: true, confirmationMessage: 'Run `composer update`? (recommended)', default: true }, [

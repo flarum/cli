@@ -1,6 +1,5 @@
 import { readdirSync } from 'node:fs';
 import { Store } from 'mem-fs';
-import { Editor } from 'mem-fs-editor';
 import { IO } from 'boilersmith/io';
 import { Paths } from 'boilersmith/paths';
 import { Validator } from '../../../utils/validation';

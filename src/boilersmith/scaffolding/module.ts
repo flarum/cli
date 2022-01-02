@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import { Store } from 'mem-fs';
 import { create } from 'mem-fs-editor';
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import pick from 'pick-deep';
 import { IO } from 'boilersmith/io';
 import { Paths } from 'boilersmith/paths';
@@ -91,20 +91,21 @@ export async function promptModulesEnabled<N extends string>(modules: Module<N>[
   });
 
   for (const m of modules) {
-    const missingDeps = !m.togglable || m.dependsOn.some((dep) => !modulesEnabled[dep]);
+    const missingDeps = !m.togglable || m.dependsOn.some(dep => !modulesEnabled[dep]);
     if (!m.togglable) {
       modulesEnabled[m.name] = true;
     } else if (missingDeps) {
       modulesEnabled[m.name] = false;
-    } else if (!advanced) {
-      modulesEnabled[m.name] = m.defaultEnabled;
-    } else {
+    } else if (advanced) {
+      // eslint-disable-next-line no-await-in-loop
       modulesEnabled[m.name] = await promptProvider.getParam<boolean>({
         name: `modules.${m.name}`,
         type: 'confirm',
         initial: m.defaultEnabled,
         message: m.shortDescription + (m.longDescription ? chalk.dim(` (${m.longDescription})`) : ''),
       });
+    } else {
+      modulesEnabled[m.name] = m.defaultEnabled;
     }
   }
 
@@ -115,17 +116,18 @@ export async function currModulesEnabled<N extends string>(
   modules: Module<N>[],
   fs: Store,
   paths: Paths,
-  cache?: ModuleStatusCache<N>
+  cache?: ModuleStatusCache<N>,
 ): Promise<Record<N, boolean>> {
   const modulesEnabled: Record<string, boolean> = {};
 
   for (const m of modules) {
-    if (!m.togglable) {
-      modulesEnabled[m.name] = true;
-    } else {
+    if (m.togglable) {
+      // eslint-disable-next-line no-await-in-loop
       const cacheVal = await cache?.get(m, fs, paths);
 
       modulesEnabled[m.name] = cacheVal ?? m.defaultEnabled;
+    } else {
+      modulesEnabled[m.name] = true;
     }
   }
 
@@ -137,13 +139,14 @@ export async function setModuleValue<MN extends string>(
   enabled: boolean,
   fs: Store,
   paths: Paths,
-  cache: ModuleStatusCache<MN>
+  cache: ModuleStatusCache<MN>,
 ): Promise<void> {
   if (module.togglable) {
     cache.set(module, enabled, fs, paths);
   }
 }
 
+// eslint-disable-next-line max-params
 export async function applyModule<MN extends string, TN extends string>(
   module: Module<MN>,
   modulesEnabled: Record<string, boolean>,
@@ -151,7 +154,7 @@ export async function applyModule<MN extends string, TN extends string>(
   scaffoldDir: string,
   fs: Store,
   paths: Paths,
-  isInitial = false
+  isInitial = false,
 ): Promise<Store> {
   const fsEditor = create(fs);
 
@@ -161,14 +164,14 @@ export async function applyModule<MN extends string, TN extends string>(
   }
 
   // Validate that dependencies are enabled
-  const missingDeps = module.togglable ? module.dependsOn.filter((dep) => !modulesEnabled[dep]) : [];
-  if (missingDeps.length) {
+  const missingDeps = module.togglable ? module.dependsOn.filter(dep => !modulesEnabled[dep]) : [];
+  if (missingDeps.length > 0) {
     throw new Error(`Could not apply module "${module.name}", because the following dependency modules are missing: "${missingDeps.join(', ')}".`);
   }
 
   // Validate that all needed params are present
-  const missingParams = module.needsTemplateParams.filter((p) => !(p in paramVals));
-  if (missingParams.length) {
+  const missingParams = module.needsTemplateParams.filter(p => !(p in paramVals));
+  if (missingParams.length > 0) {
     throw new Error(`Could not apply module "${module.name}", because the following params are missing: "${missingParams.join(', ')}".`);
   }
 
@@ -185,14 +188,14 @@ export async function applyModule<MN extends string, TN extends string>(
     const path = typeof file === 'string' ? file : file.path;
     const needsOtherModules = typeof file === 'string' ? [] : file.needsOtherModules ?? [];
 
-    if (!needsOtherModules.some((dep) => !modulesEnabled[dep])) {
+    if (!needsOtherModules.some(dep => !modulesEnabled[dep])) {
       fsEditor.copyTpl(resolve(scaffoldDir, path), paths.package(path), tplData);
     }
   }
 
-  const tplDataFlat = { ...renameKeys(tplData.modules, (k) => `modules.${k}`), ...renameKeys(tplData.params, (k) => `params.${k}`) } as Record<string, string>;
+  const tplDataFlat = { ...renameKeys(tplData.modules, k => `modules.${k}`), ...renameKeys(tplData.params, k => `params.${k}`) } as Record<string, string>;
   const jsonPaths = cloneAndFill(module.jsonToAugment, tplDataFlat);
-  for (const jsonPath in jsonPaths) {
+  for (const jsonPath of Object.keys(jsonPaths)) {
     const scaffoldContents = readTpl(resolve(scaffoldDir, jsonPath), tplData);
     const scaffoldContentsJson = JSON.parse(scaffoldContents);
 

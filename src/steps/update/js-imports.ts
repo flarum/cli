@@ -3,7 +3,7 @@ import { Store } from 'mem-fs';
 import { create } from 'mem-fs-editor';
 import { IO } from 'boilersmith/io';
 import { Paths } from 'boilersmith/paths';
-import { Step } from 'boilersmith/step-manager';
+import { DefaultProviders, Step } from 'boilersmith/step-manager';
 
 const CORE_JS_NAMESPACES = ['admin', 'common', 'forum'];
 const CORE_NAMESPACE_REGEX = new RegExp(`^(${CORE_JS_NAMESPACES.join('|')})/`);
@@ -16,7 +16,7 @@ export class UpdateJSImports implements Step {
 
   composable = false;
 
-  async run(fs: Store, paths: Paths, _paramProvider: IO, _providers: {}): Promise<Store> {
+  async run(fs: Store, paths: Paths, _paramProvider: IO, _providers: DefaultProviders): Promise<Store> {
     const fsEditor = create(fs);
 
     const importMap: ImportMap = {};

@@ -1,4 +1,4 @@
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import { Scaffolder } from 'boilersmith/scaffolding/scaffolder';
 import { getParamName, TemplateParam } from 'boilersmith/scaffolding/template-param';
 
@@ -6,7 +6,7 @@ describe('Scaffolder', function () {
   describe('Scaffolder.validate', function () {
     const scaffoldDir = resolve(__dirname, '../fixtures/example-scaffold');
     const allFiles = ['src/index.html', 'src/index.js', 'src/index.php', 'src/index.ml', '.gitignore', 'config1.json', 'config2.json', 'readme.md'];
-    const filesNoConf = allFiles.filter((p) => p !== 'config1.json');
+    const filesNoConf = allFiles.filter(p => p !== 'config1.json');
     const configKeys = ['hello', 'foo', 'authors', '${params.varKey}++', 'nested.config.string', 'nested.config.boolean', 'nested.config.null'];
 
     const templateParams: TemplateParam<string, 'someVar' | 'someOtherVar' | 'varKey'>[] = [
@@ -21,10 +21,10 @@ describe('Scaffolder', function () {
       {
         name: 'varKey',
         uses: [],
-        compute: async() => 'OCaml',
+        compute: async () => 'OCaml',
       },
     ];
-    const templateParamNames = templateParams.map((p) => getParamName(p));
+    const templateParamNames = templateParams.map(p => getParamName(p));
 
     it('errors when module dependencies missing', async function () {
       const scaffolder = new Scaffolder(scaffoldDir)
@@ -43,8 +43,8 @@ describe('Scaffolder', function () {
         .registerTemplateParam(templateParams[1])
         .registerTemplateParam(templateParams[2]);
 
-      expect(async () => await scaffolder.validate()).rejects.toThrow(
-        new Error([`Module "Everything" depends on modules that are not registered: "missing1, missing2".`].join('\n'))
+      expect(async () => scaffolder.validate()).rejects.toThrow(
+        new Error(['Module "Everything" depends on modules that are not registered: "missing1, missing2".'].join('\n')),
       );
     });
 
@@ -63,14 +63,14 @@ describe('Scaffolder', function () {
         .registerTemplateParam(templateParams[1])
         .registerTemplateParam(templateParams[2]);
 
-      expect(async () => await scaffolder.validate()).rejects.toThrow(
+      expect(async () => scaffolder.validate()).rejects.toThrow(
         new Error(
           [
-            `File "config1.json" is not owned by any module.`,
-            `File "config2.json" is not owned by any module.`,
-            `File "readme.md" is not owned by any module.`,
-          ].join('\n')
-        )
+            'File "config1.json" is not owned by any module.',
+            'File "config2.json" is not owned by any module.',
+            'File "readme.md" is not owned by any module.',
+          ].join('\n'),
+        ),
       );
     });
 
@@ -89,8 +89,8 @@ describe('Scaffolder', function () {
         .registerTemplateParam(templateParams[1])
         .registerTemplateParam(templateParams[2]);
 
-      expect(async () => await scaffolder.validate()).rejects.toThrow(
-        new Error([`File "src/index.hs" is owned by modules: "Everything", but it doesn't exist in the scaffolding directory.`].join('\n'))
+      expect(async () => scaffolder.validate()).rejects.toThrow(
+        new Error(['File "src/index.hs" is owned by modules: "Everything", but it doesn\'t exist in the scaffolding directory.'].join('\n')),
       );
     });
 
@@ -109,8 +109,8 @@ describe('Scaffolder', function () {
         .registerTemplateParam(templateParams[1])
         .registerTemplateParam(templateParams[2]);
 
-      expect(async () => await scaffolder.validate()).rejects.toThrow(
-        new Error([`File "doesntExist.json" has keys owned by modules: "Everything", but it doesn't exist in the scaffolding directory.`].join('\n'))
+      expect(async () => scaffolder.validate()).rejects.toThrow(
+        new Error(['File "doesntExist.json" has keys owned by modules: "Everything", but it doesn\'t exist in the scaffolding directory.'].join('\n')),
       );
     });
 
@@ -129,8 +129,8 @@ describe('Scaffolder', function () {
         .registerTemplateParam(templateParams[1])
         .registerTemplateParam(templateParams[2]);
 
-      expect(async () => await scaffolder.validate()).rejects.toThrow(
-        new Error([`File "config1.json" is owned by modules: "Everything". However, it also has keys that are owned by modules: "Everything".`].join('\n'))
+      expect(async () => scaffolder.validate()).rejects.toThrow(
+        new Error(['File "config1.json" is owned by modules: "Everything". However, it also has keys that are owned by modules: "Everything".'].join('\n')),
       );
     });
 
@@ -149,13 +149,13 @@ describe('Scaffolder', function () {
         .registerTemplateParam(templateParams[1])
         .registerTemplateParam(templateParams[2]);
 
-      expect(async () => await scaffolder.validate()).rejects.toThrow(
+      expect(async () => scaffolder.validate()).rejects.toThrow(
         new Error(
           [
-            `Key "nested.config.boolean" in file "config1.json" is not owned by any module.`,
-            `Key "nested.config.null" in file "config1.json" is not owned by any module.`,
-          ].join('\n')
-        )
+            'Key "nested.config.boolean" in file "config1.json" is not owned by any module.',
+            'Key "nested.config.null" in file "config1.json" is not owned by any module.',
+          ].join('\n'),
+        ),
       );
     });
 
@@ -174,8 +174,8 @@ describe('Scaffolder', function () {
         .registerTemplateParam(templateParams[1])
         .registerTemplateParam(templateParams[2]);
 
-      expect(async () => await scaffolder.validate()).rejects.toThrow(
-        new Error([`Key "nonexistent.key" is owned by modules: "Everything", but does not exist in file "config1.json".`].join('\n'))
+      expect(async () => scaffolder.validate()).rejects.toThrow(
+        new Error(['Key "nonexistent.key" is owned by modules: "Everything", but does not exist in file "config1.json".'].join('\n')),
       );
     });
 
@@ -193,8 +193,8 @@ describe('Scaffolder', function () {
         .registerTemplateParam(templateParams[0])
         .registerTemplateParam(templateParams[2]);
 
-      expect(async () => await scaffolder.validate()).rejects.toThrow(
-        new Error([`Template param "someOtherVar" is used by modules: "Everything", but is not provided.`].join('\n'))
+      expect(async () => scaffolder.validate()).rejects.toThrow(
+        new Error(['Template param "someOtherVar" is used by modules: "Everything", but is not provided.'].join('\n')),
       );
     });
 
@@ -213,12 +213,12 @@ describe('Scaffolder', function () {
         .registerTemplateParam(templateParams[1])
         .registerTemplateParam(templateParams[2]);
 
-      expect(async () => await scaffolder.validate()).rejects.toThrow(
+      expect(async () => scaffolder.validate()).rejects.toThrow(
         new Error(
-          [`Template param "someOtherVar" is defined, but not used by any modules.`, `Template param "varKey" is defined, but not used by any modules.`].join(
-            '\n'
-          )
-        )
+          ['Template param "someOtherVar" is defined, but not used by any modules.', 'Template param "varKey" is defined, but not used by any modules.'].join(
+            '\n',
+          ),
+        ),
       );
     });
 
@@ -239,9 +239,9 @@ describe('Scaffolder', function () {
         scaffolder.registerTemplateParam({
           name: 'someOtherVar',
           uses: ['missing1', 'missing2'],
-          compute: async() => '',
-        })
-      ).toThrow(new Error([`Computed template param "someOtherVar" is missing dependency params: "missing1, missing2".`].join('\n')));
+          compute: async () => '',
+        }),
+      ).toThrow(new Error(['Computed template param "someOtherVar" is missing dependency params: "missing1, missing2".'].join('\n')));
     });
   });
 });

@@ -1,4 +1,3 @@
-/* eslint-disable no-template-curly-in-string */
 import { Validator } from '../../../utils/validation';
 import { BaseJsStubStep } from '../js-base';
 

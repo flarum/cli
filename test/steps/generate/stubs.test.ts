@@ -21,10 +21,10 @@ import { genExtScaffolder } from '../../../src/steps/gen-ext-scaffolder';
 import { FlarumBaseStubStep } from '../../../src/steps/stubs/flarum-base';
 import { stubPhpProviderFactory } from '../../utils';
 import { Paths } from 'boilersmith/paths';
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 
 interface StubTest {
-  stubClass: new (stubDir: string, scaffolder: ReturnType<typeof genExtScaffolder>) => FlarumBaseStubStep;
+  StubClass: new (stubDir: string, scaffolder: ReturnType<typeof genExtScaffolder>) => FlarumBaseStubStep;
 
   params: Record<string, unknown>;
 
@@ -44,7 +44,7 @@ const requestedTestDir = '/ext/tests/somePath';
 const backendTestSpecs: StubTest[] = [
   // Event Listener
   {
-    stubClass: GenerateEventListenerStub,
+    StubClass: GenerateEventListenerStub,
     params: {
       className: 'MutateDatabaseSave',
       eventClass: '\\Flarum\\Post\\Event\\Saving',
@@ -63,7 +63,7 @@ const backendTestSpecs: StubTest[] = [
 
   // Api Serializer
   {
-    stubClass: GenerateApiSerializerStub,
+    StubClass: GenerateApiSerializerStub,
     params: {
       className: 'PotatoSerializer',
       modelClass: '\\Flarum\\Potato\\Potato',
@@ -86,7 +86,7 @@ const backendTestSpecs: StubTest[] = [
 
   // Model
   {
-    stubClass: GenerateModelStub,
+    StubClass: GenerateModelStub,
     params: {
       className: 'CustomModel',
       tableName: 'custom_models',
@@ -111,7 +111,7 @@ const backendTestSpecs: StubTest[] = [
 
   // Repository
   {
-    stubClass: GenerateRepositoryStub,
+    StubClass: GenerateRepositoryStub,
     params: {
       className: 'CustomModelRepository',
       modelClass: 'Flarum\\CustomModel\\CustomModel',
@@ -132,7 +132,7 @@ const backendTestSpecs: StubTest[] = [
 
   // Validator
   {
-    stubClass: GenerateValidatorStub,
+    StubClass: GenerateValidatorStub,
     params: {
       className: 'CustomModelValidator',
     },
@@ -148,7 +148,7 @@ const backendTestSpecs: StubTest[] = [
 
   // Policy
   {
-    stubClass: GeneratePolicyStub,
+    StubClass: GeneratePolicyStub,
     params: {
       className: 'CustomModelPolicy',
       modelClass: 'Flarum\\CustomModel\\CustomModel',
@@ -169,7 +169,7 @@ const backendTestSpecs: StubTest[] = [
 
   // Console Command
   {
-    stubClass: GenerateCommandStub,
+    StubClass: GenerateCommandStub,
     params: {
       className: 'CustomCommand',
       commandName: 'custom:command',
@@ -186,7 +186,7 @@ const backendTestSpecs: StubTest[] = [
 
   // Service Provider
   {
-    stubClass: GenerateServiceProviderStub,
+    StubClass: GenerateServiceProviderStub,
     params: {
       className: 'CustomServiceProvider',
     },
@@ -202,7 +202,7 @@ const backendTestSpecs: StubTest[] = [
 
   // Job
   {
-    stubClass: GenerateJobStub,
+    StubClass: GenerateJobStub,
     params: {
       className: 'CustomJob',
     },
@@ -218,7 +218,7 @@ const backendTestSpecs: StubTest[] = [
 
   // Domain Handler Command
   {
-    stubClass: GenerateHandlerCommandStub,
+    StubClass: GenerateHandlerCommandStub,
     params: {
       className: 'CustomBusCommand',
       classType: 'create',
@@ -239,7 +239,7 @@ const backendTestSpecs: StubTest[] = [
 
   // Domain Handler
   {
-    stubClass: GenerateHandlerStub,
+    StubClass: GenerateHandlerStub,
     params: {
       className: 'CustomBusCommandHandler',
       handlerCommandClass: 'Flarum\\Demo\\Command\\CustomBusCommand',
@@ -260,7 +260,7 @@ const backendTestSpecs: StubTest[] = [
 // Api Controllers
 for (const classType of ['normal', 'list', 'show', 'create', 'update', 'delete']) {
   backendTestSpecs.push({
-    stubClass: GenerateApiControllerStub,
+    StubClass: GenerateApiControllerStub,
     params: {
       className: `${classType}Controller`,
       serializerClass: `Flarum\\Demo\\Custom${classType}Serializer`,
@@ -281,7 +281,7 @@ for (const classType of ['normal', 'list', 'show', 'create', 'update', 'delete']
 const backendTestsTestSpecs: StubTest[] = [
   // Integration Test
   {
-    stubClass: GenerateIntegrationTestStub,
+    StubClass: GenerateIntegrationTestStub,
     params: {
       className: 'ListPotatoesTest',
     },
@@ -299,7 +299,7 @@ const backendTestsTestSpecs: StubTest[] = [
 const frontendTestSpecs: StubTest[] = [
   // Frontend Model
   {
-    stubClass: GenerateFrontendModelStub,
+    StubClass: GenerateFrontendModelStub,
     params: {
       frontend: 'common',
       className: 'CustomModel',
@@ -321,7 +321,7 @@ const frontendTestSpecs: StubTest[] = [
   },
   // Modal
   {
-    stubClass: GenerateModalStub,
+    StubClass: GenerateModalStub,
     params: {
       frontend: 'forum',
       className: 'CustomModal',
@@ -339,7 +339,7 @@ const frontendTestSpecs: StubTest[] = [
   },
   // Component
   {
-    stubClass: GenerateComponentStub,
+    StubClass: GenerateComponentStub,
     params: {
       frontend: 'admin',
       className: 'CustomComponent',
@@ -373,7 +373,7 @@ for (const specDefinition of [
 ]) {
   describe('Backend stub tests', function () {
     for (const spec of specDefinition.testSpecs) {
-      describe(`Stub Test: ${spec.stubClass.name}`, function () {
+      describe(`Stub Test: ${spec.StubClass.name}`, function () {
         const initialFilesCallback = (paths: Paths) => {
           const initial: Record<string, string> = {};
           initial[paths.package('composer.json')] = JSON.stringify(sampleComposerJson);
@@ -384,7 +384,7 @@ for (const specDefinition of [
         const stubDir = resolve(__dirname, '../../../boilerplate/stubs');
 
         test('With default dir', async function () {
-          const { fs, exposedParams } = await runStep(new spec.stubClass(stubDir, scaffolder), {php: stubPhpProviderFactory()}, Object.values(spec.params), {}, initialFilesCallback);
+          const { fs, exposedParams } = await runStep(new spec.StubClass(stubDir, scaffolder), {php: stubPhpProviderFactory()}, Object.values(spec.params), {}, initialFilesCallback);
 
           expect(getFsPaths(fs)).toStrictEqual([...spec.expectedModifiedFilesDefaultDir, '/ext/composer.json'].sort());
 
@@ -393,12 +393,12 @@ for (const specDefinition of [
 
         test('With requested dir', async function () {
           const { fs, exposedParams } = await runStep(
-            new spec.stubClass(stubDir, scaffolder),
+            new spec.StubClass(stubDir, scaffolder),
             {php: stubPhpProviderFactory()},
             Object.values(spec.params),
             {},
             initialFilesCallback,
-            specDefinition.requestedDir
+            specDefinition.requestedDir,
           );
 
           expect(getFsPaths(fs)).toStrictEqual([...spec.expectedModifiedFilesRequestedDir, '/ext/composer.json'].sort());
@@ -411,7 +411,7 @@ for (const specDefinition of [
 }
 
 const migrationSpec: StubTest = {
-  stubClass: GenerateMigrationStub,
+  StubClass: GenerateMigrationStub,
   params: {
     name: 'new migration',
   },
@@ -435,11 +435,11 @@ describe('Stub Test: Migrations', function () {
 
   test('With default dir', async function () {
     const { fs, exposedParams } = await runStep(
-      new migrationSpec.stubClass(stubDir, scaffolder),
+      new migrationSpec.StubClass(stubDir, scaffolder),
       { php: stubPhpProviderFactory() },
       Object.values(migrationSpec.params),
       {},
-      initialFilesCallback
+      initialFilesCallback,
     );
 
     expect(getFsPaths(fs)).toStrictEqual([...migrationSpec.expectedModifiedFilesDefaultDir, '/ext/composer.json'].sort());
@@ -449,12 +449,12 @@ describe('Stub Test: Migrations', function () {
 
   test('With requested dir', async function () {
     const { fs, exposedParams } = await runStep(
-      new migrationSpec.stubClass(stubDir, scaffolder),
+      new migrationSpec.StubClass(stubDir, scaffolder),
       { php: stubPhpProviderFactory() },
       Object.values(migrationSpec.params),
       {},
       initialFilesCallback,
-      requestedDir
+      requestedDir,
     );
 
     expect(getFsPaths(fs)).toStrictEqual([...migrationSpec.expectedModifiedFilesRequestedDir, '/ext/composer.json'].sort());

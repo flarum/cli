@@ -1,16 +1,16 @@
 import { Store } from 'mem-fs';
 import { IO } from 'boilersmith/io';
 import { Paths } from '../paths';
-import { Step } from '../step-manager';
+import { DefaultProviders, Step } from '../step-manager';
 import { applyModule, Module, ModuleStatusCache, promptModulesEnabled, setModuleValue } from './module';
 import { promptParamValues, TemplateParam } from './template-param';
 
-export function infraStepFactory<MN extends string, Providers extends {} = {}>(
+export function infraStepFactory<MN extends string, Providers extends DefaultProviders>(
   scaffoldDir: string,
   moduleName: string,
   modules: Module<MN>[],
   templateParams: TemplateParam[],
-  moduleStatusCache?: ModuleStatusCache<MN>
+  moduleStatusCache?: ModuleStatusCache<MN>,
 ): Step<Providers> {
   const module = modules.find(m => m.name === moduleName);
   if (!module) {
@@ -31,7 +31,6 @@ export function infraStepFactory<MN extends string, Providers extends {} = {}>(
 
       if (moduleStatusCache) {
         setModuleValue(module, true, fs, paths, moduleStatusCache);
-
       }
 
       return fs;

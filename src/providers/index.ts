@@ -1,5 +1,6 @@
-import { PhpProvider } from "./php-provider";
+import { DefaultProviders } from 'boilersmith/step-manager';
+import { PhpProvider } from './php-provider';
 
-export type FlarumProviders = {
+export interface FlarumProviders extends DefaultProviders {
     php: PhpProvider
 }

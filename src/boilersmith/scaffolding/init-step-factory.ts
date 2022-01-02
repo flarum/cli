@@ -1,12 +1,12 @@
 import { Store } from 'mem-fs';
 import { IO } from 'boilersmith/io';
 import { Paths } from '../paths';
-import { Step } from '../step-manager';
+import { DefaultProviders, Step } from '../step-manager';
 import { renameKeys } from '../utils/rename-keys';
 import { applyModule, Module, ModuleStatusCache, promptModulesEnabled, setModuleValue } from './module';
 import { promptParamValues, TemplateParam } from './template-param';
 
-export function initStepFactory<MN extends string, Providers extends {} = {}>(scaffoldDir: string, modules: Module<MN>[], templateParams: TemplateParam[], moduleStatusCache?: ModuleStatusCache<MN>): Step<Providers> {
+export function initStepFactory<MN extends string, Providers extends DefaultProviders>(scaffoldDir: string, modules: Module<MN>[], templateParams: TemplateParam[], moduleStatusCache?: ModuleStatusCache<MN>): Step<Providers> {
   let modulesEnabled: Record<string, boolean>;
 
   return {
@@ -33,7 +33,7 @@ export function initStepFactory<MN extends string, Providers extends {} = {}>(sc
       return fs;
     },
 
-    exposes: modules.map((m) => `modules.${m.name}`),
+    exposes: modules.map(m => `modules.${m.name}`),
 
     getExposed(_paths: Paths, _paramProvider: IO): Record<string, unknown> {
       return renameKeys(modulesEnabled, k => `modules.${k}`);

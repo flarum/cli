@@ -2,7 +2,7 @@ import prompts from 'prompts';
 import { Module} from 'boilersmith/scaffolding/module';
 import { TemplateParam } from 'boilersmith/scaffolding/template-param';
 import { initStepFactory } from 'boilersmith/scaffolding/init-step-factory';
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import { getFsPaths, runStep } from '../utils';
 
 describe('init step factory', function () {
@@ -45,16 +45,16 @@ describe('init step factory', function () {
       prompt: {
         name: 'someVar',
         message: 'Some Var',
-        type: 'text'
+        type: 'text',
       },
-      getCurrVal: async () => ''
+      getCurrVal: async () => '',
     },
     {
       name: 'someOtherVar',
       uses: [],
-      compute: async (paths) => paths.package(),
-    }
-  ]
+      compute: async paths => paths.package(),
+    },
+  ];
 
   const scaffoldDir = resolve(__dirname, '../fixtures/example-scaffold');
 
@@ -74,9 +74,8 @@ describe('init step factory', function () {
       '/ext/src/index.js',
       '/ext/src/index.ml',
       '/ext/src/index.php',
-    ])
+    ]);
   });
-
 
   it('works if all optional modules disabled', async function () {
     const step = initStepFactory(scaffoldDir, modules, templateParams);
@@ -88,7 +87,7 @@ describe('init step factory', function () {
     expect(getFsPaths(fs).sort()).toStrictEqual([
       '/ext/.gitignore',
       '/ext/readme.md',
-    ])
+    ]);
   });
 
   it('respects module defaults if not in advanced mode', async function () {
@@ -106,16 +105,16 @@ describe('init step factory', function () {
       '/ext/src/index.js',
       '/ext/src/index.ml',
       '/ext/src/index.php',
-    ])
+    ]);
   });
-
-
 
   it('properly sets cache', async function () {
     const cache: Record<string, boolean> = {};
     const step = initStepFactory(scaffoldDir, modules, templateParams, {
       get: async () => true,
-      set: async (module, enabled) => {cache[module.name] = enabled}
+      set: async (module, enabled) => {
+        cache[module.name] = enabled;
+      },
     });
 
     prompts.inject(['Var Value', false]);
@@ -123,8 +122,8 @@ describe('init step factory', function () {
     await runStep(step, {});
 
     expect(cache).toStrictEqual({
-      'sourceFiles': true,
-      'config': false
-    })
+      sourceFiles: true,
+      config: false,
+    });
   });
 });
