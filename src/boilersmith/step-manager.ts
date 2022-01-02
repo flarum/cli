@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 import { create as createMemFs, Store } from 'mem-fs';
 import { create as createMemFsEditor } from 'mem-fs-editor';
-import { IO, IOFactory } from './io';
+import { IO } from './io';
 import { Paths } from './paths';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
@@ -134,19 +134,19 @@ export class StepManager<Providers extends DefaultProviders> {
     }
   }
 
-  async run(paths: Paths, promptsIOFactory: IOFactory, providers: Providers): Promise<string[]> {
+  async run(paths: Paths, io: IO, providers: Providers): Promise<string[]> {
     const stepNames: string[] = [];
 
     for (let i = 0; i < this.steps.length; i++) {
       const storedStep = this.steps[i];
 
       if (storedStep instanceof AtomicStepManager) {
-        const res = await storedStep.run(paths, promptsIOFactory, providers);
+        const res = await storedStep.run(paths, io, providers);
         stepNames.push(...res);
       } else {
-        const shouldRun: boolean = await this.stepShouldRun(storedStep, promptsIOFactory);
+        const shouldRun: boolean = await this.stepShouldRun(storedStep, io);
         if (!shouldRun) continue;
-        const fs = await this.runStep(storedStep, paths, promptsIOFactory, providers);
+        const fs = await this.runStep(storedStep, paths, io, providers);
 
         await this.commit(fs);
 
@@ -157,7 +157,7 @@ export class StepManager<Providers extends DefaultProviders> {
     return stepNames;
   }
 
-  protected async stepShouldRun(storedStep: StoredStep<Providers>, promptsIOFactory: IOFactory): Promise<boolean> {
+  protected async stepShouldRun(storedStep: StoredStep<Providers>, io: IO): Promise<boolean> {
     let allDependenciesRan = true;
     let noRequiredNonFalsyDependenciesAreFalsy = true;
 
@@ -174,7 +174,7 @@ export class StepManager<Providers extends DefaultProviders> {
 
     if (!storedStep.shouldRun.optional) return true;
 
-    const promptConfirm = await promptsIOFactory({ context: 'Confirm Step' }).getParam<boolean>({
+    const promptConfirm = await io.newInstance({ context: 'Confirm Step' }, []).getParam<boolean>({
       name: 'execute_step',
       message: storedStep.shouldRun.confirmationMessage || `Run step of type "${storedStep.step.type}"?`,
       initial: storedStep.shouldRun.default || false,
@@ -184,7 +184,7 @@ export class StepManager<Providers extends DefaultProviders> {
     return promptConfirm;
   }
 
-  protected async runStep(storedStep: StoredStep<Providers>, paths: Paths, promptsIOFactory: IOFactory, providers: Providers, fs: Store = createMemFs()): Promise<Store> {
+  protected async runStep(storedStep: StoredStep<Providers>, paths: Paths, io: IO, providers: Providers, fs: Store = createMemFs()): Promise<Store> {
     const initial: Record<string, unknown> = storedStep.dependencies.reduce((initial, dep) => {
       let depValue;
       depValue = dep.exposedName === '__succeeded' ? this.exposedParams.has(dep.sourceStep) : this.exposedParams.get(dep.sourceStep)![dep.exposedName];
@@ -198,9 +198,9 @@ export class StepManager<Providers extends DefaultProviders> {
       return initial;
     }, {} as Record<string, unknown>);
 
-    const io = promptsIOFactory({ ...initial, ...storedStep.predefinedParams });
+    const cloned = io.newInstance({ ...initial, ...storedStep.predefinedParams }, []);
 
-    const newFs = await storedStep.step.run(fs, paths, io, providers);
+    const newFs = await storedStep.step.run(fs, paths, cloned, providers);
 
     if (storedStep.name) {
       this.exposedParams.set(storedStep.name, storedStep.step.getExposed(paths, io));
@@ -249,7 +249,7 @@ class AtomicStepManager<Providers> extends StepManager<Providers> {
     throw new Error("Atomic groups can't be nested.");
   }
 
-  async run(paths: Paths, promptsIOFactory: IOFactory, providers: Providers): Promise<string[]> {
+  async run(paths: Paths, io: IO, providers: Providers): Promise<string[]> {
     let fs = createMemFs();
 
     const stepNames: string[] = [];
@@ -257,10 +257,10 @@ class AtomicStepManager<Providers> extends StepManager<Providers> {
     for (let i = 0; i < this.steps.length; i++) {
       const storedStep = this.steps[i] as StoredStep<Providers>;
 
-      const shouldRun: boolean = await this.stepShouldRun(storedStep, promptsIOFactory);
+      const shouldRun: boolean = await this.stepShouldRun(storedStep, io);
       if (!shouldRun) continue;
 
-      fs = await this.runStep(storedStep, paths, promptsIOFactory, providers, fs);
+      fs = await this.runStep(storedStep, paths, io, providers, fs);
 
       stepNames.push(storedStep.step.type);
     }

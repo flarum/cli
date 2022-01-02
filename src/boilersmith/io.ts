@@ -34,6 +34,8 @@ export interface IO {
    * Get all messages that have been logged non-immediately.
    */
   getOutput(): Message[];
+
+  newInstance(cache: Record<string, unknown>, messages: Message[]): IO;
 }
 
 export const PROMPTS_OPTIONS: Options = { onCancel: () => exit() };
@@ -44,8 +46,9 @@ export class PromptsIO implements IO {
   private cache = new Map<string, unknown>();
   private messages: Message[] = [];
 
-  constructor(initial: Record<string, unknown> = {}) {
+  constructor(initial: Record<string, unknown> = {}, messages: Message[] = []) {
     this.cache = new Map(Object.entries(initial));
+    this.messages = messages;
   }
 
   async getParam<T>(paramDef: ParamDef): Promise<T> {
@@ -112,10 +115,8 @@ export class PromptsIO implements IO {
   getOutput(): Message[] {
     return this.messages;
   }
+
+  newInstance(cache: Record<string, unknown>, messages: Message[]): PromptsIO {
+    return new PromptsIO(cache, messages);
+  }
 }
-
-export type IOFactory = (initial: Record<string, unknown>) => IO;
-
-export const promptsIOFactory: IOFactory = (initial = {}) => {
-  return new PromptsIO(initial);
-};

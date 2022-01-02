@@ -2,7 +2,7 @@ import { prompt } from 'prompts';
 import { create as createStore, Store } from 'mem-fs';
 import { create } from 'mem-fs-editor';
 import { resolve } from 'node:path';
-import { PromptsIO, promptsIOFactory } from 'boilersmith/io';
+import { PromptsIO } from 'boilersmith/io';
 import { NodePaths, Paths } from 'boilersmith/paths';
 import { currParamValues, promptParamValues, TemplateParam } from 'boilersmith/scaffolding/template-param';
 
@@ -61,7 +61,7 @@ describe('Template Param Utils', function () {
   it('promptParamValues works', async function () {
     prompt.inject(['Test', 3]);
 
-    expect(await promptParamValues(templateParams, new NodePaths({package: ''}), promptsIOFactory({}))).toStrictEqual({
+    expect(await promptParamValues(templateParams, new NodePaths({package: ''}), new PromptsIO())).toStrictEqual({
       param1: 'Test',
       param2: 3,
       param3: 'Tes',

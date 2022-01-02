@@ -5,7 +5,7 @@ import prompts from 'prompts';
 import globby from 'globby';
 import { execSync } from 'node:child_process';
 import { existsSync, unlinkSync } from 'node:fs';
-import { promptsIOFactory, PROMPTS_OPTIONS } from 'boilersmith/io';
+import { PromptsIO, PROMPTS_OPTIONS } from 'boilersmith/io';
 import { StepManager } from 'boilersmith/step-manager';
 import { NodePaths } from 'boilersmith/paths';
 import { PhpSubsystemProvider } from './providers/php-provider';
@@ -64,7 +64,7 @@ export default abstract class BaseCommand extends Command {
     const phpProvider = new PhpSubsystemProvider(resolve(__dirname, '../php-subsystem/index.php'));
 
     const completed = await this.steps(new StepManager<FlarumProviders>())
-      .run(paths, promptsIOFactory, { php: phpProvider });
+      .run(paths, new PromptsIO(), { php: phpProvider });
 
     this.log('\n\n');
     this.log(chalk.bold(chalk.underline(chalk.green('Success! The following steps were completed:'))));

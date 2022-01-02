@@ -1,7 +1,7 @@
 import { prompt } from 'prompts';
 import { create as createStore } from 'mem-fs';
 
-import { promptsIOFactory } from 'boilersmith/io';
+import { PromptsIO } from 'boilersmith/io';
 import { NodePaths } from 'boilersmith/paths';
 import { Module, ModuleStatusCache, currModulesEnabled, promptModulesEnabled, setModuleValue, applyModule } from 'boilersmith/scaffolding/module';
 import { resolve } from 'node:path';
@@ -56,7 +56,7 @@ describe('Module Utils', function () {
     it('works in recommended mode', async function () {
       prompt.inject([false]);
 
-      expect(await promptModulesEnabled(modules, promptsIOFactory({}))).toStrictEqual({
+      expect(await promptModulesEnabled(modules, new PromptsIO())).toStrictEqual({
         'non-togglable': true,
         'default-on': true,
         'default-off': false,
@@ -66,7 +66,7 @@ describe('Module Utils', function () {
     it('works in advanced mode', async function () {
       prompt.inject([true, false, true]);
 
-      expect(await promptModulesEnabled(modules, promptsIOFactory({}))).toStrictEqual({
+      expect(await promptModulesEnabled(modules, new PromptsIO())).toStrictEqual({
         'non-togglable': true,
         'default-on': false,
         'default-off': true,

@@ -1,6 +1,6 @@
 /* eslint-disable max-nested-callbacks */
 import { prompt } from 'prompts';
-import { promptsIOFactory as defaultPPFac } from 'boilersmith/io';
+import { PromptsIO } from 'boilersmith/io';
 import { StepManager } from 'boilersmith/step-manager';
 import { stubPathsFactory, stubStepFactory } from './utils';
 
@@ -142,10 +142,19 @@ describe('Step Manager Validation', function () {
 });
 
 describe('Step Manager Execution', function () {
-  const promptsIOFactory = jest.fn(defaultPPFac);
+  const io = new PromptsIO();
+
+  const ioNewFunc = jest.fn(function (this: PromptsIO, cache = {}, message = []) {
+    const instance = new PromptsIO(cache, message);
+    instance.newInstance = ioNewFunc as any;
+
+    return instance;
+  });
+
+  io.newInstance = ioNewFunc as any;
 
   beforeEach(() => {
-    promptsIOFactory.mockClear();
+    ioNewFunc.mockClear();
   });
 
   test('Can run a complex but valid sequence of steps, params properly passed to dependencies', async function () {
@@ -183,7 +192,7 @@ describe('Step Manager Execution', function () {
             },
           ]);
       })
-      .run(stubPathsFactory(), promptsIOFactory, {});
+      .run(stubPathsFactory(), io, {});
 
     // Tests that all steps run, and that they do so in order.
     expect(results).toStrictEqual([
@@ -197,15 +206,15 @@ describe('Step Manager Execution', function () {
     ]);
 
     // Tests that params are shared properly.
-    expect(JSON.stringify(promptsIOFactory.mock.calls)).toStrictEqual(
+    expect(JSON.stringify(ioNewFunc.mock.calls)).toStrictEqual(
       JSON.stringify([
-        [{}],
-        [{}],
-        [{}],
-        [{ modelClass: 'Something' }],
-        [{ targetModelClass: 'Something' }],
-        [{}],
-        [{ listenerClass: 'Something Else', isntUsedHereButWhyNot: 'Something' }],
+        [{}, []],
+        [{}, []],
+        [{}, []],
+        [{ modelClass: 'Something' }, []],
+        [{ targetModelClass: 'Something' }, []],
+        [{}, []],
+        [{ listenerClass: 'Something Else', isntUsedHereButWhyNot: 'Something' }, []],
       ]),
     );
 
@@ -229,17 +238,17 @@ describe('Step Manager Execution', function () {
           dontRunIfFalsy: true,
         },
       ])
-      .run(stubPathsFactory(), promptsIOFactory, {});
+      .run(stubPathsFactory(), io, {});
 
     expect(results).toStrictEqual(['Standalone', 'Standalone', 'Standalone Optional']);
 
     // Tests that params are shared properly.
-    expect(JSON.stringify(promptsIOFactory.mock.calls)).toStrictEqual(
+    expect(JSON.stringify(ioNewFunc.mock.calls)).toStrictEqual(
       JSON.stringify([
-        [{}],
-        [{ __succeeded: true }],
-        [{ context: 'Confirm Step' }], // Prompt for confirmation of optional step
-        [{ __succeeded: true }],
+        [{}, []],
+        [{ __succeeded: true }, []],
+        [{ context: 'Confirm Step' }, []], // Prompt for confirmation of optional step
+        [{ __succeeded: true }, []],
       ]),
     );
   });
@@ -257,7 +266,7 @@ describe('Step Manager Execution', function () {
           .step(stubStepFactory('Atomic not optional'))
           .step(stubStepFactory('Atomic optional runs'), { optional: true });
       })
-      .run(stubPathsFactory(), promptsIOFactory, {});
+      .run(stubPathsFactory(), io, {});
 
     expect(results).toStrictEqual(['Optional runs', 'Not Optional', 'Atomic not optional', 'Atomic optional runs']);
   });
@@ -281,7 +290,7 @@ describe('Step Manager Execution', function () {
             exposedName: 'something else',
           },
         ])
-        .run(stubPathsFactory(), promptsIOFactory, {});
+        .run(stubPathsFactory(), io, {});
 
       expect(results).toStrictEqual(['Generate Model', 'Relies on dep1']);
     });
@@ -319,7 +328,7 @@ describe('Step Manager Execution', function () {
               },
             ]);
         })
-        .run(stubPathsFactory(), promptsIOFactory, {});
+        .run(stubPathsFactory(), io, {});
 
       expect(results).toStrictEqual(['Generate Model', 'Relies on dep1', 'Relies on dep1b']);
     });
@@ -359,7 +368,7 @@ describe('Step Manager Execution', function () {
           dontRunIfFalsy: false,
         },
       ])
-      .run(stubPathsFactory(), promptsIOFactory, {});
+      .run(stubPathsFactory(), io, {});
 
     expect(results).toStrictEqual([
       'Generate Model',

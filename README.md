@@ -192,7 +192,7 @@ For example:
         },
       ]);
   })
-  .run(stubPathsFactory(), promptsIOFactory, stubPhpProviderFactory());
+  .run(new Paths({...}), new PromptsIO(), {php: new PhpProvider(...)});
 ```
 
 
