@@ -143,7 +143,7 @@ function paramNamesToDef(name: ExtensionParams): TemplateParam<string, Extension
       },
       getCurrVal: async (fs: Store, paths: Paths) => {
         const json = getComposerJson(fs, paths);
-        return json?.extra?.['flarum-extension']?.title ?? '';
+        return json?.license ?? '';
       },
     };
 
