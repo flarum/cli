@@ -323,7 +323,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
   case 'css':
     return {
       name,
-      updatable: true,
+      updatable: false,
       togglable: true,
       defaultEnabled: true,
       shortDescription: 'CSS',
@@ -337,7 +337,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
   case 'locale':
     return {
       name,
-      updatable: true,
+      updatable: false,
       togglable: true,
       defaultEnabled: true,
       shortDescription: 'Locale',
