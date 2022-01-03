@@ -176,11 +176,44 @@ describe('applyModule', function () {
 
   it('can exclude files from being copied', async function () {
     const excludeScaffolding = ['config2.json', 'src/index.ml'];
-    const fs = await applyModule(justFilesModule, { 'just-files': true }, {}, scaffoldDir, createStore(), new NodePaths({ package: '/ext' }), excludeScaffolding);
+    const fs = await applyModule(
+      justFilesModule,
+      { 'just-files': true },
+      {},
+      scaffoldDir,
+      createStore(),
+      new NodePaths({ package: '/ext' }),
+      excludeScaffolding,
+    );
 
-    expect(getFsPaths(fs)).toStrictEqual(justFilesModule.filesToReplace.filter(f => !excludeScaffolding.includes(typeof f === 'string' ? f : f.path)).map(p => `/ext/${p}`));
+    expect(getFsPaths(fs)).toStrictEqual(
+      justFilesModule.filesToReplace.filter(f => !excludeScaffolding.includes(typeof f === 'string' ? f : f.path)).map(p => `/ext/${p}`),
+    );
     expect(getExtFileContents(fs, '.gitignore')).toStrictEqual('node_modules');
     expect(getExtFileContents(fs, 'readme.md')).toStrictEqual('# Sample Scaffolding');
+  });
+
+  it('copies over files in monorepo config', async function () {
+    const module: Module = {
+      name: 'monorepo',
+      togglable: false,
+      updatable: true,
+      shortDescription: '',
+      filesToReplace: [{ path: '.gitignore', monorepoPath: '${params.someVar}.gitignore' }, 'readme.md'],
+      jsonToAugment: {},
+      needsTemplateParams: ['someVar'],
+    };
+
+    const fs = await applyModule(
+      module,
+      { monorepo: true },
+      { someVar: 'OCaml' },
+      scaffoldDir,
+      createStore(),
+      new NodePaths({ package: '/ext', monorepo: '/ext/monorepo' }),
+    );
+
+    expect(getFsPaths(fs)).toStrictEqual(['/ext/monorepo/OCaml.gitignore', '/ext/readme.md']);
   });
 
   it('copies over JSON data', async function () {

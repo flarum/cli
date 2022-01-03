@@ -20,6 +20,11 @@ interface FileOwnership {
    * If any of the needed modules aren't enabled, the file won't be updated.
    */
   needsOtherModules?: string[];
+
+  /**
+   * If in a monorepo, should the file be placed relative to the monorepo root?
+   */
+  monorepoPath?: string;
 }
 
 interface CommonModule<N extends string> {
@@ -186,16 +191,19 @@ export async function applyModule<MN extends string, TN extends string>(
     modules: modulesEnabled,
   };
 
+  const tplDataFlat = { ...renameKeys(tplData.modules, k => `modules.${k}`), ...renameKeys(tplData.params, k => `params.${k}`) } as Record<string, string>;
+
   for (const file of module.filesToReplace) {
     const path = typeof file === 'string' ? file : file.path;
     const needsOtherModules = typeof file === 'string' ? [] : file.needsOtherModules ?? [];
 
     if (!excludeFiles.includes(path) && !needsOtherModules.some(dep => !modulesEnabled[dep])) {
-      fsEditor.copyTpl(resolve(scaffoldDir, path), paths.package(path), tplData);
+      const copyToIfMonorepo = typeof file !== 'string' && file.monorepoPath ? paths.monorepo(cloneAndFill(file.monorepoPath, tplDataFlat)) : undefined;
+      const copyTo = copyToIfMonorepo ?? paths.package(path);
+      fsEditor.copyTpl(resolve(scaffoldDir, path), copyTo, tplData);
     }
   }
 
-  const tplDataFlat = { ...renameKeys(tplData.modules, k => `modules.${k}`), ...renameKeys(tplData.params, k => `params.${k}`) } as Record<string, string>;
   const jsonPaths = cloneAndFill(module.jsonToAugment, tplDataFlat);
   for (const jsonPath of Object.keys(jsonPaths)) {
     const scaffoldContents = readTpl(resolve(scaffoldDir, jsonPath), tplData);
