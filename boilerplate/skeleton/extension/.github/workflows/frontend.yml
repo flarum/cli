@@ -1,4 +1,4 @@
-name: JS
+name: <%= params.extensionName %> JS
 
 on: [workflow_dispatch, push, pull_request]
 

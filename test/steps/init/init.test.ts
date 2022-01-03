@@ -9,7 +9,7 @@ async function getExpected(): Promise<string[]> {
   const skeletonDir = resolve(`${__dirname}/../../../boilerplate/skeleton/extension`);
   const skeletonPaths = await globby(`${skeletonDir}/**/*`, { dot: true });
 
-  return [...skeletonPaths].map(path => path.replace(skeletonDir, '/ext')).sort();
+  return [...skeletonPaths].map(path => path.replace(skeletonDir, '/ext').replace('gitignore', '.gitignore')).sort();
 }
 
 async function getEnabledModules(fs: Store) {

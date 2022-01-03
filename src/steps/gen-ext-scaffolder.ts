@@ -129,6 +129,7 @@ function paramNamesToDef(name: ExtensionParams): TemplateParam<string, Extension
       },
       getCurrVal: async (fs: Store, paths: Paths) => {
         const json = getComposerJson(fs, paths);
+        if (json.name === 'flarum/core') return 'Core';
         return json?.extra?.['flarum-extension']?.title ?? '';
       },
     };
@@ -391,7 +392,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         { path: '.github/workflows/backend.yml', monorepoPath: '.github/workflows/${params.extensionId}-backend.yml' },
       ],
       jsonToAugment: {},
-      needsTemplateParams: ['frontendDirectory', 'backendDirectory', 'mainGitBranch', 'extensionId'],
+      needsTemplateParams: ['frontendDirectory', 'backendDirectory', 'mainGitBranch', 'extensionId', 'extensionName'],
     };
 
   case 'prettier':
