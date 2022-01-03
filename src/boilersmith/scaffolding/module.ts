@@ -17,12 +17,18 @@ interface FileOwnership {
   path: string;
 
   /**
+   * Where the file should go. Defaults to path.
+   */
+  destPath?: string;
+
+  /**
    * If any of the needed modules aren't enabled, the file won't be updated.
    */
   needsOtherModules?: string[];
 
   /**
-   * If in a monorepo, should the file be placed relative to the monorepo root?
+   * If in a monorepo, should the file be placed relative to the monorepo root, and if so, where?
+   * If provided, takes priority over destPath.
    */
   monorepoPath?: string;
 }
@@ -199,7 +205,7 @@ export async function applyModule<MN extends string, TN extends string>(
 
     if (!excludeFiles.includes(path) && !needsOtherModules.some(dep => !modulesEnabled[dep])) {
       const copyToIfMonorepo = typeof file !== 'string' && file.monorepoPath ? paths.monorepo(cloneAndFill(file.monorepoPath, tplDataFlat)) : undefined;
-      const copyTo = copyToIfMonorepo ?? paths.package(path);
+      const copyTo = copyToIfMonorepo ?? paths.package(typeof file !== 'string' && file.destPath ? cloneAndFill(file.destPath, tplDataFlat) : path);
       fsEditor.copyTpl(resolve(scaffoldDir, path), copyTo, tplData);
     }
   }

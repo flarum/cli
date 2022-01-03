@@ -199,7 +199,7 @@ describe('applyModule', function () {
       togglable: false,
       updatable: true,
       shortDescription: '',
-      filesToReplace: [{ path: '.gitignore', monorepoPath: '${params.someVar}.gitignore' }, 'readme.md'],
+      filesToReplace: [{ path: '.gitignore', destPath: '${params.someVar}.gitignore', monorepoPath: '${params.someVar}.gitignore' }, 'readme.md'],
       jsonToAugment: {},
       needsTemplateParams: ['someVar'],
     };
@@ -216,6 +216,28 @@ describe('applyModule', function () {
     expect(getFsPaths(fs)).toStrictEqual(['/ext/monorepo/OCaml.gitignore', '/ext/readme.md']);
   });
 
+  it('copies over files with dest names', async function () {
+    const module: Module = {
+      name: 'monorepo',
+      togglable: false,
+      updatable: true,
+      shortDescription: '',
+      filesToReplace: [{ path: '.gitignore', destPath: '${params.someVar}.gitignore' }, 'readme.md'],
+      jsonToAugment: {},
+      needsTemplateParams: ['someVar'],
+    };
+
+    const fs = await applyModule(
+      module,
+      { monorepo: true },
+      { someVar: 'OCaml' },
+      scaffoldDir,
+      createStore(),
+      new NodePaths({ package: '/ext' }),
+    );
+
+    expect(getFsPaths(fs)).toStrictEqual(['/ext/OCaml.gitignore', '/ext/readme.md']);
+  });
   it('copies over JSON data', async function () {
     const module: Module = {
       name: 'just-json',

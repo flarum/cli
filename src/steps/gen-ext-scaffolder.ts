@@ -372,7 +372,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
       shortDescription: 'Git Configuration',
       longDescription: 'Git config files (e.g. .gitignore, .gitattributes).',
       dependsOn: [],
-      filesToReplace: ['.gitignore', '.gitattributes'],
+      filesToReplace: [{ path: 'gitignore', destPath: '.gitignore' }, '.gitattributes'],
       jsonToAugment: {},
       needsTemplateParams: [],
     };
