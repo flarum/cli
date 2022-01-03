@@ -1,4 +1,4 @@
-import { glob } from 'glob';
+import globby from 'globby';
 import { Store } from 'mem-fs';
 import { create } from 'mem-fs-editor';
 import { IO } from 'boilersmith/io';
@@ -25,7 +25,7 @@ export abstract class BaseJsStep implements Step<FlarumProviders> {
     }
 
     for (const frontend of frontends) {
-      const fsSrcFilePaths = glob.sync(paths.package(`js/src/${frontend}/*.{js,jsx,ts,tsx}`));
+      const fsSrcFilePaths = globby.sync(paths.package(`js/src/${frontend}/*.{js,jsx,ts,tsx}`));
 
       fsSrcFilePaths.forEach(async match => {
         /**

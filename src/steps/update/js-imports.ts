@@ -1,4 +1,4 @@
-import { glob } from 'glob';
+import globby from 'globby';
 import { Store } from 'mem-fs';
 import { create } from 'mem-fs-editor';
 import { IO } from 'boilersmith/io';
@@ -24,7 +24,7 @@ export class UpdateJSImports implements Step {
 
     const vendorRegex = new RegExp(`${jsSrcDir}/.*(js|jsx|ts|tsx)`);
     const fsVendorFilePaths = fs.all().map(file => file.path).filter(path => path && vendorRegex.test(path));
-    const persistedVendorFilePaths = glob.sync(`${jsSrcDir}/**/*.{js,jsx,ts,tsx}`);
+    const persistedVendorFilePaths = globby.sync(`${jsSrcDir}/**/*.{js,jsx,ts,tsx}`);
 
     for (const currPath of [...fsVendorFilePaths, ...persistedVendorFilePaths]) {
       const withNamespace = currPath.slice(jsSrcDir.length + 1).replace(/\.(js|jsx|ts|tsx)$/, '');
@@ -35,7 +35,7 @@ export class UpdateJSImports implements Step {
 
     const srcRegex = new RegExp(`${paths.package('js/src')}/.*(js|jsx|ts|tsx)`);
     const fsSrcFilePaths = fs.all().map(file => file.path).filter(path => path && srcRegex.test(path));
-    const persistedSrcFilePaths = glob.sync(paths.package('js/src/**/*.{js,jsx,ts,tsx}'));
+    const persistedSrcFilePaths = globby.sync(paths.package('js/src/**/*.{js,jsx,ts,tsx}'));
 
     for (const match of [...fsSrcFilePaths, ...persistedSrcFilePaths]) {
       let fileCounted = false;
