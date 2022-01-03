@@ -2,7 +2,8 @@
 import { prompt } from 'prompts';
 import { PromptsIO } from 'boilersmith/io';
 import { StepManager } from 'boilersmith/step-manager';
-import { stubPathsFactory, stubStepFactory } from './utils';
+import { stubStepFactory } from './utils';
+import { NodePaths } from 'boilersmith/paths';
 
 describe('Step Manager Validation', function () {
   describe('dependencies on nonexistent steps will cause errors', function () {
@@ -103,6 +104,73 @@ describe('Step Manager Validation', function () {
     });
   });
 
+  describe('Dependencies of mapped steps must also be mapped over an equal of greater set of paths', function () {
+    test('holds for named steps mapped over paths', function () {
+      expect(() => {
+        new StepManager()
+          .namedStep('someName', stubStepFactory('Generate Controller', true, [], { exposedParam: 'val' }), { optional: false }, [], {}, [
+            'packages/a',
+            'packages/b',
+          ])
+          .namedStep(
+            'nonOverlapping',
+            stubStepFactory('Dependent'),
+            { optional: false },
+            [
+              {
+                sourceStep: 'someName',
+                exposedName: 'exposedParam',
+              },
+            ],
+            {},
+            ['packages/b', 'packages/c', 'packages/d'],
+          );
+      }).toThrow(
+        'Step of type "Dependent" (A) depends on named step: "someName" (B), but is mapped across some paths that (B) is not: "packages/c, packages/d"',
+      );
+    });
+
+    test('holds for unnamed steps mapped over paths', function () {
+      expect(() => {
+        new StepManager()
+          .namedStep('someName', stubStepFactory('Generate Controller', true, [], { exposedParam: 'val' }), { optional: false }, [], {}, [
+            'packages/a',
+            'packages/b',
+          ])
+          .step(
+            stubStepFactory('Dependent'),
+            { optional: false },
+            [
+              {
+                sourceStep: 'someName',
+                exposedName: 'exposedParam',
+              },
+            ],
+            {},
+            ['packages/b', 'packages/c', 'packages/d'],
+          );
+      }).toThrow(
+        'Step of type "Dependent" (A) depends on named step: "someName" (B), but is mapped across some paths that (B) is not: "packages/c, packages/d"',
+      );
+    });
+  });
+
+  test('Non-mapped step may not depend on mapped step', function () {
+    expect(() => {
+      new StepManager()
+        .namedStep('mapped', stubStepFactory('Generate Controller', true, [], { exposedParam: 'val' }), { optional: false }, [], {}, [
+          'packages/a',
+          'packages/b',
+        ])
+        .step(stubStepFactory('Dependent'), { optional: false }, [
+          {
+            sourceStep: 'mapped',
+            exposedName: 'exposedParam',
+          },
+        ]);
+    }).toThrow('Non path-mapped step of type "Dependent" may not depend on path-mapped step "mapped".');
+  });
+
   describe('Named steps must be unique', function () {
     test('Holds with simple steps', function () {
       expect(() => {
@@ -142,24 +210,42 @@ describe('Step Manager Validation', function () {
 });
 
 describe('Step Manager Execution', function () {
-  const io = new PromptsIO();
+  let io = new PromptsIO();
+  const paths = new NodePaths({ package: '/ext' });
 
   const ioNewFunc = jest.fn(function (this: PromptsIO, cache = {}, message = []) {
     const instance = new PromptsIO(cache, message);
-    instance.newInstance = ioNewFunc as any;
+    instance.newInstance = ioNewFunc;
 
     return instance;
   });
 
-  io.newInstance = ioNewFunc as any;
+  const pathsNewFunc = jest.fn(function (this: NodePaths, packagePath: string) {
+    const instance = new NodePaths({ ...this.paths, monorepo: this.paths.package, package: packagePath });
+
+    instance.onMonorepoSub = pathsNewFunc;
+
+    return instance;
+  });
+
+  io.newInstance = ioNewFunc;
+  paths.onMonorepoSub = pathsNewFunc;
+
+  let commitMethod: jest.SpyInstance<any, unknown[]>;
 
   beforeEach(() => {
+    io = io.newInstance({}, []);
     ioNewFunc.mockClear();
+    pathsNewFunc.mockClear();
+    commitMethod = jest.spyOn(StepManager.prototype as any, 'commit');
+  });
+
+  afterEach(() => {
+    commitMethod.mockReset();
+    commitMethod.mockRestore();
   });
 
   test('Can run a complex but valid sequence of steps, params properly passed to dependencies', async function () {
-    const commitMethod = jest.spyOn(StepManager.prototype as any, 'commit');
-
     const results = await new StepManager()
       .step(stubStepFactory('Standalone'))
       .step(stubStepFactory('Standalone'))
@@ -192,7 +278,7 @@ describe('Step Manager Execution', function () {
             },
           ]);
       })
-      .run(stubPathsFactory(), io, {});
+      .run(paths, io, {});
 
     // Tests that all steps run, and that they do so in order.
     expect(results).toStrictEqual([
@@ -218,6 +304,9 @@ describe('Step Manager Execution', function () {
       ]),
     );
 
+    // No path-mapped calls here.
+    expect(JSON.stringify(pathsNewFunc.mock.calls)).toStrictEqual('[]');
+
     expect(commitMethod.mock.calls.length).toBe(6);
   });
 
@@ -238,7 +327,7 @@ describe('Step Manager Execution', function () {
           dontRunIfFalsy: true,
         },
       ])
-      .run(stubPathsFactory(), io, {});
+      .run(paths, io, {});
 
     expect(results).toStrictEqual(['Standalone', 'Standalone', 'Standalone Optional']);
 
@@ -251,6 +340,8 @@ describe('Step Manager Execution', function () {
         [{ __succeeded: true }, []],
       ]),
     );
+
+    expect(JSON.stringify(pathsNewFunc.mock.calls)).toStrictEqual('[]');
   });
 
   test('Optional steps wont run if not confirmed', async function () {
@@ -266,7 +357,7 @@ describe('Step Manager Execution', function () {
           .step(stubStepFactory('Atomic not optional'))
           .step(stubStepFactory('Atomic optional runs'), { optional: true });
       })
-      .run(stubPathsFactory(), io, {});
+      .run(paths, io, {});
 
     expect(results).toStrictEqual(['Optional runs', 'Not Optional', 'Atomic not optional', 'Atomic optional runs']);
   });
@@ -290,7 +381,7 @@ describe('Step Manager Execution', function () {
             exposedName: 'something else',
           },
         ])
-        .run(stubPathsFactory(), io, {});
+        .run(paths, io, {});
 
       expect(results).toStrictEqual(['Generate Model', 'Relies on dep1']);
     });
@@ -328,15 +419,13 @@ describe('Step Manager Execution', function () {
               },
             ]);
         })
-        .run(stubPathsFactory(), io, {});
+        .run(paths, io, {});
 
       expect(results).toStrictEqual(['Generate Model', 'Relies on dep1', 'Relies on dep1b']);
     });
   });
 
   test('If a dependency marked as "dontRunIfFalsy" is falsy, dont run.', async function () {
-    prompt.inject([true, true]);
-
     const results = await new StepManager()
       .namedStep('dep1', stubStepFactory('Generate Model', true, [], { something: false }))
       .namedStep('dep2', stubStepFactory('Generate Serializer', true, [], { 'something else': true }))
@@ -368,7 +457,7 @@ describe('Step Manager Execution', function () {
           dontRunIfFalsy: false,
         },
       ])
-      .run(stubPathsFactory(), io, {});
+      .run(paths, io, {});
 
     expect(results).toStrictEqual([
       'Generate Model',
@@ -377,5 +466,101 @@ describe('Step Manager Execution', function () {
       'Relies on dep2, should run',
       'Relies on dep2, also should run',
     ]);
+  });
+
+  test('Path-mapped steps can pull params from both non-mapped and (larger) mapped.', async function () {
+    const results = await new StepManager()
+      .namedStep('non-mapped', stubStepFactory('Non Mapped Base', true, [], { nonMappedParam: 'nonMappedVal' }), { optional: false })
+      .namedStep(
+        'mappedLarge',
+        stubStepFactory('Mapped With Many', true, [], { mappedParam: 'mappedVal' }),
+        { optional: false },
+        [
+          {
+            sourceStep: 'non-mapped',
+            exposedName: 'nonMappedParam',
+          },
+        ],
+        {},
+        ['packages/a', 'ext/b', 'plugins/c'],
+      )
+      .atomicGroup(function (stepManager) {
+        return stepManager
+          .namedStep('non-mapped-atomic', stubStepFactory('Non Mapped Atomic', true, [], { nonMappedParam2: 'nonMappedVal2' }), { optional: false })
+          .step(
+            stubStepFactory('Mapped Final'),
+            { optional: false },
+            [
+              {
+                sourceStep: 'mappedLarge',
+                exposedName: 'mappedParam',
+              },
+              {
+                sourceStep: 'non-mapped-atomic',
+                exposedName: 'nonMappedParam2',
+              },
+            ],
+            {},
+            ['packages/a', 'ext/b'],
+          );
+      })
+      .run(paths, io, {});
+
+    expect(results).toStrictEqual([
+      'Non Mapped Base',
+      'Mapped With Many (packages/a)',
+      'Mapped With Many (ext/b)',
+      'Mapped With Many (plugins/c)',
+      'Non Mapped Atomic',
+      'Mapped Final (packages/a)',
+      'Mapped Final (ext/b)',
+    ]);
+
+    // Tests that params are shared properly.
+    expect(JSON.stringify(ioNewFunc.mock.calls)).toStrictEqual(
+      JSON.stringify([
+        [{}, []],
+        [
+          {
+            nonMappedParam: 'nonMappedVal',
+          },
+          [],
+        ],
+        [{ nonMappedParam: 'nonMappedVal' }, []],
+        [{ nonMappedParam: 'nonMappedVal' }, []],
+        [{}, []],
+        [{ mappedParam: 'mappedVal', nonMappedParam2: 'nonMappedVal2' }, []],
+        [{ mappedParam: 'mappedVal', nonMappedParam2: 'nonMappedVal2' }, []],
+      ]),
+    );
+
+    // No path-mapped calls here.
+    expect(JSON.stringify(pathsNewFunc.mock.calls)).toStrictEqual(JSON.stringify([['packages/a'], ['ext/b'], ['plugins/c'], ['packages/a'], ['ext/b']]));
+
+    expect(commitMethod.mock.calls.length).toBe(5);
+  });
+
+  test('some path mapped steps, but not others, can run', async function () {
+    prompt.inject([true, false, true]);
+
+    const results = await new StepManager()
+      .namedStep('mapped', stubStepFactory('Optional'), { optional: true }, [], {}, ['packages/a', 'exts/b', 'plugins/c'])
+      .step(
+        stubStepFactory('Followup'),
+        { optional: false },
+        [
+          {
+            sourceStep: 'mapped',
+            exposedName: '__succeeded',
+          },
+        ],
+        {},
+        ['packages/a', 'exts/b', 'plugins/c'],
+      )
+      .run(paths, io, {});
+
+    expect(results).toStrictEqual(['Optional (packages/a)', 'Optional (plugins/c)', 'Followup (packages/a)', 'Followup (plugins/c)']);
+
+    expect(commitMethod.mock.calls.length).toBe(4);
   });
 });

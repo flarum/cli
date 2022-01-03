@@ -5,19 +5,21 @@ export interface Paths {
 
   package(...path: string[]): string;
 
-  requestedDir(...path: string[]): string|null;
+  requestedDir(...path: string[]): string | null;
 
-  monorepo(...path: string[]): string|null;
+  monorepo(...path: string[]): string | null;
+
+  onMonorepoSub(packagePath: string): Paths;
 }
 
 type InternalPaths = {
   package: string;
-  monorepo?: string|null;
-  requestedDir?: string|null;
-}
+  monorepo?: string | null;
+  requestedDir?: string | null;
+};
 
 export class NodePaths implements Paths {
-  private paths: InternalPaths;
+  protected paths: InternalPaths;
 
   constructor(paths: InternalPaths) {
     this.paths = paths;
@@ -31,15 +33,19 @@ export class NodePaths implements Paths {
     return resolve(this.paths.package, ...path);
   }
 
-  requestedDir(...path: string[]): string|null {
+  requestedDir(...path: string[]): string | null {
     if (!this.paths.requestedDir) return null;
 
     return resolve(this.paths.requestedDir, ...path);
   }
 
-  monorepo(...path: string[]): string|null {
+  monorepo(...path: string[]): string | null {
     if (!this.paths.monorepo) return null;
 
     return resolve(this.paths.monorepo, ...path);
+  }
+
+  onMonorepoSub(packagePath: string): NodePaths {
+    return new NodePaths({ ...this.paths, monorepo: this.paths.package, package: packagePath });
   }
 }

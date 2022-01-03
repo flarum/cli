@@ -49,6 +49,10 @@ export function stubPathsFactory(paths: TestPaths = {}): Paths {
     monorepo(...path: string[]): string | null {
       return paths.monorepo ? resolve(paths.monorepo, ...path) : null;
     },
+
+    onMonorepoSub(packagePath: string): Paths {
+      return stubPathsFactory({...paths, monorepo: paths.package, package: packagePath});
+    },
   };
 }
 
