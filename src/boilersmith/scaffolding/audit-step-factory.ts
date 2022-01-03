@@ -3,7 +3,7 @@ import { IO } from 'boilersmith/io';
 import { Paths } from '../paths';
 import { DefaultProviders, Step } from '../step-manager';
 import { renameKeys } from '../utils/rename-keys';
-import { applyModule, currModulesEnabled, Module, ModuleStatusCache } from './module';
+import { applyModule, currModulesEnabled, Module, ModuleStatusCache, setModuleValue } from './module';
 import { currParamValues, TemplateParam } from './template-param';
 import { ExcludeScaffoldingFunc } from './scaffolder';
 import { condFormat } from 'boilersmith/utils/cond-format';
@@ -72,6 +72,12 @@ export function auditStepFactory<MN extends string, Providers extends DefaultPro
               false,
             );
           }
+        }
+      }
+
+      for (const m of modules) {
+        if (moduleStatusCache && m.updatable && (actionableModules.includes(m) || m.togglable)) {
+          setModuleValue(m, actionableModules.includes(m), _fs, paths, moduleStatusCache);
         }
       }
 
