@@ -79,8 +79,8 @@
       "make": {
         "description": "Add boilerplate code to an existing Flarum extension."
       },
-      "infra": {
-        "description": "Add/modify infrastructure for an existing Flarum extension."
+      "audit": {
+        "description": "Checks for potential errors / updatable parts of a Flarum extension."
       }
     },
     "plugins": [

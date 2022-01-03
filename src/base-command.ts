@@ -15,6 +15,8 @@ import { FlarumProviders } from './providers';
 export default abstract class BaseCommand extends Command {
   protected STUB_PATH = resolve(__dirname, '../boilerplate/stubs/');
 
+  protected dry = false;
+
   protected args!: Record<string, any>;
   protected flags: any;
 
@@ -64,7 +66,7 @@ export default abstract class BaseCommand extends Command {
     const phpProvider = new PhpSubsystemProvider(resolve(__dirname, '../php-subsystem/index.php'));
 
     const out = await this.steps(new StepManager<FlarumProviders>())
-      .run(paths, new PromptsIO(), { php: phpProvider });
+      .run(paths, new PromptsIO(), { php: phpProvider }, this.dry);
 
     this.log('\n\n');
     if (out.succeeded) {
@@ -107,6 +109,22 @@ export default abstract class BaseCommand extends Command {
   // ----------------------------------------------------------------
   // Confirmation
   // ----------------------------------------------------------------
+
+  protected monorepoPaths(options: {includeCore: boolean; includeExtensions: boolean; includePhpPackages: boolean; includeJSPackages: boolean}): string[] {
+    try {
+      const monorepoConfig = readFileSync(resolve(process.cwd(), 'flarum-monorepo.json'));
+      const contents = JSON.parse(monorepoConfig.toString());
+
+      return [
+        ...(options.includeCore ? [contents.core] : []),
+        ...(options.includeExtensions ? contents.extensions : []),
+        ...(options.includePhpPackages ? contents.composerPackages : []),
+        ...(options.includeJSPackages ? contents.npmPackages : []),
+      ];
+    } catch {
+      this.error('Could not run monorepo command: `flarum-monorepo.json` file is missing or invalid.');
+    }
+  }
 
   protected isFlarumCore(path: string): boolean {
     try {

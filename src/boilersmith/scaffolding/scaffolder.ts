@@ -12,6 +12,7 @@ import { infraStepFactory } from './infra-step-factory';
 import { renameKeys } from 'boilersmith/utils/rename-keys';
 import { cloneAndFill } from 'boilersmith/utils/clone-and-fill';
 import { IO } from 'boilersmith/io';
+import { auditStepFactory } from './audit-step-factory';
 
 export class Scaffolder<TN extends string = string, MN extends string = string> {
   private templateParams: TemplateParam<unknown, TN>[] = [];
@@ -55,6 +56,10 @@ export class Scaffolder<TN extends string = string, MN extends string = string> 
 
   genInfraStep<Providers extends DefaultProviders>(module: string): Step<Providers> {
     return infraStepFactory(this.scaffoldDir, module, this.modules, this.templateParams, this.moduleStatusCache);
+  }
+
+  genAuditStep<Providers extends DefaultProviders>(dry = true): Step<Providers> {
+    return auditStepFactory(dry, this.scaffoldDir, this.modules, this.templateParams, this.moduleStatusCache);
   }
 
   async templateParamVal<T>(param: TN, fs: Store, paths: Paths, io: IO): Promise<T> {
