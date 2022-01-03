@@ -60,11 +60,18 @@ export function auditStepFactory<MN extends string, Providers extends DefaultPro
         const excludeScaffolding = excludeScaffoldingFunc ? excludeScaffoldingFunc(fs, paths) : [];
         applyModule(m, modulesEnabled, paramVals, scaffoldDir, fs, paths, excludeScaffolding, true);
         if (dry) {
-          const filesWithChanges = fs.all()
+          const filesWithChanges = fs
+            .all()
             .filter(f => f.state && f.state !== 'deleted')
             .filter(f => !existsSync(f.path) || readFileSync(f.path, 'utf8').toString() !== f.contents?.toString());
-
-          io.error(`Module ${m.name} has ${filesWithChanges.length} changed files: ${filesWithChanges.map(f => f.path.replace(paths.package() + '/', '')).join(', ')}`, false);
+          if (filesWithChanges.length > 0) {
+            io.error(
+              `Module ${m.name} has ${filesWithChanges.length} changed files: ${filesWithChanges
+                .map(f => f.path.replace(paths.package() + '/', ''))
+                .join(', ')}`,
+              false,
+            );
+          }
         }
       }
 
