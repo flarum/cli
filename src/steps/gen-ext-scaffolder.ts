@@ -207,7 +207,7 @@ function paramNamesToDef(name: ExtensionParams): TemplateParam<string, Extension
       uses: [],
       compute: async (paths: Paths) => {
         const monorepoPath = paths.monorepo();
-        return monorepoPath ? paths.package().replace(monorepoPath, '.') + 'js' : './js';
+        return monorepoPath ? paths.package().replace(monorepoPath, '.') + '/js' : './js';
       },
     };
   }
