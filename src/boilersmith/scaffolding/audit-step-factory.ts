@@ -6,8 +6,18 @@ import { renameKeys } from '../utils/rename-keys';
 import { applyModule, currModulesEnabled, Module, ModuleStatusCache } from './module';
 import { currParamValues, TemplateParam } from './template-param';
 import { ExcludeScaffoldingFunc } from './scaffolder';
+import { condFormat } from 'boilersmith/utils/cond-format';
+import chalk from 'chalk';
+import { existsSync, readFileSync } from 'node:fs';
 
-export function auditStepFactory<MN extends string, Providers extends DefaultProviders>(dry: boolean, scaffoldDir: string, modules: Module<MN>[], templateParams: TemplateParam[], excludeScaffoldingFunc?: ExcludeScaffoldingFunc, moduleStatusCache?: ModuleStatusCache<MN>): Step<Providers> {
+export function auditStepFactory<MN extends string, Providers extends DefaultProviders>(
+  dry: boolean,
+  scaffoldDir: string,
+  modules: Module<MN>[],
+  templateParams: TemplateParam[],
+  excludeScaffoldingFunc?: ExcludeScaffoldingFunc,
+  moduleStatusCache?: ModuleStatusCache<MN>,
+): Step<Providers> {
   let modulesEnabled: Record<string, boolean>;
 
   return {
@@ -19,14 +29,42 @@ export function auditStepFactory<MN extends string, Providers extends DefaultPro
       const paramVals = await currParamValues(templateParams, _fs, paths, io);
       modulesEnabled = await currModulesEnabled(modules, _fs, paths, moduleStatusCache);
 
+      const actionableModules = modules.filter(
+        m => m.updatable && modulesEnabled[m.name] && (!m.togglable || !m.dependsOn.some(dep => !modulesEnabled[dep])),
+      );
+
+      io.info(
+        condFormat(
+          io.supportsAnsiColor,
+          m => chalk.yellow(chalk.bold(chalk.underline(m))),
+          `Auditing infrastructure for ${actionableModules.length} enabled modules:`,
+        ),
+        true,
+      );
       for (const m of modules) {
-        if (m.updatable && modulesEnabled[m.name] && (!m.togglable || !m.dependsOn.some(dep => !modulesEnabled[dep]))) {
-          const fs = dry ? create() : _fs;
-          const excludeScaffolding = excludeScaffoldingFunc ? excludeScaffoldingFunc(fs, paths) : [];
-          applyModule(m, modulesEnabled, paramVals, scaffoldDir, fs, paths, excludeScaffolding, true);
-          if (fs.all()) {
-            io.error(m.name + ' ' + JSON.stringify(fs.all().map(f => [f.path, f.state])), false);
-          }
+        if (actionableModules.includes(m)) {
+          io.info(
+            condFormat(io.supportsAnsiColor, m => chalk.dim(chalk.green(m)), `✓ ${m.name}: ${m.shortDescription}`),
+            true,
+          );
+        } else if (m.updatable) {
+          io.info(
+            condFormat(io.supportsAnsiColor, m => chalk.dim(chalk.red(m)), `𐄂 ${m.name}: ${m.shortDescription} (disabled)`),
+            true,
+          );
+        }
+      }
+
+      for (const m of actionableModules) {
+        const fs = dry ? create() : _fs;
+        const excludeScaffolding = excludeScaffoldingFunc ? excludeScaffoldingFunc(fs, paths) : [];
+        applyModule(m, modulesEnabled, paramVals, scaffoldDir, fs, paths, excludeScaffolding, true);
+        if (dry) {
+          const filesWithChanges = fs.all()
+            .filter(f => f.state && f.state !== 'deleted')
+            .filter(f => !existsSync(f.path) || readFileSync(f.path, 'utf8').toString() !== f.contents?.toString());
+
+          io.error(`Module ${m.name} has ${filesWithChanges.length} changed files: ${filesWithChanges.map(f => f.path.replace(paths.package() + '/', '')).join(', ')}`, false);
         }
       }
 
