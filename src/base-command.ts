@@ -96,10 +96,11 @@ export default abstract class BaseCommand extends Command {
     for (const stepName of out.stepsRan) this.log(`- ${chalk.dim(stepName)}`);
 
     this.log('');
-    if (out.messages.length > 0) {
-      this.log('\n');
+    const nonErrorMessages = out.messages.filter(m => m.type !== 'error');
+    if (nonErrorMessages.length > 0) {
+      this.log('');
       this.log('The following messages were generated during execution:');
-      for (const message of out.messages) {
+      for (const message of nonErrorMessages) {
         this.log(message.message);
       }
     }
