@@ -386,9 +386,12 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
       shortDescription: 'GitHub Actions CI',
       longDescription: 'Automatically run checks via GitHub Actions CI. Free for open source projects.',
       dependsOn: [],
-      filesToReplace: ['.github/workflows/frontend.yml', '.github/workflows/backend.yml'],
+      filesToReplace: [
+        { path: '.github/workflows/frontend.yml', monorepoPath: '.github/workflows/${params.extensionId}-frontend.yml' },
+        { path: '.github/workflows/backend.yml', monorepoPath: '.github/workflows/${params.extensionId}-backend.yml' },
+      ],
       jsonToAugment: {},
-      needsTemplateParams: ['frontendDirectory', 'backendDirectory', 'mainGitBranch'],
+      needsTemplateParams: ['frontendDirectory', 'backendDirectory', 'mainGitBranch', 'extensionId'],
     };
 
   case 'prettier':
@@ -494,7 +497,9 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
       defaultEnabled: true,
       shortDescription: 'StyleCI config file',
       dependsOn: [],
-      filesToReplace: ['.styleci.yml'],
+      filesToReplace: [
+        {path: '.styleci.yml', monorepoPath: '.styleci.yml'},
+      ],
       jsonToAugment: {},
       needsTemplateParams: [],
     };
@@ -534,7 +539,11 @@ export function genExtScaffolder(): Scaffolder<ExtensionParams, ExtensionModules
     return json?.extra?.['flarum-cli']?.excludeScaffolding ?? [];
   };
 
-  const scaffolder = new Scaffolder<ExtensionParams, ExtensionModules>(resolve(__dirname, '../../boilerplate/skeleton/extension'), moduleStatusCache, excludeScaffoldingFunc);
+  const scaffolder = new Scaffolder<ExtensionParams, ExtensionModules>(
+    resolve(__dirname, '../../boilerplate/skeleton/extension'),
+    moduleStatusCache,
+    excludeScaffoldingFunc,
+  );
 
   for (const name of EXTENSION_MODULES) {
     scaffolder.registerModule(moduleNameToDef(name));
