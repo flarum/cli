@@ -63,15 +63,26 @@ export default abstract class BaseCommand extends Command {
 
     const phpProvider = new PhpSubsystemProvider(resolve(__dirname, '../php-subsystem/index.php'));
 
-    const completed = await this.steps(new StepManager<FlarumProviders>())
+    const out = await this.steps(new StepManager<FlarumProviders>())
       .run(paths, new PromptsIO(), { php: phpProvider });
 
     this.log('\n\n');
-    this.log(chalk.bold(chalk.underline(chalk.green('Success! The following steps were completed:'))));
+    if (out.succeeded) {
+      this.log(chalk.bold(chalk.underline(chalk.green('Success! The following steps were completed:'))));
+    } else {
+      this.log(chalk.bold(chalk.underline(chalk.red(`Error occurred, and could not complete: ${out.error}.\n\nBefore the error, the following steps were completed:`))));
+    }
 
-    for (const stepName of completed) this.log(`- ${chalk.dim(stepName)}`);
+    for (const stepName of out.stepsRan) this.log(`- ${chalk.dim(stepName)}`);
 
     this.log('');
+    if (out.messages.length > 0) {
+      this.log('\n');
+      this.log('The following messages were generated during execution:');
+      for (const message of out.messages) {
+        this.log(message.message);
+      }
+    }
 
     const goodbyeMessage = this.goodbyeMessage();
     if (goodbyeMessage) {

@@ -281,7 +281,7 @@ describe('Step Manager Execution', function () {
       .run(paths, io, {});
 
     // Tests that all steps run, and that they do so in order.
-    expect(results).toStrictEqual([
+    expect(results.stepsRan).toStrictEqual([
       'Standalone',
       'Standalone',
       'Generate Model',
@@ -329,7 +329,7 @@ describe('Step Manager Execution', function () {
       ])
       .run(paths, io, {});
 
-    expect(results).toStrictEqual(['Standalone', 'Standalone', 'Standalone Optional']);
+    expect(results.stepsRan).toStrictEqual(['Standalone', 'Standalone', 'Standalone Optional']);
 
     // Tests that params are shared properly.
     expect(JSON.stringify(ioNewFunc.mock.calls)).toStrictEqual(
@@ -359,7 +359,7 @@ describe('Step Manager Execution', function () {
       })
       .run(paths, io, {});
 
-    expect(results).toStrictEqual(['Optional runs', 'Not Optional', 'Atomic not optional', 'Atomic optional runs']);
+    expect(results.stepsRan).toStrictEqual(['Optional runs', 'Not Optional', 'Atomic not optional', 'Atomic optional runs']);
   });
 
   describe("If a step doesnt run, its dependencies won't be run.", function () {
@@ -383,7 +383,7 @@ describe('Step Manager Execution', function () {
         ])
         .run(paths, io, {});
 
-      expect(results).toStrictEqual(['Generate Model', 'Relies on dep1']);
+      expect(results.stepsRan).toStrictEqual(['Generate Model', 'Relies on dep1']);
     });
 
     test('Chained and Atomic Groups', async function () {
@@ -421,7 +421,7 @@ describe('Step Manager Execution', function () {
         })
         .run(paths, io, {});
 
-      expect(results).toStrictEqual(['Generate Model', 'Relies on dep1', 'Relies on dep1b']);
+      expect(results.stepsRan).toStrictEqual(['Generate Model', 'Relies on dep1', 'Relies on dep1b']);
     });
   });
 
@@ -459,7 +459,7 @@ describe('Step Manager Execution', function () {
       ])
       .run(paths, io, {});
 
-    expect(results).toStrictEqual([
+    expect(results.stepsRan).toStrictEqual([
       'Generate Model',
       'Generate Serializer',
       'Relies on dep1, should run',
@@ -506,7 +506,7 @@ describe('Step Manager Execution', function () {
       })
       .run(paths, io, {});
 
-    expect(results).toStrictEqual([
+    expect(results.stepsRan).toStrictEqual([
       'Non Mapped Base',
       'Mapped With Many (packages/a)',
       'Mapped With Many (ext/b)',
@@ -559,7 +559,7 @@ describe('Step Manager Execution', function () {
       )
       .run(paths, io, {});
 
-    expect(results).toStrictEqual(['Optional (packages/a)', 'Optional (plugins/c)', 'Followup (packages/a)', 'Followup (plugins/c)']);
+    expect(results.stepsRan).toStrictEqual(['Optional (packages/a)', 'Optional (plugins/c)', 'Followup (packages/a)', 'Followup (plugins/c)']);
 
     expect(commitMethod.mock.calls.length).toBe(4);
   });
@@ -567,7 +567,7 @@ describe('Step Manager Execution', function () {
   test('can dry run on StepManager', async function () {
     const results = await new StepManager().step(stubStepFactory('Step 1')).step(stubStepFactory('Step 2')).run(paths, io, {}, true);
 
-    expect(results).toStrictEqual(['Step 1', 'Step 2']);
+    expect(results.stepsRan).toStrictEqual(['Step 1', 'Step 2']);
 
     expect(commitMethod.mock.calls.length).toBe(0);
   });
@@ -581,7 +581,7 @@ describe('Step Manager Execution', function () {
   test('can dry run on AtomicStepManager', async function () {
     const results = await new AtomicStepManager().step(stubStepFactory('Step 1')).step(stubStepFactory('Step 2')).run(paths, io, {}, true);
 
-    expect(results).toStrictEqual(['Step 1', 'Step 2']);
+    expect(results.stepsRan).toStrictEqual(['Step 1', 'Step 2']);
 
     expect(commitMethod.mock.calls.length).toBe(0);
   });

@@ -2,7 +2,7 @@
 import { create as createMemFs, Store } from 'mem-fs';
 import { create as createMemFsEditor } from 'mem-fs-editor';
 import { ExposedParamManager } from './exposed-param-manager';
-import { IO } from './io';
+import { IO, Message } from './io';
 import { Paths } from './paths';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
@@ -60,6 +60,17 @@ interface StepDependency {
 }
 
 type PredefinedParameters = Record<string, unknown>;
+
+type StepsResult = {
+  succeeded: true;
+  messages: Message[];
+  stepsRan: string[];
+} | {
+  succeeded: false;
+  error: string;
+  messages: Message[];
+  stepsRan: string[]
+};
 
 const formatDependencies = (strings: string[]) => strings.map(s => `"${s}"`).join(', ');
 
@@ -161,7 +172,7 @@ export class StepManager<Providers extends DefaultProviders> {
     }
   }
 
-  async run(paths: Paths, io: IO, providers: Providers, dry = false): Promise<string[]> {
+  async run(paths: Paths, io: IO, providers: Providers, dry = false): Promise<StepsResult> {
     if (dry && this.steps.some(s => !(s instanceof AtomicStepManager) && !s.step.composable)) {
       throw new Error('Cannot dry run, as this step manager has non-composable steps.');
     }
@@ -181,20 +192,37 @@ export class StepManager<Providers extends DefaultProviders> {
       stepNames.push(packagePath ? `${step.step.type} (${packagePath})` : step.step.type);
     };
 
-    for (const storedStep of this.steps) {
-      if (storedStep instanceof AtomicStepManager) {
-        const res = await storedStep.run(paths, io, providers);
-        stepNames.push(...res);
-      } else if (storedStep.mapPaths.length > 0) {
-        for (const path of storedStep.mapPaths) {
-          await checkAndRun(storedStep, path);
+    try {
+      for (const storedStep of this.steps) {
+        if (storedStep instanceof AtomicStepManager) {
+          const res = await storedStep.run(paths, io, providers);
+          if (!res.succeeded) {
+            throw new Error(res.error);
+          }
+
+          stepNames.push(...res.stepsRan);
+        } else if (storedStep.mapPaths.length > 0) {
+          for (const path of storedStep.mapPaths) {
+            await checkAndRun(storedStep, path);
+          }
+        } else {
+          await checkAndRun(storedStep);
         }
-      } else {
-        await checkAndRun(storedStep);
       }
+    } catch (error) {
+      return {
+        succeeded: false,
+        error: error instanceof Error ? error.message : String(error),
+        stepsRan: stepNames,
+        messages: io.getOutput(),
+      };
     }
 
-    return stepNames;
+    return {
+      succeeded: true,
+      stepsRan: stepNames,
+      messages: io.getOutput(),
+    };
   }
 
   protected async stepShouldRun(storedStep: StoredStep<Providers>, io: IO, packagePath?: string): Promise<boolean> {
@@ -319,7 +347,7 @@ export class AtomicStepManager<Providers = DefaultProviders> extends StepManager
     throw new Error("Atomic groups can't be nested.");
   }
 
-  async run(paths: Paths, io: IO, providers: Providers, dry = false): Promise<string[]> {
+  async run(paths: Paths, io: IO, providers: Providers, dry = false): Promise<StepsResult> {
     let fs = createMemFs();
 
     const checkAndRun = async (step: StoredStep<Providers>, packagePath?: string) => {
@@ -333,20 +361,33 @@ export class AtomicStepManager<Providers = DefaultProviders> extends StepManager
 
     const stepNames: string[] = [];
 
-    for (const storedStep of this.steps) {
-      if (storedStep.mapPaths.length > 0) {
-        for (const path of storedStep.mapPaths) {
-          await checkAndRun(storedStep, path);
+    try {
+      for (const storedStep of this.steps) {
+        if (storedStep.mapPaths.length > 0) {
+          for (const path of storedStep.mapPaths) {
+            await checkAndRun(storedStep, path);
+          }
+        } else {
+          await checkAndRun(storedStep);
         }
-      } else {
-        await checkAndRun(storedStep);
       }
+    } catch (error) {
+      return {
+        error: error instanceof Error ? error.message : String(error),
+        succeeded: false,
+        stepsRan: [],
+        messages: io.getOutput(),
+      };
     }
 
     if (!dry) {
       await this.commit(fs);
     }
 
-    return stepNames;
+    return {
+      succeeded: true,
+      stepsRan: stepNames,
+      messages: io.getOutput(),
+    };
   }
 }
