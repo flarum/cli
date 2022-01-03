@@ -26,6 +26,10 @@ export function infraStepFactory<MN extends string, Providers extends DefaultPro
       const paramVals = await currParamValues(templateParams, fs, paths, io);
       const modulesEnabled = await currModulesEnabled(modules, fs, paths, moduleStatusCache);
 
+      if (!module.updatable) {
+        io.error(`${module.name} is not updatable.`, true, true);
+      }
+
       const initializing = !modulesEnabled[module.name];
       applyModule(module, modulesEnabled, paramVals, scaffoldDir, fs, paths, initializing);
 
