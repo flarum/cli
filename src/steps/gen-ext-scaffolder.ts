@@ -373,7 +373,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
       shortDescription: 'Git Configuration',
       longDescription: 'Git config files (e.g. .gitignore, .gitattributes).',
       dependsOn: [],
-      filesToReplace: [{ path: 'gitignore', destPath: '.gitignore' }, '.gitattributes'],
+      filesToReplace: [{ path: 'gitignore', destPath: '.gitignore' }, { path: 'js/gitignore', needsOtherModules: ['js'], destPath: 'js/.gitignore' }, '.gitattributes'],
       jsonToAugment: {},
       needsTemplateParams: [],
     };
@@ -440,7 +440,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
       defaultEnabled: false,
       shortDescription: 'Enable Bundlewatch Checks',
       dependsOn: ['js'],
-      filesToReplace: [],
+      filesToReplace: ['js/.bundlewatch.config.json'],
       jsonToAugment: {},
       needsTemplateParams: [],
     };
