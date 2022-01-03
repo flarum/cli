@@ -220,6 +220,7 @@ export const EXTENSION_MODULES = [
   'icon',
 
   'js',
+  'jsCommon',
   'css',
   'locale',
 
@@ -252,6 +253,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         'LICENSE.md',
         { path: 'js/src/admin/index.js', needsOtherModules: ['js'] },
         { path: 'js/src/forum/index.js', needsOtherModules: ['js'] },
+        { path: 'js/src/common/index.js', needsOtherModules: ['js', 'jsCommon'] },
       ],
       jsonToAugment: {
         'composer.json': [
@@ -317,6 +319,20 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         ],
       },
       needsTemplateParams: ['packageName'],
+    };
+
+  case 'jsCommon':
+    return {
+      name,
+      updatable: false,
+      togglable: true,
+      defaultEnabled: true,
+      shortDescription: 'JS common code',
+      longDescription: 'Shared code between the forum and the admin frontends',
+      dependsOn: ['js'],
+      filesToReplace: [],
+      jsonToAugment: {},
+      needsTemplateParams: [],
     };
 
   case 'css':

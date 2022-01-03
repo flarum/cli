@@ -30,6 +30,7 @@ describe('Test extension skeleton step', function () {
     mainGitBranch: 'main',
     advancedInstallation: true,
     'modules.js': true,
+    'modules.jsCommon': true,
     'modules.css': true,
     'modules.locale': true,
     'modules.gitConf': true,
@@ -111,7 +112,7 @@ describe('Test extension skeleton step', function () {
     expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/forum.less')")).toBe(true);
     expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/js/dist/admin.js'")).toBe(false);
     expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/admin.less'")).toBe(true);
-    expect(await getEnabledModules(fs)).toStrictEqual(buildModules(['js', 'typescript', 'bundlewatch', 'prettier']));
+    expect(await getEnabledModules(fs)).toStrictEqual(buildModules(['js', 'jsCommon', 'typescript', 'bundlewatch', 'prettier']));
   });
 
   test('Can exclude CSS completely', async function () {

@@ -1,1 +1,2 @@
-export * from './src/admin';
+<% if (modules.jsCommon) { %>export * from './src/common';
+<% } %>export * from './src/admin';
