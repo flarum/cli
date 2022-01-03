@@ -83,7 +83,7 @@ function paramNamesToDef(name: ExtensionParams): TemplateParam<string, Extension
       getCurrVal: async (fs: Store, paths: Paths) => {
         const json = getComposerJson(fs, paths);
         const namespace = (Object.keys(json?.autoload?.['psr-4'] ?? {})?.[0] ?? '')?.slice(0, -1);
-        return namespace || undefined;
+        return namespace || '';
       },
     };
 

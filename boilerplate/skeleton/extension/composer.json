@@ -19,11 +19,13 @@
             "role": "Developer"
         }
     <% } %>],
+    <% if (params.packageNamespace) { %>
     "autoload": {
         "psr-4": {
             "<%= params.packageNamespaceEscapedSlash %>\\": "src/"
         }
     },
+    <% } %>
     "autoload-dev": {
         "psr-4": {
             "<%= params.packageNamespaceEscapedSlash %>\\Tests\\": "tests/"
