@@ -1,15 +1,14 @@
 {
   "name": "@<%= params.packageName %>",
-  "version": "0.0.0",
   "private": true,
   "prettier": "@flarum/prettier-config",
   "dependencies": {
   },
   "devDependencies": {
     "@flarum/prettier-config": "^1.0.0",
-    "flarum-tsconfig": "^1.0.1",
-    "flarum-webpack-config": "^1.0.0",
-    "prettier": "^2.3.0",
+    "flarum-tsconfig": "^1.0.2",
+    "flarum-webpack-config": "^2.0.0",
+    "prettier": "^2.4.1",
     "typescript": "^4.4.4",
     "typescript-coverage-report": "^0.6.1",
     "webpack": "^4.26.0",
