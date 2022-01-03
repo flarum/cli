@@ -35,7 +35,7 @@ export function infraStepFactory<MN extends string, Providers extends DefaultPro
       const excludeScaffolding = excludeScaffoldingFunc ? excludeScaffoldingFunc(fs, paths) : [];
 
       const initializing = !modulesEnabled[module.name];
-      applyModule(module, modulesEnabled, paramVals, scaffoldDir, fs, paths, excludeScaffolding, initializing);
+      applyModule(module, {...modulesEnabled, [module.name]: true}, paramVals, scaffoldDir, fs, paths, excludeScaffolding, initializing);
 
       if (moduleStatusCache) {
         setModuleValue(module, true, fs, paths, moduleStatusCache);
