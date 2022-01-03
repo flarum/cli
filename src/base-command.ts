@@ -12,15 +12,23 @@ import { PhpSubsystemProvider } from './providers/php-provider';
 import chalk from 'chalk';
 import { FlarumProviders } from './providers';
 
+export enum LocationType {
+  FLARUM_EXTENSION,
+  FLARUM_CORE,
+  FLARUM_MONOREPO,
+}
+
 export default abstract class BaseCommand extends Command {
   protected STUB_PATH = resolve(__dirname, '../boilerplate/stubs/');
 
   protected dry = false;
+  protected locationType?: LocationType;
 
   protected args!: Record<string, any>;
   protected flags: any;
 
   static flags: Interfaces.FlagInput<any> = {
+    defaults: Flags.boolean({ char: 'd', description: 'Assume default responses to prompts where possible.', default: false }),
     help: Flags.help({ char: 'h' }),
   };
 
@@ -49,9 +57,13 @@ export default abstract class BaseCommand extends Command {
     let extRoot: string;
 
     if (this.requireExistingExtension) {
-      extRoot = await this.getFlarumExtensionRoot(path || process.cwd());
+      const rootData = await this.getFlarumExtensionRoot(path || process.cwd());
+      extRoot = rootData.path;
+      this.locationType = rootData.type;
 
-      await this.confirmExtDir(extRoot);
+      if (!this.flags.defaults) {
+        await this.confirmExtDir(extRoot);
+      }
     } else {
       extRoot = path || process.cwd();
     }
@@ -81,6 +93,11 @@ export default abstract class BaseCommand extends Command {
       }
 
       this.log(chalk.bold(chalk.yellow('The steps that completed were:')));
+    } else if (out.error === 'EEXIT: 0') {
+      this.log(chalk.bold(chalk.underline(chalk.red('Exiting.'))));
+      if (out.stepsRan.length > 0) {
+        this.log(chalk.bold(chalk.yellow('Before the exit, the following steps were completed:')));
+      }
     } else {
       this.log(chalk.bold(chalk.underline(chalk.red('Error occurred, and could not complete:'))));
       this.log(chalk.red(out.error));
@@ -140,10 +157,10 @@ export default abstract class BaseCommand extends Command {
       const contents = JSON.parse(monorepoConfig.toString());
 
       return [
-        ...(options.includeCore ? [contents.core] : []),
-        ...(options.includeExtensions ? contents.extensions : []),
-        ...(options.includePhpPackages ? contents.composerPackages : []),
-        ...(options.includeJSPackages ? contents.npmPackages : []),
+        ...(options.includeCore ? [contents.packages.core] : []),
+        ...(options.includeExtensions ? contents.packages.extensions : []),
+        ...(options.includePhpPackages ? contents.packages.composerPackages : []),
+        ...(options.includeJSPackages ? contents.packages.npmPackages : []),
       ];
     } catch {
       this.error('Could not run monorepo command: `flarum-monorepo.json` file is missing or invalid.');
@@ -160,12 +177,20 @@ export default abstract class BaseCommand extends Command {
     }
   }
 
-  protected async getFlarumExtensionRoot(currDir: string): Promise<string> {
+  protected async getFlarumExtensionRoot(currDir: string): Promise<{path: string, type: LocationType}> {
     let currPath = resolve(currDir);
 
     while (currPath !== '/') {
-      if (existsSync(resolve(currPath, 'composer.json')) && (existsSync(resolve(currPath, 'extend.php')) || this.isFlarumCore(currPath))) {
-        return currPath;
+      if (existsSync(resolve(currPath, 'flarum-monorepo.json'))) {
+        return {path: currPath, type: LocationType.FLARUM_MONOREPO};
+      }
+
+      if (existsSync(resolve(currPath, 'composer.json')) && existsSync(resolve(currPath, 'extend.php'))) {
+        return {path: currPath, type: LocationType.FLARUM_EXTENSION};
+      }
+
+      if (this.isFlarumCore(currPath)) {
+        return {path: currPath, type: LocationType.FLARUM_CORE};
       }
 
       currPath = resolve(currPath, '..');
@@ -174,7 +199,10 @@ export default abstract class BaseCommand extends Command {
     this.error(
       `${resolve(
         currDir,
-      )} is not located in a valid Flarum package! Flarum extensions must contain (at a minimum) 'extend.php' and 'composer.json' files.`,
+      )} is not located in a valid Flarum package!
+- Flarum extensions must contain (at a minimum) 'extend.php' and 'composer.json' files.
+- Flarum core must contain a 'composer.json' file with the name 'flarum/core'.
+- Flarum monorepos must have a valid 'flarum-monorepo.json' file`,
     );
   }
 
