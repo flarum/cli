@@ -1,16 +1,16 @@
 import { Command, Flags, Interfaces } from '@oclif/core';
 import cli from 'cli-ux';
 import { resolve } from 'node:path';
-import prompts from 'prompts';
 import globby from 'globby';
 import { execSync } from 'node:child_process';
 import { existsSync, readFileSync, unlinkSync } from 'node:fs';
-import { PromptsIO, PROMPTS_OPTIONS } from 'boilersmith/io';
+import { IO, PromptsIO } from 'boilersmith/io';
 import { StepManager } from 'boilersmith/step-manager';
 import { NodePaths } from 'boilersmith/paths';
 import { PhpSubsystemProvider } from './providers/php-provider';
 import chalk from 'chalk';
 import { FlarumProviders } from './providers';
+import { exit } from '@oclif/errors';
 
 export enum LocationType {
   FLARUM_EXTENSION,
@@ -28,7 +28,7 @@ export default abstract class BaseCommand extends Command {
   protected flags: any;
 
   static flags: Interfaces.FlagInput<any> = {
-    defaults: Flags.boolean({ char: 'd', description: 'Assume default responses to prompts where possible.', default: false }),
+    'no-interaction': Flags.boolean({ char: 'n', description: 'Do not ask any interactive questions, assume defaults. When impossible, error.', default: false }),
     help: Flags.help({ char: 'h' }),
   };
 
@@ -61,9 +61,7 @@ export default abstract class BaseCommand extends Command {
       extRoot = rootData.path;
       this.locationType = rootData.type;
 
-      if (!this.flags.defaults) {
-        await this.confirmExtDir(extRoot);
-      }
+      await this.confirmExtDir(extRoot);
     } else {
       extRoot = path || process.cwd();
     }
@@ -78,7 +76,7 @@ export default abstract class BaseCommand extends Command {
     const phpProvider = new PhpSubsystemProvider(resolve(__dirname, '../php-subsystem/index.php'));
 
     const out = await this.steps(new StepManager<FlarumProviders>())
-      .run(paths, new PromptsIO(), { php: phpProvider }, this.dry);
+      .run(paths, this.genIO(), { php: phpProvider }, this.dry);
 
     const errorMessages = out.messages.filter(m => m.type === 'error');
 
@@ -151,6 +149,10 @@ export default abstract class BaseCommand extends Command {
   // Confirmation
   // ----------------------------------------------------------------
 
+  protected genIO(): IO {
+    return new PromptsIO({}, [], this.flags['no-interaction'], exit);
+  }
+
   protected monorepoPaths(options: {includeCore: boolean; includeExtensions: boolean; includePhpPackages: boolean; includeJSPackages: boolean}): string[] {
     try {
       const monorepoConfig = readFileSync(resolve(process.cwd(), 'flarum-monorepo.json'));
@@ -207,16 +209,14 @@ export default abstract class BaseCommand extends Command {
   }
 
   protected async confirmExtDir(extRoot: string): Promise<void> {
-    const response = await prompts([
-      {
-        name: 'verify',
-        type: 'confirm',
-        message: `Work in Flarum package located at ${resolve(extRoot)}?`,
-        initial: true,
-      },
-    ], PROMPTS_OPTIONS);
+    const verify = await this.genIO().getParam<boolean>({
+      name: 'verify',
+      type: 'confirm',
+      message: `Work in Flarum package located at ${resolve(extRoot)}?`,
+      initial: true,
+    });
 
-    if (!response.verify) this.exit();
+    if (!verify) this.exit();
   }
 
   protected async ensureComposerInstallRan(extRoot: string): Promise<void> {
@@ -224,16 +224,14 @@ export default abstract class BaseCommand extends Command {
 
     this.log("This command requires `composer install` to have been ran in your extension's root directory.");
 
-    const response = await prompts([
-      {
-        name: 'composer',
-        type: 'confirm',
-        message: 'Would you like me to take care of that for you?',
-        initial: true,
-      },
-    ], PROMPTS_OPTIONS);
+    const composer = await this.genIO().getParam<boolean>({
+      name: 'composer',
+      type: 'confirm',
+      message: 'Would you like me to take care of that for you?',
+      initial: true,
+    });
 
-    if (response.composer) {
+    if (composer) {
       cli.action.start('Installing composer packages');
       execSync('composer install', { cwd: extRoot });
       cli.action.stop();
@@ -255,15 +253,14 @@ export default abstract class BaseCommand extends Command {
 
     if (empty) return false;
 
-    const response = await prompts([
-      {
-        name: 'overwrite',
-        type: 'confirm',
-        message: confirmationMessage,
-      },
-    ], PROMPTS_OPTIONS);
+    const overwrite = await this.genIO().getParam<boolean>({
+      name: 'overwrite',
+      type: 'confirm',
+      message: confirmationMessage,
+      initial: true,
+    });
 
-    if (response.overwrite === false) this.exit();
+    if (overwrite === false) this.exit();
 
     return true;
   }

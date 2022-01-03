@@ -1,10 +1,9 @@
-import prompt, { Options, PromptObject } from 'prompts';
-import { exit } from '@oclif/errors';
+import prompt, { PromptObject } from 'prompts';
 import chalk from 'chalk';
 
 export type ParamDef<N extends string = string> = Omit<PromptObject<N>, 'name'> & { name: N };
 
-export type Message = { type: 'info' | 'warning' | 'error', message: string };
+export type Message = { type: 'info' | 'warning' | 'error'; message: string };
 
 export interface IO {
   supportsAnsiColor: boolean;
@@ -36,17 +35,29 @@ export interface IO {
   newInstance(cache: Record<string, unknown>, messages: Message[]): IO;
 }
 
-export const PROMPTS_OPTIONS: Options = { onCancel: () => exit() };
+type OnCancel = () => void;
 
 export class PromptsIO implements IO {
   public supportsAnsiColor = true;
 
   private cache = new Map<string, unknown>();
-  private messages: Message[] = [];
+  private messages: Message[];
+  private noInteraction: boolean;
+  private onCancel?: OnCancel;
+  private prev?: { val: any; prompt: ParamDef };
 
-  constructor(initial: Record<string, unknown> = {}, messages: Message[] = []) {
+  constructor(
+    initial: Record<string, unknown> = {},
+    messages: Message[] = [],
+    noInteraction = false,
+    onCancel: OnCancel = () => {
+      throw new Error('EEXIT: 0');
+    },
+  ) {
     this.cache = new Map(Object.entries(initial));
     this.messages = messages;
+    this.noInteraction = noInteraction;
+    this.onCancel = onCancel;
   }
 
   async getParam<T>(paramDef: ParamDef): Promise<T> {
@@ -56,10 +67,29 @@ export class PromptsIO implements IO {
       return this.cache.get(paramName) as T;
     }
 
-    const res = (await prompt(paramDef, PROMPTS_OPTIONS)) as Record<string, unknown>;
-    const resValue = res[paramName] as T;
+    let resValue: T;
+    if (this.noInteraction) {
+      if (paramDef.initial && paramDef.initial instanceof Function) {
+        resValue = paramDef.initial(this.prev?.val, this.cache, this.prev?.prompt as PromptObject) as unknown as T;
+      } else if (paramDef.type === 'confirm' || paramDef.type === 'toggle') {
+        resValue = (paramDef.initial ?? false) as unknown as T;
+      } else if ('initial' in paramDef) {
+        resValue = paramDef.initial as unknown as T;
+      } else {
+        return this.error(`No-Interaction mode is on, but input is required for param "${paramName}".`, true);
+      }
+    } else {
+      const res = (await prompt(paramDef, {
+        onCancel: this.onCancel,
+      })) as Record<string, unknown>;
+      resValue = res[paramName] as T;
+    }
 
     this.cache.set(paramName, resValue);
+    this.prev = {
+      val: resValue,
+      prompt: paramDef,
+    };
 
     return resValue;
   }
@@ -96,7 +126,7 @@ export class PromptsIO implements IO {
   }
 
   error(message: string, immediate: false): void;
-  error(message: string, immediate: true): void;
+  error(message: string, immediate: true): never;
   error(message: string, immediate: boolean): void {
     const formatted = `${chalk.red('Error:')} ${message}`;
     if (immediate) {
@@ -111,6 +141,6 @@ export class PromptsIO implements IO {
   }
 
   newInstance(cache: Record<string, unknown>, messages: Message[]): PromptsIO {
-    return new PromptsIO(cache, messages);
+    return new PromptsIO(cache, messages, this.noInteraction, this.onCancel);
   }
 }
