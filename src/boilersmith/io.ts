@@ -26,9 +26,7 @@ export interface IO {
 
   info(message: string, immediate: boolean): void;
   warning(message: string, immediate: boolean): void;
-
-  error(message: string, immediate: false): void;
-  error(message: string, immediate: true, exit: boolean): void;
+  error(message: string, immediate: boolean): void;
 
   /**
    * Get all messages that have been logged non-immediately.
@@ -98,17 +96,13 @@ export class PromptsIO implements IO {
   }
 
   error(message: string, immediate: false): void;
-  error(message: string, immediate: true, exitProcess: boolean): void;
-  error(message: string, immediate: boolean, exitProcess?: boolean): void {
+  error(message: string, immediate: true): void;
+  error(message: string, immediate: boolean): void {
     const formatted = `${chalk.red('Error:')} ${message}`;
     if (immediate) {
-      console.log(formatted);
-
-      if (exitProcess) {
-        exit();
-      }
+      throw new Error(message);
     } else {
-      this.messages.push({ type: 'warning', message: formatted });
+      this.messages.push({ type: 'error', message: formatted });
     }
   }
 
