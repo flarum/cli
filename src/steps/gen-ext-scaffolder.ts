@@ -509,7 +509,7 @@ export function genExtScaffolder(): Scaffolder<ExtensionParams, ExtensionModules
         },
       };
 
-      create(fs).extendJSON(paths.package('composer.json'), json);
+      create(fs).extendJSON(paths.package('composer.json'), json, undefined, 4);
     },
   };
 

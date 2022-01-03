@@ -203,7 +203,7 @@ export async function applyModule<MN extends string, TN extends string>(
     const fieldsToAugment = jsonPaths[jsonPath];
     const relevant = pick(scaffoldContentsJson, fieldsToAugment);
 
-    fsEditor.extendJSON(paths.package(jsonPath), relevant);
+    fsEditor.extendJSON(paths.package(jsonPath), relevant, undefined, 4);
   }
 
   return fs;
