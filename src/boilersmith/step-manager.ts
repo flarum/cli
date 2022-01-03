@@ -68,6 +68,7 @@ type StepsResult = {
 } | {
   succeeded: false;
   error: string;
+  errorTrace?: string;
   messages: Message[];
   stepsRan: string[]
 };
@@ -213,6 +214,7 @@ export class StepManager<Providers extends DefaultProviders> {
       return {
         succeeded: false,
         error: error instanceof Error ? error.message : String(error),
+        errorTrace: error instanceof Error ? error.stack : undefined,
         stepsRan: stepNames,
         messages: io.getOutput(),
       };
@@ -374,6 +376,7 @@ export class AtomicStepManager<Providers = DefaultProviders> extends StepManager
     } catch (error) {
       return {
         error: error instanceof Error ? error.message : String(error),
+        errorTrace: error instanceof Error ? error.stack : undefined,
         succeeded: false,
         stepsRan: [],
         messages: io.getOutput(),

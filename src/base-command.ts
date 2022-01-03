@@ -68,11 +68,29 @@ export default abstract class BaseCommand extends Command {
     const out = await this.steps(new StepManager<FlarumProviders>())
       .run(paths, new PromptsIO(), { php: phpProvider }, this.dry);
 
+    const errorMessages = out.messages.filter(m => m.type === 'error');
+
     this.log('\n\n');
-    if (out.succeeded) {
+    if (out.succeeded && errorMessages.length === 0) {
       this.log(chalk.bold(chalk.underline(chalk.green('Success! The following steps were completed:'))));
+    } else if (out.succeeded) {
+      this.log(chalk.bold(chalk.underline(chalk.yellow('All steps completed, but with some errors:'))));
+
+      for (const message of errorMessages) {
+        this.log(chalk.dim(chalk.red(message.message)));
+      }
+
+      this.log(chalk.bold(chalk.yellow('The steps that completed were:')));
     } else {
-      this.log(chalk.bold(chalk.underline(chalk.red(`Error occurred, and could not complete: ${out.error}.\n\nBefore the error, the following steps were completed:`))));
+      this.log(chalk.bold(chalk.underline(chalk.red('Error occurred, and could not complete:'))));
+      this.log(chalk.red(out.error));
+      if (out.errorTrace) {
+        this.log(chalk.dim(chalk.red(out.errorTrace)));
+      }
+
+      if (out.stepsRan.length > 0) {
+        this.log(chalk.bold(chalk.yellow('Before the error, the following steps were completed:')));
+      }
     }
 
     for (const stepName of out.stepsRan) this.log(`- ${chalk.dim(stepName)}`);
@@ -84,6 +102,10 @@ export default abstract class BaseCommand extends Command {
       for (const message of out.messages) {
         this.log(message.message);
       }
+    }
+
+    if (!out.succeeded || errorMessages.length > 0) {
+      this.exit(1);
     }
 
     const goodbyeMessage = this.goodbyeMessage();
