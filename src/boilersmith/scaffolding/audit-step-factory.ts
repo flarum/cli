@@ -75,9 +75,11 @@ export function auditStepFactory<MN extends string, Providers extends DefaultPro
         }
       }
 
-      for (const m of modules) {
-        if (moduleStatusCache && m.updatable && (actionableModules.includes(m) || m.togglable)) {
-          setModuleValue(m, actionableModules.includes(m), _fs, paths, moduleStatusCache);
+      if (!dry) {
+        for (const m of modules) {
+          if (moduleStatusCache && m.updatable && (actionableModules.includes(m) || m.togglable)) {
+            setModuleValue(m, actionableModules.includes(m), _fs, paths, moduleStatusCache);
+          }
         }
       }
 
