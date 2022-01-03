@@ -1,7 +1,7 @@
 /* eslint-disable max-nested-callbacks */
 import { prompt } from 'prompts';
 import { PromptsIO } from 'boilersmith/io';
-import { StepManager } from 'boilersmith/step-manager';
+import { AtomicStepManager, StepManager } from 'boilersmith/step-manager';
 import { stubStepFactory } from './utils';
 import { NodePaths } from 'boilersmith/paths';
 
@@ -562,5 +562,27 @@ describe('Step Manager Execution', function () {
     expect(results).toStrictEqual(['Optional (packages/a)', 'Optional (plugins/c)', 'Followup (packages/a)', 'Followup (plugins/c)']);
 
     expect(commitMethod.mock.calls.length).toBe(4);
+  });
+
+  test('can dry run on StepManager', async function () {
+    const results = await new StepManager().step(stubStepFactory('Step 1')).step(stubStepFactory('Step 2')).run(paths, io, {}, true);
+
+    expect(results).toStrictEqual(['Step 1', 'Step 2']);
+
+    expect(commitMethod.mock.calls.length).toBe(0);
+  });
+
+  test('cannot dry run on StepManager with composable steps', async function () {
+    expect(async () => new StepManager().step(stubStepFactory('Step 1', false)).step(stubStepFactory('Step 2')).run(paths, io, {}, true)).rejects.toThrow(
+      'Cannot dry run, as this step manager has non-composable steps.',
+    );
+  });
+
+  test('can dry run on AtomicStepManager', async function () {
+    const results = await new AtomicStepManager().step(stubStepFactory('Step 1')).step(stubStepFactory('Step 2')).run(paths, io, {}, true);
+
+    expect(results).toStrictEqual(['Step 1', 'Step 2']);
+
+    expect(commitMethod.mock.calls.length).toBe(0);
   });
 });

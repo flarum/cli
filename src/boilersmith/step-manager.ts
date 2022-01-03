@@ -161,7 +161,11 @@ export class StepManager<Providers extends DefaultProviders> {
     }
   }
 
-  async run(paths: Paths, io: IO, providers: Providers): Promise<string[]> {
+  async run(paths: Paths, io: IO, providers: Providers, dry = false): Promise<string[]> {
+    if (dry && this.steps.some(s => !(s instanceof AtomicStepManager) && !s.step.composable)) {
+      throw new Error('Cannot dry run, as this step manager has non-composable steps.');
+    }
+
     const stepNames: string[] = [];
 
     const checkAndRun = async (step: StoredStep<Providers>, packagePath?: string) => {
@@ -170,7 +174,9 @@ export class StepManager<Providers extends DefaultProviders> {
 
       const fs = await this.runStep(step, paths, io, providers, packagePath);
 
-      await this.commit(fs);
+      if (!dry) {
+        await this.commit(fs);
+      }
 
       stepNames.push(packagePath ? `${step.step.type} (${packagePath})` : step.step.type);
     };
@@ -246,7 +252,7 @@ export class StepManager<Providers extends DefaultProviders> {
       return initial;
     }, {} as Record<string, unknown>);
 
-    const cloned = io.newInstance({ ...initial, ...storedStep.predefinedParams }, []);
+    const cloned = io.newInstance({ ...initial, ...storedStep.predefinedParams }, io.getOutput());
 
     const stepPaths = packagePath ? paths.onMonorepoSub(packagePath) : paths;
     const newFs = await storedStep.step.run(fs, stepPaths, cloned, providers);
@@ -271,10 +277,10 @@ export class StepManager<Providers extends DefaultProviders> {
   }
 }
 
-class AtomicStepManager<Providers> extends StepManager<Providers> {
+export class AtomicStepManager<Providers = DefaultProviders> extends StepManager<Providers> {
   protected steps: StoredStep<Providers>[] = [];
 
-  constructor(parentNamedSteps: Map<string, StoredStep<Providers>>, parentExposedParams: ExposedParamManager) {
+  constructor(parentNamedSteps: Map<string, StoredStep<Providers>> = new Map(), parentExposedParams: ExposedParamManager = new ExposedParamManager()) {
     super();
     this.namedSteps = parentNamedSteps;
     this.exposedParams = parentExposedParams;
@@ -313,7 +319,7 @@ class AtomicStepManager<Providers> extends StepManager<Providers> {
     throw new Error("Atomic groups can't be nested.");
   }
 
-  async run(paths: Paths, io: IO, providers: Providers): Promise<string[]> {
+  async run(paths: Paths, io: IO, providers: Providers, dry = false): Promise<string[]> {
     let fs = createMemFs();
 
     const checkAndRun = async (step: StoredStep<Providers>, packagePath?: string) => {
@@ -337,7 +343,9 @@ class AtomicStepManager<Providers> extends StepManager<Providers> {
       }
     }
 
-    await this.commit(fs);
+    if (!dry) {
+      await this.commit(fs);
+    }
 
     return stepNames;
   }
