@@ -4,12 +4,14 @@ import { Paths } from '../paths';
 import { DefaultProviders, Step } from '../step-manager';
 import { applyModule, currModulesEnabled, Module, ModuleStatusCache, setModuleValue } from './module';
 import { currParamValues, TemplateParam } from './template-param';
+import { ExcludeScaffoldingFunc } from './scaffolder';
 
 export function infraStepFactory<MN extends string, Providers extends DefaultProviders>(
   scaffoldDir: string,
   moduleName: string,
   modules: Module<MN>[],
   templateParams: TemplateParam[],
+  excludeScaffoldingFunc?: ExcludeScaffoldingFunc,
   moduleStatusCache?: ModuleStatusCache<MN>,
 ): Step<Providers> {
   const module = modules.find(m => m.name === moduleName);
@@ -30,8 +32,10 @@ export function infraStepFactory<MN extends string, Providers extends DefaultPro
         io.error(`${module.name} is not updatable.`, true, true);
       }
 
+      const excludeScaffolding = excludeScaffoldingFunc ? excludeScaffoldingFunc(fs, paths) : [];
+
       const initializing = !modulesEnabled[module.name];
-      applyModule(module, modulesEnabled, paramVals, scaffoldDir, fs, paths, initializing);
+      applyModule(module, modulesEnabled, paramVals, scaffoldDir, fs, paths, excludeScaffolding, initializing);
 
       if (moduleStatusCache) {
         setModuleValue(module, true, fs, paths, moduleStatusCache);

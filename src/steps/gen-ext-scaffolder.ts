@@ -307,7 +307,6 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
       jsonToAugment: {
         'js/package.json': [
           'name',
-          'version',
           'private',
           'devDependencies.flarum-webpack-config',
           'devDependencies.webpack',
@@ -513,7 +512,13 @@ export function genExtScaffolder(): Scaffolder<ExtensionParams, ExtensionModules
     },
   };
 
-  const scaffolder = new Scaffolder<ExtensionParams, ExtensionModules>(resolve(__dirname, '../../boilerplate/skeleton/extension'), moduleStatusCache);
+  const excludeScaffoldingFunc = (fs: Store, paths: Paths) => {
+    const json = getComposerJson(fs, paths);
+
+    return json?.extra?.['flarum-cli']?.excludeScaffolding ?? [];
+  };
+
+  const scaffolder = new Scaffolder<ExtensionParams, ExtensionModules>(resolve(__dirname, '../../boilerplate/skeleton/extension'), moduleStatusCache, excludeScaffoldingFunc);
 
   for (const name of EXTENSION_MODULES) {
     scaffolder.registerModule(moduleNameToDef(name));

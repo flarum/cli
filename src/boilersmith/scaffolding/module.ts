@@ -155,6 +155,7 @@ export async function applyModule<MN extends string, TN extends string>(
   scaffoldDir: string,
   fs: Store,
   paths: Paths,
+  excludeFiles: string[] = [],
   isInitial = false,
 ): Promise<Store> {
   const fsEditor = create(fs);
@@ -189,7 +190,7 @@ export async function applyModule<MN extends string, TN extends string>(
     const path = typeof file === 'string' ? file : file.path;
     const needsOtherModules = typeof file === 'string' ? [] : file.needsOtherModules ?? [];
 
-    if (!needsOtherModules.some(dep => !modulesEnabled[dep])) {
+    if (!excludeFiles.includes(path) && !needsOtherModules.some(dep => !modulesEnabled[dep])) {
       fsEditor.copyTpl(resolve(scaffoldDir, path), paths.package(path), tplData);
     }
   }

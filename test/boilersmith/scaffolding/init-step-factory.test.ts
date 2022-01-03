@@ -110,7 +110,7 @@ describe('init step factory', function () {
 
   it('properly sets cache', async function () {
     const cache: Record<string, boolean> = {};
-    const step = initStepFactory(scaffoldDir, modules, templateParams, {
+    const step = initStepFactory(scaffoldDir, modules, templateParams, () => [], {
       get: async () => true,
       set: async (module, enabled) => {
         cache[module.name] = enabled;

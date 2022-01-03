@@ -14,19 +14,24 @@ import { cloneAndFill } from 'boilersmith/utils/clone-and-fill';
 import { IO } from 'boilersmith/io';
 import { auditStepFactory } from './audit-step-factory';
 
+export type ExcludeScaffoldingFunc = (fs: Store, paths: Paths) => string[];
+
 export class Scaffolder<TN extends string = string, MN extends string = string> {
   private templateParams: TemplateParam<unknown, TN>[] = [];
   private modules: Module<MN>[] = [];
   private scaffoldDir: string;
 
   private moduleStatusCache?: ModuleStatusCache<MN>;
+  private excludeScaffoldingFunc?: ExcludeScaffoldingFunc;
 
   constructor(scaffoldDir: string);
   constructor(scaffoldDir: string, moduleStatusCache: ModuleStatusCache<MN>);
+  constructor(scaffoldDir: string, moduleStatusCache: ModuleStatusCache<MN>, excludeScaffoldingFuncs: ExcludeScaffoldingFunc);
 
-  constructor(scaffoldDir: string, moduleStatusCache?: ModuleStatusCache<MN>) {
+  constructor(scaffoldDir: string, moduleStatusCache?: ModuleStatusCache<MN>, excludeScaffoldingFunc?: ExcludeScaffoldingFunc) {
     this.scaffoldDir = scaffoldDir;
     this.moduleStatusCache = moduleStatusCache;
+    this.excludeScaffoldingFunc = excludeScaffoldingFunc;
   }
 
   registerModule(module: Module<MN>): this {
@@ -51,15 +56,15 @@ export class Scaffolder<TN extends string = string, MN extends string = string> 
   }
 
   genInitStep<Providers extends DefaultProviders>(): Step<Providers> {
-    return initStepFactory(this.scaffoldDir, this.modules, this.templateParams, this.moduleStatusCache);
+    return initStepFactory(this.scaffoldDir, this.modules, this.templateParams, this.excludeScaffoldingFunc, this.moduleStatusCache);
   }
 
   genInfraStep<Providers extends DefaultProviders>(module: string): Step<Providers> {
-    return infraStepFactory(this.scaffoldDir, module, this.modules, this.templateParams, this.moduleStatusCache);
+    return infraStepFactory(this.scaffoldDir, module, this.modules, this.templateParams, this.excludeScaffoldingFunc, this.moduleStatusCache);
   }
 
   genAuditStep<Providers extends DefaultProviders>(dry = true): Step<Providers> {
-    return auditStepFactory(dry, this.scaffoldDir, this.modules, this.templateParams, this.moduleStatusCache);
+    return auditStepFactory(dry, this.scaffoldDir, this.modules, this.templateParams, this.excludeScaffoldingFunc, this.moduleStatusCache);
   }
 
   async templateParamVal<T>(param: TN, fs: Store, paths: Paths, io: IO): Promise<T> {

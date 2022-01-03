@@ -5,8 +5,9 @@ import { DefaultProviders, Step } from '../step-manager';
 import { renameKeys } from '../utils/rename-keys';
 import { applyModule, Module, ModuleStatusCache, promptModulesEnabled, setModuleValue } from './module';
 import { promptParamValues, TemplateParam } from './template-param';
+import { ExcludeScaffoldingFunc } from './scaffolder';
 
-export function initStepFactory<MN extends string, Providers extends DefaultProviders>(scaffoldDir: string, modules: Module<MN>[], templateParams: TemplateParam[], moduleStatusCache?: ModuleStatusCache<MN>): Step<Providers> {
+export function initStepFactory<MN extends string, Providers extends DefaultProviders>(scaffoldDir: string, modules: Module<MN>[], templateParams: TemplateParam[], excludeScaffoldingFunc?: ExcludeScaffoldingFunc, moduleStatusCache?: ModuleStatusCache<MN>): Step<Providers> {
   let modulesEnabled: Record<string, boolean>;
 
   return {
@@ -18,9 +19,11 @@ export function initStepFactory<MN extends string, Providers extends DefaultProv
       const paramVals = await promptParamValues(templateParams, paths, io);
       modulesEnabled = await promptModulesEnabled(modules, io);
 
+      const excludeScaffolding = excludeScaffoldingFunc ? excludeScaffoldingFunc(fs, paths) : [];
+
       for (const m of modules) {
         if (modulesEnabled[m.name] && (!m.togglable || !m.dependsOn.some(dep => !modulesEnabled[dep]))) {
-          applyModule(m, modulesEnabled, paramVals, scaffoldDir, fs, paths, true);
+          applyModule(m, modulesEnabled, paramVals, scaffoldDir, fs, paths, excludeScaffolding, true);
         }
       }
 

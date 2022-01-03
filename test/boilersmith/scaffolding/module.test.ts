@@ -174,6 +174,15 @@ describe('applyModule', function () {
     expect(getExtFileContents(fs, 'readme.md')).toStrictEqual('# Sample Scaffolding');
   });
 
+  it('can exclude files from being copied', async function () {
+    const excludeScaffolding = ['config2.json', 'src/index.ml'];
+    const fs = await applyModule(justFilesModule, { 'just-files': true }, {}, scaffoldDir, createStore(), new NodePaths({ package: '/ext' }), excludeScaffolding);
+
+    expect(getFsPaths(fs)).toStrictEqual(justFilesModule.filesToReplace.filter(f => !excludeScaffolding.includes(typeof f === 'string' ? f : f.path)).map(p => `/ext/${p}`));
+    expect(getExtFileContents(fs, '.gitignore')).toStrictEqual('node_modules');
+    expect(getExtFileContents(fs, 'readme.md')).toStrictEqual('# Sample Scaffolding');
+  });
+
   it('copies over JSON data', async function () {
     const module: Module = {
       name: 'just-json',
@@ -347,7 +356,7 @@ describe('applyModule', function () {
   it('doesnt error when initializing non-updatable module', async function () {
     const module: Module = { ...justFilesModule, updatable: false };
 
-    const fs = await applyModule(module, { 'just-files': true }, {}, scaffoldDir, createStore(), new NodePaths({ package: '/ext' }), true);
+    const fs = await applyModule(module, { 'just-files': true }, {}, scaffoldDir, createStore(), new NodePaths({ package: '/ext' }), [], true);
 
     expect(getFsPaths(fs)).toStrictEqual(['/ext/.gitignore', '/ext/readme.md']);
   });
