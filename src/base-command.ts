@@ -89,6 +89,7 @@ export default abstract class BaseCommand extends Command {
       }
 
       if (out.stepsRan.length > 0) {
+        this.log('');
         this.log(chalk.bold(chalk.yellow('Before the error, the following steps were completed:')));
       }
     }
