@@ -65,7 +65,7 @@ describe('Test extension skeleton step', function () {
 
     const expected = await getExpected();
 
-    expect(getFsPaths(fs).sort()).toStrictEqual(expected);
+    expect(getFsPaths(fs).sort()).toStrictEqual(expected.filter(p => !p.includes('.bundlewatch')));
     expect(getExtFileContents(fs, 'extend.php').includes('Extend\\Locales')).toBe(true);
     expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/js/dist/forum.js'")).toBe(true);
     expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/forum.less')")).toBe(true);

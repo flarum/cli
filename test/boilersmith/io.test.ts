@@ -12,7 +12,7 @@ describe('PromptsIO Tests', function () {
         message: 'get param',
         type: 'text',
         name: 'something',
-      })
+      }),
     ).toBe('val');
   });
 
@@ -25,7 +25,7 @@ describe('PromptsIO Tests', function () {
         type: 'text',
         name: 'something',
         initial: 'default',
-      })
+      }),
     ).toBe('default');
   });
 
