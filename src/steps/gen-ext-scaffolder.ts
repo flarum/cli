@@ -331,7 +331,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
       shortDescription: 'JS common code',
       longDescription: 'Shared code between the forum and the admin frontends',
       dependsOn: ['js'],
-      filesToReplace: [],
+      filesToReplace: ['js/admin.js', 'js/forum.js'],
       jsonToAugment: {},
       needsTemplateParams: [],
     };
