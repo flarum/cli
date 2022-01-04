@@ -327,7 +327,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
       name,
       updatable: false,
       togglable: true,
-      defaultEnabled: true,
+      defaultEnabled: false,
       shortDescription: 'JS common code',
       longDescription: 'Shared code between the forum and the admin frontends',
       dependsOn: ['js'],
