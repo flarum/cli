@@ -325,9 +325,9 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
   case 'jsCommon':
     return {
       name,
-      updatable: false,
+      updatable: true,
       togglable: true,
-      defaultEnabled: false,
+      defaultEnabled: true,
       shortDescription: 'JS common code',
       longDescription: 'Shared code between the forum and the admin frontends',
       dependsOn: ['js'],
