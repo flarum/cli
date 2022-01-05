@@ -49,6 +49,20 @@ describe('Module Utils', function () {
       filesToReplace: [],
       jsonToAugment: {},
       needsTemplateParams: [],
+      // eslint-disable-next-line unicorn/no-useless-undefined
+      inferEnabled: async () => undefined,
+    },
+    {
+      name: 'default-off-infer-on',
+      togglable: true,
+      defaultEnabled: false,
+      dependsOn: [],
+      updatable: true,
+      shortDescription: '',
+      filesToReplace: [],
+      jsonToAugment: {},
+      needsTemplateParams: [],
+      inferEnabled: async () => true,
     },
   ];
 
@@ -60,16 +74,18 @@ describe('Module Utils', function () {
         'non-togglable': true,
         'default-on': true,
         'default-off': false,
+        'default-off-infer-on': false,
       });
     });
 
     it('works in advanced mode', async function () {
-      prompt.inject([true, false, true]);
+      prompt.inject([true, false, true, false]);
 
       expect(await promptModulesEnabled(modules, new PromptsIO())).toStrictEqual({
         'non-togglable': true,
         'default-on': false,
         'default-off': true,
+        'default-off-infer-on': false,
       });
     });
   });
@@ -80,6 +96,7 @@ describe('Module Utils', function () {
         'non-togglable': true,
         'default-on': true,
         'default-off': false,
+        'default-off-infer-on': true,
       });
     });
 
@@ -87,23 +104,27 @@ describe('Module Utils', function () {
       _cacheData['non-togglable'] = false;
       _cacheData['default-on'] = true;
       _cacheData['default-off'] = true;
+      _cacheData['default-off-infer-on'] = false;
 
       expect(await currModulesEnabled(modules, createStore(), new NodePaths({ package: '' }), cache)).toStrictEqual({
         'non-togglable': true,
         'default-on': true,
         'default-off': true,
+        'default-off-infer-on': false,
       });
     });
 
     it('works without cache', async function () {
-      _cacheData['non-togglable'] = false;
-      _cacheData['default-on'] = true;
-      _cacheData['default-off'] = true;
+      delete _cacheData['non-togglable'];
+      delete _cacheData['default-on'];
+      delete _cacheData['default-off'];
+      delete _cacheData['default-off-infer-on'];
 
       expect(await currModulesEnabled(modules, createStore(), new NodePaths({ package: '' }))).toStrictEqual({
         'non-togglable': true,
         'default-on': true,
         'default-off': false,
+        'default-off-infer-on': true,
       });
     });
   });
@@ -113,6 +134,7 @@ describe('Module Utils', function () {
       delete _cacheData['non-togglable'];
       delete _cacheData['default-on'];
       delete _cacheData['default-off'];
+      delete _cacheData['default-off-infer-on'];
 
       await setModuleValue(modules[0], false, createStore(), new NodePaths({ package: '' }), cache);
       await setModuleValue(modules[1], false, createStore(), new NodePaths({ package: '' }), cache);

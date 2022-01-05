@@ -83,6 +83,13 @@ interface TogglableModule<N extends string> extends CommonModule<N> {
    * Can only be enabled if these other modules are enabled.
    */
   dependsOn: string[];
+
+  /**
+   * On an existing installation, if no information about whether this
+   * module is enabled or disabled is cached, infer whether it's enabled
+   * based on the current installation's state.
+   */
+  inferEnabled?: (fs: Store, paths: Paths) => Promise<boolean | undefined>;
 }
 
 export type Module<N extends string = string> = UntoggleableModule<N> | TogglableModule<N>;
@@ -135,9 +142,9 @@ export async function currModulesEnabled<N extends string>(
   for (const m of modules) {
     if (m.togglable) {
       // eslint-disable-next-line no-await-in-loop
-      const cacheVal = await cache?.get(m, fs, paths);
+      const isEnabled = await cache?.get(m, fs, paths) ?? await m.inferEnabled?.(fs, paths);
 
-      modulesEnabled[m.name] = cacheVal ?? m.defaultEnabled;
+      modulesEnabled[m.name] = isEnabled ?? m.defaultEnabled;
     } else {
       modulesEnabled[m.name] = true;
     }
