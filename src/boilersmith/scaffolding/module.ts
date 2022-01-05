@@ -22,9 +22,9 @@ interface FileOwnership {
   destPath?: string;
 
   /**
-   * If any of the needed modules aren't enabled, the file won't be updated.
+   * Depends on other modules being enabled (or disabled).
    */
-  needsOtherModules?: string[];
+  moduleDeps?: (string | {module: string, enabled: boolean})[];
 
   /**
    * If in a monorepo, should the file be placed relative to the monorepo root, and if so, where?
@@ -208,9 +208,13 @@ export async function applyModule<MN extends string, TN extends string>(
 
   for (const file of module.filesToReplace) {
     const path = typeof file === 'string' ? file : file.path;
-    const needsOtherModules = typeof file === 'string' ? [] : file.needsOtherModules ?? [];
+    const moduleDeps = typeof file === 'string' ? [] : file.moduleDeps ?? [];
 
-    if (!excludeFiles.includes(path) && !needsOtherModules.some(dep => !modulesEnabled[dep])) {
+    if (!excludeFiles.includes(path) && !moduleDeps.some(dep => {
+      const depName = typeof dep === 'string' ? dep : dep.module;
+      const enabled = modulesEnabled[depName];
+      return typeof dep === 'string' || dep.enabled ? !enabled : enabled;
+    })) {
       const copyToIfMonorepo = typeof file !== 'string' && file.monorepoPath ? paths.monorepo(cloneAndFill(file.monorepoPath, tplDataFlat)) : undefined;
       const copyTo = copyToIfMonorepo ?? paths.package(typeof file !== 'string' && file.destPath ? cloneAndFill(file.destPath, tplDataFlat) : path);
       fsEditor.copyTpl(resolve(scaffoldDir, path), copyTo, tplData);

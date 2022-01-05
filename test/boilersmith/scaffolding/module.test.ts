@@ -374,7 +374,7 @@ describe('applyModule', function () {
       togglable: false,
       updatable: true,
       shortDescription: '',
-      filesToReplace: ['readme.md', { path: '.gitignore', needsOtherModules: ['missingModule'] }],
+      filesToReplace: ['readme.md', { path: '.gitignore', moduleDeps: ['missingModule'] }],
       jsonToAugment: {},
       needsTemplateParams: [],
     };
@@ -390,7 +390,7 @@ describe('applyModule', function () {
       togglable: false,
       updatable: true,
       shortDescription: '',
-      filesToReplace: ['readme.md', { path: '.gitignore', needsOtherModules: ['disabledModule'] }],
+      filesToReplace: ['readme.md', { path: '.gitignore', moduleDeps: ['disabledModule'] }],
       jsonToAugment: {},
       needsTemplateParams: [],
     };
@@ -413,7 +413,7 @@ describe('applyModule', function () {
       togglable: false,
       updatable: true,
       shortDescription: '',
-      filesToReplace: ['readme.md', { path: '.gitignore', needsOtherModules: ['enabledModule'] }],
+      filesToReplace: ['readme.md', { path: '.gitignore', moduleDeps: ['enabledModule'] }],
       jsonToAugment: {},
       needsTemplateParams: [],
     };
