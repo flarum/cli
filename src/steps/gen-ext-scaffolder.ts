@@ -5,6 +5,7 @@ import { TemplateParam } from 'boilersmith/scaffolding/template-param';
 import chalk from 'chalk';
 import { Store } from 'mem-fs';
 import { create } from 'mem-fs-editor';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import simpleGit from 'simple-git';
 import spdxLicenseListSimple from 'spdx-license-list/simple';
@@ -320,6 +321,9 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         ],
       },
       needsTemplateParams: ['packageName'],
+      inferEnabled: async (_fs, paths: Paths) => {
+        return existsSync(paths.package('js'));
+      },
     };
 
   case 'jsCommon':
@@ -334,6 +338,9 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
       filesToReplace: ['js/admin.js', 'js/forum.js'],
       jsonToAugment: {},
       needsTemplateParams: [],
+      inferEnabled: async (_fs, paths: Paths) => {
+        return existsSync(paths.package('js/src/common'));
+      },
     };
 
   case 'css':
@@ -348,6 +355,9 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
       filesToReplace: ['less/admin.less', 'less/forum.less'],
       jsonToAugment: {},
       needsTemplateParams: [],
+      inferEnabled: async (_fs, paths: Paths) => {
+        return existsSync(paths.package('less'));
+      },
     };
 
   case 'locale':
@@ -362,6 +372,9 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
       filesToReplace: ['locale/en.yml'],
       jsonToAugment: {},
       needsTemplateParams: [],
+      inferEnabled: async (_fs, paths: Paths) => {
+        return existsSync(paths.package('locale'));
+      },
     };
 
   case 'gitConf':
@@ -408,6 +421,13 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         'js/package.json': ['prettier', 'devDependencies.prettier', 'devDependencies.@flarum/prettier-config', 'scripts.format', 'scripts.format-check'],
       },
       needsTemplateParams: [],
+      inferEnabled: async (_fs, paths: Paths) => {
+        if (!existsSync(paths.package('js/package.json'))) {
+          return false;
+        }
+
+        return readFileSync('js/package.json').includes('prettier');
+      },
     };
 
   case 'typescript':
@@ -430,6 +450,9 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         ],
       },
       needsTemplateParams: [],
+      inferEnabled: async (_fs, paths: Paths) => {
+        return existsSync(paths.package('js/tsconfig.json'));
+      },
     };
 
   case 'bundlewatch':
@@ -443,6 +466,9 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
       filesToReplace: ['js/.bundlewatch.config.json'],
       jsonToAugment: {},
       needsTemplateParams: [],
+      inferEnabled: async (_fs, paths: Paths) => {
+        return existsSync(paths.package('js/.bundlewatch.config.json'));
+      },
     };
 
   case 'backendTesting':
@@ -475,6 +501,9 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         ],
       },
       needsTemplateParams: ['packageNamespaceEscapedSlash'],
+      inferEnabled: async (_fs, paths: Paths) => {
+        return existsSync(paths.package('tests'));
+      },
     };
 
   case 'editorConfig':
@@ -517,7 +546,7 @@ export function genExtScaffolder(): Scaffolder<ExtensionParams, ExtensionModules
   const moduleStatusCache: ModuleStatusCache<ExtensionModules> = {
     get: async (module: Module<ExtensionModules>, fs: Store, paths: Paths) => {
       const json = getComposerJson(fs, paths);
-      return !module.togglable || (json?.extra?.['flarum-cli']?.modules?.[module.name] ?? module.defaultEnabled);
+      return !module.togglable || (json?.extra?.['flarum-cli']?.modules?.[module.name]);
     },
     set: async (module: Module<ExtensionModules>, enabled: boolean, fs: Store, paths: Paths) => {
       const json = {
