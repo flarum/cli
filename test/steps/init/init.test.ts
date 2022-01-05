@@ -32,6 +32,8 @@ describe('Test extension skeleton step', function () {
     extensionName: 'Flarum Test',
     mainGitBranch: 'main',
     advancedInstallation: true,
+    'modules.admin': true,
+    'modules.forum': true,
     'modules.js': true,
     'modules.jsCommon': true,
     'modules.css': true,

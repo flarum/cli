@@ -221,6 +221,9 @@ export const EXTENSION_MODULES = [
   'core',
   'icon',
 
+  'admin',
+  'forum',
+
   'js',
   'jsCommon',
   'css',
@@ -253,11 +256,11 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         'extend.php',
         'README.md',
         'LICENSE.md',
-        { path: 'js/src/admin/index.js', moduleDeps: ['js', {module: 'typescript', enabled: false}] },
-        { path: 'js/src/forum/index.js', moduleDeps: ['js', {module: 'typescript', enabled: false}] },
+        { path: 'js/src/admin/index.js', moduleDeps: ['js', 'admin', {module: 'typescript', enabled: false}] },
+        { path: 'js/src/forum/index.js', moduleDeps: ['js', 'forum', {module: 'typescript', enabled: false}] },
         { path: 'js/src/common/index.js', moduleDeps: ['js', 'jsCommon', {module: 'typescript', enabled: false}] },
-        { path: 'js/src/admin/index.ts', moduleDeps: ['js', {module: 'typescript', enabled: true}] },
-        { path: 'js/src/forum/index.ts', moduleDeps: ['js', {module: 'typescript', enabled: true}] },
+        { path: 'js/src/admin/index.ts', moduleDeps: ['js', 'admin', {module: 'typescript', enabled: true}] },
+        { path: 'js/src/forum/index.ts', moduleDeps: ['js', 'forum', {module: 'typescript', enabled: true}] },
         { path: 'js/src/common/index.ts', moduleDeps: ['js', 'jsCommon', {module: 'typescript', enabled: true}] },
       ],
       jsonToAugment: {
@@ -301,6 +304,45 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
       needsTemplateParams: [],
     };
 
+  case 'admin':
+    return {
+      name,
+      updatable: true,
+      defaultEnabled: true,
+      dependsOn: [],
+      togglable: true,
+      shortDescription: 'Admin Frontend',
+      filesToReplace: [
+        {path: 'js/admin.js', moduleDeps: ['js', {module: 'typescript', enabled: false}]},
+        {path: 'js/admin.ts', moduleDeps: ['js', {module: 'typescript', enabled: true}]},
+      ],
+      jsonToAugment: {},
+      needsTemplateParams: [],
+      inferEnabled: async (_fs, paths: Paths) => {
+        if (!existsSync(paths.package('js'))) undefined;
+        return existsSync(paths.package('js/src/admin'));
+      },
+    };
+  case 'forum':
+    return {
+      name,
+      updatable: true,
+      defaultEnabled: true,
+      dependsOn: [],
+      togglable: true,
+      shortDescription: 'Forum Frontend',
+      filesToReplace: [
+        {path: 'js/forum.js', moduleDeps: ['js', {module: 'typescript', enabled: false}]},
+        {path: 'js/forum.ts', moduleDeps: ['js', {module: 'typescript', enabled: true}]},
+      ],
+      jsonToAugment: {},
+      needsTemplateParams: [],
+      inferEnabled: async (_fs, paths: Paths) => {
+        if (!existsSync(paths.package('js'))) undefined;
+        return existsSync(paths.package('js/src/forum'));
+      },
+    };
+
   case 'js':
     return {
       name,
@@ -312,10 +354,10 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
       dependsOn: [],
       filesToReplace: [
         'js/webpack.config.js',
-        {path: 'js/admin.js', moduleDeps: [{module: 'typescript', enabled: false}]},
-        {path: 'js/forum.js', moduleDeps: [{module: 'typescript', enabled: false}]},
-        {path: 'js/admin.ts', moduleDeps: [{module: 'typescript', enabled: true}]},
-        {path: 'js/forum.ts', moduleDeps: [{module: 'typescript', enabled: true}]},
+        {path: 'js/admin.js', moduleDeps: ['admin', {module: 'typescript', enabled: false}]},
+        {path: 'js/forum.js', moduleDeps: ['forum', {module: 'typescript', enabled: false}]},
+        {path: 'js/admin.ts', moduleDeps: ['admin', {module: 'typescript', enabled: true}]},
+        {path: 'js/forum.ts', moduleDeps: ['forum', {module: 'typescript', enabled: true}]},
       ],
       jsonToAugment: {
         'js/package.json': [
@@ -345,10 +387,10 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
       longDescription: 'Shared code between the forum and the admin frontends',
       dependsOn: ['js'],
       filesToReplace: [
-        {path: 'js/admin.js', moduleDeps: [{module: 'typescript', enabled: false}]},
-        {path: 'js/forum.js', moduleDeps: [{module: 'typescript', enabled: false}]},
-        {path: 'js/admin.ts', moduleDeps: [{module: 'typescript', enabled: true}]},
-        {path: 'js/forum.ts', moduleDeps: [{module: 'typescript', enabled: true}]},
+        {path: 'js/admin.js', moduleDeps: ['admin', {module: 'typescript', enabled: false}]},
+        {path: 'js/forum.js', moduleDeps: ['forum', {module: 'typescript', enabled: false}]},
+        {path: 'js/admin.ts', moduleDeps: ['admin', {module: 'typescript', enabled: true}]},
+        {path: 'js/forum.ts', moduleDeps: ['forum', {module: 'typescript', enabled: true}]},
       ],
       jsonToAugment: {},
       needsTemplateParams: [],
