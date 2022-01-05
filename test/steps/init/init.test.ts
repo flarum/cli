@@ -5,11 +5,14 @@ import { genExtScaffolder } from '../../../src/steps/gen-ext-scaffolder';
 import { getExtFileContents, getFsPaths, runStep, stubPathsFactory } from '../../boilersmith/utils';
 import { Store } from 'mem-fs';
 
-async function getExpected(): Promise<string[]> {
+async function getExpected(ts = true): Promise<string[]> {
   const skeletonDir = resolve(`${__dirname}/../../../boilerplate/skeleton/extension`);
   const skeletonPaths = await globby(`${skeletonDir}/**/*`, { dot: true });
 
-  return [...skeletonPaths].map(path => path.replace(skeletonDir, '/ext').replace('gitignore', '.gitignore')).sort();
+  return [...skeletonPaths]
+    .map(path => path.replace(skeletonDir, '/ext').replace('gitignore', '.gitignore'))
+    .filter(path => path.includes('webpack') || !path.endsWith(ts ? '.js' : '.ts'))
+    .sort();
 }
 
 async function getEnabledModules(fs: Store) {
@@ -113,6 +116,20 @@ describe('Test extension skeleton step', function () {
     expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/js/dist/admin.js'")).toBe(false);
     expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/admin.less'")).toBe(true);
     expect(await getEnabledModules(fs)).toStrictEqual(buildModules(['js', 'jsCommon', 'typescript', 'bundlewatch', 'prettier']));
+  });
+
+  test('Can exclude TS completely', async function () {
+    const { fs } = await runStep(initStep, {}, [], { ...vars, 'modules.typescript': false });
+
+    const expected = (await getExpected(false)).filter(path => !path.includes('tsconfig'));
+
+    expect(getFsPaths(fs).sort()).toStrictEqual(expected);
+    expect(getExtFileContents(fs, 'extend.php').includes('Extend\\Locales')).toBe(true);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/js/dist/forum.js'")).toBe(true);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/forum.less')")).toBe(true);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/js/dist/admin.js'")).toBe(true);
+    expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/admin.less'")).toBe(true);
+    expect(await getEnabledModules(fs)).toStrictEqual(buildModules(['typescript']));
   });
 
   test('Can exclude CSS completely', async function () {
