@@ -81,6 +81,9 @@
       },
       "audit": {
         "description": "Checks for potential errors / updatable parts of a Flarum extension."
+      },
+      "update": {
+        "description": "Helper commands to update extensions for new versions of Flarum Core."
       }
     },
     "plugins": [

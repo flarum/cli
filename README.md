@@ -61,8 +61,9 @@ flarum-cli --help
 
 # Commands
 * `flarum-cli help [COMMAND]`
-* `flarum-cli infra backend-testing [PATH]`
 * `flarum-cli init [PATH]`
+* `flarum-cli infra [MODULE] [PATH]`
+* `flarum-cli audit infra [--monorepo] [--fix]`
 * `flarum-cli make backend api-controller [PATH]`
 * `flarum-cli make backend api-serializer [PATH]`
 * `flarum-cli make backend api-serializer-attributes [PATH]`
@@ -83,6 +84,8 @@ flarum-cli --help
 * `flarum-cli make frontend model [PATH]`
 * `flarum-cli update js-imports [PATH]`
 
+All commands can use a `--no-interaction` flag to proceed with defaults when possible.
+
 ## For Maintainers
 
 This section is for maintainers of the flarum-cli codebase.
@@ -99,7 +102,7 @@ The base command is implemented at [src/base-command.ts](https://github.com/flar
 3. Confirm we are in the right directory
 4. Confirm that files will be overwritten / clear files as needed
 5. Run a set of registered steps
-6. Tell the user which steps ran
+6. Tell the user which steps ran, or display any errors
 7. Show a goodbye message
 
 Actual functionality is implemented at the step layer.
@@ -117,7 +120,7 @@ More documentation (and functionality!) will be added later.
 
 #### What are steps?
 
-Steps represent granular operations. Some are bigger and some are smaller, but they include:
+Steps represent meaningful, granular operations. Some are bigger and some are smaller, but they include:
 
 - Initializing an extension from boilerplate
 - Updating some part of an extension from boilerplate (like adding backend testing)
@@ -132,9 +135,10 @@ If some subtask might be needed by multiple commands, that should be a step too.
 The actual logic of a step is implemented in the async `run` method. This method takes:
 
 - An in-memory filesystem object (through `mem-fs`)
-- A path provider, which is a class that can be used to get paths relative to the extension root, the working directory, the requested directory, and the CLI's boilerplate directory
-- A param provider, which can be used to prompt the user for parameters. We'll discuss this more soon.
-- A "php provider", which can be used to interact with the PHP subsystem to add extenders to extend.php.
+- A paths object, which is a class that can be used to get paths relative to the extension root, the working directory, the requested directory (if the command was run with the `path` arg specified), and the monorepo directory (if in a subdirectory of a monorepo).
+- An `io` instance, which can be used to prompt the user for input or display outputs / errors.
+- An object of "providers", which represent additional functionality. For Flarum commands, these are:
+  - A "php provider", which can be used to interact with the PHP subsystem to add extenders to extend.php.
 
 Steps should modify the in-memory filesystem with their changes and return it.
 
@@ -214,8 +218,6 @@ Steps for generating extenders should use `src/steps/extenders/base`, where all 
 
 Steps for generating templates from php stubs should use `src/steps/stubs/php-base`, where they just need to describe what stub file they use, which params they need, and a recommended namespace where the generated file should be placed.
 
-Steps for `infra` operations (copying over some portion of the default skeleton, for operations like adding/updating backend testing or TypeScript config) shouls use `src/steps/infra/base`, where all they need to indicate is a list of files from the boilerplate they copy over, and an object describing which JSON config keys should be copied from the boilerplate to the extension for various JSON files.
-
 ### Testing
 
 Most of this architecture was driven by TDD and BDD development, allowing for a highly decoupled system.
@@ -225,3 +227,37 @@ Any additions of steps, modifications of providers, or changes of functionality 
 The 3 base step types actually provide a simple interface to generate test cases. See the relevant test files for more info.
 
 Since commands directly affect the filesystem, unit tests for them aren't really possible. It would also be quite complex to unit test all commands in addition to all steps. For this reason, commands should be manually tested, but unit tests are not currently required.
+
+### Monorepo Support
+
+Flarum CLI was designed with monorepos in mind.
+When registering a step, you can provide it an array of subdirectories to run it in.
+For each of these subdirectories, an instance of the step will run with the `paths` object returning the subdirectory as `package()`, and the original root directory as `monorepo()`.
+
+A monorepo should have a `flarum-monorepo.json` file in the root directory with the following (optional) keys:
+
+- `packages.core`: a path to Flarum Core, if present.
+- `packages.extensions`: an array of paths to Flarum extensions.
+- `packages.composer`: an array of paths to non-extension PHP Composer packages published on Packagist.
+- `packages.npm`: an array of paths to non-extension JS/TS packages published on NPM.
+
+### Scaffolding Generation
+
+One powerful use-case of Flarum CLI is creating new extensions, and keeping infrastructure in sync for existing extensions.
+For example, if managing 100 extensions, making sure the prettier config is consistent for all of them can be very tedious. Additionally, it can be annoying to have to add TypeScript config to every extension, and it's easy to make mistakes.
+
+For this purpose, Flarum CLI's `Scaffolder` system formalizes the concepts of initializing and updating extension infrastructure.
+
+At the core level, there's a boilerplate directory (`boilerplate/skeleton/extension`) that contains the scaffolding for a new extension.
+
+The scaffolder receives a set of modules, which represent some aspect of infrastructure (e.g. JS, TypeScript, Backend Testing, etc).
+Modules can be updatable (e.g. TypeScript) or not (e.g. the core setup of an `extend.php` file).
+They can also be togglable (e.g. JS), or not, in which case they are always on.
+
+Modules own files in the scaffolding directory, as well as keys in JSON config files. Every file and key must belong to at least one module. If any keys in a JSON config file belong to a module, all keys must belong to a module; if no keys are owned, the config file is treated like any other file.
+
+Modules also have template params, which are used as variables in the scaffolding.
+
+There's a lot more features and guaruntees than that, see the `Module` interface for more information.
+
+The main benefit to this system is that given this scaffolding / module setup, it is possible to generate steps to initialize a new extension, update/add a module to an existing extension, or audit an extension for any outdated infrastructure. This is how the `init`, `infra`, and `audit infra` commands are implemented.
