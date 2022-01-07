@@ -102,7 +102,7 @@ export type ModuleStatusCache<N extends string> = {
 export async function promptModulesEnabled<N extends string>(modules: Module<N>[], io: IO): Promise<Record<N, boolean>> {
   const modulesEnabled: Record<string, boolean> = {};
 
-  const advanced = await io.getParam<boolean>({
+  const advanced = await io.getParam({
     name: 'advancedInstallation',
     type: 'confirm',
     initial: false,
@@ -117,7 +117,7 @@ export async function promptModulesEnabled<N extends string>(modules: Module<N>[
       modulesEnabled[m.name] = false;
     } else if (advanced) {
       // eslint-disable-next-line no-await-in-loop
-      modulesEnabled[m.name] = await io.getParam<boolean>({
+      modulesEnabled[m.name] = await io.getParam({
         name: `modules.${m.name}`,
         type: 'confirm',
         initial: m.defaultEnabled,

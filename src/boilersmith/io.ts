@@ -1,5 +1,10 @@
-import prompt, { PromptObject } from 'prompts';
+import prompt, { PromptObject, PromptType } from 'prompts';
 import chalk from 'chalk';
+
+type BooleanPromptType = PromptType & ('confirm' | 'toggle');
+type StringPromptType = PromptType & ('text' | 'password' | 'invisible' | 'autocomplete');
+type DatePromptType = PromptType & 'date';
+type ListPromptType = PromptType & 'list';
 
 export type ParamDef<N extends string = string> = Omit<PromptObject<N>, 'name'> & { name: N };
 
@@ -11,6 +16,10 @@ export interface IO {
   /**
    * Prompt the user for some input data.
    */
+  getParam(param: ParamDef & {type: BooleanPromptType}): Promise<boolean>;
+  getParam(param: ParamDef & {type: StringPromptType}): Promise<string>;
+  getParam(param: ParamDef & {type: DatePromptType}): Promise<Date>;
+  getParam(param: ParamDef & {type: ListPromptType}): Promise<string[]>;
   getParam<T>(param: ParamDef): Promise<T>;
 
   /**

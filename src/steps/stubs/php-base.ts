@@ -52,7 +52,7 @@ export abstract class BasePhpStubStep extends FlarumBaseStubStep {
   }
 
   protected async getFileName(_fs: Store, _paths: Paths, io: IO): Promise<string> {
-    return await io.getParam<string>({ name: 'className', type: 'text' }) + '.php';
+    return await io.getParam({ name: 'className', type: 'text' }) + '.php';
   }
 
   protected stubNamespace(packageNamespace: string, paths: Paths): string {

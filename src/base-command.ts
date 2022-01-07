@@ -169,6 +169,10 @@ export default abstract class BaseCommand extends Command {
     }
   }
 
+  protected isFlarumMonorepo(path: string): boolean {
+    return existsSync(resolve(path, 'flarum-monorepo.json'));
+  }
+
   protected isFlarumCore(path: string): boolean {
     try {
       const composerJsonPath = resolve(path, 'composer.json');
@@ -209,7 +213,7 @@ export default abstract class BaseCommand extends Command {
   }
 
   protected async confirmExtDir(extRoot: string): Promise<void> {
-    const verify = await this.genIO().getParam<boolean>({
+    const verify = await this.genIO().getParam({
       name: 'verify',
       type: 'confirm',
       message: `Work in Flarum package located at ${resolve(extRoot)}?`,
@@ -224,7 +228,7 @@ export default abstract class BaseCommand extends Command {
 
     this.log("This command requires `composer install` to have been ran in your extension's root directory.");
 
-    const composer = await this.genIO().getParam<boolean>({
+    const composer = await this.genIO().getParam({
       name: 'composer',
       type: 'confirm',
       message: 'Would you like me to take care of that for you?',
@@ -253,7 +257,7 @@ export default abstract class BaseCommand extends Command {
 
     if (empty) return false;
 
-    const overwrite = await this.genIO().getParam<boolean>({
+    const overwrite = await this.genIO().getParam({
       name: 'overwrite',
       type: 'confirm',
       message: confirmationMessage,

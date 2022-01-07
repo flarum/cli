@@ -8,7 +8,7 @@ describe('PromptsIO Tests', function () {
     const io = new PromptsIO();
 
     expect(
-      await io.getParam<boolean>({
+      await io.getParam({
         message: 'get param',
         type: 'text',
         name: 'something',
@@ -20,7 +20,7 @@ describe('PromptsIO Tests', function () {
     const io = new PromptsIO({}, [], true);
 
     expect(
-      await io.getParam<string>({
+      await io.getParam({
         message: 'get param',
         type: 'text',
         name: 'something',
@@ -34,7 +34,7 @@ describe('PromptsIO Tests', function () {
 
     expect(
       async () =>
-        io.getParam<string>({
+        io.getParam({
           message: 'get param',
           type: 'text',
           name: 'something',
@@ -46,7 +46,7 @@ describe('PromptsIO Tests', function () {
     const io = new PromptsIO({}, [], true);
 
     expect(
-      await io.getParam<boolean>({
+      await io.getParam({
         message: 'get param',
         type: 'confirm',
         name: 'something',
@@ -58,7 +58,7 @@ describe('PromptsIO Tests', function () {
     const io = new PromptsIO({}, [], true);
 
     expect(
-      await io.getParam<boolean>({
+      await io.getParam({
         message: 'get param',
         type: 'toggle',
         name: 'something',

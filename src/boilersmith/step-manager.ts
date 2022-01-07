@@ -246,7 +246,7 @@ export class StepManager<Providers extends DefaultProviders> {
 
     if (!storedStep.shouldRun.optional) return true;
 
-    const promptConfirm = await io.newInstance({ context: 'Confirm Step' }, []).getParam<boolean>({
+    const promptConfirm = await io.newInstance({ context: 'Confirm Step' }, []).getParam({
       name: 'execute_step',
       message: storedStep.shouldRun.confirmationMessage || `Run step of type "${storedStep.step.type}"?`,
       initial: storedStep.shouldRun.default || false,
