@@ -5,6 +5,7 @@ import { TemplateParam } from 'boilersmith/scaffolding/template-param';
 import chalk from 'chalk';
 import { Store } from 'mem-fs';
 import { create } from 'mem-fs-editor';
+import { execSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import simpleGit from 'simple-git';
@@ -189,6 +190,10 @@ function paramNamesToDef(name: ExtensionParams): TemplateParam<string, Extension
         initial: 'main',
       },
       getCurrVal: async () => {
+        try {
+          return execSync("git remote show origin | grep 'HEAD branch' | cut -d' ' -f5").toString();
+        } catch {}
+
         return (await simpleGit().getConfig('init.defaultBranch')).value ?? 'main';
       },
     };
