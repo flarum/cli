@@ -9,7 +9,7 @@ export interface Paths {
 
   monorepo(...path: string[]): string | null;
 
-  onMonorepoSub(packagePath: string): Paths;
+  onMonorepoSub(packagePath: string, monorepoPath?: string): Paths;
 }
 
 type InternalPaths = {
@@ -45,7 +45,7 @@ export class NodePaths implements Paths {
     return resolve(this.paths.monorepo, ...path);
   }
 
-  onMonorepoSub(packagePath: string): NodePaths {
-    return new NodePaths({ ...this.paths, monorepo: this.paths.package, package: packagePath });
+  onMonorepoSub(packagePath: string, monorepoPath?: string): NodePaths {
+    return new NodePaths({ ...this.paths, monorepo: monorepoPath ?? this.paths.package, package: packagePath });
   }
 }
