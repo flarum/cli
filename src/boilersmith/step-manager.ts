@@ -1,9 +1,9 @@
 /* eslint-disable no-await-in-loop */
 import { create as createMemFs, Store } from 'mem-fs';
-import { create as createMemFsEditor } from 'mem-fs-editor';
 import { ExposedParamManager } from './exposed-param-manager';
 import { IO, Message } from './io';
 import { Paths } from './paths';
+import { commitAsync } from './utils/commit-async';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type DefaultProviders = {};
@@ -61,17 +61,19 @@ interface StepDependency {
 
 type PredefinedParameters = Record<string, unknown>;
 
-type StepsResult = {
-  succeeded: true;
-  messages: Message[];
-  stepsRan: string[];
-} | {
-  succeeded: false;
-  error: string;
-  errorTrace?: string;
-  messages: Message[];
-  stepsRan: string[]
-};
+type StepsResult =
+  | {
+      succeeded: true;
+      messages: Message[];
+      stepsRan: string[];
+    }
+  | {
+      succeeded: false;
+      error: string;
+      errorTrace?: string;
+      messages: Message[];
+      stepsRan: string[];
+    };
 
 const formatDependencies = (strings: string[]) => strings.map(s => `"${s}"`).join(', ');
 
@@ -187,7 +189,7 @@ export class StepManager<Providers extends DefaultProviders> {
       const fs = await this.runStep(step, paths, io, providers, packagePath);
 
       if (!dry) {
-        await this.commit(fs);
+        await commitAsync(fs);
       }
 
       stepNames.push(packagePath ? `${step.step.type} (${packagePath})` : step.step.type);
@@ -293,18 +295,6 @@ export class StepManager<Providers extends DefaultProviders> {
 
     return newFs;
   }
-
-  protected async commit(fs: Store): Promise<boolean> {
-    return new Promise((resolve, _reject) => {
-      createMemFsEditor(fs).commit(err => {
-        if (err) {
-          throw new Error(err);
-        }
-
-        resolve(true);
-      });
-    });
-  }
 }
 
 export class AtomicStepManager<Providers = DefaultProviders> extends StepManager<Providers> {
@@ -384,7 +374,7 @@ export class AtomicStepManager<Providers = DefaultProviders> extends StepManager
     }
 
     if (!dry) {
-      await this.commit(fs);
+      await commitAsync(fs);
     }
 
     return {

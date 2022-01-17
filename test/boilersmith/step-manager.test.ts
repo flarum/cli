@@ -4,6 +4,7 @@ import { PromptsIO } from 'boilersmith/io';
 import { AtomicStepManager, StepManager } from 'boilersmith/step-manager';
 import { stubStepFactory } from './utils';
 import { NodePaths } from 'boilersmith/paths';
+import * as commitAsyncModule from 'boilersmith/utils/commit-async';
 
 describe('Step Manager Validation', function () {
   describe('dependencies on nonexistent steps will cause errors', function () {
@@ -237,7 +238,7 @@ describe('Step Manager Execution', function () {
     io = io.newInstance({}, []);
     ioNewFunc.mockClear();
     pathsNewFunc.mockClear();
-    commitMethod = jest.spyOn(StepManager.prototype as any, 'commit');
+    commitMethod = jest.spyOn(commitAsyncModule as any, 'commitAsync');
   });
 
   afterEach(() => {
