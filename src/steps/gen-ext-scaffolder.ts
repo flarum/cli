@@ -487,7 +487,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
           return false;
         }
 
-        return readFileSync('js/package.json').includes('prettier');
+        return readFileSync(paths.package('js/package.json')).includes('prettier');
       },
     };
 
