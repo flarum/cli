@@ -14,6 +14,7 @@ A CLI for developing Flarum extensions</p>
 <!-- toc -->
 * [Introduction](#introduction)
 * [Installation](#installation)
+* [Updating](#updating)
 * [Usage](#usage)
 * [Commands](#commands)
 <!-- tocstop -->
@@ -29,6 +30,13 @@ This tool was built to simplify the development of Flarum extensions by automati
 $ npm install -g @flarum/cli
 ```
 <!-- installationstop -->
+
+# Updating
+<!-- updating -->
+```sh-session
+$ npm update -g @flarum/cli
+```
+<!-- updatingstop -->
 
 # Usage
 <!-- usage -->
