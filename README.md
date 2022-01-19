@@ -19,26 +19,26 @@ A CLI for developing Flarum extensions</p>
 * [Commands](#commands)
 <!-- tocstop -->
 
-# Introduction
+## Introduction
 One of our core values is ***Framework First***, Flarum is as much a framework for extension development as it is a forum platform.
 
 This tool was built to simplify the development of Flarum extensions by automating some repetitive and menial tasks. It allows to generate boilerplate skeleton for a new extension, common backend classes and frontend components, extenders, as well as other maintenance tasks.
 
-# Installation
+## Installation
 <!-- installation -->
 ```sh-session
 $ npm install -g @flarum/cli
 ```
 <!-- installationstop -->
 
-# Updating
+## Updating
 <!-- updating -->
 ```sh-session
 $ npm update -g @flarum/cli
 ```
 <!-- updatingstop -->
 
-# Usage
+## Usage
 <!-- usage -->
 ```sh-session
 $ npm install -g @flarum/cli
@@ -67,11 +67,19 @@ or
 flarum-cli --help
 ```
 
-# Commands
-* `flarum-cli help [COMMAND]`
-* `flarum-cli init [PATH]`
-* `flarum-cli infra [MODULE] [PATH]`
-* `flarum-cli audit infra [--monorepo] [--fix]`
+## Commands
+The CLI has different types of commands for different tasks:
+
+**Initialisation**
+* `flarum-cli init [PATH]`: Generates a blank extension skeleton, including all recommended infrastructure.
+
+**Infrastructure**: See the [infrastructure](#infrastructure-modules) section for more information.
+* `flarum-cli infra [MODULE] [PATH]`: Adds (or updates) infrastructure for some part of extension infrastructure. You can see all available modules by running `fl-dev infra --help`.
+
+**Audit**: These commands help you make sure your extension is up to date.
+* `flarum-cli audit infra [--monorepo] [--fix]` Check that infrastructure files are up to date for all enabled modules.
+
+**Backend Boilerplate Generation**: Generates different types of backend classes and/or extenders, ready to be used.
 * `flarum-cli make backend api-controller [PATH]`
 * `flarum-cli make backend api-serializer [PATH]`
 * `flarum-cli make backend api-serializer-attributes [PATH]`
@@ -87,12 +95,75 @@ flarum-cli --help
 * `flarum-cli make backend route [PATH]`
 * `flarum-cli make backend service-provider [PATH]`
 * `flarum-cli make backend validator [PATH]`
+
+**Frontend Boilerplate Generation**: Generate frontend components/classes, ready to be used.
 * `flarum-cli make frontend component [PATH]`
 * `flarum-cli make frontend modal [PATH]`
 * `flarum-cli make frontend model [PATH]`
-* `flarum-cli update js-imports [PATH]`
 
-All commands can use a `--no-interaction` flag to proceed with defaults when possible.
+**Code Updates**: These commands help update extensions for newer versions of Flarum.
+* `flarum-cli update js-imports [PATH]`: Adds admin/forum/common namespaces to all JS imports from flarum core.
+
+*And of course, you can always use the help command to see a list of all available commands with their descriptions:*
+* `flarum-cli help [COMMAND]`
+
+All commands can use a `--no-interaction` flag to proceed with default values for prompts when possible.
+
+## 🔥 The Most Powerful Commands
+Of all the aforementioned commands, the two most powerful ones that will make a huge difference, are the extension initialisation command and the backend **model** generation command. The former obviously allows to kickstart the extension with the recommended skeleton from the Core Dev team, while the latter not only creates the backend model, it allows to create all the classes related to the model, from just its name:
+* Table migration
+* Policy
+* API Serializer
+* CRUD API Controllers
+* CRUD Handlers
+* Repository
+* Validator
+* Routes
+* Related Extenders
+
+[center]
+![terminal_example](https://sycho9.github.io/flarum-cli.svg)
+![example_project_with_model_command](https://lh3.googleusercontent.com/-fUnfqQ7rwyo/YQVwwm0sa0I/AAAAAAAAFfE/-o9B30M2gE8y6d3NWaVgBhYa8xEwqLuNwCLcBGAsYHQ/s16000/Screenshot%2Bfrom%2B2021-07-31%2B16-46-38.png)
+[/center]
+
+## Infrastructure Modules
+
+If you maintain more than just a few extensions, keeping the infrastructure up to date can be very tedious.
+We heavily value developer experience, and make it a point to support automated testing, static analysis, formatting, and other tools
+that help you work more happily and efficiently. However, all this means that there's a lot of config files to keep track of.
+
+The idea behind Flarum CLI's infrastructure modules is simple: the config for some feature is associated with a "module".
+For example, the "typescript" module includes:
+
+- The `js/tsconfig.json` file
+- Dependency reqs for `typescript`, `typescript-coverage-report`, and `flarum-tsconfig` in the `package.json` file.
+- Script configuration to check type safety and type coverage in the `package.json` file.
+
+So to enable the `typescript` module, all Flarum CLI has to do is update those files and JSON config keys to the latest version.
+
+Please note that running `flarum-cli infra` or `flarum-cli audit infra --fix` will only add new files/keys and overwrite existing ones; it will not delete old files or config keys.
+
+Also, we strongly recommend carefully looking over the changes made by these commands before committing them: they should work the vast majority of the time, but there could be some corner cases.
+
+### Excluding Files
+
+Sometimes, you'll want to customize some of these configuration files, and prevent `flarum-cli infra [MODULE]` or `flarum-cli audit infra --fix` from overriding your changes. You can also exclude any files from these updates by adding their relative path to the "extra.flarum-cli.excludeScaffolding" key's array in your extension's `composer.json` file. For example, if you wanted to exclude your tsconfig file from any updates by the infra system, your `composer.json` should look as follows:
+
+```json
+{
+  ...
+  "extra": {
+    "flarum-cli": {
+      "excludeScaffolding": [
+        "js/tsconfig.json"
+      ],
+      ...
+    },
+    ...
+  }
+  ...
+}
+```
 
 ## For Maintainers
 
