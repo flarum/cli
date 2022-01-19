@@ -1,6 +1,5 @@
 module.exports = {
   setupFilesAfterEnv: ['jest-extended'],
-  testTimeout: 10_000,
   collectCoverage: true,
   testEnvironment: 'node',
   preset: 'ts-jest',
