@@ -261,12 +261,12 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         'extend.php',
         'README.md',
         'LICENSE.md',
-        { path: 'js/src/admin/index.js', moduleDeps: ['js', 'admin', {module: 'typescript', enabled: false}] },
-        { path: 'js/src/forum/index.js', moduleDeps: ['js', 'forum', {module: 'typescript', enabled: false}] },
-        { path: 'js/src/common/index.js', moduleDeps: ['js', 'jsCommon', {module: 'typescript', enabled: false}] },
-        { path: 'js/src/admin/index.ts', moduleDeps: ['js', 'admin', {module: 'typescript', enabled: true}] },
-        { path: 'js/src/forum/index.ts', moduleDeps: ['js', 'forum', {module: 'typescript', enabled: true}] },
-        { path: 'js/src/common/index.ts', moduleDeps: ['js', 'jsCommon', {module: 'typescript', enabled: true}] },
+        { path: 'js/src/admin/index.js', moduleDeps: ['js', 'admin', { module: 'typescript', enabled: false }] },
+        { path: 'js/src/forum/index.js', moduleDeps: ['js', 'forum', { module: 'typescript', enabled: false }] },
+        { path: 'js/src/common/index.js', moduleDeps: ['js', 'jsCommon', { module: 'typescript', enabled: false }] },
+        { path: 'js/src/admin/index.ts', moduleDeps: ['js', 'admin', { module: 'typescript', enabled: true }] },
+        { path: 'js/src/forum/index.ts', moduleDeps: ['js', 'forum', { module: 'typescript', enabled: true }] },
+        { path: 'js/src/common/index.ts', moduleDeps: ['js', 'jsCommon', { module: 'typescript', enabled: true }] },
       ],
       jsonToAugment: {
         'composer.json': [
@@ -318,8 +318,8 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
       togglable: true,
       shortDescription: 'Admin Frontend',
       filesToReplace: [
-        {path: 'js/admin.js', moduleDeps: ['js', {module: 'typescript', enabled: false}]},
-        {path: 'js/admin.ts', moduleDeps: ['js', {module: 'typescript', enabled: true}]},
+        { path: 'js/admin.js', moduleDeps: ['js', { module: 'typescript', enabled: false }] },
+        { path: 'js/admin.ts', moduleDeps: ['js', { module: 'typescript', enabled: true }] },
       ],
       jsonToAugment: {},
       needsTemplateParams: [],
@@ -337,8 +337,8 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
       togglable: true,
       shortDescription: 'Forum Frontend',
       filesToReplace: [
-        {path: 'js/forum.js', moduleDeps: ['js', {module: 'typescript', enabled: false}]},
-        {path: 'js/forum.ts', moduleDeps: ['js', {module: 'typescript', enabled: true}]},
+        { path: 'js/forum.js', moduleDeps: ['js', { module: 'typescript', enabled: false }] },
+        { path: 'js/forum.ts', moduleDeps: ['js', { module: 'typescript', enabled: true }] },
       ],
       jsonToAugment: {},
       needsTemplateParams: [],
@@ -359,10 +359,10 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
       dependsOn: [],
       filesToReplace: [
         'js/webpack.config.js',
-        {path: 'js/admin.js', moduleDeps: ['admin', {module: 'typescript', enabled: false}]},
-        {path: 'js/forum.js', moduleDeps: ['forum', {module: 'typescript', enabled: false}]},
-        {path: 'js/admin.ts', moduleDeps: ['admin', {module: 'typescript', enabled: true}]},
-        {path: 'js/forum.ts', moduleDeps: ['forum', {module: 'typescript', enabled: true}]},
+        { path: 'js/admin.js', moduleDeps: ['admin', { module: 'typescript', enabled: false }] },
+        { path: 'js/forum.js', moduleDeps: ['forum', { module: 'typescript', enabled: false }] },
+        { path: 'js/admin.ts', moduleDeps: ['admin', { module: 'typescript', enabled: true }] },
+        { path: 'js/forum.ts', moduleDeps: ['forum', { module: 'typescript', enabled: true }] },
       ],
       jsonToAugment: {
         'js/package.json': [
@@ -392,10 +392,10 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
       longDescription: 'Shared code between the forum and the admin frontends',
       dependsOn: ['js'],
       filesToReplace: [
-        {path: 'js/admin.js', moduleDeps: ['admin', {module: 'typescript', enabled: false}]},
-        {path: 'js/forum.js', moduleDeps: ['forum', {module: 'typescript', enabled: false}]},
-        {path: 'js/admin.ts', moduleDeps: ['admin', {module: 'typescript', enabled: true}]},
-        {path: 'js/forum.ts', moduleDeps: ['forum', {module: 'typescript', enabled: true}]},
+        { path: 'js/admin.js', moduleDeps: ['admin', { module: 'typescript', enabled: false }] },
+        { path: 'js/forum.js', moduleDeps: ['forum', { module: 'typescript', enabled: false }] },
+        { path: 'js/admin.ts', moduleDeps: ['admin', { module: 'typescript', enabled: true }] },
+        { path: 'js/forum.ts', moduleDeps: ['forum', { module: 'typescript', enabled: true }] },
       ],
       jsonToAugment: {},
       needsTemplateParams: [],
@@ -447,7 +447,11 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
       shortDescription: 'Git Configuration',
       longDescription: 'Git config files (e.g. .gitignore, .gitattributes).',
       dependsOn: [],
-      filesToReplace: [{ path: 'gitignore', destPath: '.gitignore' }, { path: 'js/gitignore', moduleDeps: ['js'], destPath: 'js/.gitignore' }, '.gitattributes'],
+      filesToReplace: [
+        { path: 'gitignore', destPath: '.gitignore' },
+        { path: 'js/gitignore', moduleDeps: ['js'], destPath: 'js/.gitignore' },
+        '.gitattributes',
+      ],
       jsonToAugment: {},
       needsTemplateParams: [],
     };
@@ -462,8 +466,16 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
       longDescription: 'Automatically run checks via GitHub Actions CI. Free for open source projects.',
       dependsOn: [],
       filesToReplace: [
-        { path: '.github/workflows/frontend.yml', monorepoPath: '.github/workflows/${params.extensionId}-frontend.yml' },
-        { path: '.github/workflows/backend.yml', monorepoPath: '.github/workflows/${params.extensionId}-backend.yml' },
+        {
+          path: '.github/workflows/frontend.yml',
+          monorepoPath: '.github/workflows/${params.extensionId}-frontend.yml',
+          requireMonorepo: false,
+        },
+        {
+          path: '.github/workflows/backend.yml',
+          monorepoPath: '.github/workflows/${params.extensionId}-backend.yml',
+          requireMonorepo: false,
+        },
       ],
       jsonToAugment: {},
       needsTemplateParams: ['frontendDirectory', 'backendDirectory', 'mainGitBranch', 'extensionId', 'extensionName'],
@@ -587,9 +599,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
       defaultEnabled: true,
       shortDescription: 'StyleCI config file',
       dependsOn: [],
-      filesToReplace: [
-        {path: '.styleci.yml', monorepoPath: '.styleci.yml'},
-      ],
+      filesToReplace: [{ path: '.styleci.yml', monorepoPath: '.styleci.yml', requireMonorepo: false }],
       jsonToAugment: {},
       needsTemplateParams: [],
     };
@@ -606,7 +616,7 @@ export function genExtScaffolder(): Scaffolder<ExtensionParams, ExtensionModules
   const moduleStatusCache: ModuleStatusCache<ExtensionModules> = {
     get: async (module: Module<ExtensionModules>, fs: Store, paths: Paths) => {
       const json = getComposerJson(fs, paths);
-      return !module.togglable || (json?.extra?.['flarum-cli']?.modules?.[module.name]);
+      return !module.togglable || json?.extra?.['flarum-cli']?.modules?.[module.name];
     },
     set: async (module: Module<ExtensionModules>, enabled: boolean, fs: Store, paths: Paths) => {
       const json = {

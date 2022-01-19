@@ -12,6 +12,7 @@ async function getExpected(ts = true): Promise<string[]> {
   return [...skeletonPaths]
     .map(path => path.replace(skeletonDir, '/ext').replace('gitignore', '.gitignore'))
     .filter(path => path.includes('webpack') || !path.endsWith(ts ? '.js' : '.ts'))
+    .filter(path => path !== 'monorepo-only.ml')
     .sort();
 }
 

@@ -260,6 +260,53 @@ describe('applyModule', function () {
 
     expect(getFsPaths(fs)).toStrictEqual(['/ext/OCaml.gitignore', '/ext/readme.md']);
   });
+
+  it('copies over monorepo only files if in monorepo', async function () {
+    const module: Module = {
+      name: 'monorepo',
+      togglable: false,
+      updatable: true,
+      shortDescription: '',
+      filesToReplace: [{ path: 'monorepo-only.ml', monorepoPath: 'monorepo-only.ml', requireMonorepo: true }],
+      jsonToAugment: {},
+      needsTemplateParams: ['someVar'],
+    };
+
+    const fs = await applyModule(
+      module,
+      { monorepo: true },
+      { someVar: 'OCaml' },
+      scaffoldDir,
+      createStore(),
+      new NodePaths({ package: '/ext', monorepo: '/ext/monorepo' }),
+    );
+
+    expect(getFsPaths(fs)).toStrictEqual(['/ext/monorepo/monorepo-only.ml']);
+  });
+
+  it('doesnt copy over monorepo only files if not in monorepo', async function () {
+    const module: Module = {
+      name: 'monorepo',
+      togglable: false,
+      updatable: true,
+      shortDescription: '',
+      filesToReplace: [{ path: 'monorepo-only.ml', monorepoPath: 'monorepo-only.ml', requireMonorepo: true }],
+      jsonToAugment: {},
+      needsTemplateParams: ['someVar'],
+    };
+
+    const fs = await applyModule(
+      module,
+      { monorepo: true },
+      { someVar: 'OCaml' },
+      scaffoldDir,
+      createStore(),
+      new NodePaths({ package: '/ext' }),
+    );
+
+    expect(getFsPaths(fs)).toStrictEqual([]);
+  });
+
   it('copies over JSON data', async function () {
     const module: Module = {
       name: 'just-json',

@@ -5,7 +5,7 @@ import { getParamName, TemplateParam } from 'boilersmith/scaffolding/template-pa
 describe('Scaffolder', function () {
   describe('Scaffolder.validate', function () {
     const scaffoldDir = resolve(__dirname, '../fixtures/example-scaffold');
-    const allFiles = ['src/index.html', 'src/index.js', 'src/index.php', 'src/index.ml', '.gitignore', 'config1.json', 'config2.json', 'readme.md'];
+    const allFiles = ['monorepo-only.ml', 'src/index.html', 'src/index.js', 'src/index.php', 'src/index.ml', '.gitignore', 'config1.json', 'config2.json', 'readme.md'];
     const filesNoConf = allFiles.filter(p => p !== 'config1.json');
     const configKeys = ['hello', 'foo', 'authors', '${params.varKey}++', 'nested.config.string', 'nested.config.boolean', 'nested.config.null'];
 

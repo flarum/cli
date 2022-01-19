@@ -10,7 +10,7 @@ import { cloneAndFill } from 'boilersmith/utils/clone-and-fill';
 import { renameKeys } from 'boilersmith/utils/rename-keys';
 import { condFormat } from 'boilersmith/utils/cond-format';
 
-interface FileOwnership {
+type FileOwnershipCommon = {
   /**
    * The path to the file
    */
@@ -24,14 +24,23 @@ interface FileOwnership {
   /**
    * Depends on other modules being enabled (or disabled).
    */
-  moduleDeps?: (string | {module: string, enabled: boolean})[];
+  moduleDeps?: (string | { module: string; enabled: boolean })[];
+};
 
-  /**
-   * If in a monorepo, should the file be placed relative to the monorepo root, and if so, where?
-   * If provided, takes priority over destPath.
-   */
-  monorepoPath?: string;
-}
+type FileOwnership =
+  | (FileOwnershipCommon & {
+      /**
+       * If in a monorepo, should the file be placed relative to the monorepo root, and if so, where?
+       * If provided, takes priority over destPath.
+       */
+      monorepoPath: string;
+
+      /**
+       * Only place this file if in a monorepo?
+       */
+      requireMonorepo: boolean;
+    })
+  | FileOwnershipCommon;
 
 interface CommonModule<N extends string> {
   name: N;
@@ -142,7 +151,7 @@ export async function currModulesEnabled<N extends string>(
   for (const m of modules) {
     if (m.togglable) {
       // eslint-disable-next-line no-await-in-loop
-      const isEnabled = await cache?.get(m, fs, paths) ?? await m.inferEnabled?.(fs, paths);
+      const isEnabled = (await cache?.get(m, fs, paths)) ?? (await m.inferEnabled?.(fs, paths));
 
       modulesEnabled[m.name] = isEnabled ?? m.defaultEnabled;
     } else {
@@ -165,7 +174,7 @@ export async function setModuleValue<MN extends string>(
   }
 }
 
-// eslint-disable-next-line max-params
+// eslint-disable-next-line max-params,complexity
 export async function applyModule<MN extends string, TN extends string>(
   module: Module<MN>,
   modulesEnabled: Record<string, boolean>,
@@ -210,15 +219,24 @@ export async function applyModule<MN extends string, TN extends string>(
     const path = typeof file === 'string' ? file : file.path;
     const moduleDeps = typeof file === 'string' ? [] : file.moduleDeps ?? [];
 
-    if (!excludeFiles.includes(path) && !moduleDeps.some(dep => {
-      const depName = typeof dep === 'string' ? dep : dep.module;
-      const enabled = modulesEnabled[depName];
-      return typeof dep === 'string' || dep.enabled ? !enabled : enabled;
-    })) {
-      const copyToIfMonorepo = typeof file !== 'string' && file.monorepoPath ? paths.monorepo(cloneAndFill(file.monorepoPath, tplDataFlat)) : undefined;
-      const copyTo = copyToIfMonorepo ?? paths.package(typeof file !== 'string' && file.destPath ? cloneAndFill(file.destPath, tplDataFlat) : path);
-      fsEditor.copyTpl(resolve(scaffoldDir, path), copyTo, tplData);
+    if (typeof file !== 'string' && 'requireMonorepo' in file && file.requireMonorepo && paths.monorepo() === null) {
+      continue;
     }
+
+    if (
+      excludeFiles.includes(path) ||
+      moduleDeps.some(dep => {
+        const depName = typeof dep === 'string' ? dep : dep.module;
+        const enabled = modulesEnabled[depName];
+        return (typeof dep === 'string' || dep.enabled) ? !enabled : enabled;
+      })
+    ) {
+      continue;
+    }
+
+    const copyToIfMonorepo = typeof file !== 'string' && 'monorepoPath' in file && file.monorepoPath ? paths.monorepo(cloneAndFill(file.monorepoPath, tplDataFlat)) : undefined;
+    const copyTo = copyToIfMonorepo ?? paths.package(typeof file !== 'string' && file.destPath ? cloneAndFill(file.destPath, tplDataFlat) : path);
+    fsEditor.copyTpl(resolve(scaffoldDir, path), copyTo, tplData);
   }
 
   const jsonPaths = cloneAndFill(module.jsonToAugment, tplDataFlat);
