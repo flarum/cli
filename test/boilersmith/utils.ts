@@ -77,7 +77,7 @@ class CacheIO extends PromptsIO {
 
 type IOConf =
   | { initialParams: Record<string, unknown>; usePrompts: false }
-  | { initialParams: Record<string, unknown>; usePrompts: true; paramVals: unknown[] };
+  | { initialParams: Record<string, unknown>; usePrompts: true; paramVals: unknown[], noInteraction?: boolean };
 
 export async function runStep<Providers extends DefaultProviders>(
   step: Step<Providers>,
@@ -93,7 +93,7 @@ export async function runStep<Providers extends DefaultProviders>(
     prompt.inject(ioConf.paramVals);
   }
 
-  const io = ioConf.usePrompts ? new PromptsIO(ioConf.initialParams) : new CacheIO(ioConf.initialParams);
+  const io = ioConf.usePrompts ? new PromptsIO(ioConf.initialParams, [], ioConf.noInteraction) : new CacheIO(ioConf.initialParams);
 
   const fsEditor = createMemFsEditor(fs);
   const initialFiles = initialFilesCallback(paths);
