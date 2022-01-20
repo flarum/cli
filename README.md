@@ -11,14 +11,11 @@ A CLI for developing Flarum extensions</p>
 <img width=720 src="https://sycho9.github.io/flarum-cli.svg" alt="terminal_example">
 </p>
 
-<!-- toc -->
-
 - [Introduction](#introduction)
 - [Installation](#installation)
 - [Updating](#updating)
 - [Usage](#usage)
 - [Commands](#commands)
-<!-- tocstop -->
 
 ## Introduction
 
@@ -49,19 +46,17 @@ $ npm update -g @flarum/cli
 ## Usage
 
 <!-- usage -->
-
 ```sh-session
 $ npm install -g @flarum/cli
 $ flarum-cli COMMAND
 running command...
 $ flarum-cli (-v|--version|version)
-@flarum/cli/2.0.0-beta.13 linux-x64 node-v16.13.0
+@flarum/cli/2.0.0-beta.13 linux-x64 node-v16.13.2
 $ flarum-cli --help [COMMAND]
 USAGE
   $ flarum-cli COMMAND
 ...
 ```
-
 <!-- usagestop -->
 
 You can also use `fl` instead of `flarum-cli` as a shorthand.
