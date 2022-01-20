@@ -517,6 +517,8 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
           'devDependencies.flarum-tsconfig',
           'devDependencies.typescript',
           'devDependencies.typescript-coverage-report',
+          'scripts.clean-typings',
+          'scripts.build-typings',
           'scripts.check-typings',
           'scripts.check-typings-coverage',
         ],

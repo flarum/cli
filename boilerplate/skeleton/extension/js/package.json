@@ -20,6 +20,8 @@
     "analyze": "cross-env ANALYZER=true yarn build",
     "format": "prettier --write src",
     "format-check": "prettier --check src",
+    "clean-typings": "npx rimraf dist-typings && mkdir dist-typings",
+    "build-typings": "npm run clean-typings && cp -r src/@types dist-typings/@types && tsc",
     "check-typings": "tsc --noEmit --emitDeclarationOnly false",
     "check-typings-coverage": "typescript-coverage-report"
   }
