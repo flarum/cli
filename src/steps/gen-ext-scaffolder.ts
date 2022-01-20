@@ -258,17 +258,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         updatable: false,
         togglable: false,
         shortDescription: 'Core Functionality',
-        filesToReplace: [
-          'extend.php',
-          'README.md',
-          'LICENSE.md',
-          { path: 'js/src/admin/index.js', moduleDeps: ['js', 'admin', { module: 'typescript', enabled: false }] },
-          { path: 'js/src/forum/index.js', moduleDeps: ['js', 'forum', { module: 'typescript', enabled: false }] },
-          { path: 'js/src/common/index.js', moduleDeps: ['js', 'jsCommon', { module: 'typescript', enabled: false }] },
-          { path: 'js/src/admin/index.ts', moduleDeps: ['js', 'admin', { module: 'typescript', enabled: true }] },
-          { path: 'js/src/forum/index.ts', moduleDeps: ['js', 'forum', { module: 'typescript', enabled: true }] },
-          { path: 'js/src/common/index.ts', moduleDeps: ['js', 'jsCommon', { module: 'typescript', enabled: true }] },
-        ],
+        filesToReplace: ['extend.php', 'README.md', 'LICENSE.md'],
         jsonToAugment: {
           'composer.json': [
             'name',
@@ -321,6 +311,8 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         filesToReplace: [
           { path: 'js/admin.js', moduleDeps: ['js', { module: 'typescript', enabled: false }] },
           { path: 'js/admin.ts', moduleDeps: ['js', { module: 'typescript', enabled: true }] },
+          { path: 'js/src/admin/index.js', doNotUpdate: true, moduleDeps: ['js', { module: 'typescript', enabled: false }] },
+          { path: 'js/src/admin/index.ts', doNotUpdate: true, moduleDeps: ['js', { module: 'typescript', enabled: true }] },
         ],
         jsonToAugment: {},
         needsTemplateParams: [],
@@ -340,6 +332,8 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         filesToReplace: [
           { path: 'js/forum.js', moduleDeps: ['js', { module: 'typescript', enabled: false }] },
           { path: 'js/forum.ts', moduleDeps: ['js', { module: 'typescript', enabled: true }] },
+          { path: 'js/src/forum/index.js', doNotUpdate: true, moduleDeps: ['js', { module: 'typescript', enabled: false }] },
+          { path: 'js/src/forum/index.ts', doNotUpdate: true, moduleDeps: ['js', { module: 'typescript', enabled: true }] },
         ],
         jsonToAugment: {},
         needsTemplateParams: [],
@@ -364,6 +358,12 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
           { path: 'js/forum.js', moduleDeps: ['forum', { module: 'typescript', enabled: false }] },
           { path: 'js/admin.ts', moduleDeps: ['admin', { module: 'typescript', enabled: true }] },
           { path: 'js/forum.ts', moduleDeps: ['forum', { module: 'typescript', enabled: true }] },
+          { path: 'js/src/admin/index.js', doNotUpdate: true, moduleDeps: ['admin', { module: 'typescript', enabled: false }] },
+          { path: 'js/src/forum/index.js', doNotUpdate: true, moduleDeps: ['forum', { module: 'typescript', enabled: false }] },
+          { path: 'js/src/common/index.js', doNotUpdate: true, moduleDeps: ['jsCommon', { module: 'typescript', enabled: false }] },
+          { path: 'js/src/admin/index.ts', doNotUpdate: true, moduleDeps: ['admin', { module: 'typescript', enabled: true }] },
+          { path: 'js/src/forum/index.ts', doNotUpdate: true, moduleDeps: ['forum', { module: 'typescript', enabled: true }] },
+          { path: 'js/src/common/index.ts', doNotUpdate: true, moduleDeps: ['jsCommon', { module: 'typescript', enabled: true }] },
         ],
         jsonToAugment: {
           'js/package.json': [
@@ -397,6 +397,8 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
           { path: 'js/forum.js', moduleDeps: ['forum', { module: 'typescript', enabled: false }] },
           { path: 'js/admin.ts', moduleDeps: ['admin', { module: 'typescript', enabled: true }] },
           { path: 'js/forum.ts', moduleDeps: ['forum', { module: 'typescript', enabled: true }] },
+          { path: 'js/src/common/index.js', doNotUpdate: true, moduleDeps: [{ module: 'typescript', enabled: false }] },
+          { path: 'js/src/common/index.ts', doNotUpdate: true, moduleDeps: [{ module: 'typescript', enabled: true }] },
         ],
         jsonToAugment: {},
         needsTemplateParams: [],
@@ -408,13 +410,16 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
     case 'css':
       return {
         name,
-        updatable: false,
+        updatable: true,
         togglable: true,
         defaultEnabled: true,
         shortDescription: 'CSS',
         longDescription: "LESS starter files for Flarum's frontend styling.",
         dependsOn: [],
-        filesToReplace: ['less/admin.less', 'less/forum.less'],
+        filesToReplace: [
+          { path: 'less/admin.less', doNotUpdate: true, moduleDeps: ['admin'] },
+          { path: 'less/forum.less', doNotUpdate: true, moduleDeps: ['forum'] },
+        ],
         jsonToAugment: {},
         needsTemplateParams: [],
         inferEnabled: async (_fs, paths: Paths) => {
@@ -431,7 +436,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         shortDescription: 'Locale',
         longDescription: 'Translation starter files.',
         dependsOn: [],
-        filesToReplace: ['locale/en.yml'],
+        filesToReplace: [{ path: 'locale/en.yml', doNotUpdate: true }],
         jsonToAugment: {},
         needsTemplateParams: [],
         inferEnabled: async (_fs, paths: Paths) => {
