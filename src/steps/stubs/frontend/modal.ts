@@ -26,5 +26,5 @@ export class GenerateModalStub extends BaseJsStubStep {
         type: 'text',
       },
     ],
-  }
+  };
 }

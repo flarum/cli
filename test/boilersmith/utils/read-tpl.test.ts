@@ -9,7 +9,7 @@ describe('read-tpl', function () {
   });
 
   it('works with data provided', function () {
-    const content = readTpl(resolve(__dirname, '../fixtures/sample.tpl'), {requiredMessage: 'Flarum is great!'});
+    const content = readTpl(resolve(__dirname, '../fixtures/sample.tpl'), { requiredMessage: 'Flarum is great!' });
 
     expect(content).toStrictEqual('Hello world!\n\nFlarum is great!');
   });

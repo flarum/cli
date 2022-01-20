@@ -16,10 +16,10 @@ export interface IO {
   /**
    * Prompt the user for some input data.
    */
-  getParam(param: ParamDef & {type: BooleanPromptType}): Promise<boolean>;
-  getParam(param: ParamDef & {type: StringPromptType}): Promise<string>;
-  getParam(param: ParamDef & {type: DatePromptType}): Promise<Date>;
-  getParam(param: ParamDef & {type: ListPromptType}): Promise<string[]>;
+  getParam(param: ParamDef & { type: BooleanPromptType }): Promise<boolean>;
+  getParam(param: ParamDef & { type: StringPromptType }): Promise<string>;
+  getParam(param: ParamDef & { type: DatePromptType }): Promise<Date>;
+  getParam(param: ParamDef & { type: ListPromptType }): Promise<string[]>;
   getParam<T>(param: ParamDef): Promise<T>;
 
   /**
@@ -61,7 +61,7 @@ export class PromptsIO implements IO {
     noInteraction = false,
     onCancel: OnCancel = () => {
       throw new Error('EEXIT: 0');
-    },
+    }
   ) {
     this.cache = new Map(Object.entries(initial));
     this.messages = messages;

@@ -9,7 +9,7 @@ interface PromptTemplateParam<T, N extends string = string> {
    */
   prompt: ParamDef<N>;
 
-  getCurrVal: (fs: Store, paths: Paths) => Promise<T|undefined>;
+  getCurrVal: (fs: Store, paths: Paths) => Promise<T | undefined>;
 }
 
 interface ComputedTemplateParam<T, N extends string = string> {
@@ -40,7 +40,7 @@ async function withComputedParamValues(params: TemplateParam[], paths: Paths, pa
   const computedParams = params.filter(isComputedParam);
 
   for (const p of computedParams) {
-    const depValues = p.uses.map(key => vals[key]);
+    const depValues = p.uses.map((key) => vals[key]);
 
     // eslint-disable-next-line no-await-in-loop
     vals[p.name] = await p.compute(paths, ...depValues);
@@ -67,7 +67,7 @@ export async function currParamValues(params: TemplateParam[], fs: Store, paths:
 
   for (const p of promptParams) {
     // eslint-disable-next-line no-await-in-loop
-    paramVals[p.prompt.name] = await p.getCurrVal(fs, paths) ?? await io.getParam(p.prompt);
+    paramVals[p.prompt.name] = (await p.getCurrVal(fs, paths)) ?? (await io.getParam(p.prompt));
   }
 
   return withComputedParamValues(params, paths, paramVals);

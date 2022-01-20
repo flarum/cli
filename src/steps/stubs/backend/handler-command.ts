@@ -33,5 +33,5 @@ export class GenerateHandlerCommandStub extends BasePhpStubStep {
         })),
       },
     ],
-  }
+  };
 }

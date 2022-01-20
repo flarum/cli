@@ -61,10 +61,10 @@ export type ComposerJsonSchema = {
         backgroundColor: string;
         color: string;
       };
-    }
-  }
+    };
+  };
   // Some others we definitely don't use
-}
+};
 
 export function getComposerJson(fs: Store, paths: Paths): ComposerJsonSchema {
   return create(fs).readJSON(paths.package('composer.json')) as ComposerJsonSchema;

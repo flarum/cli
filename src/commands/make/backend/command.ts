@@ -13,17 +13,16 @@ export default class Command extends BaseCommand {
   static args = [...BaseCommand.args];
 
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
-    return stepManager
-      .atomicGroup(stepManager => {
-        stepManager
-          .namedStep('command', new GenerateCommandStub(this.STUB_PATH, genExtScaffolder()))
-          .step(new GenerateConsoleCommandExtender(), { optional: true, confirmationMessage: 'Generate corresponding extender?', default: true }, [
-            {
-              sourceStep: 'command',
-              exposedName: 'class',
-              consumedName: 'commandClass',
-            },
-          ]);
-      });
+    return stepManager.atomicGroup((stepManager) => {
+      stepManager
+        .namedStep('command', new GenerateCommandStub(this.STUB_PATH, genExtScaffolder()))
+        .step(new GenerateConsoleCommandExtender(), { optional: true, confirmationMessage: 'Generate corresponding extender?', default: true }, [
+          {
+            sourceStep: 'command',
+            exposedName: 'class',
+            consumedName: 'commandClass',
+          },
+        ]);
+    });
   }
 }

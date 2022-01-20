@@ -384,7 +384,13 @@ describe.each([
     const stubDir = resolve(__dirname, '../../../boilerplate/stubs');
 
     test('With default dir', async function () {
-      const { fs, exposedParams } = await runStep(new spec.StubClass(stubDir, scaffolder), {php: stubPhpProviderFactory()}, Object.values(spec.params), {}, initialFilesCallback);
+      const { fs, exposedParams } = await runStep(
+        new spec.StubClass(stubDir, scaffolder),
+        { php: stubPhpProviderFactory() },
+        Object.values(spec.params),
+        {},
+        initialFilesCallback
+      );
 
       expect(getFsPaths(fs)).toStrictEqual([...spec.expectedModifiedFilesDefaultDir, '/ext/composer.json'].sort());
 
@@ -394,11 +400,11 @@ describe.each([
     test('With requested dir', async function () {
       const { fs, exposedParams } = await runStep(
         new spec.StubClass(stubDir, scaffolder),
-        {php: stubPhpProviderFactory()},
+        { php: stubPhpProviderFactory() },
         Object.values(spec.params),
         {},
         initialFilesCallback,
-        requestedDir,
+        requestedDir
       );
 
       expect(getFsPaths(fs)).toStrictEqual([...spec.expectedModifiedFilesRequestedDir, '/ext/composer.json'].sort());
@@ -437,7 +443,7 @@ describe('Stub Test: Migrations', function () {
       { php: stubPhpProviderFactory() },
       Object.values(migrationSpec.params),
       {},
-      initialFilesCallback,
+      initialFilesCallback
     );
 
     expect(getFsPaths(fs)).toStrictEqual([...migrationSpec.expectedModifiedFilesDefaultDir, '/ext/composer.json'].sort());
@@ -452,7 +458,7 @@ describe('Stub Test: Migrations', function () {
       Object.values(migrationSpec.params),
       {},
       initialFilesCallback,
-      requestedDir,
+      requestedDir
     );
 
     expect(getFsPaths(fs)).toStrictEqual([...migrationSpec.expectedModifiedFilesRequestedDir, '/ext/composer.json'].sort());

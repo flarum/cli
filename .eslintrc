@@ -5,23 +5,16 @@
     "unicorn/no-array-callback-reference": "off",
     "unicorn/prefer-module": "off",
     "unicorn/no-array-reduce": "off",
-    "unicorn/consistent-function-scoping": ["error", {"checkArrowFunctions": false}],
+    "unicorn/consistent-function-scoping": ["error", { "checkArrowFunctions": false }],
     "@typescript-eslint/ban-ts-ignore": "off",
-    "indent": ["error", 2, {"MemberExpression": 1}],
     "valid-jsdoc": "off",
-    "semi": [2, "always"],
     "max-params": ["error", 6],
     "object-curly-spacing": "off",
     "import/no-unresolved": "error",
-    "node/no-missing-import": "off",  // We have other rules for this.
-    "no-template-curly-in-string": "off"  // We use this for clone-and-fill
+    "node/no-missing-import": "off", // We have other rules for this.
+    "no-template-curly-in-string": "off" // We use this for clone-and-fill
   },
-  "extends": [
-    "oclif",
-    "oclif-typescript",
-    "plugin:import/errors",
-    "plugin:import/warnings"
-  ],
+  "extends": ["oclif", "oclif-typescript", "plugin:import/errors", "plugin:import/warnings", "prettier"],
   "settings": {
     "import/parsers": {
       "@typescript-eslint/parser": [".ts", ".tsx"]

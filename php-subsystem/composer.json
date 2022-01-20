@@ -1,12 +1,12 @@
 {
-    "name": "flarum/cli-php-util",
-    "type": "library",
-    "require": {
-        "nikic/php-parser": "^4.10"
-    },
-    "autoload": {
-      "psr-4": {
-        "Flarum\\CliPhpSubsystem\\": "src/"
-      }
+  "name": "flarum/cli-php-util",
+  "type": "library",
+  "require": {
+    "nikic/php-parser": "^4.10"
+  },
+  "autoload": {
+    "psr-4": {
+      "Flarum\\CliPhpSubsystem\\": "src/"
     }
+  }
 }

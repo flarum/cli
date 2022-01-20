@@ -40,183 +40,184 @@ export type ExtensionParams = typeof EXTENSION_PARAMS[number];
 
 function paramNamesToDef(name: ExtensionParams): TemplateParam<string, ExtensionParams> {
   switch (name) {
-  case 'packageName':
-    return {
-      prompt: {
-        name,
-        type: 'text',
-        message: `Package ${chalk.dim('(vendor/extension-name)')}`,
-        validate: s => /^([\dA-Za-z-]{2,})\/([\dA-Za-z-]{2,})$/.test(s.trim()) || 'Invalid package name format',
-        format: s => s.toLowerCase(),
-      },
-      getCurrVal: async (fs: Store, paths: Paths) => {
-        const json = getComposerJson(fs, paths);
-        return json?.name;
-      },
-    };
+    case 'packageName':
+      return {
+        prompt: {
+          name,
+          type: 'text',
+          message: `Package ${chalk.dim('(vendor/extension-name)')}`,
+          validate: (s) => /^([\dA-Za-z-]{2,})\/([\dA-Za-z-]{2,})$/.test(s.trim()) || 'Invalid package name format',
+          format: (s) => s.toLowerCase(),
+        },
+        getCurrVal: async (fs: Store, paths: Paths) => {
+          const json = getComposerJson(fs, paths);
+          return json?.name;
+        },
+      };
 
-  case 'packageDescription':
-    return {
-      prompt: {
-        name,
-        type: 'text',
-        message: 'Package description',
-      },
-      getCurrVal: async (fs: Store, paths: Paths) => {
-        const json = getComposerJson(fs, paths);
-        return json?.description ?? '';
-      },
-    };
+    case 'packageDescription':
+      return {
+        prompt: {
+          name,
+          type: 'text',
+          message: 'Package description',
+        },
+        getCurrVal: async (fs: Store, paths: Paths) => {
+          const json = getComposerJson(fs, paths);
+          return json?.description ?? '';
+        },
+      };
 
-  case 'packageNamespace':
-    return {
-      prompt: {
-        name,
-        type: 'text',
-        message: `Package namespace ${chalk.dim('(Vendor\\ExtensionName)')}`,
-        validate: s => /^([\dA-Za-z]+)\\([\dA-Za-z]+)$/.test(s.trim()) || 'Invalid namespace format',
-        format: (str: string) =>
-          str &&
+    case 'packageNamespace':
+      return {
+        prompt: {
+          name,
+          type: 'text',
+          message: `Package namespace ${chalk.dim('(Vendor\\ExtensionName)')}`,
+          validate: (s) => /^([\dA-Za-z]+)\\([\dA-Za-z]+)$/.test(s.trim()) || 'Invalid namespace format',
+          format: (str: string) =>
+            str &&
             str
               .split('\\')
-              .map(s => s[0].toUpperCase() + s.slice(1))
+              .map((s) => s[0].toUpperCase() + s.slice(1))
               .join('\\'),
-      },
-      getCurrVal: async (fs: Store, paths: Paths) => {
-        const json = getComposerJson(fs, paths);
-        const namespace = (Object.keys(json?.autoload?.['psr-4'] ?? {})?.[0] ?? '')?.slice(0, -1);
-        return namespace || '';
-      },
-    };
+        },
+        getCurrVal: async (fs: Store, paths: Paths) => {
+          const json = getComposerJson(fs, paths);
+          const namespace = (Object.keys(json?.autoload?.['psr-4'] ?? {})?.[0] ?? '')?.slice(0, -1);
+          return namespace || '';
+        },
+      };
 
-  case 'authorName':
-    return {
-      prompt: {
+    case 'authorName':
+      return {
+        prompt: {
+          name,
+          type: 'text',
+          message: 'Author name',
+        },
+        getCurrVal: async (fs: Store, paths: Paths) => {
+          const json = getComposerJson(fs, paths);
+          return json.authors?.[0]?.name ?? '';
+        },
+      };
+
+    case 'authorEmail':
+      return {
+        prompt: {
+          name,
+          type: 'text',
+          message: 'Author email',
+          validate: (s) => !s || /^[\w!#$%&*+./=?^`{|}~’-]+@[\dA-Za-z-]+(?:\.[\dA-Za-z-]+)*$/.test(s) || 'Invalid email format',
+        },
+        getCurrVal: async (fs: Store, paths: Paths) => {
+          const json = getComposerJson(fs, paths);
+          return json.authors?.[0]?.email ?? '';
+        },
+      };
+
+    case 'extensionName':
+      return {
+        prompt: {
+          name,
+          type: 'text',
+          message: 'Extension name',
+          validate: (str) => Boolean(str.trim()) || 'The extension name is required',
+          format: (str) =>
+            str
+              .split(' ')
+              .map((s: string) => (s.length > 3 ? s[0].toUpperCase() + s.slice(1) : s))
+              .join(' '),
+        },
+        getCurrVal: async (fs: Store, paths: Paths) => {
+          const json = getComposerJson(fs, paths);
+          if (json.name === 'flarum/core') return 'Core';
+          return json?.extra?.['flarum-extension']?.title ?? '';
+        },
+      };
+
+    case 'licenseType':
+      return {
+        prompt: {
+          name,
+          type: 'autocomplete',
+          message: 'License',
+          choices: [...(spdxLicenseListSimple as Set<string>)].map((e) => ({ title: e, value: e })),
+        },
+        getCurrVal: async (fs: Store, paths: Paths) => {
+          const json = getComposerJson(fs, paths);
+          return json?.license ?? '';
+        },
+      };
+
+    case 'licenseText':
+      return {
         name,
-        type: 'text',
-        message: 'Author name',
-      },
-      getCurrVal: async (fs: Store, paths: Paths) => {
-        const json = getComposerJson(fs, paths);
-        return json.authors?.[0]?.name ?? '';
-      },
-    };
+        uses: ['licenseType'],
+        compute: async (_paths, licenseType: string) => (licenseType ? require(`spdx-license-list/licenses/${licenseType}`).licenseText : ''),
+      };
 
-  case 'authorEmail':
-    return {
-      prompt: {
+    case 'packageNamespaceEscapedSlash':
+      return {
         name,
-        type: 'text',
-        message: 'Author email',
-        validate: s => !s || /^[\w!#$%&*+./=?^`{|}~’-]+@[\dA-Za-z-]+(?:\.[\dA-Za-z-]+)*$/.test(s) || 'Invalid email format',
-      },
-      getCurrVal: async (fs: Store, paths: Paths) => {
-        const json = getComposerJson(fs, paths);
-        return json.authors?.[0]?.email ?? '';
-      },
-    };
+        uses: ['packageNamespace'],
+        compute: async (_paths, packageNamespace: string) => packageNamespace.replace('\\', '\\\\'),
+      };
 
-  case 'extensionName':
-    return {
-      prompt: {
+    case 'extensionId':
+      return {
         name,
-        type: 'text',
-        message: 'Extension name',
-        validate: str => Boolean(str.trim()) || 'The extension name is required',
-        format: str =>
-          str
-            .split(' ')
-            .map((s: string) => (s.length > 3 ? s[0].toUpperCase() + s.slice(1) : s))
-            .join(' '),
-      },
-      getCurrVal: async (fs: Store, paths: Paths) => {
-        const json = getComposerJson(fs, paths);
-        if (json.name === 'flarum/core') return 'Core';
-        return json?.extra?.['flarum-extension']?.title ?? '';
-      },
-    };
+        uses: ['packageName'],
+        compute: async (_paths, packageName) => packageName.replace(/(flarum-ext-)|(flarum-)/, '').replace('/', '-'),
+      };
 
-  case 'licenseType':
-    return {
-      prompt: {
+    case 'year':
+      return {
         name,
-        type: 'autocomplete',
-        message: 'License',
-        choices: [...(spdxLicenseListSimple as Set<string>)].map(e => ({ title: e, value: e })),
-      },
-      getCurrVal: async (fs: Store, paths: Paths) => {
-        const json = getComposerJson(fs, paths);
-        return json?.license ?? '';
-      },
-    };
+        uses: [],
+        compute: async () => new Date().getFullYear().toString(),
+      };
 
-  case 'licenseText':
-    return {
-      name,
-      uses: ['licenseType'],
-      compute: async (_paths, licenseType: string) => (licenseType ? require(`spdx-license-list/licenses/${licenseType}`).licenseText : ''),
-    };
+    case 'mainGitBranch':
+      return {
+        prompt: {
+          name,
+          type: 'text',
+          message: `Main git branch ${chalk.dim('(JS will automatically build when changes are pushed to GitHub on this branch)')}`,
+          // See https://stackoverflow.com/a/12093994/11091039
+          validate: (s) =>
+            /^(?!.*\/\.)(?!.*\.\.)(?!\/)(?!.*\/\/)(?!.*@{)(?!.*\\)[^\000-\037 *:?[^~\177]+(?<!\.lock)(?<!\/)(?<!\.)$/.test(s.trim()) ||
+            'Invalid git branch',
+          initial: 'main',
+        },
+        getCurrVal: async () => {
+          try {
+            return execSync("git remote show origin | grep 'HEAD branch' | cut -d' ' -f5").toString();
+          } catch {}
 
-  case 'packageNamespaceEscapedSlash':
-    return {
-      name,
-      uses: ['packageNamespace'],
-      compute: async (_paths, packageNamespace: string) => packageNamespace.replace('\\', '\\\\'),
-    };
+          return (await simpleGit().getConfig('init.defaultBranch')).value ?? 'main';
+        },
+      };
 
-  case 'extensionId':
-    return {
-      name,
-      uses: ['packageName'],
-      compute: async (_paths, packageName) => packageName.replace(/(flarum-ext-)|(flarum-)/, '').replace('/', '-'),
-    };
-
-  case 'year':
-    return {
-      name,
-      uses: [],
-      compute: async () => new Date().getFullYear().toString(),
-    };
-
-  case 'mainGitBranch':
-    return {
-      prompt: {
+    case 'backendDirectory':
+      return {
         name,
-        type: 'text',
-        message: `Main git branch ${chalk.dim('(JS will automatically build when changes are pushed to GitHub on this branch)')}`,
-        // See https://stackoverflow.com/a/12093994/11091039
-        validate: s =>
-          /^(?!.*\/\.)(?!.*\.\.)(?!\/)(?!.*\/\/)(?!.*@{)(?!.*\\)[^\000-\037 *:?[^~\177]+(?<!\.lock)(?<!\/)(?<!\.)$/.test(s.trim()) || 'Invalid git branch',
-        initial: 'main',
-      },
-      getCurrVal: async () => {
-        try {
-          return execSync("git remote show origin | grep 'HEAD branch' | cut -d' ' -f5").toString();
-        } catch {}
+        uses: [],
+        compute: async (paths: Paths) => {
+          const monorepoPath = paths.monorepo();
+          return monorepoPath ? paths.package().replace(monorepoPath, '.') : '.';
+        },
+      };
 
-        return (await simpleGit().getConfig('init.defaultBranch')).value ?? 'main';
-      },
-    };
-
-  case 'backendDirectory':
-    return {
-      name,
-      uses: [],
-      compute: async (paths: Paths) => {
-        const monorepoPath = paths.monorepo();
-        return monorepoPath ? paths.package().replace(monorepoPath, '.') : '.';
-      },
-    };
-
-  case 'frontendDirectory':
-    return {
-      name,
-      uses: [],
-      compute: async (paths: Paths) => {
-        const monorepoPath = paths.monorepo();
-        return monorepoPath ? paths.package().replace(monorepoPath, '.') + '/js' : './js';
-      },
-    };
+    case 'frontendDirectory':
+      return {
+        name,
+        uses: [],
+        compute: async (paths: Paths) => {
+          const monorepoPath = paths.monorepo();
+          return monorepoPath ? paths.package().replace(monorepoPath, '.') + '/js' : './js';
+        },
+      };
   }
 
   return assertUnreachable(name);
@@ -251,360 +252,366 @@ export type ExtensionModules = typeof EXTENSION_MODULES[number];
 
 function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
   switch (name) {
-  case 'core':
-    return {
-      name,
-      updatable: false,
-      togglable: false,
-      shortDescription: 'Core Functionality',
-      filesToReplace: [
-        'extend.php',
-        'README.md',
-        'LICENSE.md',
-        { path: 'js/src/admin/index.js', moduleDeps: ['js', 'admin', { module: 'typescript', enabled: false }] },
-        { path: 'js/src/forum/index.js', moduleDeps: ['js', 'forum', { module: 'typescript', enabled: false }] },
-        { path: 'js/src/common/index.js', moduleDeps: ['js', 'jsCommon', { module: 'typescript', enabled: false }] },
-        { path: 'js/src/admin/index.ts', moduleDeps: ['js', 'admin', { module: 'typescript', enabled: true }] },
-        { path: 'js/src/forum/index.ts', moduleDeps: ['js', 'forum', { module: 'typescript', enabled: true }] },
-        { path: 'js/src/common/index.ts', moduleDeps: ['js', 'jsCommon', { module: 'typescript', enabled: true }] },
-      ],
-      jsonToAugment: {
-        'composer.json': [
-          'name',
-          'description',
-          'keywords',
-          'type',
-          'license',
-          'require.flarum/core',
-          'authors',
-          'autoload.psr-4.${params.packageNamespaceEscapedSlash}\\',
-          'extra.flarum-extension.title',
-          'extra.flarum-extension.category',
+    case 'core':
+      return {
+        name,
+        updatable: false,
+        togglable: false,
+        shortDescription: 'Core Functionality',
+        filesToReplace: [
+          'extend.php',
+          'README.md',
+          'LICENSE.md',
+          { path: 'js/src/admin/index.js', moduleDeps: ['js', 'admin', { module: 'typescript', enabled: false }] },
+          { path: 'js/src/forum/index.js', moduleDeps: ['js', 'forum', { module: 'typescript', enabled: false }] },
+          { path: 'js/src/common/index.js', moduleDeps: ['js', 'jsCommon', { module: 'typescript', enabled: false }] },
+          { path: 'js/src/admin/index.ts', moduleDeps: ['js', 'admin', { module: 'typescript', enabled: true }] },
+          { path: 'js/src/forum/index.ts', moduleDeps: ['js', 'forum', { module: 'typescript', enabled: true }] },
+          { path: 'js/src/common/index.ts', moduleDeps: ['js', 'jsCommon', { module: 'typescript', enabled: true }] },
         ],
-      },
-      needsTemplateParams: [
-        'packageName',
-        'packageNamespace',
-        'packageNamespaceEscapedSlash',
-        'packageDescription',
-        'extensionName',
-        'licenseType',
-        'licenseText',
-        'authorName',
-        'authorEmail',
-        'extensionId',
-        'year',
-      ],
-    };
-  case 'icon':
-    return {
-      name,
-      updatable: false,
-      togglable: false,
-      shortDescription: 'Extension Icon',
-      filesToReplace: [],
-      jsonToAugment: {
-        'composer.json': ['extra.flarum-extension.icon.name', 'extra.flarum-extension.icon.color', 'extra.flarum-extension.icon.backgroundColor'],
-      },
-      needsTemplateParams: [],
-    };
-
-  case 'admin':
-    return {
-      name,
-      updatable: true,
-      defaultEnabled: true,
-      dependsOn: [],
-      togglable: true,
-      shortDescription: 'Admin Frontend',
-      filesToReplace: [
-        { path: 'js/admin.js', moduleDeps: ['js', { module: 'typescript', enabled: false }] },
-        { path: 'js/admin.ts', moduleDeps: ['js', { module: 'typescript', enabled: true }] },
-      ],
-      jsonToAugment: {},
-      needsTemplateParams: [],
-      inferEnabled: async (_fs, paths: Paths) => {
-        if (!existsSync(paths.package('js'))) undefined;
-        return existsSync(paths.package('js/src/admin'));
-      },
-    };
-  case 'forum':
-    return {
-      name,
-      updatable: true,
-      defaultEnabled: true,
-      dependsOn: [],
-      togglable: true,
-      shortDescription: 'Forum Frontend',
-      filesToReplace: [
-        { path: 'js/forum.js', moduleDeps: ['js', { module: 'typescript', enabled: false }] },
-        { path: 'js/forum.ts', moduleDeps: ['js', { module: 'typescript', enabled: true }] },
-      ],
-      jsonToAugment: {},
-      needsTemplateParams: [],
-      inferEnabled: async (_fs, paths: Paths) => {
-        if (!existsSync(paths.package('js'))) undefined;
-        return existsSync(paths.package('js/src/forum'));
-      },
-    };
-
-  case 'js':
-    return {
-      name,
-      updatable: true,
-      togglable: true,
-      defaultEnabled: true,
-      shortDescription: 'Javascript',
-      longDescription: "Files, tools, and scripts to build Flarum's frontend.",
-      dependsOn: [],
-      filesToReplace: [
-        'js/webpack.config.js',
-        { path: 'js/admin.js', moduleDeps: ['admin', { module: 'typescript', enabled: false }] },
-        { path: 'js/forum.js', moduleDeps: ['forum', { module: 'typescript', enabled: false }] },
-        { path: 'js/admin.ts', moduleDeps: ['admin', { module: 'typescript', enabled: true }] },
-        { path: 'js/forum.ts', moduleDeps: ['forum', { module: 'typescript', enabled: true }] },
-      ],
-      jsonToAugment: {
-        'js/package.json': [
-          'name',
-          'private',
-          'devDependencies.flarum-webpack-config',
-          'devDependencies.webpack',
-          'devDependencies.webpack-cli',
-          'scripts.dev',
-          'scripts.build',
-          'scripts.analyze',
-        ],
-      },
-      needsTemplateParams: ['packageName'],
-      inferEnabled: async (_fs, paths: Paths) => {
-        return existsSync(paths.package('js'));
-      },
-    };
-
-  case 'jsCommon':
-    return {
-      name,
-      updatable: true,
-      togglable: true,
-      defaultEnabled: true,
-      shortDescription: 'JS common code',
-      longDescription: 'Shared code between the forum and the admin frontends',
-      dependsOn: ['js'],
-      filesToReplace: [
-        { path: 'js/admin.js', moduleDeps: ['admin', { module: 'typescript', enabled: false }] },
-        { path: 'js/forum.js', moduleDeps: ['forum', { module: 'typescript', enabled: false }] },
-        { path: 'js/admin.ts', moduleDeps: ['admin', { module: 'typescript', enabled: true }] },
-        { path: 'js/forum.ts', moduleDeps: ['forum', { module: 'typescript', enabled: true }] },
-      ],
-      jsonToAugment: {},
-      needsTemplateParams: [],
-      inferEnabled: async (_fs, paths: Paths) => {
-        return existsSync(paths.package('js/src/common'));
-      },
-    };
-
-  case 'css':
-    return {
-      name,
-      updatable: false,
-      togglable: true,
-      defaultEnabled: true,
-      shortDescription: 'CSS',
-      longDescription: "LESS starter files for Flarum's frontend styling.",
-      dependsOn: [],
-      filesToReplace: ['less/admin.less', 'less/forum.less'],
-      jsonToAugment: {},
-      needsTemplateParams: [],
-      inferEnabled: async (_fs, paths: Paths) => {
-        return existsSync(paths.package('less'));
-      },
-    };
-
-  case 'locale':
-    return {
-      name,
-      updatable: false,
-      togglable: true,
-      defaultEnabled: true,
-      shortDescription: 'Locale',
-      longDescription: 'Translation starter files.',
-      dependsOn: [],
-      filesToReplace: ['locale/en.yml'],
-      jsonToAugment: {},
-      needsTemplateParams: [],
-      inferEnabled: async (_fs, paths: Paths) => {
-        return existsSync(paths.package('locale'));
-      },
-    };
-
-  case 'gitConf':
-    return {
-      name,
-      updatable: true,
-      togglable: true,
-      defaultEnabled: true,
-      shortDescription: 'Git Configuration',
-      longDescription: 'Git config files (e.g. .gitignore, .gitattributes).',
-      dependsOn: [],
-      filesToReplace: [
-        { path: 'gitignore', destPath: '.gitignore' },
-        { path: 'js/gitignore', moduleDeps: ['js'], destPath: 'js/.gitignore' },
-        '.gitattributes',
-      ],
-      jsonToAugment: {},
-      needsTemplateParams: [],
-    };
-
-  case 'githubActions':
-    return {
-      name,
-      updatable: true,
-      togglable: true,
-      defaultEnabled: true,
-      shortDescription: 'GitHub Actions CI',
-      longDescription: 'Automatically run checks via GitHub Actions CI. Free for open source projects.',
-      dependsOn: [],
-      filesToReplace: [
-        {
-          path: '.github/workflows/frontend.yml',
-          monorepoPath: '.github/workflows/${params.extensionId}-frontend.yml',
-          requireMonorepo: false,
+        jsonToAugment: {
+          'composer.json': [
+            'name',
+            'description',
+            'keywords',
+            'type',
+            'license',
+            'require.flarum/core',
+            'authors',
+            'autoload.psr-4.${params.packageNamespaceEscapedSlash}\\',
+            'extra.flarum-extension.title',
+            'extra.flarum-extension.category',
+          ],
         },
-        {
-          path: '.github/workflows/backend.yml',
-          monorepoPath: '.github/workflows/${params.extensionId}-backend.yml',
-          requireMonorepo: false,
+        needsTemplateParams: [
+          'packageName',
+          'packageNamespace',
+          'packageNamespaceEscapedSlash',
+          'packageDescription',
+          'extensionName',
+          'licenseType',
+          'licenseText',
+          'authorName',
+          'authorEmail',
+          'extensionId',
+          'year',
+        ],
+      };
+    case 'icon':
+      return {
+        name,
+        updatable: false,
+        togglable: false,
+        shortDescription: 'Extension Icon',
+        filesToReplace: [],
+        jsonToAugment: {
+          'composer.json': ['extra.flarum-extension.icon.name', 'extra.flarum-extension.icon.color', 'extra.flarum-extension.icon.backgroundColor'],
         },
-      ],
-      jsonToAugment: {},
-      needsTemplateParams: ['frontendDirectory', 'backendDirectory', 'mainGitBranch', 'extensionId', 'extensionName'],
-    };
+        needsTemplateParams: [],
+      };
 
-  case 'prettier':
-    return {
-      name,
-      updatable: true,
-      togglable: true,
-      defaultEnabled: true,
-      shortDescription: 'Auto-format frontend code with Prettier.',
-      dependsOn: ['js'],
-      filesToReplace: [],
-      jsonToAugment: {
-        'js/package.json': ['prettier', 'devDependencies.prettier', 'devDependencies.@flarum/prettier-config', 'scripts.format', 'scripts.format-check'],
-      },
-      needsTemplateParams: [],
-      inferEnabled: async (_fs, paths: Paths) => {
-        if (!existsSync(paths.package('js/package.json'))) {
-          return false;
-        }
-
-        return readFileSync(paths.package('js/package.json')).includes('prettier');
-      },
-    };
-
-  case 'typescript':
-    return {
-      name,
-      updatable: true,
-      togglable: true,
-      defaultEnabled: true,
-      shortDescription: 'Support TypeScript in frontend code.',
-      dependsOn: ['js'],
-      filesToReplace: ['js/tsconfig.json'],
-      jsonToAugment: {
-        'js/package.json': [
-          'devDependencies.flarum-tsconfig',
-          'devDependencies.typescript',
-          'devDependencies.typescript-coverage-report',
-          'scripts.clean-typings',
-          'scripts.build-typings',
-          'scripts.check-typings',
-          'scripts.check-typings-coverage',
+    case 'admin':
+      return {
+        name,
+        updatable: true,
+        defaultEnabled: true,
+        dependsOn: [],
+        togglable: true,
+        shortDescription: 'Admin Frontend',
+        filesToReplace: [
+          { path: 'js/admin.js', moduleDeps: ['js', { module: 'typescript', enabled: false }] },
+          { path: 'js/admin.ts', moduleDeps: ['js', { module: 'typescript', enabled: true }] },
         ],
-      },
-      needsTemplateParams: [],
-      inferEnabled: async (_fs, paths: Paths) => {
-        return existsSync(paths.package('js/tsconfig.json'));
-      },
-    };
-
-  case 'bundlewatch':
-    return {
-      name,
-      updatable: true,
-      togglable: true,
-      defaultEnabled: false,
-      shortDescription: 'Enable Bundlewatch Checks',
-      dependsOn: ['js'],
-      filesToReplace: ['js/.bundlewatch.config.json'],
-      jsonToAugment: {},
-      needsTemplateParams: [],
-      inferEnabled: async (_fs, paths: Paths) => {
-        return existsSync(paths.package('js/.bundlewatch.config.json'));
-      },
-    };
-
-  case 'backendTesting':
-    return {
-      name,
-      updatable: true,
-      togglable: true,
-      defaultEnabled: true,
-      shortDescription: 'Backend PHP unit and integration testing via PHPUnit.',
-      dependsOn: [],
-      filesToReplace: [
-        'tests/phpunit.integration.xml',
-        'tests/phpunit.unit.xml',
-        'tests/fixtures/.gitkeep',
-        'tests/integration/setup.php',
-        'tests/unit/.gitkeep',
-      ],
-      jsonToAugment: {
-        'composer.json': [
-          'autoload-dev.psr-4.${params.packageNamespaceEscapedSlash}\\Tests\\',
-          'scripts.test',
-          'scripts.test:unit',
-          'scripts.test:integration',
-          'scripts.test:setup',
-          'scripts-descriptions.test',
-          'scripts-descriptions.test:unit',
-          'scripts-descriptions.test:integration',
-          'scripts-descriptions.test:setup',
-          'require-dev.flarum/testing',
+        jsonToAugment: {},
+        needsTemplateParams: [],
+        inferEnabled: async (_fs, paths: Paths) => {
+          if (!existsSync(paths.package('js'))) undefined;
+          return existsSync(paths.package('js/src/admin'));
+        },
+      };
+    case 'forum':
+      return {
+        name,
+        updatable: true,
+        defaultEnabled: true,
+        dependsOn: [],
+        togglable: true,
+        shortDescription: 'Forum Frontend',
+        filesToReplace: [
+          { path: 'js/forum.js', moduleDeps: ['js', { module: 'typescript', enabled: false }] },
+          { path: 'js/forum.ts', moduleDeps: ['js', { module: 'typescript', enabled: true }] },
         ],
-      },
-      needsTemplateParams: ['packageNamespaceEscapedSlash'],
-      inferEnabled: async (_fs, paths: Paths) => {
-        return existsSync(paths.package('tests'));
-      },
-    };
+        jsonToAugment: {},
+        needsTemplateParams: [],
+        inferEnabled: async (_fs, paths: Paths) => {
+          if (!existsSync(paths.package('js'))) undefined;
+          return existsSync(paths.package('js/src/forum'));
+        },
+      };
 
-  case 'editorConfig':
-    return {
-      name,
-      updatable: true,
-      togglable: true,
-      defaultEnabled: true,
-      shortDescription: 'EditorConfig setup',
-      dependsOn: [],
-      filesToReplace: ['.editorconfig'],
-      jsonToAugment: {},
-      needsTemplateParams: [],
-    };
+    case 'js':
+      return {
+        name,
+        updatable: true,
+        togglable: true,
+        defaultEnabled: true,
+        shortDescription: 'Javascript',
+        longDescription: "Files, tools, and scripts to build Flarum's frontend.",
+        dependsOn: [],
+        filesToReplace: [
+          'js/webpack.config.js',
+          { path: 'js/admin.js', moduleDeps: ['admin', { module: 'typescript', enabled: false }] },
+          { path: 'js/forum.js', moduleDeps: ['forum', { module: 'typescript', enabled: false }] },
+          { path: 'js/admin.ts', moduleDeps: ['admin', { module: 'typescript', enabled: true }] },
+          { path: 'js/forum.ts', moduleDeps: ['forum', { module: 'typescript', enabled: true }] },
+        ],
+        jsonToAugment: {
+          'js/package.json': [
+            'name',
+            'private',
+            'devDependencies.flarum-webpack-config',
+            'devDependencies.webpack',
+            'devDependencies.webpack-cli',
+            'scripts.dev',
+            'scripts.build',
+            'scripts.analyze',
+          ],
+        },
+        needsTemplateParams: ['packageName'],
+        inferEnabled: async (_fs, paths: Paths) => {
+          return existsSync(paths.package('js'));
+        },
+      };
 
-  case 'styleci':
-    return {
-      name,
-      updatable: true,
-      togglable: true,
-      defaultEnabled: true,
-      shortDescription: 'StyleCI config file',
-      dependsOn: [],
-      filesToReplace: [{ path: '.styleci.yml', monorepoPath: '.styleci.yml', requireMonorepo: false }],
-      jsonToAugment: {},
-      needsTemplateParams: [],
-    };
+    case 'jsCommon':
+      return {
+        name,
+        updatable: true,
+        togglable: true,
+        defaultEnabled: true,
+        shortDescription: 'JS common code',
+        longDescription: 'Shared code between the forum and the admin frontends',
+        dependsOn: ['js'],
+        filesToReplace: [
+          { path: 'js/admin.js', moduleDeps: ['admin', { module: 'typescript', enabled: false }] },
+          { path: 'js/forum.js', moduleDeps: ['forum', { module: 'typescript', enabled: false }] },
+          { path: 'js/admin.ts', moduleDeps: ['admin', { module: 'typescript', enabled: true }] },
+          { path: 'js/forum.ts', moduleDeps: ['forum', { module: 'typescript', enabled: true }] },
+        ],
+        jsonToAugment: {},
+        needsTemplateParams: [],
+        inferEnabled: async (_fs, paths: Paths) => {
+          return existsSync(paths.package('js/src/common'));
+        },
+      };
+
+    case 'css':
+      return {
+        name,
+        updatable: false,
+        togglable: true,
+        defaultEnabled: true,
+        shortDescription: 'CSS',
+        longDescription: "LESS starter files for Flarum's frontend styling.",
+        dependsOn: [],
+        filesToReplace: ['less/admin.less', 'less/forum.less'],
+        jsonToAugment: {},
+        needsTemplateParams: [],
+        inferEnabled: async (_fs, paths: Paths) => {
+          return existsSync(paths.package('less'));
+        },
+      };
+
+    case 'locale':
+      return {
+        name,
+        updatable: false,
+        togglable: true,
+        defaultEnabled: true,
+        shortDescription: 'Locale',
+        longDescription: 'Translation starter files.',
+        dependsOn: [],
+        filesToReplace: ['locale/en.yml'],
+        jsonToAugment: {},
+        needsTemplateParams: [],
+        inferEnabled: async (_fs, paths: Paths) => {
+          return existsSync(paths.package('locale'));
+        },
+      };
+
+    case 'gitConf':
+      return {
+        name,
+        updatable: true,
+        togglable: true,
+        defaultEnabled: true,
+        shortDescription: 'Git Configuration',
+        longDescription: 'Git config files (e.g. .gitignore, .gitattributes).',
+        dependsOn: [],
+        filesToReplace: [
+          { path: 'gitignore', destPath: '.gitignore' },
+          { path: 'js/gitignore', moduleDeps: ['js'], destPath: 'js/.gitignore' },
+          '.gitattributes',
+        ],
+        jsonToAugment: {},
+        needsTemplateParams: [],
+      };
+
+    case 'githubActions':
+      return {
+        name,
+        updatable: true,
+        togglable: true,
+        defaultEnabled: true,
+        shortDescription: 'GitHub Actions CI',
+        longDescription: 'Automatically run checks via GitHub Actions CI. Free for open source projects.',
+        dependsOn: [],
+        filesToReplace: [
+          {
+            path: '.github/workflows/frontend.yml',
+            monorepoPath: '.github/workflows/${params.extensionId}-frontend.yml',
+            requireMonorepo: false,
+          },
+          {
+            path: '.github/workflows/backend.yml',
+            monorepoPath: '.github/workflows/${params.extensionId}-backend.yml',
+            requireMonorepo: false,
+          },
+        ],
+        jsonToAugment: {},
+        needsTemplateParams: ['frontendDirectory', 'backendDirectory', 'mainGitBranch', 'extensionId', 'extensionName'],
+      };
+
+    case 'prettier':
+      return {
+        name,
+        updatable: true,
+        togglable: true,
+        defaultEnabled: true,
+        shortDescription: 'Auto-format frontend code with Prettier.',
+        dependsOn: ['js'],
+        filesToReplace: [],
+        jsonToAugment: {
+          'js/package.json': [
+            'prettier',
+            'devDependencies.prettier',
+            'devDependencies.@flarum/prettier-config',
+            'scripts.format',
+            'scripts.format-check',
+          ],
+        },
+        needsTemplateParams: [],
+        inferEnabled: async (_fs, paths: Paths) => {
+          if (!existsSync(paths.package('js/package.json'))) {
+            return false;
+          }
+
+          return readFileSync(paths.package('js/package.json')).includes('prettier');
+        },
+      };
+
+    case 'typescript':
+      return {
+        name,
+        updatable: true,
+        togglable: true,
+        defaultEnabled: true,
+        shortDescription: 'Support TypeScript in frontend code.',
+        dependsOn: ['js'],
+        filesToReplace: ['js/tsconfig.json'],
+        jsonToAugment: {
+          'js/package.json': [
+            'devDependencies.flarum-tsconfig',
+            'devDependencies.typescript',
+            'devDependencies.typescript-coverage-report',
+            'scripts.clean-typings',
+            'scripts.build-typings',
+            'scripts.check-typings',
+            'scripts.check-typings-coverage',
+          ],
+        },
+        needsTemplateParams: [],
+        inferEnabled: async (_fs, paths: Paths) => {
+          return existsSync(paths.package('js/tsconfig.json'));
+        },
+      };
+
+    case 'bundlewatch':
+      return {
+        name,
+        updatable: true,
+        togglable: true,
+        defaultEnabled: false,
+        shortDescription: 'Enable Bundlewatch Checks',
+        dependsOn: ['js'],
+        filesToReplace: ['js/.bundlewatch.config.json'],
+        jsonToAugment: {},
+        needsTemplateParams: [],
+        inferEnabled: async (_fs, paths: Paths) => {
+          return existsSync(paths.package('js/.bundlewatch.config.json'));
+        },
+      };
+
+    case 'backendTesting':
+      return {
+        name,
+        updatable: true,
+        togglable: true,
+        defaultEnabled: true,
+        shortDescription: 'Backend PHP unit and integration testing via PHPUnit.',
+        dependsOn: [],
+        filesToReplace: [
+          'tests/phpunit.integration.xml',
+          'tests/phpunit.unit.xml',
+          'tests/fixtures/.gitkeep',
+          'tests/integration/setup.php',
+          'tests/unit/.gitkeep',
+        ],
+        jsonToAugment: {
+          'composer.json': [
+            'autoload-dev.psr-4.${params.packageNamespaceEscapedSlash}\\Tests\\',
+            'scripts.test',
+            'scripts.test:unit',
+            'scripts.test:integration',
+            'scripts.test:setup',
+            'scripts-descriptions.test',
+            'scripts-descriptions.test:unit',
+            'scripts-descriptions.test:integration',
+            'scripts-descriptions.test:setup',
+            'require-dev.flarum/testing',
+          ],
+        },
+        needsTemplateParams: ['packageNamespaceEscapedSlash'],
+        inferEnabled: async (_fs, paths: Paths) => {
+          return existsSync(paths.package('tests'));
+        },
+      };
+
+    case 'editorConfig':
+      return {
+        name,
+        updatable: true,
+        togglable: true,
+        defaultEnabled: true,
+        shortDescription: 'EditorConfig setup',
+        dependsOn: [],
+        filesToReplace: ['.editorconfig'],
+        jsonToAugment: {},
+        needsTemplateParams: [],
+      };
+
+    case 'styleci':
+      return {
+        name,
+        updatable: true,
+        togglable: true,
+        defaultEnabled: true,
+        shortDescription: 'StyleCI config file',
+        dependsOn: [],
+        filesToReplace: [{ path: '.styleci.yml', monorepoPath: '.styleci.yml', requireMonorepo: false }],
+        jsonToAugment: {},
+        needsTemplateParams: [],
+      };
   }
 
   return assertUnreachable(name);
@@ -644,7 +651,7 @@ export function genExtScaffolder(): Scaffolder<ExtensionParams, ExtensionModules
   const scaffolder = new Scaffolder<ExtensionParams, ExtensionModules>(
     resolve(__dirname, '../../boilerplate/skeleton/extension'),
     moduleStatusCache,
-    excludeScaffoldingFunc,
+    excludeScaffoldingFunc
   );
 
   for (const name of EXTENSION_MODULES) {

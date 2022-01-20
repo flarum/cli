@@ -28,7 +28,11 @@ export default abstract class BaseCommand extends Command {
   protected flags: any;
 
   static flags: Interfaces.FlagInput<any> = {
-    'no-interaction': Flags.boolean({ char: 'n', description: 'Do not ask any interactive questions, assume defaults. When impossible, error.', default: false }),
+    'no-interaction': Flags.boolean({
+      char: 'n',
+      description: 'Do not ask any interactive questions, assume defaults. When impossible, error.',
+      default: false,
+    }),
     help: Flags.help({ char: 'h' }),
   };
 
@@ -75,10 +79,9 @@ export default abstract class BaseCommand extends Command {
 
     const phpProvider = new PhpSubsystemProvider(resolve(__dirname, '../php-subsystem/index.php'));
 
-    const out = await this.steps(new StepManager<FlarumProviders>())
-      .run(paths, this.genIO(), { php: phpProvider }, this.dry);
+    const out = await this.steps(new StepManager<FlarumProviders>()).run(paths, this.genIO(), { php: phpProvider }, this.dry);
 
-    const errorMessages = out.messages.filter(m => m.type === 'error');
+    const errorMessages = out.messages.filter((m) => m.type === 'error');
 
     this.log('\n\n');
     if (out.succeeded && errorMessages.length === 0) {
@@ -112,7 +115,7 @@ export default abstract class BaseCommand extends Command {
     for (const stepName of out.stepsRan) this.log(`- ${chalk.dim(stepName)}`);
 
     this.log('');
-    const nonErrorMessages = out.messages.filter(m => m.type !== 'error');
+    const nonErrorMessages = out.messages.filter((m) => m.type !== 'error');
     if (nonErrorMessages.length > 0) {
       this.log('');
       this.log('The following messages were generated during execution:');
@@ -153,7 +156,12 @@ export default abstract class BaseCommand extends Command {
     return new PromptsIO({}, [], this.flags['no-interaction'], exit);
   }
 
-  protected monorepoPaths(options: {includeCore: boolean; includeExtensions: boolean; includePhpPackages: boolean; includeJSPackages: boolean}): string[] {
+  protected monorepoPaths(options: {
+    includeCore: boolean;
+    includeExtensions: boolean;
+    includePhpPackages: boolean;
+    includeJSPackages: boolean;
+  }): string[] {
     try {
       const monorepoConfig = readFileSync(resolve(process.cwd(), 'flarum-monorepo.json'));
       const contents = JSON.parse(monorepoConfig.toString());
@@ -183,32 +191,30 @@ export default abstract class BaseCommand extends Command {
     }
   }
 
-  protected async getFlarumExtensionRoot(currDir: string): Promise<{path: string, type: LocationType}> {
+  protected async getFlarumExtensionRoot(currDir: string): Promise<{ path: string; type: LocationType }> {
     let currPath = resolve(currDir);
 
     while (currPath !== '/') {
       if (existsSync(resolve(currPath, 'flarum-monorepo.json'))) {
-        return {path: currPath, type: LocationType.FLARUM_MONOREPO};
+        return { path: currPath, type: LocationType.FLARUM_MONOREPO };
       }
 
       if (existsSync(resolve(currPath, 'composer.json')) && existsSync(resolve(currPath, 'extend.php'))) {
-        return {path: currPath, type: LocationType.FLARUM_EXTENSION};
+        return { path: currPath, type: LocationType.FLARUM_EXTENSION };
       }
 
       if (this.isFlarumCore(currPath)) {
-        return {path: currPath, type: LocationType.FLARUM_CORE};
+        return { path: currPath, type: LocationType.FLARUM_CORE };
       }
 
       currPath = resolve(currPath, '..');
     }
 
     this.error(
-      `${resolve(
-        currDir,
-      )} is not located in a valid Flarum package!
+      `${resolve(currDir)} is not located in a valid Flarum package!
 - Flarum extensions must contain (at a minimum) 'extend.php' and 'composer.json' files.
 - Flarum core must contain a 'composer.json' file with the name 'flarum/core'.
-- Flarum monorepos must have a valid 'flarum-monorepo.json' file`,
+- Flarum monorepos must have a valid 'flarum-monorepo.json' file`
     );
   }
 
@@ -251,7 +257,7 @@ export default abstract class BaseCommand extends Command {
    */
   protected async confirmOverrideFiles(dir: string, pattern: string | string[], confirmationMessage: string): Promise<boolean> {
     const paths = Array.isArray(pattern) ? pattern : [pattern];
-    const files = await globby(paths.map(p => resolve(dir, p)));
+    const files = await globby(paths.map((p) => resolve(dir, p)));
 
     const empty = files.length === 0 || (files.length === 1 && files[0] === '.git');
 

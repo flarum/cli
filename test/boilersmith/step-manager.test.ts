@@ -43,7 +43,7 @@ describe('Step Manager Validation', function () {
 
     test('Holds with atomic group', function () {
       expect(() => {
-        new StepManager().atomicGroup(stepManager => {
+        new StepManager().atomicGroup((stepManager) => {
           stepManager.step(stubStepFactory('Generate Controller'), { optional: false }, [
             {
               sourceStep: 'model',
@@ -82,7 +82,7 @@ describe('Step Manager Validation', function () {
 
     test('Holds with atomic group', function () {
       expect(() => {
-        new StepManager().namedStep('model', stubStepFactory('Generate Model')).atomicGroup(stepManager => {
+        new StepManager().namedStep('model', stubStepFactory('Generate Model')).atomicGroup((stepManager) => {
           stepManager.step(stubStepFactory('Generate Controller'), { optional: false }, [
             {
               sourceStep: 'model',
@@ -124,10 +124,10 @@ describe('Step Manager Validation', function () {
               },
             ],
             {},
-            ['packages/b', 'packages/c', 'packages/d'],
+            ['packages/b', 'packages/c', 'packages/d']
           );
       }).toThrow(
-        'Step of type "Dependent" (A) depends on named step: "someName" (B), but is mapped across some paths that (B) is not: "packages/c, packages/d"',
+        'Step of type "Dependent" (A) depends on named step: "someName" (B), but is mapped across some paths that (B) is not: "packages/c, packages/d"'
       );
     });
 
@@ -148,10 +148,10 @@ describe('Step Manager Validation', function () {
               },
             ],
             {},
-            ['packages/b', 'packages/c', 'packages/d'],
+            ['packages/b', 'packages/c', 'packages/d']
           );
       }).toThrow(
-        'Step of type "Dependent" (A) depends on named step: "someName" (B), but is mapped across some paths that (B) is not: "packages/c, packages/d"',
+        'Step of type "Dependent" (A) depends on named step: "someName" (B), but is mapped across some paths that (B) is not: "packages/c, packages/d"'
       );
     });
   });
@@ -181,7 +181,7 @@ describe('Step Manager Validation', function () {
 
     test('Holds with atomic group', function () {
       expect(() => {
-        new StepManager().namedStep('model', stubStepFactory('Generate Model')).atomicGroup(stepManager => {
+        new StepManager().namedStep('model', stubStepFactory('Generate Model')).atomicGroup((stepManager) => {
           stepManager.namedStep('model', stubStepFactory('Generate Serializer'));
         });
       }).toThrow('Named steps must have unique names. A step with name "model" already exists.');
@@ -190,7 +190,7 @@ describe('Step Manager Validation', function () {
 
   test('Errors when trying to put non-composable step in atomic group', async function () {
     expect(() => {
-      new StepManager().atomicGroup(stepManager => {
+      new StepManager().atomicGroup((stepManager) => {
         stepManager.step(stubStepFactory('Step 1')).step(stubStepFactory('Step 2', false)).step(stubStepFactory('Step 3'));
       });
     }).toThrow('Step of type "Step 2" is not composable, and cannot be added to an atomic group.');
@@ -198,10 +198,10 @@ describe('Step Manager Validation', function () {
 
   test("Atomic groups can't be nested.", async function () {
     expect(() => {
-      new StepManager().atomicGroup(stepManager => {
+      new StepManager().atomicGroup((stepManager) => {
         stepManager
           .step(stubStepFactory('Step 1'))
-          .atomicGroup(stepManagerInner => {
+          .atomicGroup((stepManagerInner) => {
             stepManagerInner.step(stubStepFactory('Step 2')).step(stubStepFactory('Step 3'));
           })
           .step(stubStepFactory('Step 4'));
@@ -264,7 +264,7 @@ describe('Step Manager Execution', function () {
           consumedName: 'targetModelClass',
         },
       ])
-      .atomicGroup(stepManager => {
+      .atomicGroup((stepManager) => {
         stepManager
           .namedStep('listener', stubStepFactory('Generate Listener', true, [], { listenerClass: 'Something Else' }))
           .step(stubStepFactory('Listener Extender'), { optional: false }, [
@@ -302,7 +302,7 @@ describe('Step Manager Execution', function () {
         [{ targetModelClass: 'Something' }, []],
         [{}, []],
         [{ listenerClass: 'Something Else', isntUsedHereButWhyNot: 'Something' }, []],
-      ]),
+      ])
     );
 
     // No path-mapped calls here.
@@ -339,7 +339,7 @@ describe('Step Manager Execution', function () {
         [{ __succeeded: true }, []],
         [{ context: 'Confirm Step' }, []], // Prompt for confirmation of optional step
         [{ __succeeded: true }, []],
-      ]),
+      ])
     );
 
     expect(JSON.stringify(pathsNewFunc.mock.calls)).toStrictEqual('[]');
@@ -352,7 +352,7 @@ describe('Step Manager Execution', function () {
       .step(stubStepFactory('Optional runs'), { optional: true })
       .step(stubStepFactory('Optional not runs'), { optional: true })
       .step(stubStepFactory('Not Optional'))
-      .atomicGroup(stepManager => {
+      .atomicGroup((stepManager) => {
         stepManager
           .step(stubStepFactory('Atomic optional not runs'), { optional: true })
           .step(stubStepFactory('Atomic not optional'))
@@ -405,7 +405,7 @@ describe('Step Manager Execution', function () {
             exposedName: 'something else',
           },
         ])
-        .atomicGroup(stepManager => {
+        .atomicGroup((stepManager) => {
           stepManager
             .step(stubStepFactory('Relies on dep1b'), { optional: false }, [
               {
@@ -483,7 +483,7 @@ describe('Step Manager Execution', function () {
           },
         ],
         {},
-        ['packages/a', 'ext/b', 'plugins/c'],
+        ['packages/a', 'ext/b', 'plugins/c']
       )
       .atomicGroup(function (stepManager) {
         return stepManager
@@ -502,7 +502,7 @@ describe('Step Manager Execution', function () {
               },
             ],
             {},
-            ['packages/a', 'ext/b'],
+            ['packages/a', 'ext/b']
           );
       })
       .run(paths, io, {});
@@ -532,11 +532,13 @@ describe('Step Manager Execution', function () {
         [{}, []],
         [{ mappedParam: 'mappedVal', nonMappedParam2: 'nonMappedVal2' }, []],
         [{ mappedParam: 'mappedVal', nonMappedParam2: 'nonMappedVal2' }, []],
-      ]),
+      ])
     );
 
     // No path-mapped calls here.
-    expect(JSON.stringify(pathsNewFunc.mock.calls)).toStrictEqual(JSON.stringify([['packages/a'], ['ext/b'], ['plugins/c'], ['packages/a'], ['ext/b']]));
+    expect(JSON.stringify(pathsNewFunc.mock.calls)).toStrictEqual(
+      JSON.stringify([['packages/a'], ['ext/b'], ['plugins/c'], ['packages/a'], ['ext/b']])
+    );
 
     expect(commitMethod.mock.calls.length).toBe(5);
   });
@@ -556,7 +558,7 @@ describe('Step Manager Execution', function () {
           },
         ],
         {},
-        ['packages/a', 'exts/b', 'plugins/c'],
+        ['packages/a', 'exts/b', 'plugins/c']
       )
       .run(paths, io, {});
 
@@ -574,9 +576,9 @@ describe('Step Manager Execution', function () {
   });
 
   test('cannot dry run on StepManager with composable steps', async function () {
-    expect(async () => new StepManager().step(stubStepFactory('Step 1', false)).step(stubStepFactory('Step 2')).run(paths, io, {}, true)).rejects.toThrow(
-      'Cannot dry run, as this step manager has non-composable steps.',
-    );
+    expect(async () =>
+      new StepManager().step(stubStepFactory('Step 1', false)).step(stubStepFactory('Step 2')).run(paths, io, {}, true)
+    ).rejects.toThrow('Cannot dry run, as this step manager has non-composable steps.');
   });
 
   test('can dry run on AtomicStepManager', async function () {

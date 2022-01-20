@@ -23,7 +23,7 @@ export interface ExpressionSpec {
 
 export interface ClosureSpec {
   params: ParamSpec[];
-  commentText?: string;  // This will be put in as a string expression, since PHP parser can't insert comments easily.
+  commentText?: string; // This will be put in as a string expression, since PHP parser can't insert comments easily.
   return?: ExpressionSpec;
 }
 

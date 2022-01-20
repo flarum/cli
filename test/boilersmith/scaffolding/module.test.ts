@@ -12,7 +12,7 @@ describe('Module Utils', function () {
   const _cacheData: Record<string, boolean> = {};
 
   const cache: ModuleStatusCache<string> = {
-    get: async module => _cacheData[module.name],
+    get: async (module) => _cacheData[module.name],
     set: async (module, val) => {
       _cacheData[module.name] = val;
     },
@@ -163,20 +163,22 @@ describe('applyModule', function () {
 
   it('errors if module marked as disabled', async function () {
     expect(async () =>
-      applyModule(justFilesModule, { 'just-files': false }, {}, scaffoldDir, createStore(), new NodePaths({ package: '/ext' })),
+      applyModule(justFilesModule, { 'just-files': false }, {}, scaffoldDir, createStore(), new NodePaths({ package: '/ext' }))
     ).rejects.toThrow(new Error('Could not apply module "just-files", because it is not enabled in the provided module statuses.'));
   });
 
   it('errors if dependencies missing', async function () {
     const module = { ...justFilesModule, togglable: true, defaultEnabled: true, dependsOn: ['missing-dep', 'disabled-dep'] };
     expect(async () =>
-      applyModule(module, { 'just-files': true, 'disabled-dep': false }, {}, scaffoldDir, createStore(), new NodePaths({ package: '/ext' })),
-    ).rejects.toThrow(new Error('Could not apply module "just-files", because the following dependency modules are missing: "missing-dep, disabled-dep".'));
+      applyModule(module, { 'just-files': true, 'disabled-dep': false }, {}, scaffoldDir, createStore(), new NodePaths({ package: '/ext' }))
+    ).rejects.toThrow(
+      new Error('Could not apply module "just-files", because the following dependency modules are missing: "missing-dep, disabled-dep".')
+    );
   });
 
   it('errors if module not present in modulesEnabled', async function () {
     expect(async () =>
-      applyModule(justFilesModule, { somethingElse: true }, {}, scaffoldDir, createStore(), new NodePaths({ package: '/ext' })),
+      applyModule(justFilesModule, { somethingElse: true }, {}, scaffoldDir, createStore(), new NodePaths({ package: '/ext' }))
     ).rejects.toThrow(new Error('Could not apply module "just-files", because it is not enabled in the provided module statuses.'));
   });
 
@@ -184,14 +186,14 @@ describe('applyModule', function () {
     const module = { ...justFilesModule, needsTemplateParams: ['missing'] };
 
     expect(async () =>
-      applyModule(module, { 'just-files': true }, { somethingElse: '42' }, scaffoldDir, createStore(), new NodePaths({ package: '/ext' })),
+      applyModule(module, { 'just-files': true }, { somethingElse: '42' }, scaffoldDir, createStore(), new NodePaths({ package: '/ext' }))
     ).rejects.toThrow(new Error('Could not apply module "just-files", because the following params are missing: "missing".'));
   });
 
   it('copies over files', async function () {
     const fs = await applyModule(justFilesModule, { 'just-files': true }, {}, scaffoldDir, createStore(), new NodePaths({ package: '/ext' }));
 
-    expect(getFsPaths(fs)).toStrictEqual(justFilesModule.filesToReplace.map(p => `/ext/${p}`));
+    expect(getFsPaths(fs)).toStrictEqual(justFilesModule.filesToReplace.map((p) => `/ext/${p}`));
     expect(getExtFileContents(fs, '.gitignore')).toStrictEqual('node_modules');
     expect(getExtFileContents(fs, 'readme.md')).toStrictEqual('# Sample Scaffolding');
   });
@@ -205,11 +207,11 @@ describe('applyModule', function () {
       scaffoldDir,
       createStore(),
       new NodePaths({ package: '/ext' }),
-      excludeScaffolding,
+      excludeScaffolding
     );
 
     expect(getFsPaths(fs)).toStrictEqual(
-      justFilesModule.filesToReplace.filter(f => !excludeScaffolding.includes(typeof f === 'string' ? f : f.path)).map(p => `/ext/${p}`),
+      justFilesModule.filesToReplace.filter((f) => !excludeScaffolding.includes(typeof f === 'string' ? f : f.path)).map((p) => `/ext/${p}`)
     );
     expect(getExtFileContents(fs, '.gitignore')).toStrictEqual('node_modules');
     expect(getExtFileContents(fs, 'readme.md')).toStrictEqual('# Sample Scaffolding');
@@ -232,7 +234,7 @@ describe('applyModule', function () {
       { someVar: 'OCaml' },
       scaffoldDir,
       createStore(),
-      new NodePaths({ package: '/ext', monorepo: '/ext/monorepo' }),
+      new NodePaths({ package: '/ext', monorepo: '/ext/monorepo' })
     );
 
     expect(getFsPaths(fs)).toStrictEqual(['/ext/monorepo/OCaml.gitignore', '/ext/readme.md']);
@@ -249,14 +251,7 @@ describe('applyModule', function () {
       needsTemplateParams: ['someVar'],
     };
 
-    const fs = await applyModule(
-      module,
-      { monorepo: true },
-      { someVar: 'OCaml' },
-      scaffoldDir,
-      createStore(),
-      new NodePaths({ package: '/ext' }),
-    );
+    const fs = await applyModule(module, { monorepo: true }, { someVar: 'OCaml' }, scaffoldDir, createStore(), new NodePaths({ package: '/ext' }));
 
     expect(getFsPaths(fs)).toStrictEqual(['/ext/OCaml.gitignore', '/ext/readme.md']);
   });
@@ -278,7 +273,7 @@ describe('applyModule', function () {
       { someVar: 'OCaml' },
       scaffoldDir,
       createStore(),
-      new NodePaths({ package: '/ext', monorepo: '/ext/monorepo' }),
+      new NodePaths({ package: '/ext', monorepo: '/ext/monorepo' })
     );
 
     expect(getFsPaths(fs)).toStrictEqual(['/ext/monorepo/monorepo-only.ml']);
@@ -295,14 +290,7 @@ describe('applyModule', function () {
       needsTemplateParams: ['someVar'],
     };
 
-    const fs = await applyModule(
-      module,
-      { monorepo: true },
-      { someVar: 'OCaml' },
-      scaffoldDir,
-      createStore(),
-      new NodePaths({ package: '/ext' }),
-    );
+    const fs = await applyModule(module, { monorepo: true }, { someVar: 'OCaml' }, scaffoldDir, createStore(), new NodePaths({ package: '/ext' }));
 
     expect(getFsPaths(fs)).toStrictEqual([]);
   });
@@ -324,11 +312,15 @@ describe('applyModule', function () {
       { someVar: 'val1', someOtherVar: 'val2', varKey: 'OCaml' },
       scaffoldDir,
       createStore(),
-      new NodePaths({ package: '/ext' }),
+      new NodePaths({ package: '/ext' })
     );
 
     expect(getFsPaths(fs)).toStrictEqual(['/ext/config1.json']);
-    expect(JSON.parse(getExtFileContents(fs, 'config1.json'))).toStrictEqual({ hello: 'val1', 'OCaml++': 'const', nested: { config: { string: 'a' } } });
+    expect(JSON.parse(getExtFileContents(fs, 'config1.json'))).toStrictEqual({
+      hello: 'val1',
+      'OCaml++': 'const',
+      nested: { config: { string: 'a' } },
+    });
   });
 
   it('copies over deep data', async function () {
@@ -348,11 +340,14 @@ describe('applyModule', function () {
       { someVar: 'val1', someOtherVar: 'val2' },
       scaffoldDir,
       createStore(),
-      new NodePaths({ package: '/ext' }),
+      new NodePaths({ package: '/ext' })
     );
 
     expect(getFsPaths(fs)).toStrictEqual(['/ext/config1.json']);
-    expect(JSON.parse(getExtFileContents(fs, 'config1.json'))).toStrictEqual({ hello: 'val1', nested: { config: { string: 'a', boolean: true, null: null } } });
+    expect(JSON.parse(getExtFileContents(fs, 'config1.json'))).toStrictEqual({
+      hello: 'val1',
+      nested: { config: { string: 'a', boolean: true, null: null } },
+    });
   });
 
   it('populates variables correctly', async function () {
@@ -372,7 +367,7 @@ describe('applyModule', function () {
       { someVar: 5, someOtherVar: false },
       scaffoldDir,
       createStore(),
-      new NodePaths({ package: '/ext' }),
+      new NodePaths({ package: '/ext' })
     );
 
     expect(getFsPaths(fs)).toStrictEqual(['/ext/config1.json', '/ext/src/index.ml']);
@@ -448,7 +443,7 @@ describe('applyModule', function () {
       {},
       scaffoldDir,
       createStore(),
-      new NodePaths({ package: '/ext' }),
+      new NodePaths({ package: '/ext' })
     );
 
     expect(getFsPaths(fs)).toStrictEqual(['/ext/readme.md']);
@@ -471,7 +466,7 @@ describe('applyModule', function () {
       {},
       scaffoldDir,
       createStore(),
-      new NodePaths({ package: '/ext' }),
+      new NodePaths({ package: '/ext' })
     );
 
     expect(getFsPaths(fs)).toStrictEqual(['/ext/.gitignore', '/ext/readme.md']);

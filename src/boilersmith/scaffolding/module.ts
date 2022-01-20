@@ -119,7 +119,7 @@ export async function promptModulesEnabled<N extends string>(modules: Module<N>[
   });
 
   for (const m of modules) {
-    const missingDeps = !m.togglable || m.dependsOn.some(dep => !modulesEnabled[dep]);
+    const missingDeps = !m.togglable || m.dependsOn.some((dep) => !modulesEnabled[dep]);
     if (!m.togglable) {
       modulesEnabled[m.name] = true;
     } else if (missingDeps) {
@@ -144,7 +144,7 @@ export async function currModulesEnabled<N extends string>(
   modules: Module<N>[],
   fs: Store,
   paths: Paths,
-  cache?: ModuleStatusCache<N>,
+  cache?: ModuleStatusCache<N>
 ): Promise<Record<N, boolean>> {
   const modulesEnabled: Record<string, boolean> = {};
 
@@ -167,7 +167,7 @@ export async function setModuleValue<MN extends string>(
   enabled: boolean,
   fs: Store,
   paths: Paths,
-  cache: ModuleStatusCache<MN>,
+  cache: ModuleStatusCache<MN>
 ): Promise<void> {
   if (module.togglable) {
     cache.set(module, enabled, fs, paths);
@@ -183,7 +183,7 @@ export async function applyModule<MN extends string, TN extends string>(
   fs: Store,
   paths: Paths,
   excludeFiles: string[] = [],
-  isInitial = false,
+  isInitial = false
 ): Promise<Store> {
   const fsEditor = create(fs);
 
@@ -193,13 +193,13 @@ export async function applyModule<MN extends string, TN extends string>(
   }
 
   // Validate that dependencies are enabled
-  const missingDeps = module.togglable ? module.dependsOn.filter(dep => !modulesEnabled[dep]) : [];
+  const missingDeps = module.togglable ? module.dependsOn.filter((dep) => !modulesEnabled[dep]) : [];
   if (missingDeps.length > 0) {
     throw new Error(`Could not apply module "${module.name}", because the following dependency modules are missing: "${missingDeps.join(', ')}".`);
   }
 
   // Validate that all needed params are present
-  const missingParams = module.needsTemplateParams.filter(p => !(p in paramVals));
+  const missingParams = module.needsTemplateParams.filter((p) => !(p in paramVals));
   if (missingParams.length > 0) {
     throw new Error(`Could not apply module "${module.name}", because the following params are missing: "${missingParams.join(', ')}".`);
   }
@@ -213,7 +213,10 @@ export async function applyModule<MN extends string, TN extends string>(
     modules: modulesEnabled,
   };
 
-  const tplDataFlat = { ...renameKeys(tplData.modules, k => `modules.${k}`), ...renameKeys(tplData.params, k => `params.${k}`) } as Record<string, string>;
+  const tplDataFlat = { ...renameKeys(tplData.modules, (k) => `modules.${k}`), ...renameKeys(tplData.params, (k) => `params.${k}`) } as Record<
+    string,
+    string
+  >;
 
   for (const file of module.filesToReplace) {
     const path = typeof file === 'string' ? file : file.path;
@@ -225,16 +228,19 @@ export async function applyModule<MN extends string, TN extends string>(
 
     if (
       excludeFiles.includes(path) ||
-      moduleDeps.some(dep => {
+      moduleDeps.some((dep) => {
         const depName = typeof dep === 'string' ? dep : dep.module;
         const enabled = modulesEnabled[depName];
-        return (typeof dep === 'string' || dep.enabled) ? !enabled : enabled;
+        return typeof dep === 'string' || dep.enabled ? !enabled : enabled;
       })
     ) {
       continue;
     }
 
-    const copyToIfMonorepo = typeof file !== 'string' && 'monorepoPath' in file && file.monorepoPath ? paths.monorepo(cloneAndFill(file.monorepoPath, tplDataFlat)) : undefined;
+    const copyToIfMonorepo =
+      typeof file !== 'string' && 'monorepoPath' in file && file.monorepoPath
+        ? paths.monorepo(cloneAndFill(file.monorepoPath, tplDataFlat))
+        : undefined;
     const copyTo = copyToIfMonorepo ?? paths.package(typeof file !== 'string' && file.destPath ? cloneAndFill(file.destPath, tplDataFlat) : path);
     fsEditor.copyTpl(resolve(scaffoldDir, path), copyTo, tplData);
   }

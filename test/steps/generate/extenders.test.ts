@@ -9,7 +9,7 @@ import { GenerateConsoleCommandExtender } from '../../../src/steps/extenders/con
 import { FlarumProviders } from '../../../src/providers';
 import { Step } from '../../../src/boilersmith/step-manager';
 import { Paths } from 'boilersmith/paths';
-import {stubPhpProviderFactory} from '../../utils';
+import { stubPhpProviderFactory } from '../../utils';
 
 interface ExtenderTest {
   ExtenderClass: new () => Step<FlarumProviders>;
@@ -81,7 +81,14 @@ return [];
         return initial;
       };
 
-      const { fs } = await runStep(new spec.ExtenderClass(), {php: stubPhpProviderFactory()}, Object.values(spec.params), {}, initialFilesCallback, requestedDir);
+      const { fs } = await runStep(
+        new spec.ExtenderClass(),
+        { php: stubPhpProviderFactory() },
+        Object.values(spec.params),
+        {},
+        initialFilesCallback,
+        requestedDir
+      );
 
       expect(getFsPaths(fs)).toStrictEqual(['/ext/extend.php'].sort());
     });

@@ -2,11 +2,16 @@ import { create as createMemFs, Store } from 'mem-fs';
 import { create as createMemFsEditor } from 'mem-fs-editor';
 import { resolve } from 'node:path';
 import { prompt } from 'prompts';
-import { ParamDef, PromptsIO, IO} from 'boilersmith/io';
+import { ParamDef, PromptsIO, IO } from 'boilersmith/io';
 import { Paths } from 'boilersmith/paths';
 import { DefaultProviders, Step } from 'boilersmith/step-manager';
 
-export function stubStepFactory<Providers extends DefaultProviders>(type: string, composable = true, paramsConsumed: ParamDef[] = [], paramsExposed: Record<string, unknown> = {}): Step<Providers> {
+export function stubStepFactory<Providers extends DefaultProviders>(
+  type: string,
+  composable = true,
+  paramsConsumed: ParamDef[] = [],
+  paramsExposed: Record<string, unknown> = {}
+): Step<Providers> {
   return {
     type,
     composable,
@@ -51,7 +56,7 @@ export function stubPathsFactory(paths: TestPaths = {}): Paths {
     },
 
     onMonorepoSub(packagePath: string): Paths {
-      return stubPathsFactory({...paths, monorepo: paths.package, package: packagePath});
+      return stubPathsFactory({ ...paths, monorepo: paths.package, package: packagePath });
     },
   };
 }
@@ -69,7 +74,7 @@ export async function runStep<Providers extends DefaultProviders>(
   params: unknown[] = [],
   initialParams: Record<string, unknown> = {},
   initialFilesCallback: (paths: Paths) => Record<string, string> = () => empty,
-  requestedDir: string|null = null,
+  requestedDir: string | null = null
 ): Promise<StepOutput> {
   const fs = createMemFs();
   const paths = stubPathsFactory({ requestedDir });
@@ -89,7 +94,10 @@ export async function runStep<Providers extends DefaultProviders>(
 }
 
 export function getFsPaths(store: Store, extDir = '/ext'): string[] {
-  return store.all().filter(f => f.state && f.state !== 'deleted').map(f => f.path)
+  return store
+    .all()
+    .filter((f) => f.state && f.state !== 'deleted')
+    .map((f) => f.path)
     .filter((path: string) => path.startsWith(extDir))
     .sort();
 }

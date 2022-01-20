@@ -44,7 +44,7 @@ export class GenerateApiSerializerStub extends BasePhpStubStep {
         type: 'text',
       },
     ],
-  }
+  };
 
   protected async compileParams(fs: Store, paths: Paths, io: IO): Promise<Record<string, unknown>> {
     const params = await super.compileParams(fs, paths, io);

@@ -26,5 +26,5 @@ export class GenerateComponentStub extends BaseJsStubStep {
         type: 'text',
       },
     ],
-  }
+  };
 }

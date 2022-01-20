@@ -11,7 +11,6 @@ export default class Route extends BaseCommand {
   static args = [...BaseCommand.args];
 
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
-    return stepManager
-      .step(new GenerateRoutesExtender());
+    return stepManager.step(new GenerateRoutesExtender());
   }
 }

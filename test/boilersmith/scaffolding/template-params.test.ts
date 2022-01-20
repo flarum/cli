@@ -35,7 +35,9 @@ describe('Template Param Utils', function () {
   ];
 
   it('currParamValues works', async function () {
-    expect(await currParamValues(templateParams, createStore(), new NodePaths({package: resolve(__dirname, '../fixtures')}), new PromptsIO({}))).toStrictEqual({
+    expect(
+      await currParamValues(templateParams, createStore(), new NodePaths({ package: resolve(__dirname, '../fixtures') }), new PromptsIO({}))
+    ).toStrictEqual({
       param1: 'Hello world!\n\n<%= requiredMessage %>',
       param2: 8,
       param3: 'Hello wo',
@@ -43,14 +45,21 @@ describe('Template Param Utils', function () {
   });
 
   it('currParamValues falls back to prompt if not available', async function () {
-    const params: TemplateParam[] = [...templateParams, {
-      prompt: {name: 'param4', type: 'text', message: 'Param 4'},
-      getCurrVal: async () => { /** do nothing */ },
-    }];
+    const params: TemplateParam[] = [
+      ...templateParams,
+      {
+        prompt: { name: 'param4', type: 'text', message: 'Param 4' },
+        getCurrVal: async () => {
+          /** do nothing */
+        },
+      },
+    ];
 
     prompt.inject(['param4Val']);
 
-    expect(await currParamValues(params, createStore(), new NodePaths({package: resolve(__dirname, '../fixtures')}), new PromptsIO({}))).toStrictEqual({
+    expect(
+      await currParamValues(params, createStore(), new NodePaths({ package: resolve(__dirname, '../fixtures') }), new PromptsIO({}))
+    ).toStrictEqual({
       param1: 'Hello world!\n\n<%= requiredMessage %>',
       param2: 8,
       param3: 'Hello wo',
@@ -61,7 +70,7 @@ describe('Template Param Utils', function () {
   it('promptParamValues works', async function () {
     prompt.inject(['Test', 3]);
 
-    expect(await promptParamValues(templateParams, new NodePaths({package: ''}), new PromptsIO())).toStrictEqual({
+    expect(await promptParamValues(templateParams, new NodePaths({ package: '' }), new PromptsIO())).toStrictEqual({
       param1: 'Test',
       param2: 3,
       param3: 'Tes',

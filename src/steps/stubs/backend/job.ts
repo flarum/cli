@@ -19,5 +19,5 @@ export class GenerateJobStub extends BasePhpStubStep {
         type: 'text',
       },
     ],
-  }
+  };
 }

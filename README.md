@@ -12,34 +12,44 @@ A CLI for developing Flarum extensions</p>
 </p>
 
 <!-- toc -->
-* [Introduction](#introduction)
-* [Installation](#installation)
-* [Updating](#updating)
-* [Usage](#usage)
-* [Commands](#commands)
+
+- [Introduction](#introduction)
+- [Installation](#installation)
+- [Updating](#updating)
+- [Usage](#usage)
+- [Commands](#commands)
 <!-- tocstop -->
 
 ## Introduction
-One of our core values is ***Framework First***, Flarum is as much a framework for extension development as it is a forum platform.
+
+One of our core values is **_Framework First_**, Flarum is as much a framework for extension development as it is a forum platform.
 
 This tool was built to simplify the development of Flarum extensions by automating some repetitive and menial tasks. It allows to generate boilerplate skeleton for a new extension, common backend classes and frontend components, extenders, as well as other maintenance tasks.
 
 ## Installation
+
 <!-- installation -->
+
 ```sh-session
 $ npm install -g @flarum/cli
 ```
+
 <!-- installationstop -->
 
 ## Updating
+
 <!-- updating -->
+
 ```sh-session
 $ npm update -g @flarum/cli
 ```
+
 <!-- updatingstop -->
 
 ## Usage
+
 <!-- usage -->
+
 ```sh-session
 $ npm install -g @flarum/cli
 $ flarum-cli COMMAND
@@ -51,6 +61,7 @@ USAGE
   $ flarum-cli COMMAND
 ...
 ```
+
 <!-- usagestop -->
 
 You can also use `fl` instead of `flarum-cli` as a shorthand.
@@ -68,58 +79,68 @@ flarum-cli --help
 ```
 
 ## Commands
+
 The CLI has different types of commands for different tasks:
 
 **Initialisation**
-* `flarum-cli init [PATH]`: Generates a blank extension skeleton, including all recommended infrastructure.
+
+- `flarum-cli init [PATH]`: Generates a blank extension skeleton, including all recommended infrastructure.
 
 **Infrastructure**: See the [infrastructure](#infrastructure-modules) section for more information.
-* `flarum-cli infra [MODULE] [PATH]`: Adds (or updates) infrastructure for some part of extension infrastructure. You can see all available modules by running `fl-dev infra --help`.
+
+- `flarum-cli infra [MODULE] [PATH]`: Adds (or updates) infrastructure for some part of extension infrastructure. You can see all available modules by running `fl-dev infra --help`.
 
 **Audit**: These commands help you make sure your extension is up to date.
-* `flarum-cli audit infra [--monorepo] [--fix]` Check that infrastructure files are up to date for all enabled modules.
+
+- `flarum-cli audit infra [--monorepo] [--fix]` Check that infrastructure files are up to date for all enabled modules.
 
 **Backend Boilerplate Generation**: Generates different types of backend classes and/or extenders, ready to be used.
-* `flarum-cli make backend api-controller [PATH]`
-* `flarum-cli make backend api-serializer [PATH]`
-* `flarum-cli make backend api-serializer-attributes [PATH]`
-* `flarum-cli make backend command [PATH]`
-* `flarum-cli make backend event-listener [PATH]`
-* `flarum-cli make backend handler [PATH]`
-* `flarum-cli make backend integration-test [PATH]`
-* `flarum-cli make backend job [PATH]`
-* `flarum-cli make backend migration [PATH]`
-* `flarum-cli make backend model [PATH]`
-* `flarum-cli make backend policy [PATH]`
-* `flarum-cli make backend repository [PATH]`
-* `flarum-cli make backend route [PATH]`
-* `flarum-cli make backend service-provider [PATH]`
-* `flarum-cli make backend validator [PATH]`
+
+- `flarum-cli make backend api-controller [PATH]`
+- `flarum-cli make backend api-serializer [PATH]`
+- `flarum-cli make backend api-serializer-attributes [PATH]`
+- `flarum-cli make backend command [PATH]`
+- `flarum-cli make backend event-listener [PATH]`
+- `flarum-cli make backend handler [PATH]`
+- `flarum-cli make backend integration-test [PATH]`
+- `flarum-cli make backend job [PATH]`
+- `flarum-cli make backend migration [PATH]`
+- `flarum-cli make backend model [PATH]`
+- `flarum-cli make backend policy [PATH]`
+- `flarum-cli make backend repository [PATH]`
+- `flarum-cli make backend route [PATH]`
+- `flarum-cli make backend service-provider [PATH]`
+- `flarum-cli make backend validator [PATH]`
 
 **Frontend Boilerplate Generation**: Generate frontend components/classes, ready to be used.
-* `flarum-cli make frontend component [PATH]`
-* `flarum-cli make frontend modal [PATH]`
-* `flarum-cli make frontend model [PATH]`
+
+- `flarum-cli make frontend component [PATH]`
+- `flarum-cli make frontend modal [PATH]`
+- `flarum-cli make frontend model [PATH]`
 
 **Code Updates**: These commands help update extensions for newer versions of Flarum.
-* `flarum-cli update js-imports [PATH]`: Adds admin/forum/common namespaces to all JS imports from flarum core.
 
-*And of course, you can always use the help command to see a list of all available commands with their descriptions:*
-* `flarum-cli help [COMMAND]`
+- `flarum-cli update js-imports [PATH]`: Adds admin/forum/common namespaces to all JS imports from flarum core.
+
+_And of course, you can always use the help command to see a list of all available commands with their descriptions:_
+
+- `flarum-cli help [COMMAND]`
 
 All commands can use a `--no-interaction` flag to proceed with default values for prompts when possible.
 
 ## 🔥 The Most Powerful Commands
+
 Of all the aforementioned commands, the two most powerful ones that will make a huge difference, are the extension initialisation command and the backend **model** generation command. The former obviously allows to kickstart the extension with the recommended skeleton from the Core Dev team, while the latter not only creates the backend model, it allows to create all the classes related to the model, from just its name:
-* Table migration
-* Policy
-* API Serializer
-* CRUD API Controllers
-* CRUD Handlers
-* Repository
-* Validator
-* Routes
-* Related Extenders
+
+- Table migration
+- Policy
+- API Serializer
+- CRUD API Controllers
+- CRUD Handlers
+- Repository
+- Validator
+- Routes
+- Related Extenders
 
 [center]
 ![terminal_example](https://sycho9.github.io/flarum-cli.svg)
@@ -242,7 +263,6 @@ Sharing parameters is done via the following process:
   - What the param is consumed at
   - If the param value is falsy, should the consumer step run at all? Useful for variable dependencies.
 
-
 For example:
 
 ```ts
@@ -277,7 +297,6 @@ For example:
   })
   .run(new Paths({...}), new PromptsIO(), {php: new PhpProvider(...)});
 ```
-
 
 #### Step Composability and Atomic Groups
 

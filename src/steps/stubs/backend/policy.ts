@@ -34,5 +34,5 @@ export class GeneratePolicyStub extends BasePhpStubStep {
         type: 'text',
       },
     ],
-  }
+  };
 }

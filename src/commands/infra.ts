@@ -7,30 +7,35 @@ import { YarnInstall } from '../steps/misc/yarn';
 import { Flags } from '@oclif/core';
 
 export default class Infra extends BaseCommand {
-  static description = 'Add/Update infrastructure to the latest scaffolding for some module in an extension. For example, you can use this to add/update TypeScript, backend testing, GitHub Actions, and other features.';
+  static description =
+    'Add/Update infrastructure to the latest scaffolding for some module in an extension. For example, you can use this to add/update TypeScript, backend testing, GitHub Actions, and other features.';
 
   static flags = {
     monorepo: Flags.boolean({ char: 'm', default: false }),
     ...BaseCommand.flags,
   };
 
-  static args = [{
-    name: 'module',
-    description: 'The name of the module to enable/update.',
-    required: true,
-    options: [...EXTENSION_MODULES],
-  }, ...BaseCommand.args];
+  static args = [
+    {
+      name: 'module',
+      description: 'The name of the module to enable/update.',
+      required: true,
+      options: [...EXTENSION_MODULES],
+    },
+    ...BaseCommand.args,
+  ];
 
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
     const module = this.args.module as ExtensionModules;
-    const mapPaths = this.flags.monorepo ? this.monorepoPaths({
-      includeCore: true,
-      includeExtensions: true,
-      includePhpPackages: false,
-      includeJSPackages: false,
-    }) : [];
-    stepManager
-      .namedStep('infra', genExtScaffolder().genInfraStep(this.args.module), {}, [], {}, mapPaths);
+    const mapPaths = this.flags.monorepo
+      ? this.monorepoPaths({
+          includeCore: true,
+          includeExtensions: true,
+          includePhpPackages: false,
+          includeJSPackages: false,
+        })
+      : [];
+    stepManager.namedStep('infra', genExtScaffolder().genInfraStep(this.args.module), {}, [], {}, mapPaths);
 
     const JS_MODULES = ['js', 'prettier', 'typescript'];
     const PHP_MODULES = ['backendTesting'];

@@ -35,5 +35,5 @@ export class GenerateCommandStub extends BasePhpStubStep {
         message: 'Command description',
       },
     ],
-  }
+  };
 }

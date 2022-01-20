@@ -19,5 +19,5 @@ export class GenerateValidatorStub extends BasePhpStubStep {
         type: 'text',
       },
     ],
-  }
+  };
 }

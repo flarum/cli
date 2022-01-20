@@ -13,25 +13,27 @@ export default class ApiController extends BaseCommand {
   static args = [...BaseCommand.args];
 
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
-    return stepManager
-      .atomicGroup(stepManager => {
-        stepManager
-          .namedStep('handlerCommand', new GenerateHandlerCommandStub(this.STUB_PATH, genExtScaffolder()))
-          .step(new GenerateHandlerStub(this.STUB_PATH, genExtScaffolder()), {}, [
-            {
-              sourceStep: 'handlerCommand',
-              exposedName: 'className',
-              modifier: (value: unknown) => `${value as string}Handler`,
-            },
-            {
-              sourceStep: 'handlerCommand',
-              exposedName: 'class',
-              consumedName: 'handlerCommandClass',
-            },
-          ], {
-            validatorClass: '',
-            repositoryClass: '',
-          });
-      });
+    return stepManager.atomicGroup((stepManager) => {
+      stepManager.namedStep('handlerCommand', new GenerateHandlerCommandStub(this.STUB_PATH, genExtScaffolder())).step(
+        new GenerateHandlerStub(this.STUB_PATH, genExtScaffolder()),
+        {},
+        [
+          {
+            sourceStep: 'handlerCommand',
+            exposedName: 'className',
+            modifier: (value: unknown) => `${value as string}Handler`,
+          },
+          {
+            sourceStep: 'handlerCommand',
+            exposedName: 'class',
+            consumedName: 'handlerCommandClass',
+          },
+        ],
+        {
+          validatorClass: '',
+          repositoryClass: '',
+        }
+      );
+    });
   }
 }

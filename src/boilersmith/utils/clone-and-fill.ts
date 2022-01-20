@@ -7,7 +7,7 @@ export function cloneAndFill<T>(obj: T, params: Record<string, string>): T {
 
   const recursiveCopyAndFill = (obj: any, params: Record<string, string>): any => {
     if (typeof obj === 'string') return fill(obj, params);
-    if (Array.isArray(obj)) return obj.map(v => recursiveCopyAndFill(v, params));
+    if (Array.isArray(obj)) return obj.map((v) => recursiveCopyAndFill(v, params));
     // eslint-disable-next-line no-new-object
     if (obj !== new Object(obj)) return obj;
 

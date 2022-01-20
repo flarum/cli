@@ -1,18 +1,18 @@
-import {Interfaces, Help as HelpDefault} from '@oclif/core';
+import { Interfaces, Help as HelpDefault } from '@oclif/core';
 import chalk from 'chalk';
 
 const COLON_REGEX = /:/g;
 
 function prepCommand(command: Interfaces.Command) {
-  return Object.assign({}, command, {id: chalk.green(command.id?.replace(COLON_REGEX, ' ') ?? '')});
+  return Object.assign({}, command, { id: chalk.green(command.id?.replace(COLON_REGEX, ' ') ?? '') });
 }
 
 function prepTopic(topic: Interfaces.Topic) {
-  return Object.assign({}, topic, {name: chalk.green(topic.name.replace(COLON_REGEX, ' '))});
+  return Object.assign({}, topic, { name: chalk.green(topic.name.replace(COLON_REGEX, ' ')) });
 }
 
 function colorHeaders(text: string) {
-  return text.replace(/(TOPICS|TOPIC|DESCRIPTION|USAGE|COMMANDS|VERSION|ARGUMENTS|OPTIONS)/g, match => {
+  return text.replace(/(TOPICS|TOPIC|DESCRIPTION|USAGE|COMMANDS|VERSION|ARGUMENTS|OPTIONS)/g, (match) => {
     return chalk.yellow(match);
   });
 }

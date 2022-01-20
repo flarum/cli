@@ -10,9 +10,9 @@ async function getExpected(ts = true): Promise<string[]> {
   const skeletonPaths = await globby(`${skeletonDir}/**/*`, { dot: true });
 
   return [...skeletonPaths]
-    .map(path => path.replace(skeletonDir, '/ext').replace('gitignore', '.gitignore'))
-    .filter(path => path.includes('webpack') || !path.endsWith(ts ? '.js' : '.ts'))
-    .filter(path => path !== 'monorepo-only.ml')
+    .map((path) => path.replace(skeletonDir, '/ext').replace('gitignore', '.gitignore'))
+    .filter((path) => path.includes('webpack') || !path.endsWith(ts ? '.js' : '.ts'))
+    .filter((path) => path !== 'monorepo-only.ml')
     .sort();
 }
 
@@ -53,13 +53,13 @@ describe('Test extension skeleton step', function () {
   function buildModules(disabled: string[]) {
     const modules: Record<string, boolean> = {};
 
-    Object.keys(vars).forEach(key => {
+    Object.keys(vars).forEach((key) => {
       if (key.startsWith('modules.')) {
         modules[key.replace('modules.', '')] = Boolean(vars[key as keyof typeof vars]);
       }
     });
 
-    disabled.forEach(key => {
+    disabled.forEach((key) => {
       modules[key] = false;
     });
 
@@ -71,7 +71,7 @@ describe('Test extension skeleton step', function () {
 
     const expected = await getExpected();
 
-    expect(getFsPaths(fs).sort()).toStrictEqual(expected.filter(p => !p.includes('.bundlewatch')));
+    expect(getFsPaths(fs).sort()).toStrictEqual(expected.filter((p) => !p.includes('.bundlewatch')));
     expect(getExtFileContents(fs, 'extend.php').includes('Extend\\Locales')).toBe(true);
     expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/js/dist/forum.js'")).toBe(true);
     expect(getExtFileContents(fs, 'extend.php').includes("__DIR__.'/less/forum.less')")).toBe(true);
@@ -96,7 +96,7 @@ describe('Test extension skeleton step', function () {
   test('Can exclude locales', async function () {
     const { fs } = await runStep(initStep, {}, [], { ...vars, 'modules.locale': false });
 
-    const expected = (await getExpected()).filter(path => !path.includes('/locale/'));
+    const expected = (await getExpected()).filter((path) => !path.includes('/locale/'));
 
     expect(getFsPaths(fs).sort()).toStrictEqual(expected);
     expect(getExtFileContents(fs, 'extend.php').includes('Extend\\Locales')).toBe(false);
@@ -110,7 +110,7 @@ describe('Test extension skeleton step', function () {
   test('Can exclude JS completely', async function () {
     const { fs } = await runStep(initStep, {}, [], { ...vars, 'modules.js': false });
 
-    const expected = (await getExpected()).filter(path => !path.includes('/js/'));
+    const expected = (await getExpected()).filter((path) => !path.includes('/js/'));
 
     expect(getFsPaths(fs).sort()).toStrictEqual(expected);
     expect(getExtFileContents(fs, 'extend.php').includes('Extend\\Locales')).toBe(true);
@@ -124,7 +124,7 @@ describe('Test extension skeleton step', function () {
   test('Can exclude TS completely', async function () {
     const { fs } = await runStep(initStep, {}, [], { ...vars, 'modules.typescript': false });
 
-    const expected = (await getExpected(false)).filter(path => !path.includes('tsconfig'));
+    const expected = (await getExpected(false)).filter((path) => !path.includes('tsconfig'));
 
     expect(getFsPaths(fs).sort()).toStrictEqual(expected);
     expect(getExtFileContents(fs, 'extend.php').includes('Extend\\Locales')).toBe(true);
@@ -138,7 +138,7 @@ describe('Test extension skeleton step', function () {
   test('Can exclude CSS completely', async function () {
     const { fs } = await runStep(initStep, {}, [], { ...vars, 'modules.css': false });
 
-    const expected = (await getExpected()).filter(path => !path.includes('/less/'));
+    const expected = (await getExpected()).filter((path) => !path.includes('/less/'));
 
     expect(getFsPaths(fs).sort()).toStrictEqual(expected);
     expect(getExtFileContents(fs, 'extend.php').includes('Extend\\Locales')).toBe(true);
@@ -152,7 +152,7 @@ describe('Test extension skeleton step', function () {
   test('Can exclude Actions CI', async function () {
     const { fs } = await runStep(initStep, {}, [], { ...vars, 'modules.githubActions': false });
 
-    const expected = (await getExpected()).filter(path => !path.includes('/.github/workflows/'));
+    const expected = (await getExpected()).filter((path) => !path.includes('/.github/workflows/'));
 
     expect(getFsPaths(fs).sort()).toStrictEqual(expected);
     expect(getExtFileContents(fs, 'extend.php').includes('Extend\\Locales')).toBe(true);

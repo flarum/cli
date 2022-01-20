@@ -18,25 +18,25 @@ export abstract class BasePhpStubStep extends FlarumBaseStubStep {
 
   protected async precompileParams(fs: Store, paths: Paths, io: IO): Promise<Record<string, unknown>> {
     const params: Record<string, unknown> = {
-      ...await super.precompileParams(fs, paths, io),
+      ...(await super.precompileParams(fs, paths, io)),
       classNamespace: this.stubNamespace(await this.scaffolder.templateParamVal('packageNamespace', fs, paths, io), paths),
     };
 
-    let paramDefs = this.schema.params.filter(param => !this.implicitParams.includes(param.name as string));
+    let paramDefs = this.schema.params.filter((param) => !this.implicitParams.includes(param.name as string));
 
     const classParams = [...this.phpClassParams];
-    const classNameParam = paramDefs.find(param => param.name === 'className');
+    const classNameParam = paramDefs.find((param) => param.name === 'className');
 
     if (classNameParam) {
       params.className = await io.getParam(classNameParam as ParamDef);
       params.class = `${params.classNamespace}\\${params.className}`;
-      paramDefs = paramDefs.filter(param => param.name !== 'class' && param.name !== 'className');
+      paramDefs = paramDefs.filter((param) => param.name !== 'class' && param.name !== 'className');
     } else {
       classParams.push('class');
     }
 
     for (const classParam of classParams) {
-      const paramDef = this.schema.params.find(param => param.name === classParam);
+      const paramDef = this.schema.params.find((param) => param.name === classParam);
 
       if (!paramDef) {
         continue;
@@ -45,18 +45,21 @@ export abstract class BasePhpStubStep extends FlarumBaseStubStep {
       // eslint-disable-next-line no-await-in-loop
       params[classParam] = await io.getParam(paramDef as ParamDef);
       params[`${classParam}Name`] = (params[classParam] as string).split('\\').pop();
-      paramDefs = paramDefs.filter(param => param.name !== classParam && param.name !== `${classParam}Name`);
+      paramDefs = paramDefs.filter((param) => param.name !== classParam && param.name !== `${classParam}Name`);
     }
 
     return params;
   }
 
   protected async getFileName(_fs: Store, _paths: Paths, io: IO): Promise<string> {
-    return await io.getParam({ name: 'className', type: 'text' }) + '.php';
+    return (await io.getParam({ name: 'className', type: 'text' })) + '.php';
   }
 
   protected stubNamespace(packageNamespace: string, paths: Paths): string {
-    const subdir = this.schema.forceRecommendedSubdir || paths.requestedDir() === null ? this.schema.recommendedSubdir.replace('\\', '.').replace('/', '.') : paths.requestedDir()!.slice(`${paths.package((this.schema.root || this.defaultRoot).replace('./', ''))}/`.length);
+    const subdir =
+      this.schema.forceRecommendedSubdir || paths.requestedDir() === null
+        ? this.schema.recommendedSubdir.replace('\\', '.').replace('/', '.')
+        : paths.requestedDir()!.slice(`${paths.package((this.schema.root || this.defaultRoot).replace('./', ''))}/`.length);
 
     this.subdir = subdir.replace('.', '/');
 

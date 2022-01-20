@@ -75,7 +75,7 @@ type StepsResult =
       stepsRan: string[];
     };
 
-const formatDependencies = (strings: string[]) => strings.map(s => `"${s}"`).join(', ');
+const formatDependencies = (strings: string[]) => strings.map((s) => `"${s}"`).join(', ');
 
 export class StepManager<Providers extends DefaultProviders> {
   protected steps: Array<StoredStep<Providers> | AtomicStepManager<Providers>> = [];
@@ -92,7 +92,7 @@ export class StepManager<Providers extends DefaultProviders> {
     shouldRun: ShouldRunConfig = {},
     dependencies: StepDependency[] = [],
     predefinedParams: PredefinedParameters = {},
-    mapPaths: string[] = [],
+    mapPaths: string[] = []
   ): this {
     this.validateDependencies(step, dependencies, mapPaths);
 
@@ -107,7 +107,7 @@ export class StepManager<Providers extends DefaultProviders> {
     shouldRun: ShouldRunConfig = {},
     dependencies: StepDependency[] = [],
     predefinedParams: PredefinedParameters = {},
-    mapPaths: string[] = [],
+    mapPaths: string[] = []
   ): this {
     if (this.namedSteps.has(name)) {
       throw new Error(`Named steps must have unique names. A step with name "${name}" already exists.`);
@@ -135,7 +135,7 @@ export class StepManager<Providers extends DefaultProviders> {
   }
 
   protected validateDependencies(step: Step<Providers>, dependencies: StepDependency[], mapPaths: string[]): void {
-    const missingDependencySteps = dependencies.map(dep => dep.sourceStep).filter(stepName => !this.namedSteps.has(stepName));
+    const missingDependencySteps = dependencies.map((dep) => dep.sourceStep).filter((stepName) => !this.namedSteps.has(stepName));
 
     if (missingDependencySteps.length > 0) {
       throw new Error(`Step of type "${step.type}" depends on nonexistent named steps ${formatDependencies(missingDependencySteps)}`);
@@ -156,27 +156,27 @@ export class StepManager<Providers extends DefaultProviders> {
         throw new Error(`Non path-mapped step of type "${step.type}" may not depend on path-mapped step "${sourceStep?.name}".`);
       }
 
-      const missingMapPathsDeps = mapPaths.filter(p => sourceStep && !sourceStep.mapPaths.includes(p));
+      const missingMapPathsDeps = mapPaths.filter((p) => sourceStep && !sourceStep.mapPaths.includes(p));
       if (sourceStep && missingMapPathsDeps?.length && sourceStep.mapPaths.length > 0) {
         throw new Error(
           `Step of type "${step.type}" (A) depends on named step: "${
             sourceStep.name
-          }" (B), but is mapped across some paths that (B) is not: "${missingMapPathsDeps.join(', ')}"`,
+          }" (B), but is mapped across some paths that (B) is not: "${missingMapPathsDeps.join(', ')}"`
         );
       }
     }
 
     if (missingDependencyParamSteps.length > 0) {
       throw new Error(
-        `Step of type "${step.type}" depends on nonexistent exposed params ${formatDependencies(missingDependencyParams)} from named steps ${formatDependencies(
-          missingDependencyParamSteps,
-        )}`,
+        `Step of type "${step.type}" depends on nonexistent exposed params ${formatDependencies(
+          missingDependencyParams
+        )} from named steps ${formatDependencies(missingDependencyParamSteps)}`
       );
     }
   }
 
   async run(paths: Paths, io: IO, providers: Providers, dry = false): Promise<StepsResult> {
-    if (dry && this.steps.some(s => !(s instanceof AtomicStepManager) && !s.step.composable)) {
+    if (dry && this.steps.some((s) => !(s instanceof AtomicStepManager) && !s.step.composable)) {
       throw new Error('Cannot dry run, as this step manager has non-composable steps.');
     }
 
@@ -264,16 +264,16 @@ export class StepManager<Providers extends DefaultProviders> {
     io: IO,
     providers: Providers,
     packagePath?: string,
-    fs: Store = createMemFs(),
+    fs: Store = createMemFs()
   ): Promise<Store> {
     const initial: Record<string, unknown> = storedStep.dependencies.reduce((initial, dep) => {
       const sourceStep = this.namedSteps.get(dep.sourceStep);
 
       let depValue;
       depValue =
-        dep.exposedName === '__succeeded' ?
-          this.exposedParams.stepRan(dep.sourceStep, packagePath) :
-          this.exposedParams.get(dep.sourceStep, dep.exposedName, sourceStep?.mapPaths.length ? packagePath : undefined);
+        dep.exposedName === '__succeeded'
+          ? this.exposedParams.stepRan(dep.sourceStep, packagePath)
+          : this.exposedParams.get(dep.sourceStep, dep.exposedName, sourceStep?.mapPaths.length ? packagePath : undefined);
 
       if (dep.modifier) {
         depValue = dep.modifier(depValue);
@@ -300,7 +300,10 @@ export class StepManager<Providers extends DefaultProviders> {
 export class AtomicStepManager<Providers = DefaultProviders> extends StepManager<Providers> {
   protected steps: StoredStep<Providers>[] = [];
 
-  constructor(parentNamedSteps: Map<string, StoredStep<Providers>> = new Map(), parentExposedParams: ExposedParamManager = new ExposedParamManager()) {
+  constructor(
+    parentNamedSteps: Map<string, StoredStep<Providers>> = new Map(),
+    parentExposedParams: ExposedParamManager = new ExposedParamManager()
+  ) {
     super();
     this.namedSteps = parentNamedSteps;
     this.exposedParams = parentExposedParams;
@@ -311,7 +314,7 @@ export class AtomicStepManager<Providers = DefaultProviders> extends StepManager
     shouldRun: ShouldRunConfig = {},
     dependencies: StepDependency[] = [],
     predefinedParams: PredefinedParameters = {},
-    mapPaths: string[] = [],
+    mapPaths: string[] = []
   ): this {
     if (!step.composable) {
       throw new Error(`Step of type "${step.type}" is not composable, and cannot be added to an atomic group.`);
@@ -326,7 +329,7 @@ export class AtomicStepManager<Providers = DefaultProviders> extends StepManager
     shouldRun: ShouldRunConfig = {},
     dependencies: StepDependency[] = [],
     predefinedParams: PredefinedParameters = {},
-    mapPaths: string[] = [],
+    mapPaths: string[] = []
   ): this {
     if (!step.composable) {
       throw new Error(`Step of type "${step.type}" is not composable, and cannot be added to an atomic group.`);

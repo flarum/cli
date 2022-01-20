@@ -42,8 +42,8 @@ export class Scaffolder<TN extends string = string, MN extends string = string> 
 
   registerTemplateParam<T>(templateParam: TemplateParam<T, TN>): this {
     if (isComputedParam(templateParam)) {
-      const currParams = new Set(this.templateParams.map(p => getParamName(p)));
-      const missingDeps = templateParam.uses.filter(dep => !currParams.has(dep as TN));
+      const currParams = new Set(this.templateParams.map((p) => getParamName(p)));
+      const missingDeps = templateParam.uses.filter((dep) => !currParams.has(dep as TN));
 
       if (missingDeps.length > 0) {
         throw new Error(`Computed template param "${getParamName(templateParam)}" is missing dependency params: "${missingDeps.join(', ')}".`);
@@ -80,7 +80,7 @@ export class Scaffolder<TN extends string = string, MN extends string = string> 
   }
 
   moduleFiles(moduleName: MN): string[] {
-    return this.modules.find(m => m.name === moduleName)?.filesToReplace.map(f => typeof f === 'string' ? f : f.path) ?? [];
+    return this.modules.find((m) => m.name === moduleName)?.filesToReplace.map((f) => (typeof f === 'string' ? f : f.path)) ?? [];
   }
 
   /**
@@ -92,19 +92,19 @@ export class Scaffolder<TN extends string = string, MN extends string = string> 
     const errors: string[] = [];
 
     // Generate template data for future checks
-    const paramVals: Record<string, 'TEST'> = Object.fromEntries(this.templateParams.map(param => [getParamName(param), 'TEST']));
+    const paramVals: Record<string, 'TEST'> = Object.fromEntries(this.templateParams.map((param) => [getParamName(param), 'TEST']));
 
-    const modulesEnabled: Record<string, boolean> = Object.fromEntries(this.modules.map(module => [module.name, true]));
+    const modulesEnabled: Record<string, boolean> = Object.fromEntries(this.modules.map((module) => [module.name, true]));
 
     const tplData = { params: paramVals, modules: modulesEnabled };
-    const tplDataFlat = { ...renameKeys(tplData.modules, k => `modules.${k}`), ...renameKeys(tplData.params, k => `params.${k}`) } as Record<
+    const tplDataFlat = { ...renameKeys(tplData.modules, (k) => `modules.${k}`), ...renameKeys(tplData.params, (k) => `params.${k}`) } as Record<
       string,
       string
     >;
 
-    const moduleNames = new Set(this.modules.map(m => m.name));
+    const moduleNames = new Set(this.modules.map((m) => m.name));
     for (const module of this.modules) {
-      const missingDeps = module.togglable ? module.dependsOn.filter(dep => !moduleNames.has(dep as MN)) : [];
+      const missingDeps = module.togglable ? module.dependsOn.filter((dep) => !moduleNames.has(dep as MN)) : [];
       if (missingDeps.length > 0) {
         errors.push(`Module "${module.name}" depends on modules that are not registered: "${missingDeps.join(', ')}".`);
       }
@@ -115,26 +115,26 @@ export class Scaffolder<TN extends string = string, MN extends string = string> 
     const templateParamsToUsingModules = new Map<TN, MN[]>();
 
     for (const module of this.modules) {
-      module.filesToReplace.forEach(file => {
+      module.filesToReplace.forEach((file) => {
         const path = typeof file === 'string' ? file : file.path;
 
         const currModules = filesToOwnerModules.get(path) ?? [];
         filesToOwnerModules.set(path, [...currModules, module.name]);
       });
 
-      module.needsTemplateParams.forEach(paramName => {
+      module.needsTemplateParams.forEach((paramName) => {
         const currModules = filesToOwnerModules.get(paramName) ?? [];
         templateParamsToUsingModules.set(paramName as TN, [...currModules, module.name]);
       });
 
-      Object.keys(module.jsonToAugment).forEach(jsonPath => {
+      Object.keys(module.jsonToAugment).forEach((jsonPath) => {
         const ownedKeys = cloneAndFill(module.jsonToAugment, tplDataFlat)[jsonPath];
 
         const currJsonData = configKeysToOwnerModules.get(jsonPath) ?? { fileOwners: [], keyOwners: new Map<string, MN[]>() };
 
         currJsonData.fileOwners.push(module.name);
 
-        ownedKeys.forEach(key => {
+        ownedKeys.forEach((key) => {
           const currModules = currJsonData.keyOwners.get(key) ?? [];
           currJsonData.keyOwners.set(key, [...currModules, module.name]);
         });
@@ -147,8 +147,8 @@ export class Scaffolder<TN extends string = string, MN extends string = string> 
     const moduleOwnedFiles = [...filesToOwnerModules.keys()];
     const moduleOwnedJsonConfs = new Set(configKeysToOwnerModules.keys());
     moduleOwnedFiles
-      .filter(path => moduleOwnedJsonConfs.has(path))
-      .forEach(path => {
+      .filter((path) => moduleOwnedJsonConfs.has(path))
+      .forEach((path) => {
         const fileModules = filesToOwnerModules.get(path)?.join(', ');
         const keyModules = configKeysToOwnerModules.get(path)?.fileOwners.join(', ');
         errors.push(`File "${path}" is owned by modules: "${fileModules}". However, it also has keys that are owned by modules: "${keyModules}".`);
@@ -156,42 +156,42 @@ export class Scaffolder<TN extends string = string, MN extends string = string> 
 
     // Ensure that all owned files exist in the filesystem.
     const scaffoldingFilePaths = new Set(
-      (await globby(resolve(this.scaffoldDir, '**/*'), { dot: true })).map(p => p.replace(`${this.scaffoldDir}/`, '')).filter(p => p !== ''),
+      (await globby(resolve(this.scaffoldDir, '**/*'), { dot: true })).map((p) => p.replace(`${this.scaffoldDir}/`, '')).filter((p) => p !== '')
     );
 
     moduleOwnedFiles
-      .filter(path => !scaffoldingFilePaths.has(path))
-      .forEach(path => {
+      .filter((path) => !scaffoldingFilePaths.has(path))
+      .forEach((path) => {
         const fileModules = filesToOwnerModules.get(path)?.join(', ');
         errors.push(`File "${path}" is owned by modules: "${fileModules}", but it doesn't exist in the scaffolding directory.`);
       });
 
     [...moduleOwnedJsonConfs]
-      .filter(path => !scaffoldingFilePaths.has(path))
-      .forEach(path => {
+      .filter((path) => !scaffoldingFilePaths.has(path))
+      .forEach((path) => {
         const keyModules = configKeysToOwnerModules.get(path)?.fileOwners.join(', ');
         errors.push(`File "${path}" has keys owned by modules: "${keyModules}", but it doesn't exist in the scaffolding directory.`);
       });
 
     // Ensure that all files in the filesystem are owned by at least one module.
     [...scaffoldingFilePaths]
-      .filter(path => !filesToOwnerModules.has(path) && !configKeysToOwnerModules.has(path))
-      .forEach(path => {
+      .filter((path) => !filesToOwnerModules.has(path) && !configKeysToOwnerModules.has(path))
+      .forEach((path) => {
         errors.push(`File "${path}" is not owned by any module.`);
       });
 
     // Ensure that every template param is used by at least one module.
     this.templateParams
-      .filter(p => !templateParamsToUsingModules.has(getParamName(p)))
-      .forEach(p => {
+      .filter((p) => !templateParamsToUsingModules.has(getParamName(p)))
+      .forEach((p) => {
         errors.push(`Template param "${getParamName(p)}" is defined, but not used by any modules.`);
       });
 
     // Ensure that every module's needed template params are provided.
-    const providedParams = new Set(this.templateParams.map(p => getParamName(p)));
+    const providedParams = new Set(this.templateParams.map((p) => getParamName(p)));
     [...templateParamsToUsingModules.keys()]
-      .filter(paramName => !providedParams.has(paramName))
-      .forEach(paramName => {
+      .filter((paramName) => !providedParams.has(paramName))
+      .forEach((paramName) => {
         const paramModules = templateParamsToUsingModules.get(paramName)?.join(', ');
         errors.push(`Template param "${paramName}" is used by modules: "${paramModules}", but is not provided.`);
       });
@@ -216,8 +216,8 @@ export class Scaffolder<TN extends string = string, MN extends string = string> 
           const keys = new Set(jsonLeafPaths(json));
 
           [...keys]
-            .filter(k => !ownerData.keyOwners.has(k))
-            .forEach(k => {
+            .filter((k) => !ownerData.keyOwners.has(k))
+            .forEach((k) => {
               errors.push(`Key "${k}" in file "${path}" is not owned by any module.`);
             });
 
@@ -242,7 +242,7 @@ export class Scaffolder<TN extends string = string, MN extends string = string> 
     }
 
     // Ensure that all files can be resolved with ejs using provided template variables.
-    scaffoldingFilePaths.forEach(path => {
+    scaffoldingFilePaths.forEach((path) => {
       readTpl(resolve(this.scaffoldDir, path), tplData);
     });
   }

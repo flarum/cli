@@ -11,6 +11,7 @@
   "devDependencies": {
     "@babel/core": "^7.0.0",
     "@babel/preset-env": "^7.14.2",
+    "@flarum/prettier-config": "^1.0.0",
     "@oclif/dev-cli": "^1.26.0",
     "@oclif/test": "^1.2.8",
     "@types/chai": "^4.2.20",
@@ -30,11 +31,13 @@
     "eslint": "^7.32.0",
     "eslint-config-oclif": "^4.0.0",
     "eslint-config-oclif-typescript": "1.0.2",
+    "eslint-config-prettier": "^8.3.0",
     "eslint-import-resolver-babel-module": "^5.3.1",
     "eslint-import-resolver-typescript": "^2.5.0",
     "eslint-plugin-import": "^2.25.3",
     "jest": "^27.4.5",
     "jest-extended": "^1.2.0",
+    "prettier": "^2.5.1",
     "ts-jest": "^27.1.2",
     "ts-node": "^8.10.2",
     "tsconfig-paths": "^3.12.0",
@@ -92,11 +95,12 @@
     ]
   },
   "repository": "flarum/cli",
+  "prettier": "@flarum/prettier-config",
   "scripts": {
     "oclif-dev": "node -r tsconfig-paths/register node_modules/.bin/oclif-dev",
-    "format": "eslint . --ext .ts --config .eslintrc --fix",
+    "format": "eslint . --ext .ts --config .eslintrc --fix && prettier --write .",
     "postpack": "rm -f oclif.manifest.json",
-    "posttest": "eslint . --ext .ts --config .eslintrc && tsc --build --dry",
+    "posttest": "prettier --check . && eslint . --ext .ts --config .eslintrc && tsc --build --dry",
     "prepack": "rm -rf lib && tsc --project tsconfig.build.json && yarn oclif-dev manifest && yarn oclif-dev readme",
     "test": "jest",
     "version": "yarn oclif-dev readme && git add README.md"

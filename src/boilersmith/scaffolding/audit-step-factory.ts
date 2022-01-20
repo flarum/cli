@@ -16,7 +16,7 @@ export function auditStepFactory<MN extends string, Providers extends DefaultPro
   modules: Module<MN>[],
   templateParams: TemplateParam[],
   excludeScaffoldingFunc?: ExcludeScaffoldingFunc,
-  moduleStatusCache?: ModuleStatusCache<MN>,
+  moduleStatusCache?: ModuleStatusCache<MN>
 ): Step<Providers> {
   let modulesEnabled: Record<string, boolean>;
 
@@ -30,27 +30,27 @@ export function auditStepFactory<MN extends string, Providers extends DefaultPro
       modulesEnabled = await currModulesEnabled(modules, _fs, paths, moduleStatusCache);
 
       const actionableModules = modules.filter(
-        m => m.updatable && modulesEnabled[m.name] && (!m.togglable || !m.dependsOn.some(dep => !modulesEnabled[dep])),
+        (m) => m.updatable && modulesEnabled[m.name] && (!m.togglable || !m.dependsOn.some((dep) => !modulesEnabled[dep]))
       );
 
       io.info(
         condFormat(
           io.supportsAnsiColor,
-          m => chalk.yellow(chalk.bold(chalk.underline(m))),
-          `Auditing infrastructure for ${actionableModules.length} enabled modules:`,
+          (m) => chalk.yellow(chalk.bold(chalk.underline(m))),
+          `Auditing infrastructure for ${actionableModules.length} enabled modules:`
         ),
-        true,
+        true
       );
       for (const m of modules) {
         if (actionableModules.includes(m)) {
           io.info(
-            condFormat(io.supportsAnsiColor, m => chalk.dim(chalk.green(m)), `✓ ${m.name}: ${m.shortDescription}`),
-            true,
+            condFormat(io.supportsAnsiColor, (m) => chalk.dim(chalk.green(m)), `✓ ${m.name}: ${m.shortDescription}`),
+            true
           );
         } else if (m.updatable) {
           io.info(
-            condFormat(io.supportsAnsiColor, m => chalk.dim(chalk.red(m)), `𐄂 ${m.name}: ${m.shortDescription} (disabled)`),
-            true,
+            condFormat(io.supportsAnsiColor, (m) => chalk.dim(chalk.red(m)), `𐄂 ${m.name}: ${m.shortDescription} (disabled)`),
+            true
           );
         }
       }
@@ -62,14 +62,14 @@ export function auditStepFactory<MN extends string, Providers extends DefaultPro
         if (dry) {
           const filesWithChanges = fs
             .all()
-            .filter(f => f.state && f.state !== 'deleted')
-            .filter(f => !existsSync(f.path) || readFileSync(f.path, 'utf8').toString() !== f.contents?.toString());
+            .filter((f) => f.state && f.state !== 'deleted')
+            .filter((f) => !existsSync(f.path) || readFileSync(f.path, 'utf8').toString() !== f.contents?.toString());
           if (filesWithChanges.length > 0) {
             io.error(
               `Module ${m.name} has ${filesWithChanges.length} changed files: ${filesWithChanges
-                .map(f => f.path.replace(paths.package() + '/', ''))
+                .map((f) => f.path.replace(paths.package() + '/', ''))
                 .join(', ')}`,
-              false,
+              false
             );
           }
         }
@@ -86,10 +86,10 @@ export function auditStepFactory<MN extends string, Providers extends DefaultPro
       return _fs;
     },
 
-    exposes: modules.map(m => `modules.${m.name}`),
+    exposes: modules.map((m) => `modules.${m.name}`),
 
     getExposed(_paths: Paths, _paramProvider: IO): Record<string, unknown> {
-      return renameKeys(modulesEnabled, k => `modules.${k}`);
+      return renameKeys(modulesEnabled, (k) => `modules.${k}`);
     },
   };
 }

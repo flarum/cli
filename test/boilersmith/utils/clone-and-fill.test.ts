@@ -27,10 +27,7 @@ describe('clone-and-fill', function () {
 
   it('Fills complex nested object', function () {
     const original = {
-      array: [
-        { name: '${NAME}' },
-        { key: 3, something: ['${HELLO}'] },
-      ],
+      array: [{ name: '${NAME}' }, { key: 3, something: ['${HELLO}'] }],
       foo: 3,
       spam: 'monty',
       flarum: ['is', 'the', '${best}est', { soft: '${Ware}' }],
@@ -44,10 +41,7 @@ describe('clone-and-fill', function () {
     };
 
     const expected = {
-      array: [
-        { name: 'Franz' },
-        { key: 3, something: ['luceos'] },
-      ],
+      array: [{ name: 'Franz' }, { key: 3, something: ['luceos'] }],
       foo: 3,
       spam: 'monty',
       flarum: ['is', 'the', 'Sychoest', { soft: 'Toby' }],

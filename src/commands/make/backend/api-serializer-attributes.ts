@@ -11,7 +11,6 @@ export default class ApiSerializerAttribute extends BaseCommand {
   static args = [...BaseCommand.args];
 
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
-    return stepManager
-      .step(new GenerateApiSerializerAttributesExtender());
+    return stepManager.step(new GenerateApiSerializerAttributesExtender());
   }
 }

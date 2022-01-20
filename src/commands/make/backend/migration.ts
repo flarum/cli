@@ -12,7 +12,6 @@ export default class Migration extends BaseCommand {
   static args = [...BaseCommand.args];
 
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
-    return stepManager
-      .step(new GenerateMigrationStub(this.STUB_PATH, genExtScaffolder()));
+    return stepManager.step(new GenerateMigrationStub(this.STUB_PATH, genExtScaffolder()));
   }
 }

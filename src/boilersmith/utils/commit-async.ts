@@ -3,7 +3,7 @@ import { create } from 'mem-fs-editor';
 
 export async function commitAsync(fs: Store): Promise<boolean> {
   return new Promise((resolve, _reject) => {
-    create(fs).commit(err => {
+    create(fs).commit((err) => {
       if (err) {
         throw new Error(err);
       }

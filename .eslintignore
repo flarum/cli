@@ -1,2 +1,4 @@
-/lib
-/boilerplate
+boilerplate
+coverage
+test/**/fixtures
+lib

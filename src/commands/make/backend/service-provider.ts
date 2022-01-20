@@ -13,17 +13,16 @@ export default class ServiceProvider extends BaseCommand {
   static args = [...BaseCommand.args];
 
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
-    return stepManager
-      .atomicGroup(stepManager => {
-        stepManager
-          .namedStep('provider', new GenerateServiceProviderStub(this.STUB_PATH, genExtScaffolder()))
-          .step(new GenerateServiceProviderExtender(), { optional: true, confirmationMessage: 'Generate corresponding extender?', default: true }, [
-            {
-              sourceStep: 'provider',
-              exposedName: 'class',
-              consumedName: 'providerClass',
-            },
-          ]);
-      });
+    return stepManager.atomicGroup((stepManager) => {
+      stepManager
+        .namedStep('provider', new GenerateServiceProviderStub(this.STUB_PATH, genExtScaffolder()))
+        .step(new GenerateServiceProviderExtender(), { optional: true, confirmationMessage: 'Generate corresponding extender?', default: true }, [
+          {
+            sourceStep: 'provider',
+            exposedName: 'class',
+            consumedName: 'providerClass',
+          },
+        ]);
+    });
   }
 }

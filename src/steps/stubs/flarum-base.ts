@@ -8,7 +8,7 @@ import { ExtensionModules, ExtensionParams } from '../gen-ext-scaffolder';
 export abstract class FlarumBaseStubStep extends BaseStubStep<FlarumProviders, ExtensionParams, ExtensionModules> {
   protected async precompileParams(fs: Store, paths: Paths, io: IO): Promise<Record<string, unknown>> {
     return {
-      ...await super.precompileParams(fs, paths, io),
+      ...(await super.precompileParams(fs, paths, io)),
       extensionId: this.scaffolder.templateParamVal('extensionId', fs, paths, io),
     };
   }

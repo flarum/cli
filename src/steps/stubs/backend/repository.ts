@@ -34,5 +34,5 @@ export class GenerateRepositoryStub extends BasePhpStubStep {
         type: 'text',
       },
     ],
-  }
+  };
 }

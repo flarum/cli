@@ -12,9 +12,9 @@ export function infraStepFactory<MN extends string, Providers extends DefaultPro
   modules: Module<MN>[],
   templateParams: TemplateParam[],
   excludeScaffoldingFunc?: ExcludeScaffoldingFunc,
-  moduleStatusCache?: ModuleStatusCache<MN>,
+  moduleStatusCache?: ModuleStatusCache<MN>
 ): Step<Providers> {
-  const module = modules.find(m => m.name === moduleName);
+  const module = modules.find((m) => m.name === moduleName);
   if (!module) {
     throw new Error(`Module ${moduleName} not found`);
   }
@@ -35,7 +35,7 @@ export function infraStepFactory<MN extends string, Providers extends DefaultPro
       const excludeScaffolding = excludeScaffoldingFunc ? excludeScaffoldingFunc(fs, paths) : [];
 
       const initializing = !modulesEnabled[module.name];
-      applyModule(module, {...modulesEnabled, [module.name]: true}, paramVals, scaffoldDir, fs, paths, excludeScaffolding, initializing);
+      applyModule(module, { ...modulesEnabled, [module.name]: true }, paramVals, scaffoldDir, fs, paths, excludeScaffolding, initializing);
 
       if (moduleStatusCache) {
         setModuleValue(module, true, fs, paths, moduleStatusCache);

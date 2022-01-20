@@ -27,7 +27,7 @@ export abstract class BaseJsStep implements Step<FlarumProviders> {
     for (const frontend of frontends) {
       const fsSrcFilePaths = globby.sync(paths.package(`js/src/${frontend}/*.{js,jsx,ts,tsx}`));
 
-      fsSrcFilePaths.forEach(async match => {
+      fsSrcFilePaths.forEach(async (match) => {
         /**
          * @TODO look into using https://esprima.org/ instead
          */
@@ -37,9 +37,7 @@ export abstract class BaseJsStep implements Step<FlarumProviders> {
         const imports = await this.getImports(frontend, paths, io);
         const definition = await this.getDefinition(io);
 
-        const newContents = currContents
-          .replace(INIT_REGEX, `$1\n  ${definition}\n`)
-          .replace(IMPORTS_REGEX, `$1${imports}\n\n$5`);
+        const newContents = currContents.replace(INIT_REGEX, `$1\n  ${definition}\n`).replace(IMPORTS_REGEX, `$1${imports}\n\n$5`);
 
         fsEditor.write(match, newContents);
       });

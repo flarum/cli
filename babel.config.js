@@ -1,15 +1,13 @@
 module.exports = {
-  presets: [
-    '@babel/preset-env',
-  ],
+  presets: ['@babel/preset-env'],
   plugins: [
     [
-      "module-resolver",
+      'module-resolver',
       {
         alias: {
-          boilersmith: "./src/boilersmith"
-        }
-      }
-    ]
-  ]
+          boilersmith: './src/boilersmith',
+        },
+      },
+    ],
+  ],
 };

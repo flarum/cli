@@ -1,5 +1,5 @@
 import prompts from 'prompts';
-import { Module} from 'boilersmith/scaffolding/module';
+import { Module } from 'boilersmith/scaffolding/module';
 import { TemplateParam } from 'boilersmith/scaffolding/template-param';
 import { initStepFactory } from 'boilersmith/scaffolding/init-step-factory';
 import { resolve } from 'node:path';
@@ -23,7 +23,7 @@ describe('init step factory', function () {
       defaultEnabled: true,
       updatable: true,
       filesToReplace: ['src/index.html', 'src/index.js', 'src/index.ml', 'src/index.php'],
-      jsonToAugment: {'config1.json': ['nested']},
+      jsonToAugment: { 'config1.json': ['nested'] },
       needsTemplateParams: ['someVar', 'someOtherVar'],
       dependsOn: [],
     },
@@ -34,7 +34,7 @@ describe('init step factory', function () {
       defaultEnabled: false,
       updatable: true,
       filesToReplace: ['config2.json'],
-      jsonToAugment: {'config1.json': ['hello', 'foo', 'authors']},
+      jsonToAugment: { 'config1.json': ['hello', 'foo', 'authors'] },
       needsTemplateParams: ['someVar', 'someOtherVar'],
       dependsOn: [],
     },
@@ -52,7 +52,7 @@ describe('init step factory', function () {
     {
       name: 'someOtherVar',
       uses: [],
-      compute: async paths => paths.package(),
+      compute: async (paths) => paths.package(),
     },
   ];
 
@@ -63,7 +63,7 @@ describe('init step factory', function () {
 
     prompts.inject(['Var Value', true, true, true]);
 
-    const {fs} = await runStep(step, {});
+    const { fs } = await runStep(step, {});
 
     expect(getFsPaths(fs).sort()).toStrictEqual([
       '/ext/.gitignore',
@@ -82,12 +82,9 @@ describe('init step factory', function () {
 
     prompts.inject(['Var Value', true, false, false]);
 
-    const {fs} = await runStep(step, {});
+    const { fs } = await runStep(step, {});
 
-    expect(getFsPaths(fs).sort()).toStrictEqual([
-      '/ext/.gitignore',
-      '/ext/readme.md',
-    ]);
+    expect(getFsPaths(fs).sort()).toStrictEqual(['/ext/.gitignore', '/ext/readme.md']);
   });
 
   it('respects module defaults if not in advanced mode', async function () {
@@ -95,7 +92,7 @@ describe('init step factory', function () {
 
     prompts.inject(['Var Value', false]);
 
-    const {fs} = await runStep(step, {});
+    const { fs } = await runStep(step, {});
 
     expect(getFsPaths(fs).sort()).toStrictEqual([
       '/ext/.gitignore',

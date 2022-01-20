@@ -4,7 +4,7 @@ interface JSONSchemaObject {
   [key: string]: JSONSchema;
 }
 
-type JSONSchemaArray = Array<JSONSchema>
+type JSONSchemaArray = Array<JSONSchema>;
 
 function inner(o: JSONSchema, prefix: string[]): string[] {
   if (Array.isArray(o)) {

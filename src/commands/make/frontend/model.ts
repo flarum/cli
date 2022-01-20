@@ -13,28 +13,25 @@ export default class Model extends BaseCommand {
   static args = [...BaseCommand.args];
 
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
-    return stepManager
-      .atomicGroup(stepManager => {
-        stepManager
-          .namedStep('model', new GenerateModelStub(this.STUB_PATH, genExtScaffolder()))
-          .step(new GenerateModelDefinition(), {}, [
-            {
-              sourceStep: 'model',
-              exposedName: 'frontend',
-            },
-            {
-              sourceStep: 'model',
-              exposedName: 'className',
-            },
-            {
-              sourceStep: 'model',
-              exposedName: 'classNamespace',
-            },
-            {
-              sourceStep: 'model',
-              exposedName: 'modelType',
-            },
-          ]);
-      });
+    return stepManager.atomicGroup((stepManager) => {
+      stepManager.namedStep('model', new GenerateModelStub(this.STUB_PATH, genExtScaffolder())).step(new GenerateModelDefinition(), {}, [
+        {
+          sourceStep: 'model',
+          exposedName: 'frontend',
+        },
+        {
+          sourceStep: 'model',
+          exposedName: 'className',
+        },
+        {
+          sourceStep: 'model',
+          exposedName: 'classNamespace',
+        },
+        {
+          sourceStep: 'model',
+          exposedName: 'modelType',
+        },
+      ]);
+    });
   }
 }

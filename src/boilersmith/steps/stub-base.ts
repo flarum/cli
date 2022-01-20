@@ -41,7 +41,9 @@ export interface StubGenerationSchema {
   params: UserProvidedParam[];
 }
 
-export abstract class BaseStubStep<Providers extends DefaultProviders, PN extends string = string, MN extends string = string> implements Step<Providers> {
+export abstract class BaseStubStep<Providers extends DefaultProviders, PN extends string = string, MN extends string = string>
+  implements Step<Providers>
+{
   protected stubDir: string;
 
   protected scaffolder: Scaffolder<PN, MN>;
@@ -101,7 +103,7 @@ export abstract class BaseStubStep<Providers extends DefaultProviders, PN extend
     const params: Record<string, unknown> = await this.precompileParams(fs, paths, io);
 
     const paramDefs = this.schema.params.filter(
-      param => !this.implicitParams.includes(param.name as string) && !Object.keys(params).includes(param.name as string),
+      (param) => !this.implicitParams.includes(param.name as string) && !Object.keys(params).includes(param.name as string)
     );
 
     for (const paramDef of paramDefs) {

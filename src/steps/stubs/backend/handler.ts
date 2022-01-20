@@ -57,5 +57,5 @@ export class GenerateHandlerStub extends BasePhpStubStep {
         type: 'text',
       },
     ],
-  }
+  };
 }

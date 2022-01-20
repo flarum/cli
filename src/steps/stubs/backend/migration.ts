@@ -22,7 +22,7 @@ export class GenerateMigrationStub extends BasePhpStubStep {
         validate: Validator.migrationName,
       },
     ],
-  }
+  };
 
   protected async compileParams(fs: Store, paths: Paths, io: IO): Promise<Record<string, unknown>> {
     const params = await super.compileParams(fs, paths, io);
@@ -44,7 +44,10 @@ export class GenerateMigrationStub extends BasePhpStubStep {
       persistedMigrations = [];
     }
 
-    const memMigrations: string[] = fs.all().map(f => f.path).filter(p => p.startsWith(paths.package('migrations')));
+    const memMigrations: string[] = fs
+      .all()
+      .map((f) => f.path)
+      .filter((p) => p.startsWith(paths.package('migrations')));
 
     return getNextMigrationName([...persistedMigrations, ...memMigrations], this.params.name as string) + '.php';
   }

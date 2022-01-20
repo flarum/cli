@@ -28,5 +28,5 @@ export class GenerateIntegrationTestStub extends BasePhpStubStep {
         type: 'text',
       },
     ],
-  }
+  };
 }

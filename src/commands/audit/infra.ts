@@ -18,12 +18,14 @@ export default class AuditInfra extends BaseCommand {
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
     this.dry = !this.flags.fix;
 
-    const mapPaths = this.flags.monorepo ? this.monorepoPaths({
-      includeCore: true,
-      includeExtensions: true,
-      includePhpPackages: false,
-      includeJSPackages: false,
-    }) : [];
+    const mapPaths = this.flags.monorepo
+      ? this.monorepoPaths({
+          includeCore: true,
+          includeExtensions: true,
+          includePhpPackages: false,
+          includeJSPackages: false,
+        })
+      : [];
     stepManager.step(genExtScaffolder().genAuditStep(!this.flags.fix), {}, [], {}, mapPaths);
 
     return stepManager;

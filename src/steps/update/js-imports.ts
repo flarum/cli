@@ -23,7 +23,10 @@ export class UpdateJSImports implements Step {
     const jsSrcDir = paths.package('vendor/flarum/core/js/src');
 
     const vendorRegex = new RegExp(`${jsSrcDir}/.*(js|jsx|ts|tsx)`);
-    const fsVendorFilePaths = fs.all().map(file => file.path).filter(path => path && vendorRegex.test(path));
+    const fsVendorFilePaths = fs
+      .all()
+      .map((file) => file.path)
+      .filter((path) => path && vendorRegex.test(path));
     const persistedVendorFilePaths = globby.sync(`${jsSrcDir}/**/*.{js,jsx,ts,tsx}`);
 
     for (const currPath of [...fsVendorFilePaths, ...persistedVendorFilePaths]) {
@@ -34,7 +37,10 @@ export class UpdateJSImports implements Step {
     }
 
     const srcRegex = new RegExp(`${paths.package('js/src')}/.*(js|jsx|ts|tsx)`);
-    const fsSrcFilePaths = fs.all().map(file => file.path).filter(path => path && srcRegex.test(path));
+    const fsSrcFilePaths = fs
+      .all()
+      .map((file) => file.path)
+      .filter((path) => path && srcRegex.test(path));
     const persistedSrcFilePaths = globby.sync(paths.package('js/src/**/*.{js,jsx,ts,tsx}'));
 
     for (const match of [...fsSrcFilePaths, ...persistedSrcFilePaths]) {

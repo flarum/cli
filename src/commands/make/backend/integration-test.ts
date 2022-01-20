@@ -12,10 +12,8 @@ export default class IntegrationTest extends BaseCommand {
   static args = [...BaseCommand.args];
 
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
-    return stepManager
-      .atomicGroup(stepManager => {
-        stepManager
-          .namedStep('test', new GenerateIntegrationTestStub(this.STUB_PATH, genExtScaffolder()));
-      });
+    return stepManager.atomicGroup((stepManager) => {
+      stepManager.namedStep('test', new GenerateIntegrationTestStub(this.STUB_PATH, genExtScaffolder()));
+    });
   }
 }

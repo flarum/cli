@@ -19,5 +19,5 @@ export class GenerateServiceProviderStub extends BasePhpStubStep {
         type: 'text',
       },
     ],
-  }
+  };
 }

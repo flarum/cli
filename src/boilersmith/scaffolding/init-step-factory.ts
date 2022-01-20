@@ -7,7 +7,13 @@ import { applyModule, Module, ModuleStatusCache, promptModulesEnabled, setModule
 import { promptParamValues, TemplateParam } from './template-param';
 import { ExcludeScaffoldingFunc } from './scaffolder';
 
-export function initStepFactory<MN extends string, Providers extends DefaultProviders>(scaffoldDir: string, modules: Module<MN>[], templateParams: TemplateParam[], excludeScaffoldingFunc?: ExcludeScaffoldingFunc, moduleStatusCache?: ModuleStatusCache<MN>): Step<Providers> {
+export function initStepFactory<MN extends string, Providers extends DefaultProviders>(
+  scaffoldDir: string,
+  modules: Module<MN>[],
+  templateParams: TemplateParam[],
+  excludeScaffoldingFunc?: ExcludeScaffoldingFunc,
+  moduleStatusCache?: ModuleStatusCache<MN>
+): Step<Providers> {
   let modulesEnabled: Record<string, boolean>;
 
   return {
@@ -22,13 +28,13 @@ export function initStepFactory<MN extends string, Providers extends DefaultProv
       const excludeScaffolding = excludeScaffoldingFunc ? excludeScaffoldingFunc(fs, paths) : [];
 
       for (const m of modules) {
-        if (modulesEnabled[m.name] && (!m.togglable || !m.dependsOn.some(dep => !modulesEnabled[dep]))) {
+        if (modulesEnabled[m.name] && (!m.togglable || !m.dependsOn.some((dep) => !modulesEnabled[dep]))) {
           applyModule(m, modulesEnabled, paramVals, scaffoldDir, fs, paths, excludeScaffolding, true);
         }
       }
 
       if (moduleStatusCache) {
-        modules.forEach(m => {
+        modules.forEach((m) => {
           setModuleValue(m, modulesEnabled[m.name], fs, paths, moduleStatusCache);
         });
       }
@@ -36,10 +42,10 @@ export function initStepFactory<MN extends string, Providers extends DefaultProv
       return fs;
     },
 
-    exposes: modules.map(m => `modules.${m.name}`),
+    exposes: modules.map((m) => `modules.${m.name}`),
 
     getExposed(_paths: Paths, _paramProvider: IO): Record<string, unknown> {
-      return renameKeys(modulesEnabled, k => `modules.${k}`);
+      return renameKeys(modulesEnabled, (k) => `modules.${k}`);
     },
   };
 }

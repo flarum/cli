@@ -18,9 +18,9 @@ export default class Init extends BaseCommand {
 
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
     return stepManager
-      .namedStep('gitInit', new GitInit(), { optional: true, confirmationMessage: 'Run `git init`? (recommended)', default: true})
+      .namedStep('gitInit', new GitInit(), { optional: true, confirmationMessage: 'Run `git init`? (recommended)', default: true })
       .namedStep('skeleton', genExtScaffolder().genInitStep())
-      .step(new ComposerInstall(), { optional: true, confirmationMessage: 'Run `composer install`? (recommended)', default: true})
+      .step(new ComposerInstall(), { optional: true, confirmationMessage: 'Run `composer install`? (recommended)', default: true })
       .step(new YarnInstall(), { optional: true, confirmationMessage: 'Run `yarn install`? (recommended)', default: true }, [
         {
           sourceStep: 'skeleton',

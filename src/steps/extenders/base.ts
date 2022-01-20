@@ -26,7 +26,7 @@ export abstract class BaseExtenderStep implements Step<FlarumProviders> {
 
   exposes = [];
 
-  getExposed(): Record<string, unknown>  {
+  getExposed(): Record<string, unknown> {
     return {};
   }
 

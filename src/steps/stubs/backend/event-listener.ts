@@ -34,5 +34,5 @@ export class GenerateEventListenerStub extends BasePhpStubStep {
         type: 'text',
       },
     ],
-  }
+  };
 }

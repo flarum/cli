@@ -13,21 +13,20 @@ export default class Policy extends BaseCommand {
   static args = [...BaseCommand.args];
 
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
-    return stepManager
-      .atomicGroup(stepManager => {
-        stepManager
-          .namedStep('policy', new GeneratePolicyStub(this.STUB_PATH, genExtScaffolder()))
-          .step(new GeneratePolicyExtender(), { optional: true, confirmationMessage: 'Generate corresponding extender?', default: true }, [
-            {
-              sourceStep: 'policy',
-              exposedName: 'class',
-              consumedName: 'policyClass',
-            },
-            {
-              sourceStep: 'policy',
-              exposedName: 'modelClass',
-            },
-          ]);
-      });
+    return stepManager.atomicGroup((stepManager) => {
+      stepManager
+        .namedStep('policy', new GeneratePolicyStub(this.STUB_PATH, genExtScaffolder()))
+        .step(new GeneratePolicyExtender(), { optional: true, confirmationMessage: 'Generate corresponding extender?', default: true }, [
+          {
+            sourceStep: 'policy',
+            exposedName: 'class',
+            consumedName: 'policyClass',
+          },
+          {
+            sourceStep: 'policy',
+            exposedName: 'modelClass',
+          },
+        ]);
+    });
   }
 }

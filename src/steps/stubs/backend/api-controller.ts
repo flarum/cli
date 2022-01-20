@@ -54,5 +54,5 @@ export class GenerateApiControllerStub extends BasePhpStubStep {
         type: 'text',
       },
     ],
-  }
+  };
 }

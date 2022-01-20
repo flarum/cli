@@ -1,1 +1,4 @@
 boilerplate
+coverage
+test/**/fixtures
+lib

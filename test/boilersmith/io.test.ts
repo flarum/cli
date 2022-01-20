@@ -12,7 +12,7 @@ describe('PromptsIO Tests', function () {
         message: 'get param',
         type: 'text',
         name: 'something',
-      }),
+      })
     ).toBe('val');
   });
 
@@ -25,20 +25,19 @@ describe('PromptsIO Tests', function () {
         type: 'text',
         name: 'something',
         initial: 'default',
-      }),
+      })
     ).toBe('default');
   });
 
   it('Errors when no initial in noInteraction mode', async function () {
     const io = new PromptsIO({}, [], true);
 
-    expect(
-      async () =>
-        io.getParam({
-          message: 'get param',
-          type: 'text',
-          name: 'something',
-        }),
+    expect(async () =>
+      io.getParam({
+        message: 'get param',
+        type: 'text',
+        name: 'something',
+      })
     ).rejects.toThrow('No-Interaction mode is on, but input is required for param "something".');
   });
 
@@ -50,7 +49,7 @@ describe('PromptsIO Tests', function () {
         message: 'get param',
         type: 'confirm',
         name: 'something',
-      }),
+      })
     ).toBe(false);
   });
 
@@ -62,7 +61,7 @@ describe('PromptsIO Tests', function () {
         message: 'get param',
         type: 'toggle',
         name: 'something',
-      }),
+      })
     ).toBe(false);
   });
 });

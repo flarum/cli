@@ -11,8 +11,7 @@ export default class UpdateJsImports extends BaseCommand {
   static args = [...BaseCommand.args];
 
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
-    return stepManager
-      .step(new UpdateJSImports());
+    return stepManager.step(new UpdateJSImports());
   }
 
   protected async additionalPreRunChecks(extRoot: string): Promise<void> {
