@@ -377,7 +377,7 @@ describe.each([
   [requestedTestDir, backendTestsTestSpecs],
   [requestedJsDir, frontendTestSpecs],
 ])('Backend stub tests', function (requestedDir, specs) {
-  describe.each(specs)('Stub test: $variable.StubClass.name', function (spec) {
+  describe.each(specs)('Stub test: $1.StubClass.name', function (spec) {
     const scaffolder = genExtScaffolder();
     const stubDir = resolve(__dirname, '../../../boilerplate/stubs');
 
