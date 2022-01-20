@@ -22,10 +22,12 @@ export class GenerateIntegrationTestStub extends BasePhpStubStep {
       {
         name: 'classNamespace',
         type: 'text',
+        message: 'Class Namespace',
       },
       {
         name: 'extensionId',
         type: 'text',
+        message: 'Extension Id',
       },
     ],
   };

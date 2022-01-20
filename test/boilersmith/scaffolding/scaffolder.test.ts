@@ -21,11 +21,11 @@ describe('Scaffolder', function () {
 
     const templateParams: TemplateParam<string, 'someVar' | 'someOtherVar' | 'varKey'>[] = [
       {
-        prompt: { name: 'someVar', type: 'text' },
+        prompt: { name: 'someVar', message: 'prompt', type: 'text' },
         getCurrVal: async () => '',
       },
       {
-        prompt: { name: 'someOtherVar', type: 'text' },
+        prompt: { name: 'someOtherVar', message: 'prompt', type: 'text' },
         getCurrVal: async () => '',
       },
       {

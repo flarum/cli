@@ -28,6 +28,7 @@ export class GenerateModelStub extends BaseJsStubStep {
       {
         name: 'classNamespace',
         type: 'text',
+        message: 'Class Namespace',
       },
     ],
   };

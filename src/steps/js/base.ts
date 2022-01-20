@@ -17,7 +17,7 @@ export abstract class BaseJsStep implements Step<FlarumProviders> {
   async run(fs: Store, paths: Paths, io: IO, _providers: FlarumProviders): Promise<Store> {
     const fsEditor = create(fs);
 
-    const frontend: string = await io.getParam({ name: 'frontend', type: 'text' });
+    const frontend: string = await io.getParam({ name: 'frontend', message: 'Frontend', type: 'text' });
     let frontends: string[] = [frontend];
 
     if (frontend === 'common') {

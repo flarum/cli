@@ -25,6 +25,7 @@ export class GenerateModelStub extends BasePhpStubStep {
       {
         name: 'classNamespace',
         type: 'text',
+        message: 'Class Namespace',
       },
       {
         name: 'tableName',

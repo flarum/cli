@@ -17,6 +17,7 @@ export class GenerateValidatorStub extends BasePhpStubStep {
       {
         name: 'classNamespace',
         type: 'text',
+        message: 'Class Namespace',
       },
     ],
   };

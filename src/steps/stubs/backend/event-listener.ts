@@ -22,6 +22,7 @@ export class GenerateEventListenerStub extends BasePhpStubStep {
       {
         name: 'classNamespace',
         type: 'text',
+        message: 'Class Namespace',
       },
       {
         name: 'eventClass',
@@ -32,6 +33,7 @@ export class GenerateEventListenerStub extends BasePhpStubStep {
       {
         name: 'eventClassName',
         type: 'text',
+        message: 'Event Class Name',
       },
     ],
   };

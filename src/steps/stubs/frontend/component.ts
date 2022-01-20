@@ -24,6 +24,7 @@ export class GenerateComponentStub extends BaseJsStubStep {
       {
         name: 'classNamespace',
         type: 'text',
+        message: 'Class Namespace',
       },
     ],
   };

@@ -24,6 +24,7 @@ export class GenerateModalStub extends BaseJsStubStep {
       {
         name: 'classNamespace',
         type: 'text',
+        message: 'Class Namespace',
       },
     ],
   };

@@ -22,6 +22,7 @@ export class GenerateApiControllerStub extends BasePhpStubStep {
       {
         name: 'classNamespace',
         type: 'text',
+        message: 'Class Namespace',
       },
       {
         name: 'classType',
@@ -41,6 +42,7 @@ export class GenerateApiControllerStub extends BasePhpStubStep {
       {
         name: 'serializerClassName',
         type: 'text',
+        message: 'Serializer class name',
       },
       {
         name: 'handlerCommandClass',
@@ -52,6 +54,7 @@ export class GenerateApiControllerStub extends BasePhpStubStep {
       {
         name: 'handlerCommandClassName',
         type: 'text',
+        message: 'Handler command class name',
       },
     ],
   };

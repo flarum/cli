@@ -36,6 +36,6 @@ export abstract class BaseJsStubStep extends FlarumBaseStubStep {
   }
 
   protected async getFileName(_fs: Store, _paths: Paths, io: IO): Promise<string> {
-    return (await io.getParam({ name: 'className', type: 'text' })) + '.js';
+    return (await io.getParam({ name: 'className', message: 'File name', type: 'text' })) + '.js';
   }
 }

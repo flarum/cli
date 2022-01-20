@@ -6,7 +6,7 @@ type StringPromptType = PromptType & ('text' | 'password' | 'invisible' | 'autoc
 type DatePromptType = PromptType & 'date';
 type ListPromptType = PromptType & 'list';
 
-export type ParamDef<N extends string = string> = Omit<PromptObject<N>, 'name'> & { name: N };
+export type ParamDef<N extends string = string> = Omit<PromptObject<N>, 'name'> & { name: N; message: string };
 
 export type Message = { type: 'info' | 'warning' | 'error'; message: string };
 

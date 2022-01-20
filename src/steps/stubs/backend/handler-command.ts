@@ -22,6 +22,7 @@ export class GenerateHandlerCommandStub extends BasePhpStubStep {
       {
         name: 'classNamespace',
         type: 'text',
+        message: 'Class Namespace',
       },
       {
         name: 'classType',

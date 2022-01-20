@@ -17,6 +17,7 @@ export class GenerateJobStub extends BasePhpStubStep {
       {
         name: 'classNamespace',
         type: 'text',
+        message: 'Class Namespace',
       },
     ],
   };

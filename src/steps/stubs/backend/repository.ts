@@ -22,6 +22,7 @@ export class GenerateRepositoryStub extends BasePhpStubStep {
       {
         name: 'classNamespace',
         type: 'text',
+        message: 'Class Namespace',
       },
       {
         name: 'modelClass',
@@ -32,6 +33,7 @@ export class GenerateRepositoryStub extends BasePhpStubStep {
       {
         name: 'modelClassName',
         type: 'text',
+        message: 'Class Namespace',
       },
     ],
   };

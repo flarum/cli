@@ -17,6 +17,7 @@ export class GenerateServiceProviderStub extends BasePhpStubStep {
       {
         name: 'classNamespace',
         type: 'text',
+        message: 'Class Namespace',
       },
     ],
   };

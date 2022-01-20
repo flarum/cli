@@ -25,6 +25,7 @@ export class GenerateHandlerStub extends BasePhpStubStep {
       {
         name: 'classNamespace',
         type: 'text',
+        message: 'Class Namespace',
       },
       {
         name: 'handlerCommandClass',
@@ -35,6 +36,7 @@ export class GenerateHandlerStub extends BasePhpStubStep {
       {
         name: 'handlerCommandClassName',
         type: 'text',
+        message: 'Handler command class name',
       },
       {
         name: 'repositoryClass', // TODO: This type of parameter is a bit of a mess
@@ -45,6 +47,7 @@ export class GenerateHandlerStub extends BasePhpStubStep {
       {
         name: 'repositoryClassName',
         type: 'text',
+        message: 'Repository Class Name',
       },
       {
         name: 'validatorClass',
@@ -55,6 +58,7 @@ export class GenerateHandlerStub extends BasePhpStubStep {
       {
         name: 'validatorClassName',
         type: 'text',
+        message: 'Validator Class Name',
       },
     ],
   };

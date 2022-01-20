@@ -28,6 +28,7 @@ export class GenerateApiSerializerStub extends BasePhpStubStep {
       {
         name: 'classNamespace',
         type: 'text',
+        message: 'Class Namespace',
       },
       {
         name: 'modelClass',
@@ -38,10 +39,12 @@ export class GenerateApiSerializerStub extends BasePhpStubStep {
       {
         name: 'modelClassName',
         type: 'text',
+        message: 'Model class name',
       },
       {
         name: 'modelType',
         type: 'text',
+        message: 'Model type',
       },
     ],
   };
