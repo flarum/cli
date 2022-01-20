@@ -32,6 +32,7 @@ describe('Test extension skeleton step', function () {
     licenseType: 'MIT',
     extensionName: 'Flarum Test',
     mainGitBranch: 'main',
+    jsPackageManager: 'yarn',
     advancedInstallation: true,
     'modules.admin': true,
     'modules.forum': true,
@@ -67,7 +68,7 @@ describe('Test extension skeleton step', function () {
   }
 
   test('Includes all default modules by default', async function () {
-    const { fs } = await runStep(initStep, {}, [], { ...vars, advancedInstallation: false });
+    const { fs } = await runStep(initStep, {}, { usePrompts: false, initialParams: { ...vars, advancedInstallation: false } });
 
     const expected = await getExpected();
 
@@ -80,7 +81,7 @@ describe('Test extension skeleton step', function () {
     expect(await getEnabledModules(fs)).toStrictEqual(buildModules(['bundlewatch']));
   });
   test('Includes all files when requested', async function () {
-    const { fs } = await runStep(initStep, {}, [], vars);
+    const { fs } = await runStep(initStep, {}, { usePrompts: false, initialParams: vars });
 
     const expected = await getExpected();
 
@@ -94,7 +95,7 @@ describe('Test extension skeleton step', function () {
   });
 
   test('Can exclude locales', async function () {
-    const { fs } = await runStep(initStep, {}, [], { ...vars, 'modules.locale': false });
+    const { fs } = await runStep(initStep, {}, { usePrompts: false, initialParams: { ...vars, 'modules.locale': false } });
 
     const expected = (await getExpected()).filter((path) => !path.includes('/locale/'));
 
@@ -108,7 +109,7 @@ describe('Test extension skeleton step', function () {
   });
 
   test('Can exclude JS completely', async function () {
-    const { fs } = await runStep(initStep, {}, [], { ...vars, 'modules.js': false });
+    const { fs } = await runStep(initStep, {}, { usePrompts: false, initialParams: { ...vars, 'modules.js': false } });
 
     const expected = (await getExpected()).filter((path) => !path.includes('/js/'));
 
@@ -122,7 +123,7 @@ describe('Test extension skeleton step', function () {
   });
 
   test('Can exclude TS completely', async function () {
-    const { fs } = await runStep(initStep, {}, [], { ...vars, 'modules.typescript': false });
+    const { fs } = await runStep(initStep, {}, { usePrompts: false, initialParams: { ...vars, 'modules.typescript': false } });
 
     const expected = (await getExpected(false)).filter((path) => !path.includes('tsconfig'));
 
@@ -136,7 +137,7 @@ describe('Test extension skeleton step', function () {
   });
 
   test('Can exclude CSS completely', async function () {
-    const { fs } = await runStep(initStep, {}, [], { ...vars, 'modules.css': false });
+    const { fs } = await runStep(initStep, {}, { usePrompts: false, initialParams: { ...vars, 'modules.css': false } });
 
     const expected = (await getExpected()).filter((path) => !path.includes('/less/'));
 
@@ -150,7 +151,7 @@ describe('Test extension skeleton step', function () {
   });
 
   test('Can exclude Actions CI', async function () {
-    const { fs } = await runStep(initStep, {}, [], { ...vars, 'modules.githubActions': false });
+    const { fs } = await runStep(initStep, {}, { usePrompts: false, initialParams: { ...vars, 'modules.githubActions': false } });
 
     const expected = (await getExpected()).filter((path) => !path.includes('/.github/workflows/'));
 
@@ -164,7 +165,7 @@ describe('Test extension skeleton step', function () {
   });
 
   test('Can set main git branch for Actions CI', async function () {
-    const { fs } = await runStep(initStep, {}, [], { ...vars, mainGitBranch: 'my/prod/branch' });
+    const { fs } = await runStep(initStep, {}, { usePrompts: false, initialParams: { ...vars, mainGitBranch: 'my/prod/branch' } });
 
     const expected = await getExpected();
 

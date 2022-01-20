@@ -43,6 +43,7 @@ const testSpecs: ExtenderTest[] = [
       routePath: '/potatoes',
       routeName: 'potatoes.index',
       routeHandler: 'Flarum\\Demo\\Api\\Controller\\ListPotatoesController',
+      httpMethod: 'GET',
     },
   },
   // Service Provider
@@ -50,6 +51,7 @@ const testSpecs: ExtenderTest[] = [
     ExtenderClass: GenerateServiceProviderExtender,
     params: {
       className: 'CustomServiceProvider',
+      providerClass: 'Flarum\\Demo\\Provider',
     },
   },
   // Policy
@@ -84,8 +86,7 @@ return [];
       const { fs } = await runStep(
         new spec.ExtenderClass(),
         { php: stubPhpProviderFactory() },
-        Object.values(spec.params),
-        {},
+        { usePrompts: false, initialParams: spec.params },
         initialFilesCallback,
         requestedDir
       );

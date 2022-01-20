@@ -61,9 +61,7 @@ describe('init step factory', function () {
   it('works if all modules enabled', async function () {
     const step = initStepFactory(scaffoldDir, modules, templateParams);
 
-    prompts.inject(['Var Value', true, true, true]);
-
-    const { fs } = await runStep(step, {});
+    const { fs } = await runStep(step, {}, {usePrompts: true, paramVals: ['Var Value', true, true, true], initialParams: {}});
 
     expect(getFsPaths(fs).sort()).toStrictEqual([
       '/ext/.gitignore',
@@ -80,9 +78,7 @@ describe('init step factory', function () {
   it('works if all optional modules disabled', async function () {
     const step = initStepFactory(scaffoldDir, modules, templateParams);
 
-    prompts.inject(['Var Value', true, false, false]);
-
-    const { fs } = await runStep(step, {});
+    const { fs } = await runStep(step, {}, {usePrompts: true, paramVals: ['Var Value', true, false, false], initialParams: {}});
 
     expect(getFsPaths(fs).sort()).toStrictEqual(['/ext/.gitignore', '/ext/readme.md']);
   });
@@ -90,9 +86,7 @@ describe('init step factory', function () {
   it('respects module defaults if not in advanced mode', async function () {
     const step = initStepFactory(scaffoldDir, modules, templateParams);
 
-    prompts.inject(['Var Value', false]);
-
-    const { fs } = await runStep(step, {});
+    const { fs } = await runStep(step, {}, {usePrompts: true, paramVals: ['Var Value', false], initialParams: {}});
 
     expect(getFsPaths(fs).sort()).toStrictEqual([
       '/ext/.gitignore',
@@ -114,9 +108,7 @@ describe('init step factory', function () {
       },
     });
 
-    prompts.inject(['Var Value', false]);
-
-    await runStep(step, {});
+    await runStep(step, {}, {usePrompts: true, paramVals: ['Var Value', false], initialParams: {}});
 
     expect(cache).toStrictEqual({
       sourceFiles: true,

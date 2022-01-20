@@ -68,18 +68,32 @@ interface StepOutput {
   exposedParams: Record<string, unknown>;
 }
 
+class CacheIO extends PromptsIO {
+  async getParam<T>(paramDef: ParamDef<string>): Promise<T> {
+    if (!this.cache.has(paramDef.name)) throw new Error(`No value for param ${paramDef.name}`);
+    return this.cache.get(paramDef.name) as T;
+  }
+}
+
+type IOConf =
+  | { initialParams: Record<string, unknown>; usePrompts: false }
+  | { initialParams: Record<string, unknown>; usePrompts: true; paramVals: unknown[] };
+
 export async function runStep<Providers extends DefaultProviders>(
   step: Step<Providers>,
   providers: Providers,
-  params: unknown[] = [],
-  initialParams: Record<string, unknown> = {},
+  // eslint-disable-next-line unicorn/no-object-as-default-parameter
+  ioConf: IOConf = { initialParams: {}, usePrompts: false },
   initialFilesCallback: (paths: Paths) => Record<string, string> = () => empty,
   requestedDir: string | null = null
 ): Promise<StepOutput> {
   const fs = createMemFs();
   const paths = stubPathsFactory({ requestedDir });
-  prompt.inject(params);
-  const io = new PromptsIO(initialParams);
+  if (ioConf.usePrompts) {
+    prompt.inject(ioConf.paramVals);
+  }
+
+  const io = ioConf.usePrompts ? new PromptsIO(ioConf.initialParams) : new CacheIO(ioConf.initialParams);
 
   const fsEditor = createMemFsEditor(fs);
   const initialFiles = initialFilesCallback(paths);

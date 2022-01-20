@@ -49,11 +49,11 @@ type OnCancel = () => void;
 export class PromptsIO implements IO {
   public supportsAnsiColor = true;
 
-  private cache = new Map<string, unknown>();
-  private messages: Message[];
-  private noInteraction: boolean;
-  private onCancel?: OnCancel;
-  private prev?: { val: any; prompt: ParamDef };
+  protected cache = new Map<string, unknown>();
+  protected messages: Message[];
+  protected noInteraction: boolean;
+  protected onCancel?: OnCancel;
+  protected prev?: { val: any; prompt: ParamDef };
 
   constructor(
     initial: Record<string, unknown> = {},

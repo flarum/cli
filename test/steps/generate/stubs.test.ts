@@ -366,7 +366,11 @@ const sampleComposerJson = {
   },
 };
 
-let scaffolder: ReturnType<typeof genExtScaffolder>;
+const initialFilesCallback = (paths: Paths) => {
+  const initial: Record<string, string> = {};
+  initial[paths.package('composer.json')] = JSON.stringify(sampleComposerJson);
+  return initial;
+};
 
 describe.each([
   [requestedDir, backendTestSpecs],
@@ -374,21 +378,14 @@ describe.each([
   [requestedJsDir, frontendTestSpecs],
 ])('Backend stub tests', function (requestedDir, specs) {
   describe.each(specs)('Stub test: $variable.StubClass.name', function (spec) {
-    const initialFilesCallback = (paths: Paths) => {
-      const initial: Record<string, string> = {};
-      initial[paths.package('composer.json')] = JSON.stringify(sampleComposerJson);
-      return initial;
-    };
-
-    scaffolder = genExtScaffolder();
+    const scaffolder = genExtScaffolder();
     const stubDir = resolve(__dirname, '../../../boilerplate/stubs');
 
     test('With default dir', async function () {
       const { fs, exposedParams } = await runStep(
         new spec.StubClass(stubDir, scaffolder),
         { php: stubPhpProviderFactory() },
-        Object.values(spec.params),
-        {},
+        { usePrompts: false, initialParams: spec.params },
         initialFilesCallback
       );
 
@@ -401,8 +398,7 @@ describe.each([
       const { fs, exposedParams } = await runStep(
         new spec.StubClass(stubDir, scaffolder),
         { php: stubPhpProviderFactory() },
-        Object.values(spec.params),
-        {},
+        { usePrompts: false, initialParams: spec.params },
         initialFilesCallback,
         requestedDir
       );
@@ -441,8 +437,7 @@ describe('Stub Test: Migrations', function () {
     const { fs, exposedParams } = await runStep(
       new migrationSpec.StubClass(stubDir, scaffolder),
       { php: stubPhpProviderFactory() },
-      Object.values(migrationSpec.params),
-      {},
+      { usePrompts: false, initialParams: migrationSpec.params },
       initialFilesCallback
     );
 
@@ -455,8 +450,7 @@ describe('Stub Test: Migrations', function () {
     const { fs, exposedParams } = await runStep(
       new migrationSpec.StubClass(stubDir, scaffolder),
       { php: stubPhpProviderFactory() },
-      Object.values(migrationSpec.params),
-      {},
+      { usePrompts: false, initialParams: migrationSpec.params },
       initialFilesCallback,
       requestedDir
     );
