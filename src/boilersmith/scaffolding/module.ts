@@ -10,7 +10,7 @@ import { cloneAndFill } from 'boilersmith/utils/clone-and-fill';
 import { renameKeys } from 'boilersmith/utils/rename-keys';
 import { condFormat } from 'boilersmith/utils/cond-format';
 
-type FileOwnershipCommon = {
+type FileOwnershipCommon<N extends string> = {
   /**
    * The path to the file
    */
@@ -24,7 +24,7 @@ type FileOwnershipCommon = {
   /**
    * Depends on other modules being enabled (or disabled).
    */
-  moduleDeps?: (string | { module: string; enabled: boolean })[];
+  moduleDeps?: (N | { module: N; enabled: boolean })[];
 
   /**
    * Only create the file if it doesn't exist; do not update existing files.
@@ -32,8 +32,8 @@ type FileOwnershipCommon = {
   doNotUpdate?: boolean;
 };
 
-type FileOwnership =
-  | (FileOwnershipCommon & {
+type FileOwnership<N extends string> =
+  | (FileOwnershipCommon<N> & {
       /**
        * If in a monorepo, should the file be placed relative to the monorepo root, and if so, where?
        * If provided, takes priority over destPath.
@@ -45,7 +45,7 @@ type FileOwnership =
        */
       requireMonorepo: boolean;
     })
-  | FileOwnershipCommon;
+  | FileOwnershipCommon<N>;
 
 interface CommonModule<N extends string> {
   name: N;
@@ -62,7 +62,7 @@ interface CommonModule<N extends string> {
   /**
    * A list of scaffolding files managed by this module.
    */
-  filesToReplace: (string | FileOwnership)[];
+  filesToReplace: (string | FileOwnership<N>)[];
 
   /**
    * A map of names of JSON files to keys which should be deep-merged from the scaffolding.
@@ -96,7 +96,7 @@ interface TogglableModule<N extends string> extends CommonModule<N> {
   /**
    * Can only be enabled if these other modules are enabled.
    */
-  dependsOn: string[];
+  dependsOn: N[];
 
   /**
    * On an existing installation, if no information about whether this
