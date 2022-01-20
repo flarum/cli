@@ -366,49 +366,47 @@ const sampleComposerJson = {
   },
 };
 
-for (const specDefinition of [
-  { requestedDir: requestedDir, testSpecs: backendTestSpecs },
-  { requestedDir: requestedTestDir, testSpecs: backendTestsTestSpecs },
-  { requestedDir: requestedJsDir, testSpecs: frontendTestSpecs },
-]) {
-  describe('Backend stub tests', function () {
-    for (const spec of specDefinition.testSpecs) {
-      describe(`Stub Test: ${spec.StubClass.name}`, function () {
-        const initialFilesCallback = (paths: Paths) => {
-          const initial: Record<string, string> = {};
-          initial[paths.package('composer.json')] = JSON.stringify(sampleComposerJson);
-          return initial;
-        };
+let scaffolder: ReturnType<typeof genExtScaffolder>;
 
-        const scaffolder = genExtScaffolder();
-        const stubDir = resolve(__dirname, '../../../boilerplate/stubs');
+describe.each([
+  [requestedDir, backendTestSpecs],
+  [requestedTestDir, backendTestsTestSpecs],
+  [requestedJsDir, frontendTestSpecs],
+])('Backend stub tests', function (requestedDir, specs) {
+  describe.each(specs)('Stub test: $variable.StubClass.name', function (spec) {
+    const initialFilesCallback = (paths: Paths) => {
+      const initial: Record<string, string> = {};
+      initial[paths.package('composer.json')] = JSON.stringify(sampleComposerJson);
+      return initial;
+    };
 
-        test('With default dir', async function () {
-          const { fs, exposedParams } = await runStep(new spec.StubClass(stubDir, scaffolder), {php: stubPhpProviderFactory()}, Object.values(spec.params), {}, initialFilesCallback);
+    scaffolder = genExtScaffolder();
+    const stubDir = resolve(__dirname, '../../../boilerplate/stubs');
 
-          expect(getFsPaths(fs)).toStrictEqual([...spec.expectedModifiedFilesDefaultDir, '/ext/composer.json'].sort());
+    test('With default dir', async function () {
+      const { fs, exposedParams } = await runStep(new spec.StubClass(stubDir, scaffolder), {php: stubPhpProviderFactory()}, Object.values(spec.params), {}, initialFilesCallback);
 
-          expect(exposedParams).toStrictEqual(spec.expectedExposedParamsDefaultDir);
-        });
+      expect(getFsPaths(fs)).toStrictEqual([...spec.expectedModifiedFilesDefaultDir, '/ext/composer.json'].sort());
 
-        test('With requested dir', async function () {
-          const { fs, exposedParams } = await runStep(
-            new spec.StubClass(stubDir, scaffolder),
-            {php: stubPhpProviderFactory()},
-            Object.values(spec.params),
-            {},
-            initialFilesCallback,
-            specDefinition.requestedDir,
-          );
+      expect(exposedParams).toStrictEqual(spec.expectedExposedParamsDefaultDir);
+    });
 
-          expect(getFsPaths(fs)).toStrictEqual([...spec.expectedModifiedFilesRequestedDir, '/ext/composer.json'].sort());
+    test('With requested dir', async function () {
+      const { fs, exposedParams } = await runStep(
+        new spec.StubClass(stubDir, scaffolder),
+        {php: stubPhpProviderFactory()},
+        Object.values(spec.params),
+        {},
+        initialFilesCallback,
+        requestedDir,
+      );
 
-          expect(exposedParams).toStrictEqual(spec.expectedExposedParamsRequestedDir);
-        });
-      });
-    }
+      expect(getFsPaths(fs)).toStrictEqual([...spec.expectedModifiedFilesRequestedDir, '/ext/composer.json'].sort());
+
+      expect(exposedParams).toStrictEqual(spec.expectedExposedParamsRequestedDir);
+    });
   });
-}
+});
 
 const migrationSpec: StubTest = {
   StubClass: GenerateMigrationStub,
