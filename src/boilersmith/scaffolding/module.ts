@@ -25,6 +25,11 @@ type FileOwnershipCommon = {
    * Depends on other modules being enabled (or disabled).
    */
   moduleDeps?: (string | { module: string; enabled: boolean })[];
+
+  /**
+   * Only create the file if it doesn't exist; do not update existing files.
+   */
+  doNotUpdate?: boolean;
 };
 
 type FileOwnership =
@@ -222,6 +227,16 @@ export async function applyModule<MN extends string, TN extends string>(
     const path = typeof file === 'string' ? file : file.path;
     const moduleDeps = typeof file === 'string' ? [] : file.moduleDeps ?? [];
 
+    const copyToIfMonorepo =
+      typeof file !== 'string' && 'monorepoPath' in file && file.monorepoPath
+        ? paths.monorepo(cloneAndFill(file.monorepoPath, tplDataFlat))
+        : undefined;
+    const copyTo = copyToIfMonorepo ?? paths.package(typeof file !== 'string' && file.destPath ? cloneAndFill(file.destPath, tplDataFlat) : path);
+
+    if (typeof file !== 'string' && file.doNotUpdate && fsEditor.exists(copyTo)) {
+      continue;
+    }
+
     if (typeof file !== 'string' && 'requireMonorepo' in file && file.requireMonorepo && paths.monorepo() === null) {
       continue;
     }
@@ -237,11 +252,6 @@ export async function applyModule<MN extends string, TN extends string>(
       continue;
     }
 
-    const copyToIfMonorepo =
-      typeof file !== 'string' && 'monorepoPath' in file && file.monorepoPath
-        ? paths.monorepo(cloneAndFill(file.monorepoPath, tplDataFlat))
-        : undefined;
-    const copyTo = copyToIfMonorepo ?? paths.package(typeof file !== 'string' && file.destPath ? cloneAndFill(file.destPath, tplDataFlat) : path);
     fsEditor.copyTpl(resolve(scaffoldDir, path), copyTo, tplData);
   }
 

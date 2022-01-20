@@ -195,7 +195,7 @@ describe('applyModule', function () {
 
     expect(getFsPaths(fs)).toStrictEqual(justFilesModule.filesToReplace.map((p) => `/ext/${p}`));
     expect(getExtFileContents(fs, '.gitignore')).toStrictEqual('node_modules');
-    expect(getExtFileContents(fs, 'readme.md')).toStrictEqual('# Sample Scaffolding');
+    expect(getExtFileContents(fs, 'readme.md')).toStrictEqual('# Sample Scaffolding\n');
   });
 
   it('can exclude files from being copied', async function () {
@@ -214,7 +214,7 @@ describe('applyModule', function () {
       justFilesModule.filesToReplace.filter((f) => !excludeScaffolding.includes(typeof f === 'string' ? f : f.path)).map((p) => `/ext/${p}`)
     );
     expect(getExtFileContents(fs, '.gitignore')).toStrictEqual('node_modules');
-    expect(getExtFileContents(fs, 'readme.md')).toStrictEqual('# Sample Scaffolding');
+    expect(getExtFileContents(fs, 'readme.md')).toStrictEqual('# Sample Scaffolding\n');
   });
 
   it('copies over files in monorepo config', async function () {
@@ -486,5 +486,50 @@ describe('applyModule', function () {
     expect(async () => {
       await applyModule(module, { 'just-files': true }, {}, scaffoldDir, createStore(), new NodePaths({ package: '/ext' }));
     }).rejects.toThrow('Cannot update module "just-files", as it is not updatable, and has already been initialized.');
+  });
+
+  it('creates doNotUpdate files if they dont exist', async function () {
+    const module: Module = {
+      name: 'files-need-modules',
+      togglable: false,
+      updatable: true,
+      shortDescription: '',
+      filesToReplace: [{ path: 'readme.md', doNotUpdate: true }],
+      jsonToAugment: {},
+      needsTemplateParams: [],
+    };
+
+    const fs = await applyModule(
+      module,
+      { 'files-need-modules': true, enabledModule: true },
+      {},
+      scaffoldDir,
+      createStore(),
+      new NodePaths({ package: '/ext' })
+    );
+
+    expect(getFsPaths(fs)).toStrictEqual(['/ext/readme.md']);
+    expect(create(fs).read('/ext/readme.md')).toEqual('# Sample Scaffolding\n');
+  });
+
+  it('doesnt update doNotUpdate files if they already exist', async function () {
+    const module: Module = {
+      name: 'files-need-modules',
+      togglable: false,
+      updatable: true,
+      shortDescription: '',
+      filesToReplace: [{ path: 'readme.md', doNotUpdate: true }],
+      jsonToAugment: {},
+      needsTemplateParams: [],
+    };
+
+    const fs = createStore();
+
+    create(fs).write('/ext/readme.md', 'DO NOT OVERWRITE');
+
+    await applyModule(module, { 'files-need-modules': true, enabledModule: true }, {}, scaffoldDir, fs, new NodePaths({ package: '/ext' }));
+
+    expect(getFsPaths(fs)).toStrictEqual(['/ext/readme.md']);
+    expect(create(fs).read('/ext/readme.md')).toEqual('DO NOT OVERWRITE');
   });
 });
