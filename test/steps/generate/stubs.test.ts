@@ -173,6 +173,7 @@ const backendTestSpecs: StubTest[] = [
     params: {
       className: 'CustomCommand',
       commandName: 'custom:command',
+      commandDescription: 'Custom Command Description',
     },
     expectedModifiedFilesDefaultDir: ['/ext/src/Console/CustomCommand.php'],
     expectedModifiedFilesRequestedDir: [`${requestedDir}/CustomCommand.php`],
@@ -372,13 +373,26 @@ const initialFilesCallback = (paths: Paths) => {
   return initial;
 };
 
+const scaffolder = genExtScaffolder();
+scaffolder.templateParamVal = jest
+  .fn(async (name) => {
+    switch (name) {
+      case 'packageName':
+        return 'flarum/core';
+      case 'packageNamespace':
+        return 'Flarum\\Demo';
+      default:
+        return 'flarum';
+    }
+  })
+  .bind(scaffolder);
+
 describe.each([
   [requestedDir, backendTestSpecs],
   [requestedTestDir, backendTestsTestSpecs],
   [requestedJsDir, frontendTestSpecs],
 ])('Backend stub tests', function (requestedDir, specs) {
   describe.each(specs)('Stub test: $1.StubClass.name', function (spec) {
-    const scaffolder = genExtScaffolder();
     const stubDir = resolve(__dirname, '../../../boilerplate/stubs');
 
     test('With default dir', async function () {
@@ -430,7 +444,6 @@ describe('Stub Test: Migrations', function () {
     return initial;
   };
 
-  const scaffolder = genExtScaffolder();
   const stubDir = resolve(__dirname, '../../../boilerplate/stubs');
 
   test('With default dir', async function () {
