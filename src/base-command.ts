@@ -79,7 +79,7 @@ export default abstract class BaseCommand extends Command {
 
     const phpProvider = new PhpSubsystemProvider(resolve(__dirname, '../php-subsystem/index.php'));
 
-    const out = await this.steps(new StepManager<FlarumProviders>()).run(paths, this.genIO(), { php: phpProvider }, this.dry);
+    const out = await this.steps(new StepManager<FlarumProviders>(), extRoot).run(paths, this.genIO(), { php: phpProvider }, this.dry);
 
     const errorMessages = out.messages.filter((m) => m.type === 'error');
 
@@ -94,7 +94,7 @@ export default abstract class BaseCommand extends Command {
       }
 
       this.log(chalk.bold(chalk.yellow('The steps that completed were:')));
-    } else if (out.error === 'EEXIT: 0') {
+    } else if (out.error.startsWith('EEXIT:')) {
       this.log(chalk.bold(chalk.underline(chalk.red('Exiting.'))));
       if (out.stepsRan.length > 0) {
         this.log(chalk.bold(chalk.yellow('Before the exit, the following steps were completed:')));
@@ -146,7 +146,7 @@ export default abstract class BaseCommand extends Command {
     // Can be implemented if needed.
   }
 
-  protected abstract steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders>;
+  protected abstract steps(stepManager: StepManager<FlarumProviders>, extRoot: string): StepManager<FlarumProviders>;
 
   // ----------------------------------------------------------------
   // Confirmation
@@ -189,6 +189,12 @@ export default abstract class BaseCommand extends Command {
     } catch {
       return false;
     }
+  }
+
+  protected jsPackageManager(currDir: string): 'yarn' | 'npm' | null {
+    if (!existsSync(resolve(currDir, 'js'))) return null;
+
+    return existsSync(resolve(currDir, 'js/yarn.lock')) ? 'yarn' : 'npm';
   }
 
   protected async getFlarumExtensionRoot(currDir: string): Promise<{ path: string; type: LocationType }> {
