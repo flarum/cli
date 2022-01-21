@@ -1,4 +1,3 @@
-import prompts from 'prompts';
 import { Module } from 'boilersmith/scaffolding/module';
 import { TemplateParam } from 'boilersmith/scaffolding/template-param';
 import { initStepFactory } from 'boilersmith/scaffolding/init-step-factory';
@@ -61,7 +60,7 @@ describe('init step factory', function () {
   it('works if all modules enabled', async function () {
     const step = initStepFactory(scaffoldDir, modules, templateParams);
 
-    const { fs } = await runStep(step, {}, {usePrompts: true, paramVals: ['Var Value', true, true, true], initialParams: {}});
+    const { fs } = await runStep(step, {}, { usePrompts: true, paramVals: ['Var Value', true, true, true], initialParams: {} });
 
     expect(getFsPaths(fs).sort()).toStrictEqual([
       '/ext/.gitignore',
@@ -78,7 +77,7 @@ describe('init step factory', function () {
   it('works if all optional modules disabled', async function () {
     const step = initStepFactory(scaffoldDir, modules, templateParams);
 
-    const { fs } = await runStep(step, {}, {usePrompts: true, paramVals: ['Var Value', true, false, false], initialParams: {}});
+    const { fs } = await runStep(step, {}, { usePrompts: true, paramVals: ['Var Value', true, false, false], initialParams: {} });
 
     expect(getFsPaths(fs).sort()).toStrictEqual(['/ext/.gitignore', '/ext/readme.md']);
   });
@@ -86,7 +85,7 @@ describe('init step factory', function () {
   it('respects module defaults if not in advanced mode', async function () {
     const step = initStepFactory(scaffoldDir, modules, templateParams);
 
-    const { fs } = await runStep(step, {}, {usePrompts: true, paramVals: ['Var Value', false], initialParams: {}});
+    const { fs } = await runStep(step, {}, { usePrompts: true, paramVals: ['Var Value', false], initialParams: {} });
 
     expect(getFsPaths(fs).sort()).toStrictEqual([
       '/ext/.gitignore',
@@ -108,7 +107,7 @@ describe('init step factory', function () {
       },
     });
 
-    await runStep(step, {}, {usePrompts: true, paramVals: ['Var Value', false], initialParams: {}});
+    await runStep(step, {}, { usePrompts: true, paramVals: ['Var Value', false], initialParams: {} });
 
     expect(cache).toStrictEqual({
       sourceFiles: true,
