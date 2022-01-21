@@ -77,7 +77,7 @@ class CacheIO extends PromptsIO {
 
 type IOConf =
   | { initialParams: Record<string, unknown>; usePrompts: false }
-  | { initialParams: Record<string, unknown>; usePrompts: true; paramVals: unknown[], noInteraction?: boolean };
+  | { initialParams: Record<string, unknown>; usePrompts: true; paramVals: unknown[]; noInteraction?: boolean };
 
 export async function runStep<Providers extends DefaultProviders>(
   step: Step<Providers>,
