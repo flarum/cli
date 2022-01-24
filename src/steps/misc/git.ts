@@ -9,8 +9,8 @@ export class GitInit implements Step {
 
   composable = false;
 
-  async run(fs: Store, _paths: Paths, _paramProvider: IO, _providers: DefaultProviders): Promise<Store> {
-    simpleGit().init();
+  async run(fs: Store, paths: Paths, _paramProvider: IO, _providers: DefaultProviders): Promise<Store> {
+    simpleGit(paths.package()).init();
 
     return fs;
   }
