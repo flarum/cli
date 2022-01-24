@@ -16,11 +16,11 @@ export interface IO {
   /**
    * Prompt the user for some input data.
    */
-  getParam(param: ParamDef & { type: BooleanPromptType }): Promise<boolean>;
-  getParam(param: ParamDef & { type: StringPromptType }): Promise<string>;
-  getParam(param: ParamDef & { type: DatePromptType }): Promise<Date>;
-  getParam(param: ParamDef & { type: ListPromptType }): Promise<string[]>;
-  getParam<T>(param: ParamDef): Promise<T>;
+  getParam(param: ParamDef & { type: BooleanPromptType }, noCache?: boolean): Promise<boolean>;
+  getParam(param: ParamDef & { type: StringPromptType }, noCache?: boolean): Promise<string>;
+  getParam(param: ParamDef & { type: DatePromptType }, noCache?: boolean): Promise<Date>;
+  getParam(param: ParamDef & { type: ListPromptType }, noCache?: boolean): Promise<string[]>;
+  getParam<T>(param: ParamDef, noCache?: boolean): Promise<T>;
 
   /**
    * Check if some data has already been prompted for.
@@ -69,7 +69,7 @@ export class PromptsIO implements IO {
     this.onCancel = onCancel;
   }
 
-  async getParam<T>(paramDef: ParamDef): Promise<T> {
+  async getParam<T>(paramDef: ParamDef, noCache = false): Promise<T> {
     const paramName = paramDef.name as string;
 
     if (this.cache.has(paramName)) {
@@ -94,7 +94,10 @@ export class PromptsIO implements IO {
       resValue = res[paramName] as T;
     }
 
-    this.cache.set(paramName, resValue);
+    if (!noCache) {
+      this.cache.set(paramName, resValue);
+    }
+
     this.prev = {
       val: resValue,
       prompt: paramDef,
