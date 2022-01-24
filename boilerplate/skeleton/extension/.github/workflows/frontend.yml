@@ -8,13 +8,15 @@ on: [workflow_dispatch, push, pull_request]
 
 jobs:
   run:
-    uses: flarum/.github/.github/workflows/REUSABLE_frontend.yml@main
+    uses: flarum/.github/.github/workflows/REUSABLE_frontend.yml@as/support-npm-yarn
     with:
       enable_bundlewatch: <%= modules.bundlewatch %>
       enable_prettier: <%= modules.prettier %>
       enable_typescript: <%= modules.typescript %>
 
       frontend_directory: <%= params.frontendDirectory %>
+      backend_directory: <%= params.backendDirectory %>
+      package_manager: <%= params.jsPackageManager %>
       main_git_branch: <%= params.mainGitBranch %>
     secrets:
       bundlewatch_github_token: ${{ secrets.BUNDLEWATCH_GITHUB_TOKEN }}
