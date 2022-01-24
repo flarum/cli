@@ -195,7 +195,7 @@ function paramNamesToDef(name: ExtensionParams): TemplateParam<string, Extension
         getCurrVal: async (_fs, paths) => {
           const cwd = paths.monorepo() ?? paths.package();
           try {
-            return execSync("git remote show origin | grep 'HEAD branch' | cut -d' ' -f5", {cwd}).toString();
+            return execSync("git remote show origin | grep 'HEAD branch' | cut -d' ' -f5", { cwd }).toString();
           } catch {}
 
           return (await simpleGit(cwd).getConfig('init.defaultBranch')).value ?? 'main';
@@ -291,6 +291,8 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
             'autoload.psr-4.${params.packageNamespaceEscapedSlash}\\',
             'extra.flarum-extension.title',
             'extra.flarum-extension.category',
+            'minimum-stability',
+            'prefer-stable',
           ],
         },
         needsTemplateParams: [
