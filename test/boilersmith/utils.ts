@@ -17,7 +17,7 @@ export function stubStepFactory<Providers extends DefaultProviders>(
     composable,
     exposes: Object.keys(paramsExposed),
     async run(fs: Store, _paths: Paths, io: IO, _providers: Providers): Promise<Store> {
-      paramsConsumed.forEach(io.getParam);
+      paramsConsumed.forEach((prompt) => io.getParam(prompt));
 
       return fs;
     },
