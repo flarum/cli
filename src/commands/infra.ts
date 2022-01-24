@@ -3,6 +3,7 @@ import { ComposerInstall } from '../steps/misc/composer';
 import BaseCommand from '../base-command';
 import { FlarumProviders } from '../providers';
 import { ExtensionModules, EXTENSION_MODULES, genExtScaffolder } from '../steps/gen-ext-scaffolder';
+import { NpmInstall } from '../steps/misc/npm';
 import { YarnInstall } from '../steps/misc/yarn';
 import { Flags } from '@oclif/core';
 
@@ -25,7 +26,7 @@ export default class Infra extends BaseCommand {
     ...BaseCommand.args,
   ];
 
-  protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
+  protected steps(stepManager: StepManager<FlarumProviders>, extRoot: string): StepManager<FlarumProviders> {
     const module = this.args.module as ExtensionModules;
     const mapPaths = this.flags.monorepo
       ? this.monorepoPaths({
@@ -40,14 +41,19 @@ export default class Infra extends BaseCommand {
     const JS_MODULES = ['js', 'prettier', 'typescript'];
     const PHP_MODULES = ['backendTesting'];
 
+    const packageManager = this.jsPackageManager(extRoot);
     if (!this.flags.monorepo && JS_MODULES.includes(module)) {
-      stepManager.step(new YarnInstall(), { optional: true, confirmationMessage: 'Run `yarn`? (recommended)', default: true }, [
-        {
-          sourceStep: 'infra',
-          exposedName: '__succeeded',
-          dontRunIfFalsy: true,
-        },
-      ]);
+      stepManager.step(
+        packageManager === 'npm' ? new NpmInstall() : new YarnInstall(),
+        { optional: true, confirmationMessage: `Run \`${packageManager ?? 'yarn'}\`? (recommended)`, default: true },
+        [
+          {
+            sourceStep: 'infra',
+            exposedName: '__succeeded',
+            dontRunIfFalsy: true,
+          },
+        ]
+      );
     }
 
     if (!this.flags.monorepo && PHP_MODULES.includes(module)) {

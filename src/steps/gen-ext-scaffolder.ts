@@ -26,6 +26,8 @@ export const EXTENSION_PARAMS = [
   'licenseType',
   'mainGitBranch',
 
+  'jsPackageManager',
+
   'licenseText',
 
   'packageNamespaceEscapedSlash',
@@ -190,12 +192,30 @@ function paramNamesToDef(name: ExtensionParams): TemplateParam<string, Extension
             'Invalid git branch',
           initial: 'main',
         },
-        getCurrVal: async () => {
+        getCurrVal: async (_fs, paths) => {
+          const cwd = paths.monorepo() ?? paths.package();
           try {
-            return execSync("git remote show origin | grep 'HEAD branch' | cut -d' ' -f5").toString();
+            return execSync("git remote show origin | grep 'HEAD branch' | cut -d' ' -f5", {cwd}).toString();
           } catch {}
 
-          return (await simpleGit().getConfig('init.defaultBranch')).value ?? 'main';
+          return (await simpleGit(cwd).getConfig('init.defaultBranch')).value ?? 'main';
+        },
+      };
+
+    case 'jsPackageManager':
+      return {
+        prompt: {
+          name,
+          type: 'select',
+          message: 'JS Package Manager',
+          initial: 'yarn',
+          choices: [
+            { title: 'Yarn', value: 'yarn' },
+            { title: 'NPM', value: 'npm' },
+          ],
+        },
+        getCurrVal: async (fs: Store, paths: Paths) => {
+          return create(fs).exists(paths.package('js/yarn.lock')) ? 'yarn' : 'npm';
         },
       };
 
@@ -372,12 +392,13 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
             'devDependencies.flarum-webpack-config',
             'devDependencies.webpack',
             'devDependencies.webpack-cli',
+            'scripts.ci',
             'scripts.dev',
             'scripts.build',
             'scripts.analyze',
           ],
         },
-        needsTemplateParams: ['packageName'],
+        needsTemplateParams: ['packageName', 'jsPackageManager'],
         inferEnabled: async (_fs, paths: Paths) => {
           return existsSync(paths.package('js'));
         },

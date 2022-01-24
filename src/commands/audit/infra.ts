@@ -3,6 +3,9 @@ import BaseCommand from '../../base-command';
 import { FlarumProviders } from '../../providers';
 import { genExtScaffolder } from '../../steps/gen-ext-scaffolder';
 import { Flags } from '@oclif/core';
+import { YarnInstall } from '../../steps/misc/yarn';
+import { ComposerInstall } from '../../steps/misc/composer';
+import { NpmInstall } from '../../steps/misc/npm';
 
 export default class AuditInfra extends BaseCommand {
   static description = 'Check for outdated config files, infrastructure, setup, etc.';
@@ -15,7 +18,7 @@ export default class AuditInfra extends BaseCommand {
 
   static args = [...BaseCommand.args];
 
-  protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
+  protected steps(stepManager: StepManager<FlarumProviders>, extRoot: string): StepManager<FlarumProviders> {
     this.dry = !this.flags.fix;
 
     const mapPaths = this.flags.monorepo
@@ -26,7 +29,29 @@ export default class AuditInfra extends BaseCommand {
           includeJSPackages: false,
         })
       : [];
-    stepManager.step(genExtScaffolder().genAuditStep(!this.flags.fix), {}, [], {}, mapPaths);
+    stepManager.namedStep('audit', genExtScaffolder().genAuditStep(!this.flags.fix), {}, [], {}, mapPaths);
+
+    if (!this.flags.monorepo && !this.dry) {
+      const packageManager = this.jsPackageManager(extRoot);
+      stepManager.step(
+        packageManager === 'npm' ? new NpmInstall() : new YarnInstall(),
+        { optional: true, confirmationMessage: `Run \`${packageManager ?? 'yarn'}\`? (recommended)`, default: true },
+        [
+          {
+            sourceStep: 'audit',
+            exposedName: '__succeeded',
+            dontRunIfFalsy: true,
+          },
+        ]
+      );
+      stepManager.step(new ComposerInstall(), { optional: true, confirmationMessage: 'Run `composer update`? (recommended)', default: true }, [
+        {
+          sourceStep: 'audit',
+          exposedName: '__succeeded',
+          dontRunIfFalsy: true,
+        },
+      ]);
+    }
 
     return stepManager;
   }

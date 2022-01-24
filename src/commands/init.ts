@@ -6,6 +6,7 @@ import yosay from 'yosay';
 import { FlarumProviders } from '../providers';
 import { genExtScaffolder } from '../steps/gen-ext-scaffolder';
 import { GitInit } from '../steps/misc/git';
+import { NpmInstall } from '../steps/misc/npm';
 
 export default class Init extends BaseCommand {
   static description = 'Create a new Flarum extension';
@@ -16,18 +17,23 @@ export default class Init extends BaseCommand {
 
   protected requireExistingExtension = false;
 
-  protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
+  protected steps(stepManager: StepManager<FlarumProviders>, extRoot: string): StepManager<FlarumProviders> {
+    const packageManager = this.jsPackageManager(extRoot);
     return stepManager
       .namedStep('gitInit', new GitInit(), { optional: true, confirmationMessage: 'Run `git init`? (recommended)', default: true })
       .namedStep('skeleton', genExtScaffolder().genInitStep())
       .step(new ComposerInstall(), { optional: true, confirmationMessage: 'Run `composer install`? (recommended)', default: true })
-      .step(new YarnInstall(), { optional: true, confirmationMessage: 'Run `yarn install`? (recommended)', default: true }, [
-        {
-          sourceStep: 'skeleton',
-          exposedName: 'modules.js',
-          dontRunIfFalsy: true,
-        },
-      ]);
+      .step(
+        packageManager === 'npm' ? new NpmInstall() : new YarnInstall(),
+        { optional: true, confirmationMessage: `Run \`${packageManager ?? 'yarn'}\`? (recommended)`, default: true },
+        [
+          {
+            sourceStep: 'skeleton',
+            exposedName: 'modules.js',
+            dontRunIfFalsy: true,
+          },
+        ]
+      );
   }
 
   protected welcomeMessage(): string {
