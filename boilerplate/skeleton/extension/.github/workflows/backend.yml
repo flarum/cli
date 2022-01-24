@@ -8,7 +8,7 @@ on: [workflow_dispatch, push, pull_request]
 
 jobs:
   run:
-    uses: flarum/.github/.github/workflows/REUSABLE_backend.yml@main
+    uses: flarum/.github/.github/workflows/REUSABLE_backend.yml@as/support-npm-yarn
     with:
       enable_backend_testing: <%= modules.backendTesting %>
 
