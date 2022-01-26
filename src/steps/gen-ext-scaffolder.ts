@@ -673,7 +673,10 @@ export function genExtScaffolder(): Scaffolder<ExtensionParams, ExtensionModules
   const excludeScaffoldingFunc = (fs: Store, paths: Paths) => {
     const json = getComposerJson(fs, paths);
 
-    return json?.extra?.['flarum-cli']?.excludeScaffolding ?? [];
+    return {
+      files: json?.extra?.['flarum-cli']?.excludeScaffolding ?? [],
+      configKeys: json?.extra?.['flarum-cli']?.excludeScaffoldingConfigKeys ?? {},
+    };
   };
 
   const scaffolder = new Scaffolder<ExtensionParams, ExtensionModules>(

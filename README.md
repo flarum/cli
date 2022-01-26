@@ -173,6 +173,10 @@ Sometimes, you'll want to customize some of these configuration files, and preve
       "excludeScaffolding": [
         "js/tsconfig.json"
       ],
+      "excludeScaffoldingKeys": {
+        "composer.json": [
+          "scripts.test:setup"
+        ],
       ...
     },
     ...

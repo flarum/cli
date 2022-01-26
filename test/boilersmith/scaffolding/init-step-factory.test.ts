@@ -100,12 +100,20 @@ describe('init step factory', function () {
 
   it('properly sets cache', async function () {
     const cache: Record<string, boolean> = {};
-    const step = initStepFactory(scaffoldDir, modules, templateParams, () => [], {
-      get: async () => true,
-      set: async (module, enabled) => {
-        cache[module.name] = enabled;
+    const step = initStepFactory(
+      scaffoldDir,
+      modules,
+      templateParams,
+      () => {
+        return { files: [], configKeys: {} };
       },
-    });
+      {
+        get: async () => true,
+        set: async (module, enabled) => {
+          cache[module.name] = enabled;
+        },
+      }
+    );
 
     await runStep(step, {}, { usePrompts: true, paramVals: ['Var Value', false], initialParams: {} });
 

@@ -57,7 +57,7 @@ export function auditStepFactory<MN extends string, Providers extends DefaultPro
 
       for (const m of actionableModules) {
         const fs = dry ? create() : _fs;
-        const excludeScaffolding = excludeScaffoldingFunc ? excludeScaffoldingFunc(fs, paths) : [];
+        const excludeScaffolding = excludeScaffoldingFunc ? excludeScaffoldingFunc(fs, paths) : { files: [], configKeys: {} };
         applyModule(m, modulesEnabled, paramVals, scaffoldDir, fs, paths, excludeScaffolding, true);
         if (dry) {
           const filesWithChanges = fs

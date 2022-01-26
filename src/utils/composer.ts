@@ -50,6 +50,7 @@ export type ComposerJsonSchema = {
   extra?: {
     'flarum-cli'?: {
       excludeScaffolding?: string[];
+      excludeScaffoldingConfigKeys: Record<string, string[]>;
       mainGitBranch?: string;
       modules?: Record<ExtensionModules, boolean>;
     };

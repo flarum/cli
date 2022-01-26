@@ -199,7 +199,7 @@ describe('applyModule', function () {
   });
 
   it('can exclude files from being copied', async function () {
-    const excludeScaffolding = ['config2.json', 'src/index.ml'];
+    const excludeScaffolding = { files: ['config2.json', 'src/index.ml'], configKeys: {} };
     const fs = await applyModule(
       justFilesModule,
       { 'just-files': true },
@@ -211,7 +211,7 @@ describe('applyModule', function () {
     );
 
     expect(getFsPaths(fs)).toStrictEqual(
-      justFilesModule.filesToReplace.filter((f) => !excludeScaffolding.includes(typeof f === 'string' ? f : f.path)).map((p) => `/ext/${p}`)
+      justFilesModule.filesToReplace.filter((f) => !excludeScaffolding.files.includes(typeof f === 'string' ? f : f.path)).map((p) => `/ext/${p}`)
     );
     expect(getExtFileContents(fs, '.gitignore')).toStrictEqual('node_modules');
     expect(getExtFileContents(fs, 'readme.md')).toStrictEqual('# Sample Scaffolding\n');
@@ -320,6 +320,34 @@ describe('applyModule', function () {
       hello: 'val1',
       'OCaml++': 'const',
       nested: { config: { string: 'a' } },
+    });
+  });
+
+  it('can exclude JSON keys from being copied', async function () {
+    const excludeScaffolding = { files: [], configKeys: { 'config1.json': ['nested.config.string', '${params.varKey}++'] } };
+    const module: Module = {
+      name: 'exclude-json',
+      togglable: false,
+      updatable: true,
+      shortDescription: '',
+      filesToReplace: [],
+      jsonToAugment: { 'config1.json': ['nested.config.string', 'hello', '${params.varKey}++'] },
+      needsTemplateParams: ['someVar', 'someOtherVar'],
+    };
+
+    const fs = await applyModule(
+      module,
+      { 'exclude-json': true },
+      { someVar: 'val1', someOtherVar: 'val2', varKey: 'OCaml' },
+      scaffoldDir,
+      createStore(),
+      new NodePaths({ package: '/ext' }),
+      excludeScaffolding
+    );
+
+    expect(getFsPaths(fs)).toStrictEqual(['/ext/config1.json']);
+    expect(JSON.parse(getExtFileContents(fs, 'config1.json'))).toStrictEqual({
+      hello: 'val1',
     });
   });
 
@@ -475,7 +503,16 @@ describe('applyModule', function () {
   it('doesnt error when initializing non-updatable module', async function () {
     const module: Module = { ...justFilesModule, updatable: false };
 
-    const fs = await applyModule(module, { 'just-files': true }, {}, scaffoldDir, createStore(), new NodePaths({ package: '/ext' }), [], true);
+    const fs = await applyModule(
+      module,
+      { 'just-files': true },
+      {},
+      scaffoldDir,
+      createStore(),
+      new NodePaths({ package: '/ext' }),
+      { files: [], configKeys: {} },
+      true
+    );
 
     expect(getFsPaths(fs)).toStrictEqual(['/ext/.gitignore', '/ext/readme.md']);
   });

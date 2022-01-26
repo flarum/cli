@@ -25,7 +25,7 @@ export function initStepFactory<MN extends string, Providers extends DefaultProv
       const paramVals = await promptParamValues(templateParams, paths, io);
       modulesEnabled = await promptModulesEnabled(modules, io);
 
-      const excludeScaffolding = excludeScaffoldingFunc ? excludeScaffoldingFunc(fs, paths) : [];
+      const excludeScaffolding = excludeScaffoldingFunc ? excludeScaffoldingFunc(fs, paths) : { files: [], configKeys: {} };
 
       for (const m of modules) {
         if (modulesEnabled[m.name] && (!m.togglable || !m.dependsOn.some((dep) => !modulesEnabled[dep]))) {

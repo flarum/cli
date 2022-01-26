@@ -32,7 +32,7 @@ export function infraStepFactory<MN extends string, Providers extends DefaultPro
         io.error(`${module.name} is not updatable.`, true);
       }
 
-      const excludeScaffolding = excludeScaffoldingFunc ? excludeScaffoldingFunc(fs, paths) : [];
+      const excludeScaffolding = excludeScaffoldingFunc ? excludeScaffoldingFunc(fs, paths) : { files: [], configKeys: {} };
 
       const initializing = !modulesEnabled[module.name];
       applyModule(module, { ...modulesEnabled, [module.name]: true }, paramVals, scaffoldDir, fs, paths, excludeScaffolding, initializing);

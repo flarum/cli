@@ -9,6 +9,7 @@ import { readTpl } from 'boilersmith/utils/read-tpl';
 import { cloneAndFill } from 'boilersmith/utils/clone-and-fill';
 import { renameKeys } from 'boilersmith/utils/rename-keys';
 import { condFormat } from 'boilersmith/utils/cond-format';
+import { ExcludeScaffoldingFunc } from './scaffolder';
 
 type FileOwnershipCommon<N extends string> = {
   /**
@@ -187,7 +188,8 @@ export async function applyModule<MN extends string, TN extends string>(
   scaffoldDir: string,
   fs: Store,
   paths: Paths,
-  excludeFiles: string[] = [],
+  // eslint-disable-next-line unicorn/no-object-as-default-parameter
+  excludeScaffolding: ReturnType<ExcludeScaffoldingFunc> = { files: [], configKeys: {} },
   isInitial = false
 ): Promise<Store> {
   const fsEditor = create(fs);
@@ -242,7 +244,7 @@ export async function applyModule<MN extends string, TN extends string>(
     }
 
     if (
-      excludeFiles.includes(path) ||
+      excludeScaffolding.files.includes(path) ||
       moduleDeps.some((dep) => {
         const depName = typeof dep === 'string' ? dep : dep.module;
         const enabled = modulesEnabled[depName];
@@ -260,7 +262,8 @@ export async function applyModule<MN extends string, TN extends string>(
     const scaffoldContents = readTpl(resolve(scaffoldDir, jsonPath), tplData);
     const scaffoldContentsJson = JSON.parse(scaffoldContents);
 
-    const fieldsToAugment = jsonPaths[jsonPath];
+    const excludeKeys = cloneAndFill(excludeScaffolding.configKeys[jsonPath] ?? [], tplDataFlat);
+    const fieldsToAugment = jsonPaths[jsonPath].filter((key) => !excludeKeys.includes(key));
     const relevant = pick(scaffoldContentsJson, fieldsToAugment);
 
     fsEditor.extendJSON(paths.package(jsonPath), relevant, undefined, 4);

@@ -14,7 +14,13 @@ import { cloneAndFill } from 'boilersmith/utils/clone-and-fill';
 import { IO } from 'boilersmith/io';
 import { auditStepFactory } from './audit-step-factory';
 
-export type ExcludeScaffoldingFunc = (fs: Store, paths: Paths) => string[];
+export type ExcludeScaffoldingFunc = (
+  fs: Store,
+  paths: Paths
+) => {
+  files: string[];
+  configKeys: Record<string, string[]>;
+};
 
 export class Scaffolder<TN extends string = string, MN extends string = string> {
   private templateParams: TemplateParam<unknown, TN>[] = [];
