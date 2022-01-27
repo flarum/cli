@@ -111,7 +111,7 @@ describe('Test extension skeleton step', function () {
   test('Can exclude JS completely', async function () {
     const { fs } = await runStep(initStep, {}, { usePrompts: false, initialParams: { ...vars, 'modules.js': false } });
 
-    const expected = (await getExpected()).filter((path) => !path.includes('/js/'));
+    const expected = (await getExpected()).filter((path) => !path.includes('/js/') && !path.includes('frontend.yml'));
 
     expect(getFsPaths(fs).sort()).toStrictEqual(expected);
     expect(getExtFileContents(fs, 'extend.php').includes('Extend\\Locales')).toBe(true);
