@@ -552,6 +552,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         filesToReplace: ['js/tsconfig.json'],
         jsonToAugment: {
           'js/package.json': [
+            'devDependencies.@types/mithril',
             'devDependencies.flarum-tsconfig',
             'devDependencies.typescript',
             'devDependencies.typescript-coverage-report',
