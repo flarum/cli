@@ -501,6 +501,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
             path: '.github/workflows/frontend.yml',
             monorepoPath: '.github/workflows/${params.extensionId}-frontend.yml',
             requireMonorepo: false,
+            moduleDeps: ['js'],
           },
           {
             path: '.github/workflows/backend.yml',
