@@ -16,7 +16,6 @@
     "webpack-cli": "^4.9.1"
   },
   "scripts": {
-    "ci": "<% if (params.jsPackageManager) { %>yarn install --immutable --immutable-cache<% } else { %>npm ci<% } %>",
     "dev": "webpack --mode development --watch",
     "build": "webpack --mode production",
     "analyze": "cross-env ANALYZER=true <%= params.jsPackageManager %> run build",

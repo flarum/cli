@@ -396,7 +396,6 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
             'devDependencies.flarum-webpack-config',
             'devDependencies.webpack',
             'devDependencies.webpack-cli',
-            'scripts.ci',
             'scripts.dev',
             'scripts.build',
             'scripts.analyze',
