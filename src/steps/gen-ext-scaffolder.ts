@@ -195,7 +195,8 @@ function paramNamesToDef(name: ExtensionParams): TemplateParam<string, Extension
         getCurrVal: async (_fs, paths) => {
           const cwd = paths.monorepo() ?? paths.package();
           try {
-            if ((await simpleGit(cwd).getRemotes()).some((rem) => rem.name === 'origin')) {
+            const remotes = execSync('git remote', { cwd, timeout: 2000 }).toString().split('\n');
+            if (remotes.includes('origin')) {
               return execSync("git remote show origin | grep 'HEAD branch' | cut -d' ' -f5", { cwd }).toString();
             }
           } catch {}
