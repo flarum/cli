@@ -1,1 +1,1 @@
-<%= params.licenseText %>
+<%- params.licenseText %>
