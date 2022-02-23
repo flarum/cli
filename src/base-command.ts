@@ -11,6 +11,8 @@ import { PhpSubsystemProvider } from './providers/php-provider';
 import chalk from 'chalk';
 import { FlarumProviders } from './providers';
 import { exit } from '@oclif/errors';
+import { composerPath, corePath, extensionPath, getMonorepoConf, npmPath } from './utils/monorepo';
+import { create } from 'mem-fs';
 
 export enum LocationType {
   FLARUM_EXTENSION,
@@ -163,14 +165,13 @@ export default abstract class BaseCommand extends Command {
     includeJSPackages: boolean;
   }): string[] {
     try {
-      const monorepoConfig = readFileSync(resolve(process.cwd(), 'flarum-monorepo.json'));
-      const contents = JSON.parse(monorepoConfig.toString());
+      const monorepoConfig = getMonorepoConf(create(), new NodePaths({ package: process.cwd() }));
 
       return [
-        ...(options.includeCore ? [contents.packages.core] : []),
-        ...(options.includeExtensions ? contents.packages.extensions : []),
-        ...(options.includePhpPackages ? contents.packages.composerPackages : []),
-        ...(options.includeJSPackages ? contents.packages.npmPackages : []),
+        ...(options.includeCore && monorepoConfig.packages.core ? [corePath(monorepoConfig.packages.core.name)] : []),
+        ...(options.includeExtensions ? monorepoConfig.packages.extensions : []).map((ext) => extensionPath(ext.name)),
+        ...(options.includePhpPackages ? monorepoConfig.packages.composer ?? [] : []).map((lib) => composerPath(lib.name)),
+        ...(options.includeJSPackages ? monorepoConfig.packages.npm ?? [] : []).map((lib) => npmPath(lib.name)),
       ];
     } catch {
       this.error('Could not run monorepo command: `flarum-monorepo.json` file is missing or invalid.');
