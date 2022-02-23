@@ -32,4 +32,12 @@ export class Validator {
   public static modelType(s: string): ValidatorFunc {
     return /^[\w-]+$/.test(s.trim()) || 'Field is required; alphanumerical characters, dashes, and underscores only!';
   }
+
+  public static fileName(s: string): ValidatorFunc {
+    return /^[\w-]+$/.test(s.trim()) || 'Field is required; alphanumerical characters, dashes, and underscores only!';
+  }
+
+  public static gitRepo(s: string): ValidatorFunc {
+    return /^((git|ssh|http(s)?)|(git@[\w.]+))(:(\/\/)?)([\w./:@~-]+)(\.git)(\/)?$/.test(s.trim()) || 'Invalid git repo URL.';
+  }
 }
