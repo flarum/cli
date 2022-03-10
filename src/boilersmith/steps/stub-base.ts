@@ -5,7 +5,7 @@ import { ParamDef, IO } from 'boilersmith/io';
 import { Paths } from 'boilersmith/paths';
 import { DefaultProviders, Step } from 'boilersmith/step-manager';
 import { cloneAndFill } from '../utils/clone-and-fill';
-import { resolve } from 'node:path';
+import { resolve } from 'path';
 import { Scaffolder } from 'boilersmith/scaffolding/scaffolder';
 
 interface UserProvidedParam extends Omit<ParamDef, 'type'> {

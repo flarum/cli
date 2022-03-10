@@ -1,4 +1,4 @@
-import { resolve } from 'node:path';
+import { resolve } from 'path';
 import { readTpl } from 'boilersmith/utils/read-tpl';
 
 describe('read-tpl', function () {

@@ -1,4 +1,4 @@
-import { resolve } from 'node:path';
+import { resolve } from 'path';
 
 export interface Paths {
   cwd(...path: string[]): string;

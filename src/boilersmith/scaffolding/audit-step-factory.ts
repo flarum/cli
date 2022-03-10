@@ -8,7 +8,7 @@ import { currParamValues, TemplateParam } from './template-param';
 import { ExcludeScaffoldingFunc } from './scaffolder';
 import { condFormat } from 'boilersmith/utils/cond-format';
 import chalk from 'chalk';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'fs';
 
 export function auditStepFactory<MN extends string, Providers extends DefaultProviders>(
   dry: boolean,

@@ -1,9 +1,9 @@
 import { Command, Flags, Interfaces } from '@oclif/core';
 import cli from 'cli-ux';
-import { resolve } from 'node:path';
+import { resolve } from 'path';
 import globby from 'globby';
-import { execSync } from 'node:child_process';
-import { existsSync, readFileSync, unlinkSync } from 'node:fs';
+import { execSync } from 'child_process';
+import { existsSync, readFileSync, unlinkSync } from 'fs';
 import { IO, PromptsIO } from 'boilersmith/io';
 import { StepManager } from 'boilersmith/step-manager';
 import { NodePaths } from 'boilersmith/paths';

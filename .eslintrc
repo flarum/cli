@@ -7,6 +7,8 @@
     "unicorn/no-array-reduce": "off",
     "unicorn/consistent-function-scoping": ["error", { "checkArrowFunctions": false }],
     "@typescript-eslint/ban-ts-ignore": "off",
+    "unicorn/prefer-node-protocol": "off",
+    "unicorn/import-style": "off",
     "valid-jsdoc": "off",
     "max-params": ["error", 6],
     "object-curly-spacing": "off",

@@ -1,6 +1,6 @@
 import globby from 'globby';
 import { Store } from 'mem-fs';
-import { resolve } from 'node:path';
+import { resolve } from 'path';
 import { Paths } from '../paths';
 import { DefaultProviders, Step } from '../step-manager';
 import { jsonLeafPaths } from 'boilersmith/utils/json-leaf-paths';

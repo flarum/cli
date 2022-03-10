@@ -1,5 +1,5 @@
 import globby from 'globby';
-import { resolve } from 'node:path';
+import { resolve } from 'path';
 import { getComposerJson } from '../../../src/utils/composer';
 import { genExtScaffolder } from '../../../src/steps/gen-ext-scaffolder';
 import { getExtFileContents, getFsPaths, runStep, stubPathsFactory } from '../../boilersmith/utils';

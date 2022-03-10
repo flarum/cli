@@ -1,5 +1,5 @@
 import { Data, Options, render } from 'ejs';
-import { readFileSync } from 'node:fs';
+import { readFileSync } from 'fs';
 
 export function readTpl(path: string, data: Data, options?: Options): string {
   const template = readFileSync(path, 'utf8');

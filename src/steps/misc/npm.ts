@@ -1,4 +1,4 @@
-import { execSync } from 'node:child_process';
+import { execSync } from 'child_process';
 import { Store } from 'mem-fs';
 import { IO } from 'boilersmith/io';
 import { Paths } from 'boilersmith/paths';

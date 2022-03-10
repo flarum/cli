@@ -1,7 +1,7 @@
 import { Module } from 'boilersmith/scaffolding/module';
 import { TemplateParam } from 'boilersmith/scaffolding/template-param';
 import { initStepFactory } from 'boilersmith/scaffolding/init-step-factory';
-import { resolve } from 'node:path';
+import { resolve } from 'path';
 import { getFsPaths, runStep } from '../utils';
 
 describe('init step factory', function () {

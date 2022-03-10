@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import { Store } from 'mem-fs';
 import { create } from 'mem-fs-editor';
-import { resolve } from 'node:path';
+import { resolve } from 'path';
 import pick from 'pick-deep';
 import { IO } from 'boilersmith/io';
 import { Paths } from 'boilersmith/paths';

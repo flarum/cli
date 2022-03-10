@@ -1,6 +1,6 @@
 import { create as createMemFsEditor } from 'mem-fs-editor';
 import { UpdateJSImports } from '../../../src/steps/update/js-imports';
-import { resolve } from 'node:path';
+import { resolve } from 'path';
 import { runStep } from '../../boilersmith/utils';
 import { Paths } from 'boilersmith/paths';
 

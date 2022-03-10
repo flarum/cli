@@ -1,4 +1,4 @@
-import { readdirSync } from 'node:fs';
+import { readdirSync } from 'fs';
 import { Store } from 'mem-fs';
 import { IO } from 'boilersmith/io';
 import { Paths } from 'boilersmith/paths';

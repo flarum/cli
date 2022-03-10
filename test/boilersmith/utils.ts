@@ -1,6 +1,6 @@
 import { create as createMemFs, Store } from 'mem-fs';
 import { create as createMemFsEditor } from 'mem-fs-editor';
-import { resolve } from 'node:path';
+import { resolve } from 'path';
 import { prompt } from 'prompts';
 import { ParamDef, PromptsIO, IO } from 'boilersmith/io';
 import { Paths } from 'boilersmith/paths';

@@ -1,4 +1,4 @@
-import { resolve } from 'node:path';
+import { resolve } from 'path';
 import { Scaffolder } from 'boilersmith/scaffolding/scaffolder';
 import { getParamName, TemplateParam } from 'boilersmith/scaffolding/template-param';
 

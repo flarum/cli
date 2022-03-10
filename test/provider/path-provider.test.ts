@@ -1,4 +1,4 @@
-import path from 'node:path';
+import path from 'path';
 import { NodePaths } from 'boilersmith/paths';
 
 describe('NodePaths Works', function () {

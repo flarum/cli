@@ -1,5 +1,5 @@
 /* eslint-disable no-await-in-loop */
-import { execSync } from 'node:child_process';
+import { execSync } from 'child_process';
 import { Store } from 'mem-fs';
 import { IO } from 'boilersmith/io';
 import { Paths } from 'boilersmith/paths';
@@ -10,19 +10,23 @@ import { ExtensionModules, ExtensionParams } from '../gen-ext-scaffolder';
 import { composerPath, corePath, extensionPath, FlarumMonorepoJsonSchema, npmPath } from '../../utils/monorepo';
 import { condFormat } from 'boilersmith/utils/cond-format';
 import chalk from 'chalk';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { resolve } from 'node:path';
-import { tmpdir } from 'node:os';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import { resolve } from 'path';
+import { tmpdir } from 'os';
 import simpleGit from 'simple-git';
 import { create } from 'mem-fs-editor';
 import { commitAsync } from 'boilersmith/utils/commit-async';
 import { Validator } from '../../utils/validation';
 
-async function addGitPackage(cwd: string, path: string, remote: string) {
+async function addGitPackage(cwd: string, path: string, remote: string, mainBranch: string | null = 'main') {
   const tmpDir = mkdtempSync(resolve(tmpdir(), `${path.replace('/', '_')}-`));
 
-  execSync(`git clone ${remote} ${tmpDir}`, { cwd });
+  execSync(`git clone ${remote} ${tmpDir} --verbose --branch ${mainBranch} --single-branch`, { cwd });
   execSync(`git filter-repo --to-subdirectory-filter ${path}`, { cwd: tmpDir });
+  if (mainBranch) {
+    await simpleGit(tmpDir).checkout(mainBranch);
+  }
+
   await simpleGit(tmpDir).branch(['REWRITE']);
   await simpleGit(tmpDir).checkout('REWRITE');
 
@@ -163,26 +167,27 @@ export class MonorepoCreate implements Step<FlarumProviders> {
     await simpleGit(target).init();
 
     for (const lib of conf.packages.npm ?? []) {
-      await addGitPackage(target, npmPath(lib.name), lib.gitRemote);
+      await addGitPackage(target, npmPath(lib.name), lib.gitRemote, lib.mainBranch);
     }
 
     for (const lib of conf.packages.composer ?? []) {
-      await addGitPackage(target, composerPath(lib.name), lib.gitRemote);
+      await addGitPackage(target, composerPath(lib.name), lib.gitRemote, lib.mainBranch);
     }
 
     for (const ext of conf.packages.extensions ?? []) {
-      await addGitPackage(target, extensionPath(ext.name), ext.gitRemote);
+      await addGitPackage(target, extensionPath(ext.name), ext.gitRemote, ext.mainBranch);
     }
 
-    if (conf.packages.core) {
-      await addGitPackage(target, corePath(conf.packages.core.name), conf.packages.core.gitRemote);
+    const corePkg = conf.packages.core;
+    if (corePkg) {
+      await addGitPackage(target, corePath(corePkg.name), corePkg.gitRemote, corePkg.mainBranch);
     }
 
     const npmPaths = conf.packages.npm?.map((lib) => npmPath(lib.name)) ?? [];
     const composerPaths = conf.packages.composer?.map((lib) => composerPath(lib.name)) ?? [];
     const flarumPaths = conf.packages.extensions?.map((ext) => extensionPath(ext.name)) ?? [];
-    if (conf.packages.core) {
-      flarumPaths.push(corePath(conf.packages.core.name));
+    if (corePkg) {
+      flarumPaths.push(corePath(corePkg.name));
     }
 
     flarumPaths.forEach((path) => {

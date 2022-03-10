@@ -21,7 +21,7 @@ import { genExtScaffolder } from '../../../src/steps/gen-ext-scaffolder';
 import { FlarumBaseStubStep } from '../../../src/steps/stubs/flarum-base';
 import { stubPhpProviderFactory } from '../../utils';
 import { Paths } from 'boilersmith/paths';
-import { resolve } from 'node:path';
+import { resolve } from 'path';
 
 interface StubTest {
   StubClass: new (stubDir: string, scaffolder: ReturnType<typeof genExtScaffolder>) => FlarumBaseStubStep;

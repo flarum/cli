@@ -4,7 +4,7 @@ import { create as createStore } from 'mem-fs';
 import { PromptsIO } from 'boilersmith/io';
 import { NodePaths } from 'boilersmith/paths';
 import { Module, ModuleStatusCache, currModulesEnabled, promptModulesEnabled, setModuleValue, applyModule } from 'boilersmith/scaffolding/module';
-import { resolve } from 'node:path';
+import { resolve } from 'path';
 import { getExtFileContents, getFsPaths } from '../utils';
 import { create } from 'mem-fs-editor';
 

@@ -1,7 +1,7 @@
 import { prompt } from 'prompts';
 import { create as createStore, Store } from 'mem-fs';
 import { create } from 'mem-fs-editor';
-import { resolve } from 'node:path';
+import { resolve } from 'path';
 import { PromptsIO } from 'boilersmith/io';
 import { NodePaths, Paths } from 'boilersmith/paths';
 import { currParamValues, promptParamValues, TemplateParam } from 'boilersmith/scaffolding/template-param';
