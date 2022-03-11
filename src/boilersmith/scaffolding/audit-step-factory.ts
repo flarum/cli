@@ -49,7 +49,7 @@ export function auditStepFactory<MN extends string, Providers extends DefaultPro
           );
         } else if (m.updatable) {
           io.info(
-            condFormat(io.supportsAnsiColor, (m) => chalk.dim(chalk.red(m)), `𐄂 ${m.name}: ${m.shortDescription} (disabled)`),
+            condFormat(io.supportsAnsiColor, (m) => chalk.dim(chalk.red(m)), `✕ ${m.name}: ${m.shortDescription} (disabled)`),
             true
           );
         }
