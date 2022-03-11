@@ -210,7 +210,10 @@ export class MonorepoCreate implements Step<FlarumProviders> {
 
     [...composerPaths, ...flarumPaths].forEach((path) => {
       const cwd = resolve(target, path);
-      execSync('composer config repositories.0 path "../*"', { cwd });
+
+      const relRepoPath = path.includes('/') ? '../../*/*' : './../*/*';
+
+      execSync(`composer config repositories.0 path "${relRepoPath}"`, { cwd });
       execSync('composer config minimum-stability dev', { cwd });
       execSync('composer config prefer-stable true', { cwd });
       const composerJsonPath = resolve(cwd, 'composer.json');

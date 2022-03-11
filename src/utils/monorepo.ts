@@ -3,19 +3,19 @@ import { Paths } from 'boilersmith/paths';
 import { create } from 'mem-fs-editor';
 
 export function npmPath(name: string): string {
-  return `packages/lib-${name}`;
+  return `js-packages/${name}`;
 }
 
 export function composerPath(name: string): string {
-  return `packages/lib-${name}`;
+  return `php-packages/${name}`;
 }
 
 export function extensionPath(name: string): string {
-  return `packages/ext-${name}`;
+  return `extensions/${name}`;
 }
 
 export function corePath(_name: string): string {
-  return 'packages/core';
+  return 'framework/core';
 }
 
 type PackageInfo = {
