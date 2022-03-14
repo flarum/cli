@@ -1,6 +1,7 @@
 #!/usr/bin/env node
+const { resolve } = require('path');
 
-require('module-alias').addAlias('boilersmith', `${__dirname}/../lib/boilersmith`);
+require('module-alias').addAlias('boilersmith', resolve(__dirname, '..', 'lib', 'boilersmith'));
 
 const oclif = require('@oclif/core');
 
