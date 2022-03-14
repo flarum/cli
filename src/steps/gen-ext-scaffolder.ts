@@ -211,7 +211,7 @@ function paramNamesToDef(name: ExtensionParams): TemplateParam<string, Extension
           name,
           type: 'select',
           message: 'JS Package Manager',
-          initial: 'yarn',
+          initial: 0,
           choices: [
             { title: 'Yarn', value: 'yarn' },
             { title: 'NPM', value: 'npm' },
