@@ -197,11 +197,11 @@ function paramNamesToDef(name: ExtensionParams): TemplateParam<string, Extension
           try {
             const remotes = execSync('git remote', { cwd, timeout: 2000 }).toString().split('\n');
             if (remotes.includes('origin')) {
-              return execSync("git remote show origin | grep 'HEAD branch' | cut -d' ' -f5", { cwd }).toString();
+              return execSync("git remote show origin | grep 'HEAD branch' | cut -d' ' -f5", { cwd, timeout: 2000 }).toString();
             }
           } catch {}
 
-          return (await simpleGit(cwd).getConfig('init.defaultBranch')).value ?? 'main';
+          return (await simpleGit(cwd, { timeout: { block: 2000 } }).getConfig('init.defaultBranch')).value ?? 'main';
         },
       };
 
@@ -481,7 +481,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         filesToReplace: [
           { path: 'gitignore', destPath: '.gitignore' },
           { path: 'js/gitignore', moduleDeps: ['js'], destPath: 'js/.gitignore' },
-          {path: '.gitattributes', monorepoPath: '.gitattributes'},
+          { path: '.gitattributes', monorepoPath: '.gitattributes' },
         ],
         jsonToAugment: {},
         needsTemplateParams: [],
