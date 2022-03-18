@@ -481,7 +481,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         filesToReplace: [
           { path: 'gitignore', destPath: '.gitignore' },
           { path: 'js/gitignore', moduleDeps: ['js'], destPath: 'js/.gitignore' },
-          '.gitattributes',
+          {path: '.gitattributes', monorepoPath: '.gitattributes'},
         ],
         jsonToAugment: {},
         needsTemplateParams: [],
