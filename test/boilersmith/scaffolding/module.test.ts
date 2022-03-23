@@ -7,6 +7,7 @@ import { Module, ModuleStatusCache, currModulesEnabled, promptModulesEnabled, se
 import { resolve } from 'path';
 import { getExtFileContents, getFsPaths } from '../utils';
 import { create } from 'mem-fs-editor';
+import { readFileSync } from 'fs';
 
 describe('Module Utils', function () {
   const _cacheData: Record<string, boolean> = {};
@@ -595,5 +596,60 @@ describe('applyModule', function () {
 
     expect(getFsPaths(fs)).toStrictEqual(['/ext/readme.md']);
     expect(create(fs).read('/ext/readme.md')).toEqual('DO NOT OVERWRITE');
+  });
+
+  it('copies over customizable files completely when new', async function () {
+    const customizableFilesModule: Module = {
+      name: 'customizable-files',
+      togglable: false,
+      updatable: true,
+      shortDescription: '',
+      filesToReplace: ['tsconfig.json'],
+      jsonToAugment: {},
+      needsTemplateParams: [],
+    };
+    const fs = await applyModule(
+      customizableFilesModule,
+      { 'customizable-files': true },
+      {},
+      scaffoldDir,
+      createStore(),
+      new NodePaths({ package: '/ext' })
+    );
+
+    expect(getFsPaths(fs)).toStrictEqual(customizableFilesModule.filesToReplace.map((p) => `/ext/${p}`));
+    expect(getExtFileContents(fs, 'tsconfig.json')).toStrictEqual(
+      readFileSync(resolve(__dirname, '../fixtures/example-scaffold/tsconfig.json')).toString()
+    );
+  });
+
+  it('copies over customizable files, keeping modifications', async function () {
+    const customizableFilesModule: Module = {
+      name: 'customizable-files',
+      togglable: false,
+      updatable: true,
+      shortDescription: '',
+      filesToReplace: ['tsconfig.json'],
+      jsonToAugment: {},
+      needsTemplateParams: [],
+    };
+
+    const fs = createStore();
+
+    const modified = readFileSync(resolve(__dirname, '../fixtures/tsconfig.json')).toString()
+
+    create(fs).write('/ext/tsconfig.json', modified);
+
+    await applyModule(
+      customizableFilesModule,
+      { 'customizable-files': true },
+      {},
+      scaffoldDir,
+      fs,
+      new NodePaths({ package: '/ext' })
+    );
+
+    expect(getFsPaths(fs)).toStrictEqual(customizableFilesModule.filesToReplace.map((p) => `/ext/${p}`));
+    expect(getExtFileContents(fs, 'tsconfig.json')).toStrictEqual(modified);
   });
 });

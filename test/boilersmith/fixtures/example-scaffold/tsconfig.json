@@ -1,0 +1,23 @@
+{
+  // Use Flarum's tsconfig as a starting point
+  "extends": "flarum-tsconfig",
+  "include": [
+    "src/**/*",
+    "../vendor/*/*/js/dist-typings/@types/**/*",
+// <CUSTOM-1>
+// </CUSTOM-1>
+    "@types/**/*",
+  ],
+  "compilerOptions": {
+    // This will output typings to `dist-typings`
+    "declarationDir": "./dist-typings",
+    "baseUrl": ".",
+    "paths": {
+      "flarum/*": [
+        "../vendor/flarum/core/js/dist-typings/*",
+      ],
+// <CUSTOM-2>
+// </CUSTOM-2>
+    }
+  }
+}

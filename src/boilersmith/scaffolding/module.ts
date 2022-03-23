@@ -259,7 +259,13 @@ export async function applyModule<MN extends string, TN extends string>(
       continue;
     }
 
-    fsEditor.copyTpl(resolve(scaffoldDir, path), copyTo, tplData);
+    let source = readTpl(resolve(scaffoldDir, path), tplData);
+
+    if (fsEditor.exists(copyTo)) {
+      source = applyCustomizations(source, fsEditor.read(copyTo));
+    }
+
+    fsEditor.write(copyTo, source);
   }
 
   const jsonPaths = cloneAndFill(module.jsonToAugment, tplDataFlat);
@@ -275,4 +281,15 @@ export async function applyModule<MN extends string, TN extends string>(
   }
 
   return fs;
+}
+
+function applyCustomizations(source: string, curr: string): string {
+  const CUSTOMIZATION_REGEX = new RegExp(/(\/\/ <CUSTOM-(?<id>.*)>)(?<contents>.*)(\/\/ <\/CUSTOM-\k<id>>)/gs);
+
+  const matches = curr.matchAll(CUSTOMIZATION_REGEX);
+  const customizations = Object.fromEntries([...matches].map(m => m.groups).filter(Boolean).map(g => [g?.id, g?.contents]));
+
+  return source.replace(
+    CUSTOMIZATION_REGEX,
+    (_m, open, id, _c, close) => `${open}${customizations[id] ?? ''}${close}`);
 }

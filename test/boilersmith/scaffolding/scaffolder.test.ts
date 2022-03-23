@@ -6,6 +6,7 @@ describe('Scaffolder', function () {
   describe('Scaffolder.validate', function () {
     const scaffoldDir = resolve(__dirname, '../fixtures/example-scaffold');
     const allFiles = [
+      "tsconfig.json",
       'monorepo-only.ml',
       'src/index.html',
       'src/index.js',
@@ -17,7 +18,7 @@ describe('Scaffolder', function () {
       'readme.md',
     ];
     const filesNoConf = allFiles.filter((p) => p !== 'config1.json');
-    const configKeys = ['hello', 'foo', 'authors', '${params.varKey}++', 'nested.config.string', 'nested.config.boolean', 'nested.config.null'];
+    const configKeys = ['hello', 'foo', 'authors', '${params.varKey}++\\', 'nested.config.string', 'nested.config.boolean', 'nested.config.null'];
 
     const templateParams: TemplateParam<string, 'someVar' | 'someOtherVar' | 'varKey'>[] = [
       {
