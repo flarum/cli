@@ -30,7 +30,6 @@ export const EXTENSION_PARAMS = [
 
   'licenseText',
 
-  'packageNamespaceEscapedSlash',
   'extensionId',
   'year',
 
@@ -159,13 +158,6 @@ function paramNamesToDef(name: ExtensionParams): TemplateParam<string, Extension
         compute: async (_paths, licenseType: string) => (licenseType ? require(`spdx-license-list/licenses/${licenseType}`).licenseText : ''),
       };
 
-    case 'packageNamespaceEscapedSlash':
-      return {
-        name,
-        uses: ['packageNamespace'],
-        compute: async (_paths, packageNamespace: string) => packageNamespace.replace('\\', '\\\\'),
-      };
-
     case 'extensionId':
       return {
         name,
@@ -291,7 +283,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
             'license',
             'require.flarum/core',
             'authors',
-            'autoload.psr-4.${params.packageNamespaceEscapedSlash}\\',
+            'autoload.psr-4.${params.packageNamespace}\\',
             'extra.flarum-extension.title',
             'extra.flarum-extension.category',
             'minimum-stability',
@@ -301,7 +293,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         needsTemplateParams: [
           'packageName',
           'packageNamespace',
-          'packageNamespaceEscapedSlash',
+          'packageNamespace',
           'packageDescription',
           'extensionName',
           'licenseType',
@@ -601,7 +593,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
         ],
         jsonToAugment: {
           'composer.json': [
-            'autoload-dev.psr-4.${params.packageNamespaceEscapedSlash}\\Tests\\',
+            'autoload-dev.psr-4.${params.packageNamespace}\\Tests\\',
             'scripts.test',
             'scripts.test:unit',
             'scripts.test:integration',
@@ -613,7 +605,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
             'require-dev.flarum/testing',
           ],
         },
-        needsTemplateParams: ['packageNamespaceEscapedSlash'],
+        needsTemplateParams: ['packageNamespace'],
         inferEnabled: async (_fs, paths: Paths) => {
           return existsSync(paths.package('tests'));
         },

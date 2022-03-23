@@ -1,7 +1,7 @@
 {
   "hello": "<%= params.someVar %>",
   "foo": "<%= params.someOtherVar %>",
-  "<%= params.varKey %>++": "const",
+  "<%= params.varKey %>++\\": "const",
   "authors": ["George Washington", "Alexander Hamilton", "Thomas Jefferson"],
   "nested": {
     "config": {

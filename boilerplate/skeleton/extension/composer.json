@@ -22,13 +22,13 @@
     <% if (params.packageNamespace) { %>
     "autoload": {
         "psr-4": {
-            "<%= params.packageNamespaceEscapedSlash %>\\": "src/"
+            "<%= params.packageNamespace %>\\": "src/"
         }
     },
     <% } %>
     "autoload-dev": {
         "psr-4": {
-            "<%= params.packageNamespaceEscapedSlash %>\\Tests\\": "tests/"
+            "<%= params.packageNamespace %>\\Tests\\": "tests/"
         }
     },
     "extra": {

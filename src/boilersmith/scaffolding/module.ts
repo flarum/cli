@@ -225,6 +225,11 @@ export async function applyModule<MN extends string, TN extends string>(
     string
   >;
 
+  // This is necessary because one layer of escaped backslashes is lost on template population.
+  tplData.params = Object.fromEntries(
+    Object.entries(paramVals).map(([k, v]) => [k, typeof v === 'string' ? v.replace('\\', '\\\\') : v])
+  ) as Record<TN, unknown>
+
   for (const file of module.filesToReplace) {
     const path = typeof file === 'string' ? file : file.path;
     const moduleDeps = typeof file === 'string' ? [] : file.moduleDeps ?? [];

@@ -302,7 +302,7 @@ describe('applyModule', function () {
       updatable: true,
       shortDescription: '',
       filesToReplace: [],
-      jsonToAugment: { 'config1.json': ['nested.config.string', 'hello', '${params.varKey}++'] },
+      jsonToAugment: { 'config1.json': ['nested.config.string', 'hello', '${params.varKey}++\\'] },
       needsTemplateParams: ['someVar', 'someOtherVar'],
     };
 
@@ -318,20 +318,47 @@ describe('applyModule', function () {
     expect(getFsPaths(fs)).toStrictEqual(['/ext/config1.json']);
     expect(JSON.parse(getExtFileContents(fs, 'config1.json'))).toStrictEqual({
       hello: 'val1',
-      'OCaml++': 'const',
+      'OCaml++\\': 'const',
+      nested: { config: { string: 'a' } },
+    });
+  });
+  it('copies over JSON data with backslashes in values', async function () {
+    const module: Module = {
+      name: 'just-json',
+      togglable: false,
+      updatable: true,
+      shortDescription: '',
+      filesToReplace: [],
+      jsonToAugment: { 'config1.json': ['nested.config.string', 'hello', '${params.varKey}++\\'] },
+      needsTemplateParams: ['someVar', 'someOtherVar'],
+    };
+
+    const fs = await applyModule(
+      module,
+      { 'just-json': true },
+      { someVar: 'val1', someOtherVar: 'val2', varKey: 'OC\\aml' },
+      scaffoldDir,
+      createStore(),
+      new NodePaths({ package: '/ext' })
+    );
+
+    expect(getFsPaths(fs)).toStrictEqual(['/ext/config1.json']);
+    expect(JSON.parse(getExtFileContents(fs, 'config1.json'))).toStrictEqual({
+      hello: 'val1',
+      'OC\\aml++\\': 'const',
       nested: { config: { string: 'a' } },
     });
   });
 
   it('can exclude JSON keys from being copied', async function () {
-    const excludeScaffolding = { files: [], configKeys: { 'config1.json': ['nested.config.string', '${params.varKey}++'] } };
+    const excludeScaffolding = { files: [], configKeys: { 'config1.json': ['nested.config.string', '${params.varKey}++\\'] } };
     const module: Module = {
       name: 'exclude-json',
       togglable: false,
       updatable: true,
       shortDescription: '',
       filesToReplace: [],
-      jsonToAugment: { 'config1.json': ['nested.config.string', 'hello', '${params.varKey}++'] },
+      jsonToAugment: { 'config1.json': ['nested.config.string', 'hello', '${params.varKey}++\\'] },
       needsTemplateParams: ['someVar', 'someOtherVar'],
     };
 
