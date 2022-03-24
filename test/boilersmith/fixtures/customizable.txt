@@ -5,6 +5,7 @@
     "src/**/*",
     "../vendor/*/*/js/dist-typings/@types/**/*",
 // <CUSTOM-1>
+    "something-else/**/*",
 // </CUSTOM-1>
     "@types/**/*",
   ],
@@ -16,8 +17,12 @@
       "flarum/*": [
         "../vendor/flarum/core/js/dist-typings/*",
       ],
-// <CUSTOM-2>
-// </CUSTOM-2>
+<!-- <CUSTOM-2> -->
+    "something-else/**/*": [""]
+<!-- </CUSTOM-2> -->
     }
   }
+# <CUSTOM-3>
+HELLO WORLD!!!!!
+# </CUSTOM-3>
 }

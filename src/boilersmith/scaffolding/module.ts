@@ -226,9 +226,10 @@ export async function applyModule<MN extends string, TN extends string>(
   >;
 
   // This is necessary because one layer of escaped backslashes is lost on template population.
-  tplData.params = Object.fromEntries(
-    Object.entries(paramVals).map(([k, v]) => [k, typeof v === 'string' ? v.replace('\\', '\\\\') : v])
-  ) as Record<TN, unknown>
+  tplData.params = Object.fromEntries(Object.entries(paramVals).map(([k, v]) => [k, typeof v === 'string' ? v.replace('\\', '\\\\') : v])) as Record<
+    TN,
+    unknown
+  >;
 
   for (const file of module.filesToReplace) {
     const path = typeof file === 'string' ? file : file.path;
@@ -284,12 +285,34 @@ export async function applyModule<MN extends string, TN extends string>(
 }
 
 function applyCustomizations(source: string, curr: string): string {
-  const CUSTOMIZATION_REGEX = new RegExp(/(\/\/ <CUSTOM-(?<id>.*)>)(?<contents>.*)(\/\/ <\/CUSTOM-\k<id>>)/gs);
+  const commentStructures = [
+    ['//', '\n'],
+    ['/*', ' */'],
+    ['<!--', '-->'],
+    ['#', '\n'],
+  ] as [string, string][];
 
-  const matches = curr.matchAll(CUSTOMIZATION_REGEX);
-  const customizations = Object.fromEntries([...matches].map(m => m.groups).filter(Boolean).map(g => [g?.id, g?.contents]));
+  commentStructures.forEach((x) => x);
 
-  return source.replace(
-    CUSTOMIZATION_REGEX,
-    (_m, open, id, _c, close) => `${open}${customizations[id] ?? ''}${close}`);
+  return commentStructures.reduce((acc, [start, end]) => {
+    const CUSTOMIZATION_REGEX = new RegExp(
+      `(${start}\\s*<CUSTOM-(?<id>.*)>\\s*${end})(?<contents>.*)(${start}\\s*</CUSTOM-\\k<id>>\\s*${end})`,
+      'gs'
+    );
+
+    const matches = curr.matchAll(CUSTOMIZATION_REGEX);
+    const customizations = Object.fromEntries(
+      [...matches]
+        .map((m) => m.groups)
+        .filter(Boolean)
+        .map((g) => [g?.id, g?.contents])
+    );
+
+    return acc.replace(
+      CUSTOMIZATION_REGEX,
+      (_m, open, id, _c, close) =>
+        (console.log(`${open}${customizations[id] ?? ''}${close}`, '\n' + customizations[id]) as any as string) ||
+        `${open}${customizations[id] ?? ''}${close}`
+    );
+  }, source);
 }

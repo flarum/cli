@@ -604,7 +604,7 @@ describe('applyModule', function () {
       togglable: false,
       updatable: true,
       shortDescription: '',
-      filesToReplace: ['tsconfig.json'],
+      filesToReplace: ['customizable.txt'],
       jsonToAugment: {},
       needsTemplateParams: [],
     };
@@ -618,8 +618,8 @@ describe('applyModule', function () {
     );
 
     expect(getFsPaths(fs)).toStrictEqual(customizableFilesModule.filesToReplace.map((p) => `/ext/${p}`));
-    expect(getExtFileContents(fs, 'tsconfig.json')).toStrictEqual(
-      readFileSync(resolve(__dirname, '../fixtures/example-scaffold/tsconfig.json')).toString()
+    expect(getExtFileContents(fs, 'customizable.txt')).toStrictEqual(
+      readFileSync(resolve(__dirname, '../fixtures/example-scaffold/customizable.txt')).toString()
     );
   });
 
@@ -629,27 +629,20 @@ describe('applyModule', function () {
       togglable: false,
       updatable: true,
       shortDescription: '',
-      filesToReplace: ['tsconfig.json'],
+      filesToReplace: ['customizable.txt'],
       jsonToAugment: {},
       needsTemplateParams: [],
     };
 
     const fs = createStore();
 
-    const modified = readFileSync(resolve(__dirname, '../fixtures/tsconfig.json')).toString()
+    const modified = readFileSync(resolve(__dirname, '../fixtures/customizable.txt')).toString();
 
-    create(fs).write('/ext/tsconfig.json', modified);
+    create(fs).write('/ext/customizable.txt', modified);
 
-    await applyModule(
-      customizableFilesModule,
-      { 'customizable-files': true },
-      {},
-      scaffoldDir,
-      fs,
-      new NodePaths({ package: '/ext' })
-    );
+    await applyModule(customizableFilesModule, { 'customizable-files': true }, {}, scaffoldDir, fs, new NodePaths({ package: '/ext' }));
 
     expect(getFsPaths(fs)).toStrictEqual(customizableFilesModule.filesToReplace.map((p) => `/ext/${p}`));
-    expect(getExtFileContents(fs, 'tsconfig.json')).toStrictEqual(modified);
+    expect(getExtFileContents(fs, 'customizable.txt')).toStrictEqual(modified);
   });
 });

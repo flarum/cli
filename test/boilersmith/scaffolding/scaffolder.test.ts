@@ -6,7 +6,7 @@ describe('Scaffolder', function () {
   describe('Scaffolder.validate', function () {
     const scaffoldDir = resolve(__dirname, '../fixtures/example-scaffold');
     const allFiles = [
-      "tsconfig.json",
+      'customizable.txt',
       'monorepo-only.ml',
       'src/index.html',
       'src/index.js',
