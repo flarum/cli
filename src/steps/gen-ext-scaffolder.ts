@@ -386,6 +386,7 @@ function moduleNameToDef(name: ExtensionModules): Module<ExtensionModules> {
           'js/package.json': [
             'name',
             'private',
+            'version',
             'devDependencies.flarum-webpack-config',
             'devDependencies.webpack',
             'devDependencies.webpack-cli',
