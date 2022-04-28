@@ -1,6 +1,7 @@
 {
   "name": "@<%= params.packageName %>",
   "private": true,
+  "version": "0.0.0",
   "prettier": "@flarum/prettier-config",
   "dependencies": {
   },
