@@ -8,7 +8,7 @@ export default class Split extends BaseCommand {
   static description = 'Split monorepo changes into subrepos.';
 
   static flags = {
-    config: Flags.string({ char: 'c', required: false }),
+    force: Flags.boolean({ char: 'f', required: false }),
     ...BaseCommand.flags,
   };
 
@@ -17,6 +17,6 @@ export default class Split extends BaseCommand {
   protected requireExistingExtension = false;
 
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
-    return stepManager.step(new MonorepoSplit());
+    return stepManager.step(new MonorepoSplit(this.flags.force));
   }
 }

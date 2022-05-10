@@ -308,11 +308,6 @@ function applyCustomizations(source: string, curr: string): string {
         .map((g) => [g?.id, g?.contents])
     );
 
-    return acc.replace(
-      CUSTOMIZATION_REGEX,
-      (_m, open, id, _c, close) =>
-        (console.log(`${open}${customizations[id] ?? ''}${close}`, '\n' + customizations[id]) as any as string) ||
-        `${open}${customizations[id] ?? ''}${close}`
-    );
+    return acc.replace(CUSTOMIZATION_REGEX, (_m, open, id, _c, close) => `${open}${customizations[id] ?? ''}${close}`);
   }, source);
 }
