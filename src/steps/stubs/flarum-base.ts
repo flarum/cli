@@ -9,7 +9,7 @@ export abstract class FlarumBaseStubStep extends BaseStubStep<FlarumProviders, E
   protected async precompileParams(fs: Store, paths: Paths, io: IO): Promise<Record<string, unknown>> {
     return {
       ...(await super.precompileParams(fs, paths, io)),
-      extensionId: this.scaffolder.templateParamVal('extensionId', fs, paths, io),
+      extensionId: await this.scaffolder.templateParamVal('extensionId', fs, paths, io),
     };
   }
 }
