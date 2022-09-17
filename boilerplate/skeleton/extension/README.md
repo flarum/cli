@@ -2,7 +2,7 @@
 
 ![License](https://img.shields.io/badge/license-<%= params.licenseType %>-blue.svg) [![Latest Stable Version](https://img.shields.io/packagist/v/<%= params.packageName %>.svg)](https://packagist.org/packages/<%= params.packageName %>) [![Total Downloads](https://img.shields.io/packagist/dt/<%= params.packageName %>.svg)](https://packagist.org/packages/<%= params.packageName %>)
 
-A [Flarum](http://flarum.org) extension. <%= params.packageDescription %>
+A [Flarum](https://flarum.org) extension. <%= params.packageDescription %>
 
 ## Installation
 
