@@ -77,33 +77,35 @@ export class MonorepoSplit implements Step<FlarumProviders> {
 
     const clean = [];
 
-    // Add Remotes
-    for (const lib of conf.packages.npm ?? []) {
-      await addRemote(target, lib.name, lib.gitRemote);
-      await splitAndPush(target, splitExec, npmPath(lib.name), lib.name, lib.mainBranch, this.force);
-      clean.push(lib.name);
-    }
+    try {
+      // Add Remotes
+      for (const lib of conf.packages.npm ?? []) {
+        await addRemote(target, lib.name, lib.gitRemote);
+        await splitAndPush(target, splitExec, npmPath(lib.name), lib.name, lib.mainBranch, this.force);
+        clean.push(lib.name);
+      }
 
-    for (const lib of conf.packages.composer ?? []) {
-      await addRemote(target, lib.name, lib.gitRemote);
-      await splitAndPush(target, splitExec, composerPath(lib.name), lib.name, lib.mainBranch, this.force);
-      clean.push(lib.name);
-    }
+      for (const lib of conf.packages.composer ?? []) {
+        await addRemote(target, lib.name, lib.gitRemote);
+        await splitAndPush(target, splitExec, composerPath(lib.name), lib.name, lib.mainBranch, this.force);
+        clean.push(lib.name);
+      }
 
-    for (const ext of conf.packages.extensions ?? []) {
-      await addRemote(target, ext.name, ext.gitRemote);
-      await splitAndPush(target, splitExec, extensionPath(ext.name), ext.name, ext.mainBranch, this.force);
-      clean.push(ext.name);
-    }
+      for (const ext of conf.packages.extensions ?? []) {
+        await addRemote(target, ext.name, ext.gitRemote);
+        await splitAndPush(target, splitExec, extensionPath(ext.name), ext.name, ext.mainBranch, this.force);
+        clean.push(ext.name);
+      }
 
-    if (corePkg) {
-      await addRemote(target, corePkg.name, corePkg.gitRemote);
-      await splitAndPush(target, splitExec, corePath(corePkg.name), corePkg.name, corePkg.mainBranch, this.force);
-      clean.push(corePkg.name);
-    }
-
-    for (const name of clean) {
-      await cleanupBranchAndRemote(target, name);
+      if (corePkg) {
+        await addRemote(target, corePkg.name, corePkg.gitRemote);
+        await splitAndPush(target, splitExec, corePath(corePkg.name), corePkg.name, corePkg.mainBranch, this.force);
+        clean.push(corePkg.name);
+      }
+    } finally {
+      for (const name of clean) {
+        await cleanupBranchAndRemote(target, name);
+      }
     }
 
     return fs;
