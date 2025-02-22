@@ -31,10 +31,10 @@ class ChangeSignatures extends NodeVisitorAbstract
 
         if (! $this->valid && $node instanceof Class_) {
             $implements = array_map(function (Node\Name $interface) {
-                return $interface->getAttribute('resolvedName')->name;
+                return NodeUtil::className($interface);
             }, $node->implements);
 
-            $extends = $node->extends ? $node->extends->getAttribute('resolvedName')->name : null;
+            $extends = $node->extends ? NodeUtil::className($node->extends) : null;
 
             if ($extends && isset($this->changes[$extends])) {
                 $this->valid = true;

@@ -146,7 +146,7 @@ class Search extends Replacement
                                 $expr = $node->stmts[0]->expr;
 
                                 if ($expr instanceof Node\Expr\StaticCall) {
-                                    $model = $expr->class->getAttribute('resolvedName')->name;
+                                    $model = NodeUtil::className($expr->class);
                                     $this->data['repositories'][$class]['model'] = $model;
                                 }
                             }
@@ -173,7 +173,7 @@ class Search extends Replacement
                                 if ($expr instanceof Node\Expr\MethodCall && $expr->var instanceof Node\Expr\PropertyFetch && isset($this->map[$expr->var->name->name])) {
                                     $this->data['searchers'][$fqnClass]['repository'] = $this->map[$expr->var->name->name];
                                 } elseif ($expr instanceof Node\Expr\MethodCall && $expr->var instanceof Node\Expr\StaticCall) {
-                                    $model = $expr->var->class->getAttribute('resolvedName')->name;
+                                    $model = NodeUtil::className($expr->var->class);
                                     $this->data['searchers'][$fqnClass]['model'] = $model;
                                 }
                             }
@@ -271,7 +271,7 @@ class Search extends Replacement
                         }
 
                         if ($class === 'Flarum\Extend\Filter') {
-                            $filterer = $new->args[0]->value->class->getAttribute('resolvedName')->name;
+                            $filterer = NodeUtil::className($new->args[0]->value->class);
 
                             if ($filterer === 'Flarum\\Discussion\\Filter\\DiscussionFilterer') {
                                 $searcher = 'Flarum\\Discussion\\Search\\DiscussionSearcher';
@@ -297,7 +297,7 @@ class Search extends Replacement
                                 $this->data['searchers'][$searcher]['mutators'][] = $arg->value;
                             }
                         } elseif ($class === 'Flarum\Extend\SimpleFlarumSearch') {
-                            $searcher = $new->args[0]->value->class->getAttribute('resolvedName')->name;
+                            $searcher = NodeUtil::className($new->args[0]->value->class);
 
                             $arg = $node->args[0];
 

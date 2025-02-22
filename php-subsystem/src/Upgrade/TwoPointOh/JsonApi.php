@@ -48,7 +48,7 @@ class JsonApi extends Replacement
             public function enterNode(\PhpParser\Node $node)
             {
                 if ($node instanceof \PhpParser\Node\Stmt\Class_ && $node->extends) {
-                    if (in_array($node->extends->getAttribute('resolvedName')->name, self::STALE)) {
+                    if (in_array(NodeUtil::className($node->extends), self::STALE)) {
                         $node->setAttribute('comments', [new \PhpParser\Comment\Doc(<<<PHPDOC
                         /**
                          * @TODO: Remove this in favor of one of the API resource classes that were added.
@@ -145,7 +145,7 @@ class JsonApi extends Replacement
             {
                 if ($node instanceof \PhpParser\Node\Expr\New_) {
                     if ($node->class instanceof \PhpParser\Node\Name) {
-                        $class = $node->class->getAttribute('resolvedName')->name;
+                        $class = NodeUtil::className($node->class);
 
                         if (in_array($class, ['Flarum\Extend\ApiSerializer', 'Flarum\Extend\ApiController', 'Flarum\Foundation\AbstractValidator'])) {
                             $parent = $node->getAttribute('parent');

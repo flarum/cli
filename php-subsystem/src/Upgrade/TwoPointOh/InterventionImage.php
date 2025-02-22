@@ -2,6 +2,7 @@
 
 namespace Flarum\CliPhpSubsystem\Upgrade\TwoPointOh;
 
+use Flarum\CliPhpSubsystem\NodeUtil;
 use Flarum\CliPhpSubsystem\NodeVisitors\ReplaceUses;
 use Flarum\CliPhpSubsystem\Upgrade\Replacement;
 use Flarum\CliPhpSubsystem\Upgrade\ReplacementResult;
@@ -35,9 +36,9 @@ class InterventionImage extends Replacement
                 if ($node instanceof Node\Stmt\Property
                     && $node->type
                     && $node->type->hasAttribute('resolvedName')
-                    && strpos($node->type->getAttribute('resolvedName')->name, 'Intervention\\Image\\') === 0
+                    && strpos(NodeUtil::className($node->type), 'Intervention\\Image\\') === 0
                 ) {
-                    $this->propertyTypes[$node->props[0]->name->name] = $node->type->getAttribute('resolvedName')->name;
+                    $this->propertyTypes[$node->props[0]->name->name] = NodeUtil::className($node->type);
                 }
 
                 if ($node instanceof Node\Stmt\ClassMethod && $node->name->name === '__construct') {
@@ -46,12 +47,12 @@ class InterventionImage extends Replacement
                             || ! $param->type
                             || ! $param->type->hasAttribute('resolvedName')
                             || ! is_string($param->var->name)
-                            || strpos($param->type->getAttribute('resolvedName')->name, 'Intervention\\Image\\') !== 0
+                            || strpos(NodeUtil::className($param->type), 'Intervention\\Image\\') !== 0
                         ) {
                             continue;
                         }
 
-                        $this->propertyTypes[$param->var->name] = $param->type->getAttribute('resolvedName')->name;
+                        $this->propertyTypes[$param->var->name] = NodeUtil::className($param->type);
                     }
                 }
             }

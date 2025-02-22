@@ -2,6 +2,7 @@
 
 namespace Flarum\CliPhpSubsystem\Upgrade\TwoPointOh;
 
+use Flarum\CliPhpSubsystem\NodeUtil;
 use Flarum\CliPhpSubsystem\NodeVisitors\ChangeSignatures;
 use Flarum\CliPhpSubsystem\Upgrade\Replacement;
 use Flarum\CliPhpSubsystem\Upgrade\ReplacementResult;
@@ -37,7 +38,7 @@ class EmailViews extends Replacement
 
             public function enterNode(\PhpParser\Node $node)
             {
-                if ($node instanceof \PhpParser\Node\Stmt\Class_ && (!$node->implements || ! in_array($this->interface, array_map(function ($interface) { return $interface->getAttribute('resolvedName')->name; }, $node->implements)))) {
+                if ($node instanceof \PhpParser\Node\Stmt\Class_ && (!$node->implements || ! in_array($this->interface, array_map(function ($interface) { return NodeUtil::className($interface); }, $node->implements)))) {
                     return NodeVisitor::DONT_TRAVERSE_CHILDREN;
                 }
 
@@ -53,7 +54,7 @@ class EmailViews extends Replacement
 
             public function leaveNode(Node $node)
             {
-                if ($node instanceof \PhpParser\Node\Stmt\Class_ && (!$node->implements || ! in_array($this->interface, array_map(function ($interface) { return $interface->getAttribute('resolvedName')->name; }, $node->implements)))) {
+                if ($node instanceof \PhpParser\Node\Stmt\Class_ && (!$node->implements || ! in_array($this->interface, array_map(function ($interface) { return NodeUtil::className($interface); }, $node->implements)))) {
                     return NodeVisitor::STOP_TRAVERSAL;
                 }
 

@@ -69,4 +69,9 @@ class NodeUtil
             array_splice($node->stmts, $lastUseStatement + 1, 0, $uses);
         }
     }
+
+    public static function className($expr): ?string
+    {
+        return $expr->getAttribute('resolvedName')?->name ?? $expr->name;
+    }
 }
