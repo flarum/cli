@@ -12,7 +12,7 @@ import { FlarumProviders } from '../../providers';
 async function addRemote(cwd: string, name: string, remote: string) {
   try {
     await simpleGit(cwd).addRemote(name, remote);
-    await simpleGit(cwd).fetch(name);
+    await simpleGit(cwd).fetch(name, ['--all']);
   } catch {
     // ignore, remote already exists.
   }
@@ -20,9 +20,17 @@ async function addRemote(cwd: string, name: string, remote: string) {
 
 async function splitAndPush(cwd: string, splitExecPath: string, splitPath: string, remoteName: string, remoteBranch?: string, force = false) {
   const currBranch = execSync('git rev-parse --abbrev-ref HEAD', { cwd }).toString().trim();
-  const sha1 = execSync(`${splitExecPath} --prefix=${splitPath}`, { cwd, stdio: ['pipe', 'pipe', 'ignore'] })
-    .toString()
-    .trim();
+
+  let sha1;
+
+  try {
+    sha1 = execSync(`${splitExecPath} --prefix=${splitPath}`, { cwd, stdio: ['pipe', 'pipe', 'ignore'] })
+      .toString()
+      .trim();
+  } catch (error) {
+    console.error((error as any).output?.toString());
+    throw error;
+  }
 
   const branch = remoteBranch || 'main';
 
