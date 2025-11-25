@@ -64,6 +64,8 @@ export class MonorepoSplit implements Step<FlarumProviders> {
 
   async run(fs: Store, paths: Paths, io: IO, _providers: FlarumProviders): Promise<Store> {
     const platform = process.platform;
+    const arch = process.arch;
+
     if (platform !== 'linux' && platform !== 'darwin') {
       io.error(`Your platform, "${platform}", is not supported. Split can only be run on linux and mac`, true);
       return fs;
@@ -74,7 +76,12 @@ export class MonorepoSplit implements Step<FlarumProviders> {
       return fs;
     }
 
-    const splitExec = resolve(__dirname, `../../../bin/splitsh-lite-${platform}`);
+    // Select the appropriate binary based on platform and architecture
+    let splitExec: string;
+    splitExec =
+      platform === 'darwin' && arch === 'arm64'
+        ? resolve(__dirname, `../../../bin/splitsh-lite-darwin-arm64`)
+        : resolve(__dirname, `../../../bin/splitsh-lite-${platform}`);
 
     const target = paths.requestedDir() ?? paths.package();
 

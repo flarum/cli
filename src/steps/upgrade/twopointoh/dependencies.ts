@@ -102,8 +102,8 @@ export default class Dependencies extends BaseUpgradeStep {
         'flarum-webpack-config': '^3.0.0',
         'flarum-tsconfig': '^2.0.0',
         '@flarum/jest-config': '^2.0.0',
-        'webpack': "^5.65.0",
-        'webpack-cli': "^4.9.1",
+        webpack: '^5.65.0',
+        'webpack-cli': '^4.9.1',
       };
 
       const dependencies = advanced.dependencies || advanced.devDependencies;
