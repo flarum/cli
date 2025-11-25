@@ -78,11 +78,10 @@ export class MonorepoSplit implements Step<FlarumProviders> {
 
     // Select the appropriate binary based on platform and architecture
     let splitExec: string;
-    if (platform === 'darwin' && arch === 'arm64') {
-      splitExec = resolve(__dirname, `../../../bin/splitsh-lite-darwin-arm64`);
-    } else {
-      splitExec = resolve(__dirname, `../../../bin/splitsh-lite-${platform}`);
-    }
+    splitExec =
+      platform === 'darwin' && arch === 'arm64'
+        ? resolve(__dirname, `../../../bin/splitsh-lite-darwin-arm64`)
+        : resolve(__dirname, `../../../bin/splitsh-lite-${platform}`);
 
     const target = paths.requestedDir() ?? paths.package();
 

@@ -12,16 +12,19 @@ This guide covers how to set up and work with the Flarum CLI codebase locally.
 1. **Clone the repository** (if you haven't already)
 
 2. **Install dependencies:**
+
    ```bash
    yarn install
    ```
 
 3. **Build the TypeScript source:**
+
    ```bash
    yarn prepack
    ```
 
    This command:
+
    - Compiles TypeScript from `src/` to `lib/`
    - Generates the oclif manifest
    - Updates the README with command documentation
@@ -31,11 +34,13 @@ This guide covers how to set up and work with the Flarum CLI codebase locally.
 You have several options for running the CLI during development:
 
 ### Option 1: Direct execution via bin/run
+
 ```bash
 ./bin/run [command]
 ```
 
 Example:
+
 ```bash
 ./bin/run --help
 ./bin/run init
@@ -43,24 +48,29 @@ Example:
 ```
 
 ### Option 2: Create a development alias (recommended)
+
 Add an alias to your shell configuration file without affecting existing installations:
 
 **For zsh** (add to `~/.zshrc`):
+
 ```bash
 alias fl-dev='/path/to/cli/bin/run'
 ```
 
 **For bash** (add to `~/.bashrc` or `~/.bash_profile`):
+
 ```bash
 alias fl-dev='/path/to/cli/bin/run'
 ```
 
 After adding the alias, reload your shell:
+
 ```bash
 source ~/.zshrc  # or source ~/.bashrc
 ```
 
 Then use:
+
 ```bash
 fl-dev [command]
 ```
@@ -68,11 +78,13 @@ fl-dev [command]
 This allows you to keep your existing `fl1`, `fl2`, etc. aliases intact while having a dedicated `fl-dev` for local development.
 
 ### Option 3: Link globally for development
+
 ```bash
 yarn link
 ```
 
 After linking, you can use any of these commands:
+
 - `flarum-cli [command]`
 - `fl [command]`
 - `fl2 [command]`
@@ -96,11 +108,13 @@ After linking, you can use any of these commands:
 ### Testing
 
 Run the test suite:
+
 ```bash
 yarn test
 ```
 
 This will:
+
 - Run Jest tests
 - Check code formatting with Prettier
 - Lint code with ESLint
@@ -109,6 +123,7 @@ This will:
 ### Code Formatting
 
 Format code automatically:
+
 ```bash
 yarn format
 ```
@@ -146,23 +161,27 @@ This runs ESLint with auto-fix and Prettier.
 ### Key Concepts
 
 **Commands** (in `src/commands/`)
+
 - User-facing CLI commands
 - Built on oclif framework
 - Orchestrate step execution
 
 **Steps** (in `src/steps/`)
+
 - Granular, reusable operations
 - Modify in-memory filesystem
 - Can be composed atomically
 - Support parameter sharing between steps
 
 **Step Manager**
+
 - Fluent API for chaining steps
 - Handles optional steps
 - Manages parameter passing between steps
 - Supports atomic groups for transactional changes
 
 **Scaffolding System** (`src/boilersmith/`)
+
 - Manages extension infrastructure modules
 - Supports initialization and updates
 - Module-based file and config ownership
@@ -170,12 +189,15 @@ This runs ESLint with auto-fix and Prettier.
 ## Debugging
 
 ### Running with Node Inspector
+
 ```bash
 node --inspect ./bin/run [command]
 ```
 
 ### Verbose Output
+
 Most commands support flags for additional output. Check command help:
+
 ```bash
 ./bin/run [command] --help
 ```
@@ -206,14 +228,17 @@ Most commands support flags for additional output. Check command help:
 ## Troubleshooting
 
 ### "Command not found" after changes
+
 - Ensure you've run `yarn prepack` to rebuild
 - Check that `lib/` directory exists and contains compiled code
 
 ### TypeScript errors
+
 - Run `yarn posttest` to see type checking output
 - Ensure `tsconfig.json` includes your new files
 
 ### Tests failing
+
 - Run `yarn test` to see full output
 - Check that step unit tests match your changes
 
