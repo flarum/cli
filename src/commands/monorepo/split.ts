@@ -17,6 +17,6 @@ export default class Split extends BaseCommand {
   protected requireExistingExtension = false;
 
   protected steps(stepManager: StepManager<FlarumProviders>): StepManager<FlarumProviders> {
-    return stepManager.step(new MonorepoSplit(this.flags.force));
+    return stepManager.step(new MonorepoSplit(this.flags.force, this.flags['no-interaction']));
   }
 }
