@@ -7,7 +7,7 @@
   "dependencies": {
   },
   "devDependencies": {
-    "@flarum/jest-config": "^1.0.1",
+    "@flarum/jest-config": "^2.0.0",
     "@flarum/prettier-config": "^1.0.0",
     "flarum-tsconfig": "^2.0.0",
     "flarum-webpack-config": "^3.0.0",
