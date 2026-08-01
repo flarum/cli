@@ -39,7 +39,7 @@ export default class PhpUnit extends BaseUpgradeStep {
       'https://github.com/sebastianbergmann/phpunit/blob/11.3.0/DEPRECATIONS.md',
     ];
 
-    const dbLink = 'http://localhost:3000/extend/testing#model-factories';
+    const dbLink = 'https://docs.flarum.org/2.x/extend/testing#model-factories';
 
     return `Flarum 2.0 uses PHPUnit 11. The tool has applied the most significant changes, but you might still run into other deprecations.
                      Please refer to the following links for more information:

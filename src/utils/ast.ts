@@ -8,14 +8,9 @@ import prettierConfig from '@flarum/prettier-config/prettierrc.json';
 import * as recast from 'recast';
 
 export function parseCode(code: string): t.File {
-  try {
-    return recast.parse(code, {
-      parser: require('recast/parsers/babel-ts'),
-    });
-  } catch (error) {
-    console.log(code);
-    throw error;
-  }
+  return recast.parse(code, {
+    parser: require('recast/parsers/babel-ts'),
+  });
 }
 
 export async function generateCode(ast: t.File, extenders = false): Promise<string> {
