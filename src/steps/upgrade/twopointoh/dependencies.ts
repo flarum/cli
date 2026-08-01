@@ -58,7 +58,7 @@ export default class Dependencies extends BaseUpgradeStep {
         });
 
         if (key === 'flarum/core') {
-          composer.require[key] = '^2.0.0-beta';
+          composer.require[key] = '^2.0.0';
         } else if (key.startsWith('flarum/') && value !== '*') {
           composer.require[key] = '*';
         }
@@ -74,15 +74,21 @@ export default class Dependencies extends BaseUpgradeStep {
         });
 
         if (['flarum/core', 'flarum/testing', 'flarum/phpstan'].includes(key)) {
-          composer['require-dev'][key] = '^2.0.0-beta';
+          composer['require-dev'][key] = '^2.0.0';
         } else if (key.startsWith('flarum/') && (value as string).startsWith('^1')) {
           composer['require-dev'][key] = '*';
         }
       }
 
       if (composer.require.php) {
-        composer.require.php = '^8.2';
+        composer.require.php = '^8.3';
       }
+
+      // 2.0 constraints resolve to prereleases while the line is in RC, so the
+      // extension has to accept them — with stable preferred wherever one
+      // exists, so only Flarum itself comes from the beta channel.
+      composer['minimum-stability'] = 'beta';
+      composer['prefer-stable'] = true;
 
       if (composer.require['fof/extend']) {
         composer.require['fof/extend'] = '^2.0.0';
