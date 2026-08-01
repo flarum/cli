@@ -15,6 +15,7 @@ import s from 'string';
 import simpleGit from 'simple-git';
 import { cloneNode } from '@babel/types';
 import { PhpProvider } from '../../../providers/php-provider';
+import { StepFailures } from './step-failures';
 
 export type ReplacementResult = {
   imports?: ImportChange[];
@@ -127,6 +128,8 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
       dots = (dots + 1) % 4;
     };
 
+    const failures = new StepFailures();
+
     const targets = this.targets();
 
     for (const target of targets) {
@@ -145,9 +148,16 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
           }
 
           const code = fsEditor.read(file);
-          const advanced = this.advancedContent(file, code);
 
-          this.before(file, code, advanced);
+          // Same as the transform pass below: a file this step can't read
+          // shouldn't stop it from reporting on the others.
+          try {
+            const advanced = this.advancedContent(file, code);
+
+            this.before(file, code, advanced);
+          } catch (error) {
+            failures.record(s(file.replace(paths.package(), '')).stripLeft('/').stripLeft('\\').toString(), error);
+          }
 
           progress();
         }
@@ -163,12 +173,22 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
           }
 
           const code = fsEditor.read(file);
-          const advanced = this.advancedContent(file, code);
-
           const relativeTarget = s(file.replace(paths.package(), '')).stripLeft('/').stripLeft('\\').toString();
 
-          // eslint-disable-next-line no-await-in-loop
-          const result = await this.applyReplacements(relativeTarget, code, advanced);
+          let result;
+
+          // One file the step can't handle shouldn't decide the fate of the
+          // rest: note it and carry on, so the author is told about every
+          // problem this step found rather than the first one.
+          try {
+            const advanced = this.advancedContent(file, code);
+
+            // eslint-disable-next-line no-await-in-loop
+            result = await this.applyReplacements(relativeTarget, code, advanced);
+          } catch (error) {
+            failures.record(relativeTarget, error);
+            continue;
+          }
 
           if (result.newPath && result.newPath !== file) {
             fsEditor.move(file, result.newPath!);
@@ -213,7 +233,30 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
       // }
     }
 
-    const changesMade = await simpleGit(paths.requestedDir() ?? paths.cwd())
+    const dir = paths.requestedDir() ?? paths.cwd();
+
+    if (failures.any()) {
+      // Leave the step all-or-nothing. Its partial writes are already on disk,
+      // and the run refuses to start with a dirty tree, so keeping them would
+      // block the re-run this step is asking the author to do.
+      await simpleGit(dir).checkout(['--', '.']);
+
+      this.command.log('\u001B[A     => ' + chalk.bgRed.bold('   FAILED   '));
+      this.command.log('');
+      this.command.log(failures.report());
+      this.command.log('');
+
+      const files = failures.count() === 1 ? 'file' : 'files';
+
+      this.command.error(
+        `${failures.count()} ${files} could not be upgraded by this step, so it made no changes.\n` +
+          '     Fix the problems above and run the command again — steps that already\n' +
+          '     completed are skipped, so it will resume from here.',
+        { code: 'FL_ERR' }
+      );
+    }
+
+    const changesMade = await simpleGit(dir)
       .diffSummary()
       .then((summary) => summary.files.length > 0);
 
@@ -265,8 +308,7 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
         try {
           advanced = parseCode(code);
         } catch (error) {
-          this.command.warn(`Failed to parse code for ${file}, code: \n${code}`);
-          throw error;
+          throw new Error(`The transformed code could not be parsed back: ${(error as Error).message}`);
         }
 
         result.imports?.forEach((imp) => {
@@ -332,13 +374,17 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
 
       try {
         return JSON.parse(code);
-      } catch {
-        this.command.error(`Failed to parse JSON file ${file}`);
+      } catch (error) {
+        throw new Error(`Not valid JSON: ${(error as Error).message}`);
       }
     }
 
     if (['js', 'ts', 'jsx', 'tsx'].includes(lang || '')) {
-      return parseCode(code);
+      try {
+        return parseCode(code);
+      } catch (error) {
+        throw new Error(`Could not parse: ${(error as Error).message}`);
+      }
     }
 
     return null;
@@ -365,8 +411,7 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
       try {
         return generateCode(updated as t.File, false);
       } catch (error) {
-        this.command.warn(`Failed to generate code for ${file}, code: \n${code}`);
-        throw error;
+        throw new Error(`Could not generate code from the transformed syntax tree: ${(error as Error).message}`);
       }
     }
 
