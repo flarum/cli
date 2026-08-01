@@ -11,6 +11,7 @@ import { resolve } from 'path';
 import simpleGit from 'simple-git';
 import spdxLicenseListSimple from 'spdx-license-list/simple';
 import { getComposerJson } from '../utils/composer';
+import s from 'string';
 
 function assertUnreachable(_x: never): never {
   throw new Error("Didn't expect to get here");
@@ -75,6 +76,13 @@ function paramNamesToDef(name: ExtensionParams): TemplateParam<string, Extension
           name,
           type: 'text',
           message: `Package namespace ${chalk.dim('(Vendor\\ExtensionName)')}`,
+          initial: (_prev, values) =>
+            (values as unknown as Map<string, string>)
+              .get('packageName')!
+              .replace('/flarum-', '/')
+              .split('/')
+              .map((b: string) => s(b).camelize().capitalize().toString())
+              .join('\\'),
           validate: (s) => /^([\dA-Za-z]+)\\([\dA-Za-z]+)$/.test(s.trim()) || 'Invalid namespace format',
           format: (str: string) =>
             str &&
@@ -86,7 +94,7 @@ function paramNamesToDef(name: ExtensionParams): TemplateParam<string, Extension
         getCurrVal: async (fs: Store, paths: Paths) => {
           const json = getComposerJson(fs, paths);
           const namespace = (Object.keys(json?.autoload?.['psr-4'] ?? {})?.[0] ?? '')?.slice(0, -1);
-          return namespace || '';
+          return (namespace || '').replace('\\\\', '\\');
         },
       };
 
@@ -124,6 +132,12 @@ function paramNamesToDef(name: ExtensionParams): TemplateParam<string, Extension
           type: 'text',
           message: 'Extension name',
           validate: (str) => Boolean(str.trim()) || 'The extension name is required',
+          initial: (_prev, values) =>
+            s((values as unknown as Map<string, string>).get('packageName')!.split('/')[1])
+              .replaceAll('flarum-', '')
+              .humanize()
+              .capitalize()
+              .toString(),
           format: (str) =>
             str
               .split(' ')
