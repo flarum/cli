@@ -48,8 +48,13 @@ async function splitAndPush(cwd: string, splitExecPath: string, splitPath: strin
 
 async function cleanupBranchAndRemote(cwd: string, name: string) {
   await simpleGit(cwd).removeRemote(name);
-  const tmpBranch = `${name}-tmp`;
-  execSync(`git branch -D ${tmpBranch}`, { cwd });
+  try {
+    const tmpBranch = `${name}-tmp`;
+    execSync(`git branch -D ${tmpBranch}`, { cwd, stdio: 'ignore' });
+  } catch {
+    // A forced split pushes the split sha straight to the remote, so it never
+    // creates the temp branch this deletes.
+  }
 }
 
 export class MonorepoSplit implements Step<FlarumProviders> {
@@ -57,9 +62,11 @@ export class MonorepoSplit implements Step<FlarumProviders> {
   composable = false;
   exposes = [];
   force?: boolean;
+  noInteraction?: boolean;
 
-  constructor(force: boolean) {
+  constructor(force: boolean, noInteraction = false) {
     this.force = force;
+    this.noInteraction = noInteraction;
   }
 
   async run(fs: Store, paths: Paths, io: IO, _providers: FlarumProviders): Promise<Store> {
@@ -71,7 +78,11 @@ export class MonorepoSplit implements Step<FlarumProviders> {
       return fs;
     }
 
-    if (this.force && !(await io.getParam({ type: 'confirm', name: 'confirm', initial: false, message: 'Are you sure you want to force split?' }))) {
+    if (
+      this.force &&
+      !this.noInteraction &&
+      !(await io.getParam({ type: 'confirm', name: 'confirm', initial: false, message: 'Are you sure you want to force split?' }))
+    ) {
       io.error('Decided not to force push', true);
       return fs;
     }
