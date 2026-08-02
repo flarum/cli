@@ -1,28 +1,35 @@
 import { BaseUpgradeStep, GitCommit, Replacement } from '../base';
 import chalk from 'chalk';
+import { modernizePhpunitXml } from './phpunit-xml';
 
 export default class PhpUnit extends BaseUpgradeStep {
   type = 'PHPUnit 9 to 11 changes';
 
   replacements(file: string): Replacement[] {
-    if (!file.endsWith('.php')) return [];
+    if (file.endsWith('.php')) {
+      return [
+        (_file, code) => ({
+          updated: this.php!.run('upgrade.2-0.phpunit', { file, code }).code,
+        }),
+      ];
+    }
 
-    return [
-      (_file, code) => ({
-        updated: this.php!.run('upgrade.2-0.phpunit', { file, code }).code,
-      }),
-      (file, code) => {
-        if (!file.endsWith('.xml')) return null;
+    // The XML rewrite previously sat behind the .php guard above (making it
+    // unreachable) and used String.replace with regex syntax in a string
+    // (matching nothing) — every upgraded extension kept its 9.3-era config.
+    if (/(^|\/)phpunit(\.[\w-]+)?\.xml$/.test(file)) {
+      return [
+        (xmlFile, code) => ({
+          updated: modernizePhpunitXml(xmlFile, code),
+        }),
+      ];
+    }
 
-        return {
-          updated: code.replace('xsi:noNamespaceSchemaLocation="([^"]+)"', 'xsi:noNamespaceSchemaLocation="../vendor/phpunit/phpunit/phpunit.xsd"'),
-        };
-      },
-    ];
+    return [];
   }
 
   targets(): string[] {
-    return ['tests/**/*'];
+    return ['tests/**/*', 'phpunit.xml', 'phpunit.*.xml'];
   }
 
   gitCommit(): GitCommit {
