@@ -12,18 +12,18 @@ export function modernizePhpunitXml(file: string, code: string): string {
 
   // Attributes removed in PHPUnit 10.
   updated = updated.replace(
-    /[ \t]*(?:convert(?:Deprecations|Errors|Notices|Warnings)ToExceptions|forceCoversAnnotation|verbose|printerClass)="[^"]*"\r?\n/g,
+    /[\t ]*(?:convert(?:Deprecations|Errors|Notices|Warnings)ToExceptions|forceCoversAnnotation|verbose|printerClass)="[^"]*"\r?\n/g,
     ''
   );
   updated = updated.replace(/backupStaticAttributes=/g, 'backupStaticProperties=');
 
   // New settings, inserted next to their neighbours in the scaffolded order.
   if (!updated.includes('cacheDirectory=')) {
-    updated = updated.replace(/(\n([ \t]*)backupGlobals="[^"]*")/, '$1\n$2cacheDirectory=".phpunit.cache"');
+    updated = updated.replace(/(\n([\t ]*)backupGlobals="[^"]*")/, '$1\n$2cacheDirectory=".phpunit.cache"');
   }
 
   if (!updated.includes('displayDetailsOnTestsThatTriggerWarnings=')) {
-    updated = updated.replace(/(\n([ \t]*)colors="[^"]*")/, '$1\n$2displayDetailsOnTestsThatTriggerWarnings="true"');
+    updated = updated.replace(/(\n([\t ]*)colors="[^"]*")/, '$1\n$2displayDetailsOnTestsThatTriggerWarnings="true"');
   }
 
   // The include list lives in <source> now; coverage configuration as it
@@ -32,7 +32,7 @@ export function modernizePhpunitXml(file: string, code: string): string {
 
   // Test listeners were removed in PHPUnit 10 (Mockery integration works
   // without one).
-  updated = updated.replace(/[ \t]*<listeners>[\s\S]*?<\/listeners>\r?\n?/, '');
+  updated = updated.replace(/[\t ]*<listeners>[\S\s]*?<\/listeners>\r?\n?/, '');
 
   return updated;
 }

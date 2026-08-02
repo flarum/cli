@@ -99,7 +99,7 @@ describe('modernizePhpunitXml', () => {
     expect(integration).not.toContain('<coverage');
     expect(integration).not.toContain('processUncoveredFiles');
     // The include list survives inside <source>.
-    expect(integration).toMatch(/<source>[\s\S]*<directory suffix="\.php">\.\.\/src\/<\/directory>[\s\S]*<\/source>/);
+    expect(integration).toMatch(/<source>[\S\s]*<directory suffix="\.php">\.\.\/src\/<\/directory>[\S\s]*<\/source>/);
   });
 
   test('removes the listeners block PHPUnit 10 dropped', () => {
