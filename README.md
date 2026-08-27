@@ -49,7 +49,7 @@ $ npm install -g @flarum/cli
 $ flarum-cli COMMAND
 running command...
 $ flarum-cli (-v|--version|version)
-@flarum/cli/3.0.11-dev darwin-arm64 node-v25.1.0
+@flarum/cli/3.0.12 darwin-arm64 node-v26.6.0
 $ flarum-cli --help [COMMAND]
 USAGE
   $ flarum-cli COMMAND
