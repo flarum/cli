@@ -7,6 +7,7 @@ import * as t from '@babel/types';
 import { parse } from 'recast/parsers/babel-ts';
 import { BaseUpgradeStep, GitCommit, Replacement } from '../base';
 import { formatCode } from '../../../../utils/ast';
+import { extensionId } from '../../../../utils/composer';
 
 const TODO = '@TODO: register this with Extend.Admin in admin/extend instead';
 const DOCS = 'https://docs.flarum.org/2.x/extend/admin';
@@ -462,10 +463,7 @@ export default class AdminExtender extends BaseUpgradeStep {
   /** The extension's ID, as core makes it from the package name. */
   protected extensionId(): string | null {
     try {
-      const name: string = JSON.parse(fs.readFileSync(path.join(this.root, 'composer.json'), 'utf8')).name;
-      const [vendor, pkg] = name.includes('/') ? name.split('/', 2) : [name, name];
-
-      return `${vendor}-${pkg.replace(/flarum-ext-/g, '').replace(/flarum-/g, '')}`;
+      return extensionId(JSON.parse(fs.readFileSync(path.join(this.root, 'composer.json'), 'utf8')).name);
     } catch {
       return null;
     }

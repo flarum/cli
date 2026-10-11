@@ -2,7 +2,48 @@ import { BaseUpgradeStep, GitCommit, ImportChange, Replacement } from '../base';
 import chalk from 'chalk';
 import * as t from '@babel/types';
 import traverse from '@babel/traverse';
+import fs from 'fs';
+import path from 'path';
+import { parse } from 'recast/parsers/babel-ts';
 import { getFunctionName } from '../../../../utils/ast';
+import { extensionId } from '../../../../utils/composer';
+
+/** The bundled extensions' IDs, which are their initializers' names in 2.0. */
+const BUNDLED = new Set([
+  'flarum-akismet',
+  'flarum-approval',
+  'flarum-audit',
+  'flarum-bbcode',
+  'flarum-deck',
+  'flarum-embed',
+  'flarum-emoji',
+  'flarum-extension-manager',
+  'flarum-flags',
+  'flarum-gdpr',
+  'flarum-lang-english',
+  'flarum-likes',
+  'flarum-lock',
+  'flarum-markdown',
+  'flarum-mentions',
+  'flarum-messages',
+  'flarum-nicknames',
+  'flarum-pusher',
+  'flarum-realtime',
+  'flarum-statistics',
+  'flarum-sticky',
+  'flarum-subscriptions',
+  'flarum-suspend',
+  'flarum-tags',
+]);
+
+/** The 1.x names of the bundled initializers 2.0 renamed (flarum/framework#4003). */
+const RENAMED: Record<string, string> = {
+  lock: 'flarum-lock',
+  subscriptions: 'flarum-subscriptions',
+  'flarum/nicknames': 'flarum-nicknames',
+};
+
+const CHECK_TODO = "@TODO: check whether the extension is enabled with '<its extension ID>' in flarum.extensions instead";
 
 export default class MiscFrontendChanges extends BaseUpgradeStep {
   type = 'Miscellaneous frontend changes.';
@@ -387,17 +428,122 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
     };
   }
 
+  /**
+   * `app.initializers.has(name)` becomes `'id' in flarum.extensions`, where the
+   * upgrade knows the ID for certain: a bundled extension's, or one the
+   * extension's composer.json names. An initializer is not always named after
+   * its extension, so a check it can't be sure of gets a @TODO instead.
+   */
   private updateInitializers(): Replacement {
     return (_file, code) => {
-      if (!code.includes('this.currentTag')) return null;
+      if (!/initializers\s*\.\s*has\s*\(/.test(code)) return null;
+
+      const edits: Array<{ start: number; end: number; text: string }> = [];
+      const flagged = new Set<number>();
+
+      traverse(parse(code) as t.File, {
+        CallExpression: (p) => {
+          const id = this.checkedExtension(p.node);
+
+          if (id === undefined) return;
+
+          if (id) {
+            edits.push({ start: p.node.start!, end: p.node.end!, text: `('${id}' in flarum.extensions)` });
+
+            return;
+          }
+
+          // Above the statement, where a comment can't land in JSX or a string.
+          const statement = p.getStatementParent();
+
+          if (!statement || statement.node.leadingComments?.some((comment) => comment.value.includes(CHECK_TODO))) return;
+
+          const lineStart = code.lastIndexOf('\n', statement.node.start! - 1) + 1;
+
+          if (flagged.has(lineStart)) return;
+
+          flagged.add(lineStart);
+
+          const indent = /^[\t ]*/.exec(code.slice(lineStart))![0];
+          const docs = 'https://docs.flarum.org/2.x/extend/extending-extensions';
+
+          edits.push({
+            start: lineStart,
+            end: lineStart,
+            text: `${indent}// ${CHECK_TODO} (${docs}). An initializer is not always named after its extension, and some were renamed in 2.0.\n`,
+          });
+        },
+      });
+
+      if (edits.length === 0) return null;
 
       return {
-        updated: code
-          .replace(/initializers\.has\(["']lock["']\)/g, "initializers.has('flarum-lock')")
-          .replace(/initializers\.has\(["']subscriptions["']\)/g, "initializers.has('flarum-subscriptions')")
-          .replace(/initializers\.has\(["']flarum\/nicknames["']\)/g, "initializers.add('flarum-nicknames')"),
+        updated: edits
+          .sort((a, b) => b.start - a.start)
+          .reduce((result, edit) => result.slice(0, edit.start) + edit.text + result.slice(edit.end), code),
       };
     };
+  }
+
+  /**
+   * For `app.initializers.has('name')`: the ID of the extension it checks for,
+   * or null when the upgrade can't be sure of it. Undefined for anything else.
+   */
+  private checkedExtension(call: t.CallExpression): string | null | undefined {
+    const callee = call.callee;
+
+    if (!t.isMemberExpression(callee) || callee.computed || !t.isIdentifier(callee.property, { name: 'has' })) return undefined;
+
+    const initializers = callee.object;
+
+    if (!t.isMemberExpression(initializers) || initializers.computed || !t.isIdentifier(initializers.property, { name: 'initializers' })) {
+      return undefined;
+    }
+
+    const owner = initializers.object;
+
+    if (!t.isIdentifier(owner, { name: 'app' }) && !(t.isMemberExpression(owner) && t.isIdentifier(owner.property, { name: 'app' }))) {
+      return undefined;
+    }
+
+    const [name] = call.arguments;
+
+    if (call.arguments.length !== 1 || !t.isStringLiteral(name)) return undefined;
+
+    return RENAMED[name.value] ?? (BUNDLED.has(name.value) ? name.value : this.namedExtensions().get(name.value) ?? null);
+  }
+
+  private named: Map<string, string> | null = null;
+
+  /**
+   * The extensions the composer.json names, by package name and by ID.
+   */
+  private namedExtensions(): Map<string, string> {
+    if (this.named) return this.named;
+
+    this.named = new Map();
+
+    let composer: Record<string, any> = {};
+
+    try {
+      composer = JSON.parse(fs.readFileSync(path.join(this.root, 'composer.json'), 'utf8'));
+    } catch {
+      return this.named;
+    }
+
+    const packages = [
+      ...Object.keys(composer.require ?? {}),
+      ...Object.keys(composer['require-dev'] ?? {}),
+      ...Object.keys(composer.suggest ?? {}),
+      ...(composer.extra?.['flarum-extension']?.['optional-dependencies'] ?? []),
+    ].filter((name: unknown): name is string => typeof name === 'string' && name.includes('/'));
+
+    for (const name of packages) {
+      this.named.set(name, extensionId(name));
+      this.named.set(extensionId(name), extensionId(name));
+    }
+
+    return this.named;
   }
 
   private updateUploadImageButton(): Replacement {

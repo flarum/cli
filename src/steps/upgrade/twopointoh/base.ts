@@ -304,6 +304,12 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
       // eslint-disable-next-line no-await-in-loop
       code = await this.updateCode(file, code, result.updated);
 
+      // Later replacements read the parsed code: parse it again after a text
+      // change, or one that returns a syntax tree would undo this change.
+      if (typeof result.updated === 'string') {
+        advanced = this.advancedContent(file, code);
+      }
+
       if (result.imports?.length || (result.updated && typeof result.updated !== 'string' && 'program' in result.updated)) {
         try {
           advanced = parseCode(code);
