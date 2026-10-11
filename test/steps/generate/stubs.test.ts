@@ -1,4 +1,4 @@
-import { getFsPaths, runStep } from '../../boilersmith/utils';
+import { getExtFileContents, getFsPaths, runStep } from '../../boilersmith/utils';
 
 import { GenerateEventListenerStub } from '../../../src/steps/stubs/backend/event-listener';
 import { GenerateControllerStub } from '../../../src/steps/stubs/backend/controller';
@@ -8,6 +8,7 @@ import { GenerateHandlerCommandStub } from '../../../src/steps/stubs/backend/han
 import { GenerateIntegrationTestStub } from '../../../src/steps/stubs/backend/integration-test';
 import { GenerateMigrationStub } from '../../../src/steps/stubs/backend/migration';
 import { GenerateModelStub } from '../../../src/steps/stubs/backend/model';
+import { GenerateModelFactoryStub } from '../../../src/steps/stubs/backend/model-factory';
 import { GenerateModelStub as GenerateFrontendModelStub } from '../../../src/steps/stubs/frontend/model';
 import { GenerateServiceProviderStub } from '../../../src/steps/stubs/backend/service-provider';
 import { GenerateJobStub } from '../../../src/steps/stubs/backend/job';
@@ -216,6 +217,22 @@ const backendTestSpecs: StubTest[] = [
     },
     expectedExposedParamsRequestedDir: {
       class: 'Flarum\\Demo\\somePath\\CustomJob',
+    },
+  },
+
+  // Model Factory, generated alongside the model
+  {
+    StubClass: GenerateModelFactoryStub,
+    params: {
+      className: 'CustomModelFactory',
+    },
+    expectedModifiedFilesDefaultDir: ['/ext/src/CustomModelFactory.php'],
+    expectedModifiedFilesRequestedDir: [`${requestedDir}/CustomModelFactory.php`],
+    expectedExposedParamsDefaultDir: {
+      class: 'Flarum\\Demo\\CustomModelFactory',
+    },
+    expectedExposedParamsRequestedDir: {
+      class: 'Flarum\\Demo\\somePath\\CustomModelFactory',
     },
   },
 
@@ -473,5 +490,39 @@ describe('Stub Test: Migrations', function () {
     expect(getFsPaths(fs)).toStrictEqual([...migrationSpec.expectedModifiedFilesRequestedDir, '/ext/composer.json'].sort());
 
     expect(exposedParams).toStrictEqual(migrationSpec.expectedExposedParamsRequestedDir);
+  });
+});
+
+describe('A model and its factory', function () {
+  const stubDir = resolve(__dirname, '../../../boilerplate/stubs');
+
+  test('The factory fills a model in its own namespace', async function () {
+    const { fs } = await runStep(
+      new GenerateModelFactoryStub(stubDir, scaffolder),
+      { php: stubPhpProviderFactory() },
+      { usePrompts: false, initialParams: { className: 'CustomModelFactory' } },
+      initialFilesCallback
+    );
+
+    const factory = getExtFileContents(fs, 'src/CustomModelFactory.php');
+
+    expect(factory).toContain('namespace Flarum\\Demo;');
+    expect(factory).toContain('use Illuminate\\Database\\Eloquent\\Factories\\Factory;');
+    expect(factory).toContain('class CustomModelFactory extends Factory');
+    expect(factory).toContain('public function definition(): array');
+  });
+
+  test('The model uses its factory', async function () {
+    const { fs } = await runStep(
+      new GenerateModelStub(stubDir, scaffolder),
+      { php: stubPhpProviderFactory() },
+      { usePrompts: false, initialParams: { className: 'CustomModel', tableName: 'custom_models' } },
+      initialFilesCallback
+    );
+
+    const model = getExtFileContents(fs, 'src/CustomModel.php');
+
+    expect(model).toContain('use Illuminate\\Database\\Eloquent\\Factories\\HasFactory;');
+    expect(model).toContain('    use HasFactory;');
   });
 });

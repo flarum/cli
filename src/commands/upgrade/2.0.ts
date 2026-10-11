@@ -16,6 +16,7 @@ import JsonApi from '../../steps/upgrade/twopointoh/backend/json-api';
 import Search from '../../steps/upgrade/twopointoh/backend/search';
 import LessChanges from '../../steps/upgrade/twopointoh/less';
 import PhpUnit from '../../steps/upgrade/twopointoh/backend/phpunit';
+import ModelFactories from '../../steps/upgrade/twopointoh/backend/model-factories';
 import { Flags } from '@oclif/core';
 import EmailViews from '../../steps/upgrade/twopointoh/backend/email-views';
 import InterventionImage from '../../steps/upgrade/twopointoh/backend/intervention-image';
@@ -63,6 +64,7 @@ export default class TwoPointOh extends BaseCommand {
         JsonApi,
         InterventionImage,
         Search,
+        ModelFactories,
         PhpUnit,
         // LESS
         LessChanges,

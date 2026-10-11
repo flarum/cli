@@ -1,16 +1,24 @@
 import { BaseUpgradeStep, GitCommit, Replacement } from '../base';
 import chalk from 'chalk';
 import { modernizePhpunitXml } from './phpunit-xml';
+import { extensionModels } from './extension-models';
 
 export default class PhpUnit extends BaseUpgradeStep {
   type = 'PHPUnit 9 to 12 changes';
 
+  /** Core's models and the extension's, by table, for prepareDatabase() to name. */
+  private models: Record<string, string> | null = null;
+
   replacements(file: string): Replacement[] {
     if (file.endsWith('.php')) {
       return [
-        (_file, code) => ({
-          updated: this.php!.run('upgrade.2-0.phpunit', { file, code }).code,
-        }),
+        (_file, code) => {
+          this.models ??= extensionModels(this.root, this.php!).byTable;
+
+          return {
+            updated: this.php!.run('upgrade.2-0.phpunit', { file, code, data: { models: this.models } }).code,
+          };
+        },
       ];
     }
 
