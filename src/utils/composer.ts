@@ -70,3 +70,13 @@ export type ComposerJsonSchema = {
 export function getComposerJson(fs: Store, paths: Paths): ComposerJsonSchema {
   return create(fs).readJSON(paths.package('composer.json')) as ComposerJsonSchema;
 }
+
+/**
+ * An extension's ID, from its package name, as core makes it: `vendor-package`,
+ * without a `flarum-ext-` or `flarum-` in the package's part.
+ */
+export function extensionId(packageName: string): string {
+  const [vendor, pkg] = packageName.includes('/') ? packageName.split('/', 2) : [packageName, packageName];
+
+  return `${vendor}-${pkg.replace(/flarum-ext-/g, '').replace(/flarum-/g, '')}`;
+}
