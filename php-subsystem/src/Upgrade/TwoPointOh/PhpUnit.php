@@ -290,6 +290,10 @@ class PhpUnit extends Replacement
             return [$doc, [], [], $unconverted];
         }
 
+        // #[Test] first, as Flarum's own tests have it; the rest as written.
+        $isTest = fn (Node\AttributeGroup $group) => $group->attrs[0]->name->toString() === 'Test';
+        usort($groups, fn (Node\AttributeGroup $a, Node\AttributeGroup $b) => $isTest($b) <=> $isTest($a));
+
         return [$this->rebuildDoc($kept), $groups, $providers, $unconverted];
     }
 

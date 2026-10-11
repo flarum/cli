@@ -69,6 +69,23 @@ class ThingTest extends TestCase
 `);
     });
 
+    it('puts #[Test] first, as Flarum does, wherever @test was written', () => {
+      // As flarum/approval's tests have it.
+      const code = upgrade(
+        testClass(`    /**
+     * @dataProvider unallowedUsers
+     * @test
+     */
+    public function can_only_see_approved(?int $authenticatedAs)
+    {
+    }`)
+      );
+
+      expect(code).toContain(`    #[Test]
+    #[DataProvider('unallowedUsers')]
+    public function can_only_see_approved(?int $authenticatedAs)`);
+    });
+
     it('turns the class annotations into attributes', () => {
       const code = upgrade(
         testClass(
