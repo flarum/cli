@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import { modernizePhpunitXml } from './phpunit-xml';
 
 export default class PhpUnit extends BaseUpgradeStep {
-  type = 'PHPUnit 9 to 11 changes';
+  type = 'PHPUnit 9 to 12 changes';
 
   replacements(file: string): Replacement[] {
     if (file.endsWith('.php')) {
@@ -34,8 +34,8 @@ export default class PhpUnit extends BaseUpgradeStep {
 
   gitCommit(): GitCommit {
     return {
-      message: 'chore(2.0): Backend tests + PHPUnit 9 to 11 changes',
-      description: 'Flarum 2.0 uses PHPUnit 11 and encourages use of model factories for easier cross-database testing.',
+      message: 'chore(2.0): Backend tests + PHPUnit 9 to 12 changes',
+      description: 'Flarum 2.0 uses PHPUnit 12 and encourages use of model factories for easier cross-database testing.',
     };
   }
 
@@ -43,12 +43,13 @@ export default class PhpUnit extends BaseUpgradeStep {
     const links = [
       'https://github.com/sebastianbergmann/phpunit/blob/9.6/DEPRECATIONS.md',
       'https://github.com/sebastianbergmann/phpunit/blob/10.5/DEPRECATIONS.md',
-      'https://github.com/sebastianbergmann/phpunit/blob/11.3.0/DEPRECATIONS.md',
+      'https://github.com/sebastianbergmann/phpunit/blob/11.5/DEPRECATIONS.md',
+      'https://github.com/sebastianbergmann/phpunit/blob/12.5/DEPRECATIONS.md',
     ];
 
     const dbLink = 'https://docs.flarum.org/2.x/extend/testing#model-factories';
 
-    return `Flarum 2.0 uses PHPUnit 11. The tool has applied the most significant changes, but you might still run into other deprecations.
+    return `Flarum 2.0 uses PHPUnit 12. The tool has applied the most significant changes, and left @TODO comments on what it could not, but you might still run into other deprecations.
                      Please refer to the following links for more information:
                      ${links.map((link) => chalk.underline(link)).join('\n                     ')}
 

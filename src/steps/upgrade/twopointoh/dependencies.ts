@@ -84,11 +84,8 @@ export default class Dependencies extends BaseUpgradeStep {
         composer.require.php = '^8.3';
       }
 
-      // 2.0 constraints resolve to prereleases while the line is in RC, so the
-      // extension has to accept them — with stable preferred wherever one
-      // exists, so only Flarum itself comes from the beta channel.
-      composer['minimum-stability'] = 'beta';
-      composer['prefer-stable'] = true;
+      // Flarum 2.0 is stable, so its constraints resolve without changing the
+      // extension's minimum stability.
 
       if (composer.require['fof/extend']) {
         composer.require['fof/extend'] = '^2.0.0';
@@ -104,19 +101,23 @@ export default class Dependencies extends BaseUpgradeStep {
     return (_file, _code, advanced) => {
       advanced = advanced as Record<string, any>;
 
+      // The versions a new extension is scaffolded with. 3.0.6 is the first
+      // flarum-webpack-config that loads an extension's code-split chunks from
+      // its own build.
       const map: Record<string, string> = {
-        'flarum-webpack-config': '^3.0.0',
+        'flarum-webpack-config': '^3.0.6',
         'flarum-tsconfig': '^2.0.0',
         '@flarum/jest-config': '^2.0.0',
-        webpack: '^5.65.0',
+        webpack: '^5.104.1',
         'webpack-cli': '^4.9.1',
       };
 
-      const dependencies = advanced.dependencies || advanced.devDependencies;
-
-      for (const [key] of Object.entries(dependencies)) {
-        if (map[key]) {
-          dependencies[key] = map[key];
+      // Extensions list the tooling under either key, often split between both.
+      for (const dependencies of [advanced.dependencies, advanced.devDependencies]) {
+        for (const key of Object.keys(dependencies || {})) {
+          if (map[key]) {
+            dependencies[key] = map[key];
+          }
         }
       }
 
