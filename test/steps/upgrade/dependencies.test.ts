@@ -116,7 +116,7 @@ describe('the dependencies step', () => {
 
     it('brings the tooling to the versions a new extension is scaffolded with', async () => {
       const scaffolded = scaffoldedPackageJson().devDependencies;
-      const tooling = ['flarum-webpack-config', 'flarum-tsconfig', '@flarum/jest-config', 'webpack', 'webpack-cli'];
+      const tooling = ['flarum-webpack-config', 'flarum-tsconfig', '@flarum/jest-config', 'webpack', 'webpack-cli', 'typescript'];
 
       const pkg = await upgrade('js/package.json', {
         devDependencies: Object.fromEntries(tooling.map((name) => [name, '^0.0.1'])),
