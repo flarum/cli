@@ -7,6 +7,7 @@ import ImportExt from '../../steps/upgrade/twopointoh/frontend/export-registry/i
 import Compat from '../../steps/upgrade/twopointoh/frontend/export-registry/compat';
 import UsageOfLazyModules from '../../steps/upgrade/twopointoh/frontend/code-splitting/usage-of-lazy-modules';
 import MiscFrontendChanges from '../../steps/upgrade/twopointoh/frontend/misc';
+import AdminExtender from '../../steps/upgrade/twopointoh/frontend/admin-extender';
 import FormatCode from '../../steps/upgrade/twopointoh/frontend/format';
 import chalk from 'chalk';
 import MiscBackendChanges from '../../steps/upgrade/twopointoh/backend/misc';
@@ -56,6 +57,7 @@ export default class TwoPointOh extends BaseCommand {
         ImportExt,
         UsageOfLazyModules,
         MiscFrontendChanges,
+        AdminExtender,
         // Backend
         MiscBackendChanges,
         Filesystem,
