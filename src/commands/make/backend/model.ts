@@ -1,6 +1,7 @@
 import { PredefinedParameters, ShouldRunConfig, StepDependency, StepManager } from 'boilersmith/step-manager';
 import BaseCommand from '../../../base-command';
 import { GenerateModelStub } from '../../../steps/stubs/backend/model';
+import { GenerateModelFactoryStub } from '../../../steps/stubs/backend/model-factory';
 import { GenerateMigrationStub } from '../../../steps/stubs/backend/migration';
 import { GenerateApiResourceStub } from '../../../steps/stubs/backend/api-resource';
 import { GeneratePolicyStub } from '../../../steps/stubs/backend/policy';
@@ -30,8 +31,17 @@ export default class BackendModel extends BaseCommand {
     dependencies?: StepDependency[],
     predefinedDependencies?: PredefinedParameters
   ): StepManager<FlarumProviders> {
+    // The factory is not optional: the model uses HasFactory, which needs it.
     return stepManager
       .namedStep('backendModel', new GenerateModelStub(STUB_PATH, genExtScaffolder()), shouldRun, dependencies, predefinedDependencies)
+      .step(new GenerateModelFactoryStub(STUB_PATH, genExtScaffolder()), {}, [
+        {
+          sourceStep: 'backendModel',
+          exposedName: 'className',
+          consumedName: 'className',
+          modifier: (modelClassName: unknown) => `${modelClassName as string}Factory`,
+        },
+      ])
       .step(
         new GenerateMigrationStub(STUB_PATH, genExtScaffolder()),
         { optional: true, confirmationMessage: 'Generate corresponding Migration?', default: true },

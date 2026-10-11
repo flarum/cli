@@ -425,18 +425,26 @@ class PhpUnit extends Replacement
         //     Discussion::class => [...],
         // ]);
 
-        $traverser->addVisitor($visitor = new class extends \PhpParser\NodeVisitorAbstract {
-            protected $models = [
-                'users' => 'Flarum\\User\\User',
-                'discussions' => 'Flarum\\Discussion\\Discussion',
-                'groups' => 'Flarum\\Group\\Group',
-                'tags' => 'Flarum\\Tags\\Tag',
-                'flags' => 'Flarum\\Flags\\Flag',
-                'posts' => 'Flarum\\Post\\Post',
-                'access_tokens' => 'Flarum\\Http\\AccessToken',
-            ];
+        // The class each short name already stands for in the file.
+        $imports = [];
 
+        foreach ((new \PhpParser\NodeFinder())->findInstanceOf($ast, Node\Stmt\Use_::class) as $use) {
+            if ($use->type === Node\Stmt\Use_::TYPE_NORMAL) {
+                foreach ($use->uses as $useUse) {
+                    $imports[$useUse->getAlias()->toString()] = $useUse->name->toString();
+                }
+            }
+        }
+
+        // Core's models with a factory, and the extension's own, by table.
+        $models = array_merge(ModelFactories::CORE_MODELS, $data['models'] ?? []);
+
+        $traverser->addVisitor($visitor = new class ($models, $imports) extends \PhpParser\NodeVisitorAbstract {
             public $usedModels = [];
+
+            public function __construct(protected array $models, protected array $names)
+            {
+            }
 
             public function leaveNode(Node $node)
             {
@@ -449,10 +457,17 @@ class PhpUnit extends Replacement
                                         $table = $item->key->value;
 
                                         if (isset($this->models[$table])) {
-                                            $exploded = explode('\\', $this->models[$table]);
-                                            $className = end($exploded);
-                                            $item->key = new Node\Expr\ClassConstFetch(new Node\Name($className), 'class');
-                                            $this->usedModels[$this->models[$table]] = true;
+                                            $class = $this->models[$table];
+                                            $short = substr($class, strrpos($class, '\\') + 1);
+
+                                            // A short name that already stands for another class is written in full.
+                                            if (isset($this->names[$short]) && $this->names[$short] !== $class) {
+                                                $item->key = new Node\Expr\ClassConstFetch(new Node\Name\FullyQualified($class), 'class');
+                                            } else {
+                                                $this->names[$short] = $class;
+                                                $item->key = new Node\Expr\ClassConstFetch(new Node\Name($short), 'class');
+                                                $this->usedModels[$class] = true;
+                                            }
                                         }
                                     }
                                 }

@@ -45,6 +45,18 @@ try {
             $output = (new Flarum\CliPhpSubsystem\Upgrade\TwoPointOh\Search())->handle($input['file'], $input['code'] ?? null, $input['data'] ?? []);
             break;
 
+        case 'upgrade.2-0.migrations-schema':
+            $output = (new Flarum\CliPhpSubsystem\Upgrade\TwoPointOh\ModelFactories())->schema($input['data']['migrations'] ?? []);
+            break;
+
+        case 'upgrade.2-0.models':
+            $output = (new Flarum\CliPhpSubsystem\Upgrade\TwoPointOh\ModelFactories())->models($input['data']['files'] ?? []);
+            break;
+
+        case 'upgrade.2-0.model-factory':
+            $output = (new Flarum\CliPhpSubsystem\Upgrade\TwoPointOh\ModelFactories())->factory($input['file'], $input['code'], $input['data'] ?? []);
+            break;
+
         case 'upgrade.2-0.phpunit':
             $output = (new Flarum\CliPhpSubsystem\Upgrade\TwoPointOh\PhpUnit())->handle($input['file'], $input['code'] ?? null, $input['data'] ?? []);
             break;

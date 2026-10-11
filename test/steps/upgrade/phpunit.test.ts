@@ -229,6 +229,56 @@ class ThingTest extends TestCase
     });
   });
 
+  describe('prepareDatabase()', () => {
+    const prepare = (rows: string, models: Record<string, string> = {}) =>
+      php.run('upgrade.2-0.phpunit', {
+        file: 'tests/integration/api/ThingTest.php',
+        code: testClass(`    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->prepareDatabase([
+${rows}
+        ]);
+    }`),
+        data: { models },
+      }).code;
+
+    it("names the extension's own tables by their models, so their factories fill them", () => {
+      const code = prepare(
+        `            'users' => [$this->normalUser()],
+            'acme_things' => [['id' => 1, 'title' => 'A thing']],
+            'acme_thing_user' => [['thing_id' => 1, 'user_id' => 2]],`,
+        Object.fromEntries([['acme_things', 'Acme\\Thing\\Thing']])
+      );
+
+      expect(code).toContain(`            User::class => [$this->normalUser()],
+            Thing::class => [['id' => 1, 'title' => 'A thing']],
+            'acme_thing_user' => [['thing_id' => 1, 'user_id' => 2]],`);
+      expect(code).toContain('use Acme\\Thing\\Thing;');
+      expect(code).toContain('use Flarum\\User\\User;');
+    });
+
+    it('names the api_keys table by its model', () => {
+      const code = prepare(`            'api_keys' => [['key' => 'secret']],`);
+
+      expect(code).toContain(`            ApiKey::class => [['key' => 'secret']],`);
+      expect(code).toContain('use Flarum\\Api\\ApiKey;');
+    });
+
+    it('names a model in full when another has its short name', () => {
+      const code = prepare(
+        `            'users' => [$this->normalUser()],
+            'acme_users' => [['id' => 1]],`,
+        Object.fromEntries([['acme_users', 'Acme\\Thing\\User']])
+      );
+
+      expect(code).toContain(`            User::class => [$this->normalUser()],
+            \\Acme\\Thing\\User::class => [['id' => 1]],`);
+      expect(code).not.toContain('use Acme\\Thing\\User;');
+    });
+  });
+
   describe('assertions PHPUnit 10 removed', () => {
     it('renames the ones that were replaced', () => {
       const code = upgrade(
