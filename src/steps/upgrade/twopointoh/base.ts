@@ -369,8 +369,8 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
     if (lang === 'json') {
       // remove comments
       code = code.replace(/^\s*\/\/.*$/gm, '');
-      // remove loose ,
-      code = code.replace(/,\s*}/g, '}');
+      // remove loose , before the end of an object or an array, as tsconfig.json allows
+      code = code.replace(/,(\s*[\]}])/g, '$1');
 
       try {
         return JSON.parse(code);
