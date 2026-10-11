@@ -375,7 +375,8 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
         updated: code
           .replace(/this\.currentTag/g, 'app.currentTag')
           .replace('app.search.', 'app.search.state.')
-          .replace('app.extensionData', 'app.registry')
+          .replace(/\bapp\.extensionData\b/g, 'app.registry')
+          .replace(/\b(app\.registry\s*\.\s*)getAllExtensionPermissions\b/g, '$1getAllPermissions')
           .replace("extend(BasicsPage.prototype, 'homePageItems'", "extend(BasicsPage, 'homePageItems'")
           .replace('className="NotificationList', 'className="HeaderList')
           .replace('className: "NotificationList', 'className: "HeaderList')
