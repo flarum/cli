@@ -182,4 +182,25 @@ describe('Test extension skeleton step', function () {
     expect(getExtFileContents(fs, '.github/workflows/frontend.yml').includes('my/prod/branch')).toBe(true);
     expect(await getEnabledModules(fs)).toStrictEqual(buildModules([]));
   });
+
+  test('Adds scripts to run only the tests whose name matches', async function () {
+    const { fs } = await runStep(initStep, {}, { usePrompts: false, initialParams: vars });
+
+    const composerJson = JSON.parse(getExtFileContents(fs, 'composer.json'));
+
+    expect(composerJson.scripts['test:unit:filter']).toBe('phpunit -c tests/phpunit.unit.xml --filter');
+    expect(composerJson.scripts['test:integration:filter']).toBe('phpunit -c tests/phpunit.integration.xml --filter');
+    expect(composerJson['scripts-descriptions']['test:unit:filter']).toBeDefined();
+    expect(composerJson['scripts-descriptions']['test:integration:filter']).toBeDefined();
+  });
+
+  test('Leaves out every test script without backend testing', async function () {
+    const { fs } = await runStep(initStep, {}, { usePrompts: false, initialParams: { ...vars, 'modules.backendTesting': false } });
+
+    const composerJson = JSON.parse(getExtFileContents(fs, 'composer.json'));
+    const testScripts = (scripts: Record<string, unknown> = {}) => Object.keys(scripts).filter((name) => name.startsWith('test'));
+
+    expect(testScripts(composerJson.scripts)).toStrictEqual([]);
+    expect(testScripts(composerJson['scripts-descriptions'])).toStrictEqual([]);
+  });
 });
