@@ -14,7 +14,7 @@ use Tobyz\JsonApiServer\Context as OriginalContext;
 /**
  * @extends <% if (modelClassName) { %>Resource\AbstractDatabaseResource<<%= modelClassName %>><% } else { %>Resource\AbstractResource<object><% } %>
  */
-class <%= className %> extends <% if (modelClassName) { %>Resource\AbstractDatabaseResource<% } else { %>Resource\AbstractResource<% if (interfaces.length > 0) %> implements <%= interfaces.join(', ') %><% } %>
+class <%= className %> extends <% if (modelClassName) { %>Resource\AbstractDatabaseResource<% } else { %>Resource\AbstractResource<% if (interfaces.length > 0) { %> implements <%= interfaces.join(', ') %><% } %><% } %>
 {
     public function type(): string
     {
@@ -35,7 +35,7 @@ class <%= className %> extends <% if (modelClassName) { %>Resource\AbstractDatab
     {
         return [<% if (endpoints.includes('create')) { %>
             Endpoint\Create::make()<% if (modelClassName) { %>
-                ->can('create<%= modelClassName %>'),<% } %><% } %><% if (endpoints.includes('update')) { %>
+                ->can('create<%= modelClassName %>')<% } %>,<% } %><% if (endpoints.includes('update')) { %>
             Endpoint\Update::make()
                 ->can('update'),<% } %><% if (endpoints.includes('delete')) { %>
             Endpoint\Delete::make()

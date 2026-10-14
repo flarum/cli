@@ -52,7 +52,7 @@ export class GenerateAdvancedApiResourceStub extends BasePhpStubStep {
         type: 'multiselect',
         message: 'Endpoints',
         choices: [
-          { title: 'index', value: 'index', selected: true },
+          { title: 'index', value: 'list', selected: true },
           { title: 'show', value: 'show', selected: true },
           { title: 'create', value: 'create', selected: true },
           { title: 'update', value: 'update', selected: true },
