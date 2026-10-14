@@ -17,6 +17,18 @@ function assertUnreachable(_x: never): never {
   throw new Error("Didn't expect to get here");
 }
 
+/**
+ * The SPDX text for a licence, or an empty string when it isn't a known SPDX
+ * identifier (e.g. "proprietary" or a free-form "© Some Company").
+ */
+export function licenseTextFor(licenseType: unknown): string {
+  if (typeof licenseType !== 'string' || !licenseType) return '';
+
+  const id = [...(spdxLicenseListSimple as Set<string>)].find((l) => l.toLowerCase() === licenseType.toLowerCase());
+
+  return id ? require(`spdx-license-list/licenses/${id}`).licenseText : '';
+}
+
 export const EXTENSION_PARAMS = [
   'packageName',
   'packageDescription',
@@ -170,8 +182,7 @@ function paramNamesToDef(name: ExtensionParams): TemplateParam<string, Extension
       return {
         name,
         uses: ['licenseType'],
-        compute: async (_paths, licenseType: string) =>
-          licenseType && licenseType !== 'proprietary' ? require(`spdx-license-list/licenses/${licenseType}`).licenseText : '',
+        compute: async (_paths, licenseType: string) => licenseTextFor(licenseType),
       };
 
     case 'extensionId':
