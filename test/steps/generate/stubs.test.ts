@@ -3,6 +3,7 @@ import { getExtFileContents, getFsPaths, runStep } from '../../boilersmith/utils
 import { GenerateEventListenerStub } from '../../../src/steps/stubs/backend/event-listener';
 import { GenerateControllerStub } from '../../../src/steps/stubs/backend/controller';
 import { GenerateApiResourceStub } from '../../../src/steps/stubs/backend/api-resource';
+import { GenerateAdvancedApiResourceStub } from '../../../src/steps/stubs/backend/advanced-api-resource';
 import { GenerateHandlerStub } from '../../../src/steps/stubs/backend/handler';
 import { GenerateHandlerCommandStub } from '../../../src/steps/stubs/backend/handler-command';
 import { GenerateIntegrationTestStub } from '../../../src/steps/stubs/backend/integration-test';
@@ -524,5 +525,44 @@ describe('A model and its factory', function () {
 
     expect(model).toContain('use Illuminate\\Database\\Eloquent\\Factories\\HasFactory;');
     expect(model).toContain('    use HasFactory;');
+  });
+});
+
+describe('An API resource made by the 2.0 upgrade', function () {
+  const stubDir = resolve(__dirname, '../../../boilerplate/stubs');
+
+  async function resource(params: Record<string, unknown>): Promise<string> {
+    const { fs } = await runStep(
+      new GenerateAdvancedApiResourceStub(stubDir, scaffolder),
+      { php: stubPhpProviderFactory() },
+      { usePrompts: false, initialParams: { className: 'PotatoResource', relations: [], ...params } },
+      initialFilesCallback
+    );
+
+    return getExtFileContents(fs, 'src/Api/Resource/PotatoResource.php');
+  }
+
+  test('Without a model or endpoints, it implements nothing', async function () {
+    const code = await resource({ modelClass: '', modelClassName: '', modelType: 'potatoes', endpoints: [] });
+
+    expect(code).toContain('class PotatoResource extends Resource\\AbstractResource\n{');
+  });
+
+  test('Without a model, it implements a contract for each endpoint', async function () {
+    const code = await resource({ modelClass: '', modelClassName: '', modelType: 'potatoes', endpoints: ['create', 'list'] });
+
+    expect(code).toContain(
+      'class PotatoResource extends Resource\\AbstractResource implements Resource\\Contracts\\Creatable, Resource\\Contracts\\Listable\n{'
+    );
+    expect(code).toContain('            Endpoint\\Create::make(),\n            Endpoint\\Index::make()\n                ->paginate(),\n');
+  });
+
+  test('With a model, only creating needs a permission', async function () {
+    const code = await resource({ modelClass: '\\Flarum\\Potato\\Potato', endpoints: ['create', 'list'] });
+
+    expect(code).toContain('class PotatoResource extends Resource\\AbstractDatabaseResource\n{');
+    expect(code).toContain(
+      "            Endpoint\\Create::make()\n                ->can('createPotato'),\n            Endpoint\\Index::make()\n                ->paginate(),\n"
+    );
   });
 });
