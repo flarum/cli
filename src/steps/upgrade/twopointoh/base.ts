@@ -31,6 +31,14 @@ export type Replacement = (file: string, code: string, advanced: AdvancedContent
 
 export type AdvancedContent = t.File | Record<string, any> | null;
 
+/**
+ * The indentation a JSON file's first indented line uses, or the given
+ * fallback when it has none (an empty object, say, or everything on one line).
+ */
+function jsonIndentation(code: string, fallback: number): string | number {
+  return code.match(/^[\t ]+(?=\S)/m)?.[0] ?? fallback;
+}
+
 export type ImportChange = {
   replacesPath?: string | null;
   import: ModuleImport;
@@ -45,7 +53,8 @@ export type GitCommit = {
  * What a step did, for a program driving the upgrade.
  */
 export type StepOutcome =
-  | { status: 'skipped' | 'no-changes' }
+  | { status: 'skipped' }
+  | { status: 'no-changes'; todos?: Todo[] }
   | { status: 'committed'; commit: { sha: string; message: string }; notes: string; todos: Todo[] }
   | { status: 'failed'; failures: Failure[] };
 
@@ -94,6 +103,27 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
   abstract replacements(file: string, code: string): Replacement[];
   abstract gitCommit(): GitCommit;
   abstract pauseMessage(): string;
+
+  /** Whether the step runs for a check, in a worktree that is thrown away. */
+  public checking = false;
+
+  /** Work this step leaves that no @TODO comment in a file shows. */
+  protected followUps: Todo[] = [];
+
+  /**
+   * Leave work for the author that the step can't mark with a @TODO comment,
+   * such as a file that is missing, or a change it can only point out.
+   */
+  protected leaveTodo(file: string, text: string): void {
+    if (!this.followUps.some((todo) => todo.file === file && todo.text === text)) {
+      this.followUps.push({ file, line: null, text });
+    }
+  }
+
+  /** The follow-ups, as lines to print under the step's notes. */
+  protected followUpLines(): string[] {
+    return this.followUps.map((todo) => `${chalk.bgYellow.black(' TO DO ')} ${todo.file}: ${todo.text}`);
+  }
 
   protected fsEditor: null | Editor = null;
 
@@ -293,7 +323,7 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
 
       const notes = this.pauseMessage();
 
-      await this.pauseAndConfirm(notes, io);
+      await this.pauseAndConfirm([notes, ...this.followUpLines()].join('\n                     '), io);
 
       const commit = this.gitCommit();
       const message = commit.message + '\n\n' + commit.description;
@@ -305,15 +335,21 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
         status: 'committed',
         commit: { sha, message: commit.message },
         notes: stripAnsi(notes).trim(),
-        todos: await todosAddedBy(dir, sha),
+        todos: [...(await todosAddedBy(dir, sha)), ...this.followUps],
       };
 
-      this.command.log(overwrite() + '     => ' + chalk.bgCyan.bold('   COMMIT   ') + ' ' + chalk.dim(commit.message));
+      const label = this.checking ? chalk.bgYellow.black.bold(' WOULD CHANGE ') : chalk.bgCyan.bold('   COMMIT   ');
+      this.command.log(overwrite() + '     => ' + label + ' ' + chalk.dim(commit.message));
       this.command.log('');
     } else {
-      this.outcome = { status: 'no-changes' };
+      this.outcome = this.followUps.length > 0 ? { status: 'no-changes', todos: this.followUps } : { status: 'no-changes' };
 
       this.command.log(overwrite() + '     => ' + chalk.bgGreen.bold(' NO CHANGES '));
+
+      for (const line of this.followUpLines()) {
+        this.command.log('                     ' + line);
+      }
+
       this.command.log('');
     }
 
@@ -449,9 +485,12 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
     }
 
     if (lang === 'json') {
-      const space = file === 'composer.json' ? 4 : 2;
+      // Write the file back the way it was laid out, so the diff only shows
+      // what the step changed.
+      const space = jsonIndentation(code, file === 'composer.json' ? 4 : 2);
+      const json = JSON.stringify(updated, null, space);
 
-      return JSON.stringify(updated, null, space);
+      return code.includes('\r\n') ? json.replace(/\n/g, '\r\n') + (code.endsWith('\r\n') ? '\r\n' : '') : json + (code.endsWith('\n') ? '\n' : '');
     }
 
     if (updated && 'program' in updated) {

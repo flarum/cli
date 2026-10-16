@@ -1,6 +1,9 @@
 import ejs from 'ejs';
 import { BaseUpgradeStep, GitCommit, Replacement } from '../base';
 
+/** Where a view lives: `acme-thing::emails.launched` is in `.../emails/launched.blade.php`. */
+const viewFile = (view: string): string => '/' + view.split('::').pop()!.replace(/\./g, '/') + '.blade.php';
+
 export default class EmailViews extends BaseUpgradeStep {
   type = 'Email notifications now require both Plain Text and HTML views.';
 
@@ -34,44 +37,33 @@ export default class EmailViews extends BaseUpgradeStep {
         };
       },
       async (file, code) => {
-        if (Object.keys(this.collected).length === 0) return null;
+        const newFiles: { path: string; code: string }[] = [];
 
-        const fileName = file.split('/').pop();
-        const newFiles: any[] = [];
+        for (const views of Object.values(this.collected)) {
+          // A notification that has both views already has nothing to convert,
+          // such as one already upgraded to 2.0.
+          if (!views || Boolean(views.html) === Boolean(views.text)) continue;
 
-        Object.keys(this.collected).forEach((classFile) => {
-          if (!this.collected[classFile]) {
-            return;
+          const view = views.html || views.text;
+
+          // The view's own file, by its full path: on 2.x the html and plain
+          // views of a notification have the same file name.
+          if (!file.endsWith(viewFile(view))) continue;
+
+          const viewFileName = view.split('::')[1].split('.').pop();
+
+          for (const viewType of ['text', 'html'] as const) {
+            const templateContent = this.fsEditor!.read(__dirname + this.templates[viewType]);
+            const viewTypePath = viewType === 'text' ? 'plain' : 'html';
+
+            newFiles.push({
+              path: file.split('/views/')[0] + '/views/email/' + viewTypePath + '/' + viewFileName + '.blade.php',
+              code: ejs.render(templateContent, { content: code.trimEnd() }),
+            });
           }
+        }
 
-          if (!this.collected[classFile].html && !this.collected[classFile].text) {
-            return;
-          }
-
-          // if there is a text view but no html view, use the same content for both.
-          // same for html view but no text view.
-
-          ['text', 'html'].forEach((view) => {
-            const viewType = view as 'html' | 'text';
-            const viewPath = this.collected[classFile][viewType] || this.collected[classFile][viewType === 'html' ? 'text' : 'html'];
-            const viewFileName = viewPath.split('::')[1].split('.').pop();
-
-            if (fileName === `${viewFileName}.blade.php`) {
-              const templateContent = this.fsEditor!.read(__dirname + this.templates[viewType]);
-              const viewTypePath = viewType === 'text' ? 'plain' : 'html';
-              newFiles.push({
-                path: file.split('/views/')[0] + '/views/email/' + viewTypePath + '/' + viewFileName + '.blade.php',
-                code: ejs.render(templateContent, { content: code.trimEnd() }),
-              });
-            }
-          });
-        });
-
-        return {
-          updated: code,
-          delete: newFiles.length > 0,
-          newFiles,
-        };
+        return newFiles.length > 0 ? { updated: code, delete: true, newFiles } : null;
       },
     ];
   }

@@ -135,9 +135,9 @@ class JsonApi extends Replacement
 
         $traverser->addVisitor(new NodeVisitor\ParentConnectingVisitor());
 
+        // The TODO says what to write instead. Imports are left to whoever
+        // writes it: added now, they would go unused until then.
         $traverser->addVisitor(new class () extends \PhpParser\NodeVisitorAbstract {
-            public $hasExtenders = false;
-
             const LINK_TO_DOCS = 'https://docs.flarum.org/2.x/extend/api#extending-api-resources';
             const COMMENT = '// @TODO: Replace with the new implementation '.self::LINK_TO_DOCS;
 
@@ -157,26 +157,8 @@ class JsonApi extends Replacement
                             if ($parent) {
                                 $parent->setAttribute('comments', [new \PhpParser\Comment\Doc(self::COMMENT)]);
                             }
-
-                            $this->hasExtenders = true;
                         }
                     }
-                }
-            }
-
-            public function leaveNode(\PhpParser\Node $node)
-            {
-                if (! $this->hasExtenders) {
-                    return null;
-                }
-
-                if ($node instanceof \PhpParser\Node\Stmt\Namespace_) {
-                    NodeUtil::addUsesToNamespace($node, [
-                        'Flarum\Api\Context',
-                        'Flarum\Api\Endpoint',
-                        'Flarum\Api\Resource',
-                        'Flarum\Api\Schema',
-                    ]);
                 }
             }
         });

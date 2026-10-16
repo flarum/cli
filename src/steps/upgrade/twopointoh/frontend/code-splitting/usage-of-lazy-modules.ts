@@ -8,13 +8,14 @@ export default class UsageOfLazyModules extends BaseUpgradeStep {
   type = 'Adapt to accessing/extending lazy loaded Flarum modules.';
 
   // Array.from(flarum.reg.chunks.entries().flatMap(e => e[1].modules.map(m => e[1].namespace + ':' + m))).join('\n')
+  // LabelValue and LoadingPost were lazy once, and are in the main bundle
+  // now (flarum/framework#4235), so they are imported as usual.
   // core:forum/components/ReplyComposer
   // core:forum/components/ComposerBody
   // core:common/components/ConfirmDocumentUnload
   // core:forum/components/LogInModal
   // core:forum/components/ForgotPasswordModal
   // core:forum/components/PostStream
-  // core:forum/components/LoadingPost
   // core:forum/components/ReplyPlaceholder
   // core:forum/components/PostStreamScrubber
   // core:forum/components/SearchModal
@@ -33,7 +34,6 @@ export default class UsageOfLazyModules extends BaseUpgradeStep {
   // core:forum/components/AccessTokensList
   // core:forum/components/NewAccessTokenModal
   // core:forum/states/UserSecurityPageState
-  // core:common/components/LabelValue
   // core:forum/components/NotificationsPage
   // core:forum/components/Composer
   // core:forum/components/ComposerButton
@@ -51,15 +51,11 @@ export default class UsageOfLazyModules extends BaseUpgradeStep {
         'ForgotPasswordModal',
         'NotificationsPage',
         'ComposerBody',
-        'ConfirmDocumentUnload',
-        'LoadingPost',
         'ReplyPlaceholder',
         'PostStreamScrubber',
-        'SearchModal',
         'SignUpModal',
         'DiscussionComposer',
         'EditPostComposer',
-        'ComposerBody',
         'LogInModal',
         'PostStream',
         'ReplyComposer',
@@ -73,16 +69,16 @@ export default class UsageOfLazyModules extends BaseUpgradeStep {
         'UserSecurityPageState',
         'ComposerButton',
       ],
-      common: ['EditUserModal', 'LabelValue', 'ConfirmDocumentUnload'],
+      common: ['EditUserModal', 'ConfirmDocumentUnload', 'SearchModal'],
     },
     'flarum/tags': {
       admin: [],
-      forum: ['TagDiscussionModal', 'TagSelectionModal', 'ToggleButton'],
-      common: [],
+      forum: ['TagDiscussionModal', 'ToggleButton'],
+      common: ['TagSelectionModal'],
     },
     'flarum/emoji': {
       admin: [],
-      forum: ['EmojiMap'],
+      forum: ['emojiMap'],
       common: [],
     },
     current: {
@@ -424,8 +420,30 @@ export default class UsageOfLazyModules extends BaseUpgradeStep {
 
   removeImportLines(): Replacement {
     return (_file, code) => {
-      this.forEachLazyModule(code, ({ module, importLine }) => {
+      this.forEachLazyModule(code, ({ module, importPath, importedAs, importLine }) => {
         if (code.includes(` extends ${module}`)) {
+          return;
+        }
+
+        // Types are erased from the build, so a type import costs nothing.
+        if (/^type\s/.test(importedAs.trim())) {
+          return;
+        }
+
+        // The other replacements load what they can as it's needed. Whatever
+        // still uses the import, such as JSX rendering the component, would
+        // break without it, and only the author knows where to load it. A name
+        // inside a string, such as a module path, is no use of it.
+        const names = importedAs.match(/[$A-Z_a-z][\w$]*/g)?.filter((name) => name !== 'as' && name !== 'default') ?? [];
+        const rest = code.replace(importLine, '');
+
+        if (names.some((name) => new RegExp(`(?<![\\w$./'"])${name.replace(/\$/g, '\\$')}(?![\\w$'"])`).test(rest))) {
+          const todo = `// @TODO: ${module} is lazy loaded in 2.0, so this import is undefined until its chunk has loaded. Load it with \`await import('${importPath}')\` before using it. https://docs.flarum.org/2.x/extend/code-splitting\n`;
+
+          if (!code.includes(todo + importLine)) {
+            code = code.replace(importLine, todo + importLine);
+          }
+
           return;
         }
 

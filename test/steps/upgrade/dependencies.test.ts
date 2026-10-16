@@ -52,6 +52,21 @@ const onePackageJson = {
   },
 };
 
+/**
+ * The package.json as the upgrade writes it back, for an extension with or
+ * without a tsconfig.json, using the given package manager.
+ */
+async function withTypings(content: Record<string, any>, { tsconfig = true, packageManager = 'yarn' } = {}) {
+  const step = new Dependencies({} as any, '/extension', 1, 1, false);
+  jest.spyOn(step as any, 'hasTsConfig').mockReturnValue(tsconfig);
+  jest.spyOn(step as any, 'packageManager').mockReturnValue(packageManager);
+
+  const code = JSON.stringify(content, null, 2);
+  const result = await step.applyReplacements('js/package.json', code, step.advancedContent('js/package.json', code));
+
+  return { pkg: JSON.parse(result.updated as string), notes: step.pauseMessage(), todos: (step as any).followUps };
+}
+
 describe('the dependencies step', () => {
   describe('in composer.json', () => {
     it('requires Flarum 2.0 and PHP 8.3', async () => {
@@ -70,6 +85,29 @@ describe('the dependencies step', () => {
       expect(composer).not.toHaveProperty('prefer-stable');
     });
 
+    it('keeps a PHP constraint newer than Flarum 2.0 needs', async () => {
+      const composer = await upgrade('composer.json', { ...oneComposerJson, require: { ...oneComposerJson.require, php: '^8.4' } });
+
+      expect(composer.require.php).toBe('^8.4');
+    });
+
+    it('keeps a Flarum constraint that already asks for a later 2.x release', async () => {
+      const composer = await upgrade('composer.json', {
+        require: { 'flarum/core': '^2.0.1' },
+        'require-dev': { 'flarum/testing': '^2.0.1', 'flarum/phpstan': '^2.0.0' },
+      });
+
+      expect(composer.require['flarum/core']).toBe('^2.0.1');
+      expect(composer['require-dev']['flarum/testing']).toBe('^2.0.1');
+    });
+
+    it('still replaces a constraint it cannot compare', async () => {
+      const composer = await upgrade('composer.json', { require: { 'flarum/core': '*' }, 'require-dev': { 'flarum/core': '*@dev' } });
+
+      expect(composer.require['flarum/core']).toBe('^2.0.0');
+      expect(composer['require-dev']['flarum/core']).toBe('^2.0.0');
+    });
+
     it('leaves the stability settings the extension already has', async () => {
       const composer = await upgrade('composer.json', { ...oneComposerJson, 'minimum-stability': 'dev', 'prefer-stable': true });
 
@@ -82,7 +120,7 @@ describe('the dependencies step', () => {
     it('updates the build tooling in both dependencies and devDependencies', async () => {
       const pkg = await upgrade('js/package.json', onePackageJson);
 
-      expect(pkg.dependencies['flarum-webpack-config']).toBe('^3.0.6');
+      expect(pkg.devDependencies['flarum-webpack-config']).toBe('^3.0.6');
       expect(pkg.devDependencies['flarum-tsconfig']).toBe('^2.0.0');
     });
 
@@ -95,17 +133,71 @@ describe('the dependencies step', () => {
     it('requires the webpack Flarum builds with', async () => {
       const pkg = await upgrade('js/package.json', onePackageJson);
 
-      expect(pkg.dependencies.webpack).toBe('^5.104.1');
+      expect(pkg.devDependencies.webpack).toBe('^5.104.1');
     });
 
-    it('drops a devDependency the extension also lists as a dependency', async () => {
+    it('keeps tooling the extension already asks for newer versions of, and says so', async () => {
+      const step = new Dependencies({} as any, '/extension', 1, 1, false);
+      const code = JSON.stringify({ devDependencies: { 'webpack-cli': '^5.1.4', webpack: '^5.65.0' } }, null, 2);
+      const result = await step.applyReplacements('js/package.json', code, step.advancedContent('js/package.json', code));
+      const pkg = JSON.parse(result.updated as string);
+
+      expect(pkg.devDependencies['webpack-cli']).toBe('^5.1.4');
+      expect(pkg.devDependencies.webpack).toBe('^5.104.1');
+      expect(step.pauseMessage()).toContain('webpack-cli ^5.1.4');
+    });
+
+    it('moves the build tooling to devDependencies, and says so', async () => {
+      const step = new Dependencies({} as any, '/extension', 1, 1, false);
+      const code = JSON.stringify(onePackageJson, null, 2);
+      const result = await step.applyReplacements('js/package.json', code, step.advancedContent('js/package.json', code));
+      const pkg = JSON.parse(result.updated as string);
+
+      expect(pkg.dependencies).toEqual({});
+      expect(Object.keys(pkg.devDependencies)).toEqual([
+        '@flarum/prettier-config',
+        'flarum-tsconfig',
+        'flarum-webpack-config',
+        'prettier',
+        'webpack',
+        'webpack-cli',
+      ]);
+      expect(step.pauseMessage()).toContain(
+        'Moved to devDependencies, as the extension only builds with them: flarum-webpack-config, webpack, webpack-cli.'
+      );
+    });
+
+    it('moves type packages to devDependencies', async () => {
+      const pkg = await upgrade('js/package.json', { dependencies: { '@types/mithril': '^2.0.8' } });
+
+      expect(pkg.devDependencies['@types/mithril']).toBe('^2.0.8');
+      expect(pkg.dependencies).not.toHaveProperty('@types/mithril');
+    });
+
+    it('leaves the libraries the bundle may include in dependencies', async () => {
+      const pkg = await upgrade('js/package.json', { dependencies: { 'flarum-webpack-config': '^2.0.0', 'emoji-mart': '^5.6.0' } });
+
+      expect(pkg.dependencies).toEqual({ 'emoji-mart': '^5.6.0' });
+    });
+
+    it('keeps the newer constraint of tooling listed under both keys', async () => {
       const pkg = await upgrade('js/package.json', {
-        dependencies: { 'flarum-webpack-config': '^2.0.0' },
+        dependencies: { 'flarum-webpack-config': '^2.0.0', prettier: '^3.0.3' },
         devDependencies: { 'flarum-webpack-config': '^2.0.0', prettier: '^2.5.1' },
       });
 
-      expect(pkg.dependencies['flarum-webpack-config']).toBe('^3.0.6');
-      expect(pkg.devDependencies).not.toHaveProperty('flarum-webpack-config');
+      expect(pkg.dependencies).toEqual({});
+      expect(pkg.devDependencies).toEqual({ 'flarum-webpack-config': '^3.0.6', prettier: '^3.0.3' });
+    });
+
+    it('still drops a devDependency the extension also lists as a dependency, when it is not tooling', async () => {
+      const pkg = await upgrade('js/package.json', {
+        dependencies: { 'emoji-mart': '^5.6.0' },
+        devDependencies: { 'emoji-mart': '^5.0.0', prettier: '^2.5.1' },
+      });
+
+      expect(pkg.dependencies['emoji-mart']).toBe('^5.6.0');
+      expect(pkg.devDependencies).not.toHaveProperty('emoji-mart');
     });
 
     it('handles a package.json without dependencies', async () => {
@@ -125,6 +217,70 @@ describe('the dependencies step', () => {
       for (const name of tooling) {
         expect([name, pkg.devDependencies[name]]).toEqual([name, scaffolded[name]]);
       }
+    });
+  });
+
+  describe('the scripts that build and check typings', () => {
+    const typings = ['clean-typings', 'build-typings', 'post-build-typings', 'check-typings', 'check-typings-coverage'];
+
+    it('adds the ones a new extension is scaffolded with, and what they run', async () => {
+      const scaffolded = scaffoldedPackageJson();
+      const { pkg, notes } = await withTypings(onePackageJson);
+
+      for (const name of typings) {
+        expect([name, pkg.scripts[name]]).toEqual([name, scaffolded.scripts[name].replace(/<%= params\.jsPackageManager %>/g, 'yarn')]);
+      }
+
+      expect(pkg.devDependencies.typescript).toBe('^4.9.5');
+      expect(pkg.devDependencies['typescript-coverage-report']).toBe(scaffolded.devDependencies['typescript-coverage-report']);
+      expect(notes).toContain(
+        'build and check typings: clean-typings, build-typings, post-build-typings, check-typings, check-typings-coverage, typescript, typescript-coverage-report.'
+      );
+    });
+
+    it('runs them with the package manager the extension uses', async () => {
+      const { pkg } = await withTypings(onePackageJson, { packageManager: 'npm' });
+
+      expect(pkg.scripts['build-typings']).toContain('npm run clean-typings');
+      expect(pkg.scripts['build-typings']).not.toContain('yarn');
+    });
+
+    it('keeps the scripts the extension already has', async () => {
+      const { pkg } = await withTypings({ ...onePackageJson, scripts: { build: 'webpack --mode production', 'check-typings': 'tsc --noEmit' } });
+
+      expect(pkg.scripts.build).toBe('webpack --mode production');
+      expect(pkg.scripts['check-typings']).toBe('tsc --noEmit');
+      expect(pkg.scripts).toHaveProperty('check-typings-coverage');
+    });
+
+    it('keeps the TypeScript the extension lists, wherever it lists it', async () => {
+      const { pkg } = await withTypings({ dependencies: { typescript: '^4.5.4' } });
+
+      expect(pkg.devDependencies.typescript).toBe('^4.9.5');
+      expect(pkg.dependencies).not.toHaveProperty('typescript');
+    });
+
+    it('adds nothing to an extension that has them all', async () => {
+      const scaffolded = scaffoldedPackageJson();
+      const scripts = Object.fromEntries(typings.map((name) => [name, scaffolded.scripts[name]]));
+      const { pkg, notes } = await withTypings({ scripts, devDependencies: { prettier: '^2.5.1' } });
+
+      expect(pkg.devDependencies).toEqual({ prettier: '^2.5.1' });
+      expect(notes).not.toContain('build and check typings');
+    });
+
+    it('adds none without a tsconfig.json to check against, and leaves that to do', async () => {
+      const { pkg, todos } = await withTypings(onePackageJson, { tsconfig: false });
+
+      expect(pkg.scripts).toBeUndefined();
+      expect(pkg.devDependencies).not.toHaveProperty('typescript');
+      expect(todos).toEqual([
+        {
+          file: 'js/tsconfig.json',
+          line: null,
+          text: 'Add a tsconfig.json, then the scripts that build and check typings, which the reusable frontend workflow runs: clean-typings, build-typings, post-build-typings, check-typings, check-typings-coverage.',
+        },
+      ]);
     });
   });
 

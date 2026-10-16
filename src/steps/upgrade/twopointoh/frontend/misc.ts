@@ -69,7 +69,27 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
       this.updateInitializers(),
       this.updateUploadImageButton(),
       ...this.updateExtendModal(),
+      this.flagAvatarEditor(),
     ];
+  }
+
+  /**
+   * 2.0's AvatarEditor opens the file picker on click, and uploads a dropped
+   * image, whenever user.hasUploadedAvatar() is false. 1.x went by
+   * avatarUrl(), so an extension that gives users an avatar some other way,
+   * as a Gravatar one does, now gets an upload instead of its menu.
+   */
+  flagAvatarEditor(): Replacement {
+    return (file, code) => {
+      if (/["']flarum\/forum\/components\/AvatarEditor["']/.test(code)) {
+        this.leaveTodo(
+          file,
+          'It uses AvatarEditor, which in 2.0 opens the file picker, or uploads a dropped image, whenever user.hasUploadedAvatar() is false, not when there is no avatarUrl(). Check what it does for users without an uploaded avatar.'
+        );
+      }
+
+      return null;
+    };
   }
 
   targets(): string[] {
