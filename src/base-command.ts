@@ -4,7 +4,7 @@ import { resolve } from 'path';
 import globby from 'globby';
 import { execSync } from 'child_process';
 import { existsSync, readFileSync, unlinkSync } from 'fs';
-import { IO, PromptsIO } from 'boilersmith/io';
+import { IO, Message, PromptsIO } from 'boilersmith/io';
 import { StepManager } from 'boilersmith/step-manager';
 import { NodePaths } from 'boilersmith/paths';
 import { PhpSubsystemProvider } from './providers/php-provider';
@@ -13,6 +13,7 @@ import { FlarumProviders } from './providers';
 import { exit } from '@oclif/errors';
 import { composerPath, corePath, extensionPath, getMonorepoConf, npmPath } from './utils/monorepo';
 import { create } from 'mem-fs';
+import { overwrite, stripAnsi } from './utils/terminal';
 
 export enum LocationType {
   FLARUM_EXTENSION,
@@ -110,6 +111,17 @@ export default abstract class BaseCommand extends Command {
 
     const errorMessages = out.messages.filter((m) => m.type === 'error');
 
+    if (this.jsonEnabled()) {
+      const succeeded = out.succeeded && errorMessages.length === 0;
+      const error = out.succeeded ? errorMessages[0]?.message ?? null : out.error;
+
+      this.writeJson(this.jsonReport(succeeded, error, out.messages));
+
+      if (!succeeded) process.exitCode = 1;
+
+      return;
+    }
+
     // this.log('\n\n');
 
     if (!this.skipFinalMessage && out.succeeded && errorMessages.length === 0) {
@@ -135,7 +147,7 @@ export default abstract class BaseCommand extends Command {
 
       if (prettyPrint) {
         this.log('\n');
-        this.log('\u001B[A     => ' + chalk.bgRed.bold('   ERROR   ') + ' ' + chalk.red(out.error));
+        this.log(overwrite() + '     => ' + chalk.bgRed.bold('   ERROR   ') + ' ' + chalk.red(out.error));
       } else {
         this.log(chalk.red(out.error));
       }
@@ -180,6 +192,40 @@ export default abstract class BaseCommand extends Command {
     return '';
   }
 
+  /**
+   * The result of a run with `--json`, for the program that started it.
+   */
+  protected jsonReport(succeeded: boolean, error: string | null, messages: Message[]): Record<string, unknown> {
+    return {
+      status: succeeded ? 'succeeded' : 'failed',
+      error: error === null ? null : stripAnsi(error),
+      messages: messages.map((m) => ({ ...m, message: stripAnsi(m.message) })),
+    };
+  }
+
+  /**
+   * Written by hand rather than returned from `run()`: oclif colours JSON it
+   * prints itself whenever the output is a terminal.
+   */
+  protected writeJson(report: Record<string, unknown>): void {
+    process.stdout.write(JSON.stringify(report, null, 2) + '\n');
+  }
+
+  /**
+   * With `--json`, an error before or between steps is still reported as JSON.
+   */
+  async catch(err: any): Promise<any> {
+    if (!this.jsonEnabled()) return super.catch(err);
+
+    const code = err?.oclif?.exit ?? 1;
+
+    if (code === 0) return;
+
+    process.exitCode = code;
+
+    this.writeJson(this.jsonReport(false, err?.message ?? String(err), []));
+  }
+
   protected goodbyeMessage(): string {
     return 'Please make sure to check my work, adjust formatting, and test before committing!!!';
   }
@@ -195,7 +241,8 @@ export default abstract class BaseCommand extends Command {
   // ----------------------------------------------------------------
 
   protected genIO(): IO {
-    return new PromptsIO(this.args, [], this.flags['no-interaction'], exit);
+    // Nobody can answer a prompt when a program is reading the output.
+    return new PromptsIO(this.args, [], this.flags['no-interaction'] || this.jsonEnabled(), exit);
   }
 
   protected monorepoPaths(options: {

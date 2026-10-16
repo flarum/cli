@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 
-type Failure = {
+export type Failure = {
   file: string;
   reason: string;
 };
@@ -27,6 +27,13 @@ export class StepFailures {
 
   count(): number {
     return this.failures.length;
+  }
+
+  /**
+   * The failures as data, for a program driving the upgrade.
+   */
+  list(): Failure[] {
+    return this.failures.map((failure) => ({ ...failure }));
   }
 
   /**

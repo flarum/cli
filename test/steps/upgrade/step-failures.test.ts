@@ -42,6 +42,18 @@ describe('StepFailures', () => {
     expect(report).toContain('third problem');
   });
 
+  it('lists each file and reason as data, for a program driving the upgrade', () => {
+    const failures = new StepFailures();
+
+    failures.record('a.php', new Error('first problem'));
+    failures.record('b.php', 'second problem');
+
+    expect(failures.list()).toStrictEqual([
+      { file: 'a.php', reason: 'first problem' },
+      { file: 'b.php', reason: 'second problem' },
+    ]);
+  });
+
   it('reports a non-Error throw without losing what it was', () => {
     const failures = new StepFailures();
 

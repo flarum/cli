@@ -350,8 +350,7 @@ export default class MiscFrontendChanges extends BaseUpgradeStep {
                         t.isStringLiteral(prop.value) ? prop.value : t.jsxExpressionContainer(prop.value)
                       );
                     } catch (error) {
-                      console.log({ [key.toString()]: prop.value });
-                      throw error;
+                      throw new Error(`Could not turn the "${key.toString()}" attr into a JSX attribute: ${(error as Error).message}`);
                     }
                   }) as t.JSXAttribute[];
               } else if (attrs && t.isIdentifier(attrs)) {

@@ -15,7 +15,9 @@ import s from 'string';
 import simpleGit from 'simple-git';
 import { cloneNode } from '@babel/types';
 import { PhpProvider } from '../../../providers/php-provider';
-import { StepFailures } from './step-failures';
+import { Failure, StepFailures } from './step-failures';
+import { Todo, todosAddedBy } from './todos';
+import { isTerminal, overwrite, stripAnsi } from '../../../utils/terminal';
 
 export type ReplacementResult = {
   imports?: ImportChange[];
@@ -39,6 +41,14 @@ export type GitCommit = {
   description: string;
 };
 
+/**
+ * What a step did, for a program driving the upgrade.
+ */
+export type StepOutcome =
+  | { status: 'skipped' | 'no-changes' }
+  | { status: 'committed'; commit: { sha: string; message: string }; notes: string; todos: Todo[] }
+  | { status: 'failed'; failures: Failure[] };
+
 export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
   abstract type: string;
 
@@ -57,6 +67,11 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
   protected php: null | PhpProvider = null;
 
   protected step = 0;
+
+  get number(): number {
+    return this.step;
+  }
+
   protected totalSteps = 0;
   protected forceStep = false;
   protected root: string;
@@ -82,6 +97,11 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
 
   protected fsEditor: null | Editor = null;
 
+  /**
+   * Unset until the step runs.
+   */
+  public outcome: StepOutcome | null = null;
+
   async run(fs: Store, paths: Paths, io: IO, providers: FlarumProviders): Promise<Store> {
     if (this.root !== paths.cwd()) {
       process.chdir(this.root);
@@ -92,6 +112,9 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
     this.fsEditor = fsEditor;
 
     this.php = providers.php;
+
+    // Until the step gets further: whatever stops it from here on is a failure.
+    this.outcome = { status: 'failed', failures: [] };
 
     // Stop if there are uncommited changes
     const status = await simpleGit(paths.requestedDir() ?? paths.cwd()).status();
@@ -110,6 +133,7 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
     if (!this.forceStep && (await this.alreadyCommited(paths.requestedDir() ?? paths.cwd(), this.gitCommit().message))) {
       this.command.log('     => ' + chalk.bgGreen.bold('    SKIP    '));
       this.command.log('');
+      this.outcome = { status: 'skipped' };
       return fs;
     }
 
@@ -117,13 +141,15 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
     let dots = 1;
     let nl = false;
     const progress = () => {
+      if (!isTerminal()) return;
+
       if (!nl) {
         this.command.log('');
         nl = true;
       }
 
       const filledDots = '.'.repeat(dots) + ' '.repeat(3 - dots);
-      this.command.log('\u001B[A     => ' + chalk.bold('  WORKING' + filledDots));
+      this.command.log(overwrite() + '     => ' + chalk.bold('  WORKING' + filledDots));
 
       dots = (dots + 1) % 4;
     };
@@ -241,7 +267,9 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
       // block the re-run this step is asking the author to do.
       await simpleGit(dir).checkout(['--', '.']);
 
-      this.command.log('\u001B[A     => ' + chalk.bgRed.bold('   FAILED   '));
+      this.outcome = { status: 'failed', failures: failures.list() };
+
+      this.command.log(overwrite() + '     => ' + chalk.bgRed.bold('   FAILED   '));
       this.command.log('');
       this.command.log(failures.report());
       this.command.log('');
@@ -263,16 +291,29 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
     if (changesMade) {
       await simpleGit(paths.requestedDir() ?? paths.cwd()).add('.');
 
-      await this.pauseAndConfirm(this.pauseMessage(), io);
+      const notes = this.pauseMessage();
+
+      await this.pauseAndConfirm(notes, io);
 
       const commit = this.gitCommit();
       const message = commit.message + '\n\n' + commit.description;
-      await commitAll(paths.requestedDir() ?? paths.cwd(), message);
+      await commitAll(dir, message);
 
-      this.command.log('\u001B[A     => ' + chalk.bgCyan.bold('   COMMIT   ') + ' ' + chalk.dim(commit.message));
+      const sha = (await simpleGit(dir).revparse(['HEAD'])).trim();
+
+      this.outcome = {
+        status: 'committed',
+        commit: { sha, message: commit.message },
+        notes: stripAnsi(notes).trim(),
+        todos: await todosAddedBy(dir, sha),
+      };
+
+      this.command.log(overwrite() + '     => ' + chalk.bgCyan.bold('   COMMIT   ') + ' ' + chalk.dim(commit.message));
       this.command.log('');
     } else {
-      this.command.log('\u001B[A     => ' + chalk.bgGreen.bold(' NO CHANGES '));
+      this.outcome = { status: 'no-changes' };
+
+      this.command.log(overwrite() + '     => ' + chalk.bgGreen.bold(' NO CHANGES '));
       this.command.log('');
     }
 
@@ -427,7 +468,7 @@ export abstract class BaseUpgradeStep implements Step<FlarumProviders> {
   protected async pauseAndConfirm(message: string, io: IO): Promise<void> {
     const stepMarker = chalk.bgWhite.black.bold('    DONE    ');
 
-    this.command.log('\u001B[A     => ' + stepMarker + ' ' + message);
+    this.command.log(overwrite() + '     => ' + stepMarker + ' ' + message);
     this.command.log('');
 
     await this.command.continueWhenReady(io);
