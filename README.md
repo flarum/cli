@@ -132,6 +132,36 @@ The CLI has different types of commands for different tasks:
 **Code Updates**: These commands help update extensions for newer versions of Flarum.
 
 - `flarum-cli update js-imports [PATH]`: Adds admin/forum/common namespaces to all JS imports from flarum core.
+- `flarum-cli upgrade 2.0 [PATH] [-n|--no-interaction] [--json] [--step <number>] [--force-steps]`: Upgrades a 1.x extension to Flarum 2.0, one step at a time, committing each step. Steps already committed are skipped, so running it again resumes where it stopped.
+
+To drive the upgrade from another program, such as an AI agent, pass `--json`. It asks nothing, and prints a single JSON object when it finishes. It exits non-zero when the upgrade didn't complete:
+
+```json
+{
+  "status": "failed",
+  "error": "1 file could not be upgraded by this step, so it made no changes. …",
+  "messages": [],
+  "steps": [
+    {
+      "step": 13,
+      "title": "Prepare for JSON:API changes.",
+      "status": "committed",
+      "commit": { "sha": "c63dd501…", "message": "chore(2.0): JSON:API changes" },
+      "notes": "Flarum 2.0 completely refactors the JSON:API implementation. …",
+      "todos": [{ "file": "extend.php", "line": 33, "text": "// @TODO: Replace with the new implementation …" }]
+    },
+    {
+      "step": 14,
+      "title": "Intervention Image Library v3",
+      "status": "failed",
+      "failures": [{ "file": "src/Thumbnailer.php", "reason": "Syntax error, unexpected '{' on line 15" }]
+    },
+    { "step": 15, "title": "Search & Filter API changes", "status": "not-run" }
+  ]
+}
+```
+
+Each step is `committed`, `no-changes`, `skipped` (committed by an earlier run), `failed` or `not-run`. A step that fails on some files lists them and makes no changes, so fix those files, commit, and run the command again. The `todos` are the `@TODO` comments the step's commit added, for what the upgrade could not change itself.
 
 _And of course, you can always use the help command to see a list of all available commands with their descriptions:_
 

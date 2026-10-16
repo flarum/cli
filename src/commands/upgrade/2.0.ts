@@ -21,12 +21,21 @@ import ModelFactories from '../../steps/upgrade/twopointoh/backend/model-factori
 import { Flags } from '@oclif/core';
 import EmailViews from '../../steps/upgrade/twopointoh/backend/email-views';
 import InterventionImage from '../../steps/upgrade/twopointoh/backend/intervention-image';
+import { BaseUpgradeStep } from '../../steps/upgrade/twopointoh/base';
+import { Message } from 'boilersmith/io';
 
 export default class TwoPointOh extends BaseCommand {
   static description = 'Upgrade an extension to Flarum 2.0';
 
+  static enableJsonFlag = true;
+
   static flags = {
     ...BaseCommand.flags,
+    json: Flags.boolean({
+      description:
+        "Report each step's outcome, failures, notes and the @TODOs it left as JSON, for a program driving the upgrade. Implies --no-interaction.",
+      required: false,
+    }),
     step: Flags.string({
       description: 'Optionally specify a specific step to run',
       required: false,
@@ -42,6 +51,11 @@ export default class TwoPointOh extends BaseCommand {
   protected requireExistingExtension = true;
 
   skipFinalMessage = true;
+
+  /**
+   * The steps this run was asked to take, in order.
+   */
+  protected scheduled: BaseUpgradeStep[] = [];
 
   protected steps(steps: StepManager<FlarumProviders>, extRoot: string): StepManager<FlarumProviders> {
     // Error.stackTraceLimit = Number.POSITIVE_INFINITY;
@@ -93,17 +107,32 @@ export default class TwoPointOh extends BaseCommand {
       const step = Number.parseInt(this.flags.step as string, 10);
 
       if (step > 0 && step <= total) {
+        this.scheduled = [collection[step - 1]];
+
         return steps.step(collection[step - 1]);
       }
 
       this.error(`Invalid step number. Please provide a number between 1 and ${total}`);
     }
 
+    this.scheduled = collection;
+
     collection.forEach((step) => {
       steps.step(step);
     });
 
     return steps;
+  }
+
+  protected jsonReport(succeeded: boolean, error: string | null, messages: Message[]): Record<string, unknown> {
+    return {
+      ...super.jsonReport(succeeded, error, messages),
+      steps: this.scheduled.map((step) => ({
+        step: step.number,
+        title: step.type,
+        ...(step.outcome ?? { status: 'not-run' }),
+      })),
+    };
   }
 
   protected welcomeMessage(): string {
