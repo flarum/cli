@@ -26,6 +26,25 @@ ${body}
 `;
 
 describe('the PHPUnit step', () => {
+  it('puts the imports it adds where they sort among those already there', () => {
+    const code = upgrade(
+      testClass(`    /**
+     * @test
+     */
+    public function it_works()
+    {
+        $this->assertTrue(true);
+    }`).replace(
+        'use Flarum\\Testing\\integration\\TestCase;\n',
+        'use Flarum\\Testing\\integration\\TestCase;\nuse Psr\\Http\\Message\\ResponseInterface;\n'
+      )
+    );
+
+    expect(code).toContain(`use Flarum\\Testing\\integration\\TestCase;
+use PHPUnit\\Framework\\Attributes\\Test;
+use Psr\\Http\\Message\\ResponseInterface;`);
+  });
+
   describe('annotations', () => {
     it('turns @test and @dataProvider into attributes, and makes the provider static', () => {
       expect(

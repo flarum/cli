@@ -60,7 +60,7 @@ export default abstract class BaseCommand extends Command {
     const { args } = await this.parse(this.constructor as any);
 
     this.args = args;
-    const path: string | undefined = args.path;
+    const path: string | undefined = this.stepsPath(args.path);
 
     const paths = new NodePaths({
       requestedDir: path,
@@ -70,6 +70,14 @@ export default abstract class BaseCommand extends Command {
     const phpProvider = new PhpSubsystemProvider(resolve(__dirname, '../php-subsystem/index.php'));
 
     return steps.run(paths, this.genIO(), { php: phpProvider }, this.dry, args);
+  }
+
+  /**
+   * Where the steps run, which is where the command was asked to unless a
+   * command runs them somewhere else.
+   */
+  protected stepsPath(path: string | undefined): string | undefined {
+    return path;
   }
 
   async extRoot(path: string | undefined): Promise<string> {

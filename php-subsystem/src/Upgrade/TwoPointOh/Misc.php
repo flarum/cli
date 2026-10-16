@@ -2,6 +2,7 @@
 
 namespace Flarum\CliPhpSubsystem\Upgrade\TwoPointOh;
 
+use Flarum\CliPhpSubsystem\NodeUtil;
 use Flarum\CliPhpSubsystem\NodeVisitors\ChangeSignatures;
 use Flarum\CliPhpSubsystem\Upgrade\Replacement;
 use Flarum\CliPhpSubsystem\Upgrade\ReplacementResult;
@@ -198,7 +199,11 @@ class Misc extends Replacement
                 if ($node instanceof \PhpParser\Node\Expr\MethodCall) {
                     if ($class = $this->getClass($node)) {
                         if ($class === 'Extend\Notification') {
-                            if ($node->name->name === 'type') {
+                            // 1.x's second argument is the serializer. 2.x's is the
+                            // drivers enabled by default, an array, which stays.
+                            $serializer = $node->args[1]->value ?? null;
+
+                            if ($node->name->name === 'type' && ($serializer instanceof \PhpParser\Node\Expr\ClassConstFetch || $serializer instanceof \PhpParser\Node\Scalar\String_)) {
                                 $args = $node->args;
                                 unset($args[1]);
                                 $node->args = array_values($args);
@@ -371,14 +376,13 @@ class Misc extends Replacement
 
             public function enterNode(Node $node)
             {
-                // Does this class implement the Flarum\Notification\Blueprint\BlueprintInterface ?
+                // Does this class implement the Flarum\Notification\Blueprint\BlueprintInterface,
+                // and not yet the Flarum\Notification\AlertableInterface ?
                 if ($node instanceof Node\Stmt\Class_) {
-                    foreach ($node->implements as $interface) {
-                        if ($interface->getAttribute('resolvedName')->name === 'Flarum\Notification\Blueprint\BlueprintInterface') {
-                            $this->valid = true;
-                            break;
-                        }
-                    }
+                    $implements = array_map(fn ($interface) => $interface->getAttribute('resolvedName')->name, $node->implements);
+
+                    $this->valid = in_array('Flarum\Notification\Blueprint\BlueprintInterface', $implements)
+                        && ! in_array('Flarum\Notification\AlertableInterface', $implements);
                 }
             }
 
@@ -389,15 +393,7 @@ class Misc extends Replacement
                 }
 
                 if ($node instanceof Node\Stmt\Namespace_) {
-                    // Add the Flarum\Notification\AlertableInterface import
-                    $node->stmts = array_merge(
-                        [
-                            new Node\Stmt\Use_([
-                                new Node\Stmt\UseUse(new Node\Name('Flarum\Notification\AlertableInterface'))
-                            ])
-                        ],
-                        $node->stmts
-                    );
+                    NodeUtil::addUsesToNamespace($node, ['Flarum\Notification\AlertableInterface']);
                 }
 
                 if ($node instanceof \PhpParser\Node\Stmt\Class_) {

@@ -7,7 +7,8 @@ export const TODO_MARKER = '@TODO';
 
 export type Todo = {
   file: string;
-  line: number;
+  /** Null for work a step leaves without a @TODO comment in the file to show for it. */
+  line: number | null;
   text: string;
 };
 

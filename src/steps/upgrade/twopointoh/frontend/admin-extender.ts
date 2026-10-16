@@ -909,9 +909,28 @@ function indexEdits(
 ): string {
   const edits: Edit[] = [];
   const moved = new Set<t.Node>(registrations.map((registration) => registration.statement.node));
+  const emptied = emptiedInitializers(registrations, moved);
+
+  // An initializer left with nothing to do goes as a whole. 2.0 checks
+  // whether an extension is enabled in flarum.extensions, not by its
+  // initializer, so nothing needs it to stay.
+  // The app it added itself to may now go unused too.
+  const candidates = new Map(imports);
+
+  for (const initializer of emptied) {
+    moved.add(initializer.node);
+    edits.push(removal(code, initializer));
+
+    const app = initializer.get('expression.callee.object.object') as NodePath;
+    const binding = app.isIdentifier() ? app.scope.getBinding(app.node.name) : undefined;
+
+    if (binding && isImport(binding)) candidates.set(binding.identifier.name, binding);
+  }
 
   for (const registration of registrations) {
-    edits.push(removal(code, registration));
+    if (!emptied.some((initializer) => registration.statement.isDescendant(initializer))) {
+      edits.push(removal(code, registration.statement));
+    }
   }
 
   // A constant only the moved code, or another constant going, used goes too.
@@ -970,7 +989,7 @@ function indexEdits(
     !reference.findParent((parent) => moved.has(parent.node) || [...going].some((g) => g.path.parentPath!.node === parent.node));
   const byDeclaration = new Map<t.ImportDeclaration, t.Node[]>();
 
-  for (const binding of imports.values()) {
+  for (const binding of candidates.values()) {
     if (references(program, binding).some(outside)) continue;
 
     const declaration = binding.path.parent as t.ImportDeclaration;
@@ -1025,10 +1044,35 @@ function references(program: NodePath<t.Program>, binding: Binding): NodePath[] 
   return found;
 }
 
+/**
+ * The `app.initializers.add(...)` statements that only held registrations
+ * which are moving, and no comments of their own.
+ */
+function emptiedInitializers(registrations: Registration[], moved: Set<t.Node>): NodePath<t.ExpressionStatement>[] {
+  const emptied: NodePath<t.ExpressionStatement>[] = [];
+
+  for (const registration of registrations) {
+    const block = registration.statement.parentPath as NodePath<t.BlockStatement>;
+    const statement = block.parentPath?.parentPath?.parentPath;
+
+    if (!statement?.isExpressionStatement() || emptied.some((other) => other.node === statement.node)) continue;
+
+    const body = block.node.body;
+    const removed = new Set(body.flatMap((node) => node.leadingComments ?? []));
+    const kept = [...(block.node.innerComments ?? []), ...(body.at(-1)?.trailingComments ?? [])].filter((comment) => !removed.has(comment));
+
+    if (body.every((node) => moved.has(node)) && kept.length === 0) {
+      emptied.push(statement);
+    }
+  }
+
+  return emptied;
+}
+
 /** The statement's lines, with the comments above it and one ending its line. */
-function removal(code: string, registration: Registration): Edit {
-  const node = registration.statement.node;
-  const parent = registration.statement.parentPath.node as t.BlockStatement;
+function removal(code: string, statement: NodePath<t.Statement>): Edit {
+  const node = statement.node;
+  const parent = statement.parentPath!.node as t.BlockStatement | t.Program;
   const previous = parent.body[parent.body.indexOf(node) - 1];
   const leading = (node.leadingComments ?? []).filter((comment) => !previous || comment.loc!.start.line > previous.loc!.end.line);
   const start = leading.length > 0 ? leading[0].start! : node.start!;

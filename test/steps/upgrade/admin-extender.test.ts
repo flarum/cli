@@ -55,13 +55,10 @@ app.initializers.add('acme-interstellar', () => {
 `,
       });
 
-      // The initializer stays: other extensions may check for it by name.
+      // The initializer has nothing left to do, so it goes, and the app only it
+      // used. 2.0 checks whether an extension is enabled in flarum.extensions.
       expect(index).toBe(
-        await format(`import app from 'flarum/admin/app';
-
-export { default as extend } from './extend';
-
-app.initializers.add('acme-interstellar', () => {});
+        await format(`export { default as extend } from './extend';
 `)
       );
 
@@ -78,6 +75,62 @@ export default [
 ];
 `),
       });
+    });
+
+    it('leaving an initializer that still has other work in place', async () => {
+      const { index } = await upgrade({
+        'js/src/admin/index.ts': `import app from 'flarum/admin/app';
+
+app.initializers.add('acme-interstellar', () => {
+  app.extensionData.for('acme-interstellar').registerSetting({ setting: 'acme-interstellar.fuel', type: 'text' });
+
+  console.log('ready');
+});
+`,
+      });
+
+      expect(index).toBe(
+        await format(`import app from 'flarum/admin/app';
+
+export { default as extend } from './extend';
+
+app.initializers.add('acme-interstellar', () => {
+  console.log('ready');
+});
+`)
+      );
+    });
+
+    it('leaving an initializer with a comment of its own in place', async () => {
+      const { index } = await upgrade({
+        'js/src/admin/index.ts': `import app from 'flarum/admin/app';
+
+app.initializers.add('acme-interstellar', () => {
+  app.extensionData.for('acme-interstellar').registerSetting({ setting: 'acme-interstellar.fuel', type: 'text' });
+  // More settings once the launch pad is built.
+});
+`,
+      });
+
+      expect(index).toContain("app.initializers.add('acme-interstellar'");
+      expect(index).toContain('// More settings once the launch pad is built.');
+    });
+
+    it('removing an initializer with the comments above it', async () => {
+      const { index } = await upgrade({
+        'js/src/admin/index.ts': `import app from 'flarum/admin/app';
+
+// Register the settings.
+app.initializers.add('acme-interstellar', () => {
+  app.extensionData.for('acme-interstellar').registerSetting({ setting: 'acme-interstellar.fuel', type: 'text' });
+});
+`,
+      });
+
+      expect(index).toBe(
+        await format(`export { default as extend } from './extend';
+`)
+      );
     });
 
     it('each registration as its Admin extender method, with its priority and type', async () => {
@@ -342,8 +395,6 @@ app.initializers.add('acme-interstellar', (app) => {
 
       expect(index).toBe(
         await format(`export { default as extend } from './extend';
-
-app.initializers.add('acme-interstellar', (app) => {});
 `)
       );
 
@@ -452,11 +503,7 @@ export default [...commonExtend];
       });
 
       expect(index).toBe(
-        await format(`import app from 'flarum/admin/app';
-
-export { default as extend } from './extend';
-
-app.initializers.add('acme-interstellar', () => {});
+        await format(`export { default as extend } from './extend';
 `)
       );
 
@@ -573,11 +620,7 @@ app.initializers.add('acme-interstellar', () => {
       });
 
       expect(index).toBe(
-        await format(`import app from 'flarum/admin/app';
-
-export { default as extend } from './extend';
-
-app.initializers.add('acme-interstellar', () => {});
+        await format(`export { default as extend } from './extend';
 `)
       );
 

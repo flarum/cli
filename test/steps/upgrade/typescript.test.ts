@@ -21,8 +21,23 @@ async function upgrade(step: Step, file: string, code: string): Promise<string> 
   return result.updated as string;
 }
 
+// Read back as TypeScript reads it, comments and all.
 const upgradeJson = async (step: Step, file: string, content: Record<string, any>) =>
-  JSON.parse(await upgrade(step, file, JSON.stringify(content, null, 2)));
+  step.advancedContent(file, await upgrade(step, file, JSON.stringify(content, null, 2))) as Record<string, any>;
+
+// What the step puts first in compilerOptions, at the given indentation.
+const typesOption = (indent: string) =>
+  `${indent}// Only load the type packages the code imports. Others, such as the\n${indent}// @types/node webpack brings along, use syntax TypeScript 4.9 can't read.\n${indent}"types": [],\n`;
+
+/** An extension with the given js/package.json, for what the step reads from disk. */
+function extensionWith(pkg: Record<string, unknown>): string {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'typescript-'));
+
+  fs.mkdirSync(path.join(root, 'js'));
+  fs.writeFileSync(path.join(root, 'js/package.json'), JSON.stringify(pkg));
+
+  return root;
+}
 
 const scaffolded = (file: string) => fs.readFileSync(path.resolve(__dirname, '../../../boilerplate/skeleton/extension', file), 'utf8');
 
@@ -100,6 +115,7 @@ describe('TypeScript, which Flarum 2.0 builds with at 4.9', () => {
       });
 
       expect(tsconfig.compilerOptions).toEqual({
+        types: [],
         lib: ['DOM'],
         declarationDir: './dist-typings',
         baseUrl: '.',
@@ -115,10 +131,10 @@ describe('TypeScript, which Flarum 2.0 builds with at 4.9', () => {
         compilerOptions: { target: 'ESNext', moduleResolution: 'Node', module: 'ES2020', jsx: 'preserve' },
       });
 
-      expect(tsconfig.compilerOptions).toEqual({ target: 'ESNext', moduleResolution: 'Node', module: 'ES2020', jsx: 'preserve' });
+      expect(tsconfig.compilerOptions).toEqual({ types: [], target: 'ESNext', moduleResolution: 'Node', module: 'ES2020', jsx: 'preserve' });
     });
 
-    it('leaves a tsconfig TypeScript 4.9 can read exactly as it was', async () => {
+    it('leaves a tsconfig TypeScript 4.9 can read as it was, but for the type packages it loads', async () => {
       const step = newStep();
       const code = `{
   // Use Flarum's shared TypeScript settings.
@@ -131,7 +147,9 @@ describe('TypeScript, which Flarum 2.0 builds with at 4.9', () => {
 }
 `;
 
-      expect(await upgrade(step, 'js/tsconfig.json', code)).toBe(code);
+      expect(await upgrade(step, 'js/tsconfig.json', code)).toBe(
+        code.replace('  "compilerOptions": {\n', `  "compilerOptions": {\n${typesOption('    ')}`)
+      );
       expect(step.pauseMessage()).not.toContain('tsconfig.json');
     });
 
@@ -149,7 +167,58 @@ describe('TypeScript, which Flarum 2.0 builds with at 4.9', () => {
 }
 `;
 
+      expect(await upgrade(newStep(), 'js/tsconfig.json', code)).toBe(
+        code.replace('  "compilerOptions": {\n', `  "compilerOptions": {\n${typesOption('    ')}`)
+      );
+    });
+
+    it('keeps the type packages a tsconfig already names', async () => {
+      const code = `{\n  "compilerOptions": {\n    "types": ["mithril"]\n  }\n}\n`;
+
       expect(await upgrade(newStep(), 'js/tsconfig.json', code)).toBe(code);
+    });
+
+    it('leaves listing the type packages whose globals the code may use to do', async () => {
+      const step = new Dependencies(
+        {} as any,
+        extensionWith({ devDependencies: { '@types/jquery': '^3.5.0', '@types/jest': '^29.0.0' } }),
+        1,
+        1,
+        false
+      );
+
+      await upgrade(step, 'js/tsconfig.json', `{\n  "compilerOptions": {}\n}\n`);
+
+      expect((step as any).followUps).toEqual([
+        {
+          file: 'js/tsconfig.json',
+          line: null,
+          text: 'It only loads the type packages the code imports now. If the code uses the globals of @types/jquery, list them in compilerOptions.types.',
+        },
+      ]);
+    });
+
+    it("loads Jest's globals in a test config, which would no longer get them from tsconfig.json", async () => {
+      const step = new Dependencies({} as any, extensionWith({ devDependencies: { '@flarum/jest-config': '^2.0.0' } }), 1, 1, false);
+      const code = `{\n    "extends": "./tsconfig.json",\n    "compilerOptions": {\n        "strict": false\n    }\n}\n`;
+
+      expect(await upgrade(step, 'js/tsconfig.test.json', code)).toBe(
+        `{\n    "extends": "./tsconfig.json",\n    "compilerOptions": {\n        "types": ["jest"],\n        "strict": false\n    }\n}\n`
+      );
+    });
+
+    it('leaves a test config alone without Jest', async () => {
+      const code = `{\n  "compilerOptions": {\n    "strict": false\n  }\n}\n`;
+
+      expect(await upgrade(newStep(), 'js/tsconfig.test.json', code)).toBe(code);
+    });
+
+    it('is what a new extension is scaffolded with', async () => {
+      const tsconfig = scaffolded('js/tsconfig.json');
+      const test = scaffolded('js/tsconfig.test.json');
+
+      expect(tsconfig).toContain(typesOption('    '));
+      expect(test).toContain('"types": ["jest"]');
     });
 
     it('flags a list of configs to extend, which TypeScript 4.9 cannot read', async () => {
@@ -157,9 +226,13 @@ describe('TypeScript, which Flarum 2.0 builds with at 4.9', () => {
       const tsconfig = await upgradeJson(step, 'js/tsconfig.json', { extends: ['flarum-tsconfig', './tsconfig.paths.json'] });
 
       expect(tsconfig.extends).toEqual(['flarum-tsconfig', './tsconfig.paths.json']);
-      expect(step.pauseMessage()).toContain(
-        'js/tsconfig.json extends a list of configs, which TypeScript 4.9 cannot read. Extend one, and move the rest into it.'
-      );
+      expect((step as any).followUps).toEqual([
+        {
+          file: 'js/tsconfig.json',
+          line: null,
+          text: 'It extends a list of configs, which TypeScript 4.9 cannot read. Extend one, and move the rest into it.',
+        },
+      ]);
     });
   });
 

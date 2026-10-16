@@ -22,7 +22,30 @@ import { Flags } from '@oclif/core';
 import EmailViews from '../../steps/upgrade/twopointoh/backend/email-views';
 import InterventionImage from '../../steps/upgrade/twopointoh/backend/intervention-image';
 import { BaseUpgradeStep } from '../../steps/upgrade/twopointoh/base';
-import { Message } from 'boilersmith/io';
+import { IO, Message } from 'boilersmith/io';
+import { execFileSync } from 'child_process';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import simpleGit from 'simple-git';
+
+/**
+ * The temporary worktree a check runs the steps in, so the extension itself
+ * is never changed.
+ */
+type Checkout = {
+  /** The repository the extension is in. */
+  repo: string;
+  worktree: string;
+  branch: string;
+  /** The extension's root inside the worktree. */
+  root: string;
+  /** What was checked. */
+  commit: string;
+  /** Whether the extension had changes not committed, which a check leaves out. */
+  dirty: boolean;
+  cwd: string;
+};
 
 export default class TwoPointOh extends BaseCommand {
   static description = 'Upgrade an extension to Flarum 2.0';
@@ -44,6 +67,11 @@ export default class TwoPointOh extends BaseCommand {
       description: 'Force run steps even if already ran',
       required: false,
     }),
+    check: Flags.boolean({
+      description:
+        'Report what the upgrade would change, such as on an extension already on Flarum 2.0, without changing it: the steps run on the last commit, in a temporary git worktree that is removed afterwards. Implies --force-steps and --no-interaction.',
+      required: false,
+    }),
   };
 
   static args = [...BaseCommand.args];
@@ -56,6 +84,87 @@ export default class TwoPointOh extends BaseCommand {
    * The steps this run was asked to take, in order.
    */
   protected scheduled: BaseUpgradeStep[] = [];
+
+  protected checkout: Checkout | null = null;
+
+  async run(): Promise<void> {
+    try {
+      await super.run();
+    } finally {
+      await this.removeCheckout();
+    }
+  }
+
+  protected async additionalPreRunChecks(extRoot: string): Promise<void> {
+    if (this.flags.check) {
+      this.checkout = await this.createCheckout(extRoot);
+    }
+  }
+
+  protected stepsPath(requested: string | undefined): string | undefined {
+    return this.checkout?.root ?? requested;
+  }
+
+  protected genIO(): IO {
+    // A check asks nothing: there is nothing to confirm.
+    if (this.flags?.check) this.flags['no-interaction'] = true;
+
+    return super.genIO();
+  }
+
+  protected async createCheckout(extRoot: string): Promise<Checkout> {
+    const root = fs.realpathSync(extRoot);
+    const git = simpleGit(root);
+
+    let repo: string;
+
+    try {
+      repo = (await git.revparse(['--show-toplevel'])).trim();
+    } catch {
+      this.error('--check runs the upgrade on a copy of the extension in a git worktree, so the extension must be in a git repository.', {
+        code: 'FL_ERR',
+      });
+    }
+
+    const commit = (await git.revparse(['HEAD'])).trim();
+    const dirty = !(await git.status()).isClean();
+    const worktree = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), 'flarum-upgrade-check-'));
+    const branch = `flarum-upgrade-check/${path.basename(worktree)}`;
+
+    await simpleGit(repo).raw(['worktree', 'add', '--quiet', '-b', branch, worktree, commit]);
+
+    return { repo, worktree, branch, root: path.join(worktree, path.relative(repo, root)), commit, dirty, cwd: process.cwd() };
+  }
+
+  /** Remove the worktree and its branch, saying so if it can't. */
+  protected async removeCheckout(): Promise<void> {
+    const checkout = this.checkout;
+
+    if (!checkout) return;
+
+    this.checkout = null;
+
+    // The steps ran from inside the worktree.
+    process.chdir(checkout.cwd);
+
+    try {
+      await simpleGit(checkout.repo).raw(['worktree', 'remove', '--force', checkout.worktree]);
+      await simpleGit(checkout.repo).raw(['branch', '-D', checkout.branch]);
+    } catch (error) {
+      process.stderr.write(
+        `The check could not remove its worktree ${checkout.worktree} and branch ${checkout.branch}: ${(error as Error).message}\n` +
+          `Remove them with: git worktree remove --force ${checkout.worktree} && git branch -D ${checkout.branch}\n`
+      );
+    }
+  }
+
+  /** What a step that committed in the worktree would change, from its commit. */
+  protected wouldChange(sha: string): { files: string[]; diff: string } {
+    const show = (...args: string[]) =>
+      execFileSync('git', ['show', '--format=', '--no-color', '--no-ext-diff', ...args, sha], { cwd: this.checkout!.worktree, encoding: 'utf8' });
+
+    return { files: show('--name-only').split('\n').filter(Boolean), diff: show() };
+  }
 
   protected steps(steps: StepManager<FlarumProviders>, extRoot: string): StepManager<FlarumProviders> {
     // Error.stackTraceLimit = Number.POSITIVE_INFINITY;
@@ -98,7 +207,8 @@ export default class TwoPointOh extends BaseCommand {
     });
 
     collection = collection.map((Step: new (...args: any) => any) => {
-      const step = new Step(this, extRoot, stepCount, total, this.flags['force-steps']);
+      const step = new Step(this, this.checkout?.root ?? extRoot, stepCount, total, this.flags['force-steps'] || this.flags.check);
+      step.checking = Boolean(this.flags.check);
       stepCount++;
       return step;
     });
@@ -127,15 +237,32 @@ export default class TwoPointOh extends BaseCommand {
   protected jsonReport(succeeded: boolean, error: string | null, messages: Message[]): Record<string, unknown> {
     return {
       ...super.jsonReport(succeeded, error, messages),
+      ...(this.checkout && { check: { commit: this.checkout.commit, uncommittedChangesLeftOut: this.checkout.dirty } }),
       steps: this.scheduled.map((step) => ({
         step: step.number,
         title: step.type,
-        ...(step.outcome ?? { status: 'not-run' }),
+        ...this.reported(step),
       })),
     };
   }
 
+  /** A step's outcome, as what it would change when checking. */
+  protected reported(step: BaseUpgradeStep): Record<string, unknown> {
+    const outcome = step.outcome ?? { status: 'not-run' };
+
+    if (!this.checkout || outcome.status !== 'committed') return outcome;
+
+    return { status: 'would-change', ...this.wouldChange(outcome.commit.sha), notes: outcome.notes, todos: outcome.todos };
+  }
+
   protected welcomeMessage(): string {
+    if (this.flags.check) {
+      return `
+    Checking what the Flarum 2.0 upgrade would change in your extension. The steps run on its last commit,
+    in a temporary git worktree that is removed afterwards: nothing in your extension changes.
+    `;
+    }
+
     const beforeProceeding = chalk.bold.red('Before proceeding:');
     const command = chalk.bold.bgYellow.black('fl update js-imports');
     const makeSure = chalk.bold.dim(`- Make sure your extend.php file directly returns an array of extenders.
@@ -154,6 +281,28 @@ export default class TwoPointOh extends BaseCommand {
   }
 
   protected goodbyeMessage(): string {
+    if (this.checkout) {
+      const changing = this.scheduled.filter((step) => step.outcome?.status === 'committed');
+      const lines = changing.map((step) => {
+        const { files } = this.wouldChange((step.outcome as { commit: { sha: string } }).commit.sha);
+
+        return `    - Step ${step.number}, ${step.type} ${chalk.dim(files.join(', '))}`;
+      });
+
+      return [
+        changing.length > 0
+          ? `    ${changing.length} of the steps would change something in ${this.checkout.commit.slice(0, 7)}:`
+          : `    None of the steps would change anything in ${this.checkout.commit.slice(0, 7)}.`,
+        ...lines,
+        this.checkout.dirty && '    Changes that were not committed were left out of the check.',
+        '',
+        '    Nothing was changed. Run with --json as well to see each diff, or without --check to make the changes.',
+        '',
+      ]
+        .filter((line) => line !== false)
+        .join('\n');
+    }
+
     const composer = chalk.bold.bgYellow('composer update');
     const yarn = chalk.bold.bgYellow('yarn install');
 

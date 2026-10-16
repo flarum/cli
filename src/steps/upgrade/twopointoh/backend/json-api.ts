@@ -45,6 +45,7 @@ export default class JsonApi extends BaseUpgradeStep {
     let collected: any = null;
 
     return [
+      this.flagAvatarUrl(),
       async (file, code) => {
         const output = this.php!.run('upgrade.2-0.json-api', { file, code });
 
@@ -102,6 +103,24 @@ export default class JsonApi extends BaseUpgradeStep {
 
   targets(): string[] {
     return ['src/**/*', 'extend.php'];
+  }
+
+  /**
+   * 2.0's user resource has avatarSrcset next to avatarUrl, and browsers
+   * prefer it, so code that only sets the URL still shows a user's uploaded
+   * avatar on most screens.
+   */
+  flagAvatarUrl(): Replacement {
+    return (file, code) => {
+      if (/["']avatarUrl["']/.test(code)) {
+        this.leaveTodo(
+          file,
+          "It sets avatarUrl. 2.0's API also has avatarSrcset, which browsers prefer over the URL: set it too, or a user's uploaded avatar still shows."
+        );
+      }
+
+      return null;
+    };
   }
 
   gitCommit(): GitCommit {

@@ -132,7 +132,7 @@ The CLI has different types of commands for different tasks:
 **Code Updates**: These commands help update extensions for newer versions of Flarum.
 
 - `flarum-cli update js-imports [PATH]`: Adds admin/forum/common namespaces to all JS imports from flarum core.
-- `flarum-cli upgrade 2.0 [PATH] [-n|--no-interaction] [--json] [--step <number>] [--force-steps]`: Upgrades a 1.x extension to Flarum 2.0, one step at a time, committing each step. Steps already committed are skipped, so running it again resumes where it stopped.
+- `flarum-cli upgrade 2.0 [PATH] [-n|--no-interaction] [--json] [--check] [--step <number>] [--force-steps]`: Upgrades a 1.x extension to Flarum 2.0, one step at a time, committing each step. Steps already committed are skipped, so running it again resumes where it stopped.
 
 To drive the upgrade from another program, such as an AI agent, pass `--json`. It asks nothing, and prints a single JSON object when it finishes. It exits non-zero when the upgrade didn't complete:
 
@@ -161,7 +161,9 @@ To drive the upgrade from another program, such as an AI agent, pass `--json`. I
 }
 ```
 
-Each step is `committed`, `no-changes`, `skipped` (committed by an earlier run), `failed` or `not-run`. A step that fails on some files lists them and makes no changes, so fix those files, commit, and run the command again. The `todos` are the `@TODO` comments the step's commit added, for what the upgrade could not change itself.
+Each step is `committed`, `no-changes`, `skipped` (committed by an earlier run), `failed` or `not-run`. A step that fails on some files lists them and makes no changes, so fix those files, commit, and run the command again. The `todos` are what the upgrade could not change itself: the `@TODO` comments the step's commit added, and work it can only point out, such as a file to add, which has a `line` of `null`. A `no-changes` step lists its `todos` too, when it has any.
+
+To see what the upgrade would change without changing anything, pass `--check`, such as for an extension already on Flarum 2.0. The steps run on the extension's last commit, in a temporary git worktree that is removed afterwards, and none is skipped. With `--json`, a step that would change something is `would-change`, with the `files` and `diff` of the change, and the report's `check` names the commit checked and whether changes not yet committed were left out.
 
 _And of course, you can always use the help command to see a list of all available commands with their descriptions:_
 

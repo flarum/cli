@@ -55,18 +55,28 @@ class NodeUtil
             return true;
         }));
 
-        $lastUseStatement = null;
+        usort($uses, fn ($a, $b) => strcasecmp($a->uses[0]->name->toString(), $b->uses[0]->name->toString()));
 
-        foreach ($node->stmts as $index => $stmt) {
-            if ($stmt instanceof \PhpParser\Node\Stmt\Use_) {
-                $lastUseStatement = $index;
-            } elseif (! is_null($lastUseStatement)) {
-                break;
+        // Each goes where it sorts among the imports already there, as the
+        // Flarum StyleCI preset orders them, or after the last one.
+        foreach ($uses as $use) {
+            $lastUseStatement = null;
+            $position = null;
+
+            foreach ($node->stmts as $index => $stmt) {
+                if ($stmt instanceof \PhpParser\Node\Stmt\Use_) {
+                    $lastUseStatement = $index;
+
+                    if (is_null($position) && strcasecmp($stmt->uses[0]->name->toString(), $use->uses[0]->name->toString()) > 0) {
+                        $position = $index;
+                    }
+                } elseif (! is_null($lastUseStatement)) {
+                    break;
+                }
             }
-        }
 
-        if (! is_null($lastUseStatement)) {
-            array_splice($node->stmts, $lastUseStatement + 1, 0, $uses);
+            // Without any imports yet, it opens the namespace.
+            array_splice($node->stmts, $position ?? (is_null($lastUseStatement) ? 0 : $lastUseStatement + 1), 0, [$use]);
         }
     }
 
