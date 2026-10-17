@@ -28,9 +28,57 @@ class AddExtender extends NodeVisitorAbstract
     $this->nameContext = $nameContext;
   }
 
+  /**
+   * The return statements whose array of extenders gets the new one.
+   *
+   * @var array<int, true>
+   */
+  protected $targets = [];
+
+  /**
+   * Picks the arrays of extenders the file returns: those returned outside any
+   * function, or failing that, from the fewest nested functions. An array a
+   * Conditional's closure returns is left alone, as it holds the extenders for
+   * when another extension is enabled.
+   */
+  public function beforeTraverse(array $nodes)
+  {
+    $returns = [];
+
+    $find = function (array $nodes, int $depth) use (&$find, &$returns) {
+      foreach ($nodes as $node) {
+        if (! $node instanceof Node) {
+          continue;
+        }
+
+        if ($node instanceof Node\Stmt\Return_ && $node->expr instanceof Node\Expr\Array_) {
+          $returns[] = [$node, $depth];
+        }
+
+        $nested = $node instanceof Node\FunctionLike ? $depth + 1 : $depth;
+
+        foreach ($node->getSubNodeNames() as $name) {
+          $find(is_array($node->$name) ? $node->$name : [$node->$name], $nested);
+        }
+      }
+    };
+
+    $find($nodes, 0);
+
+    $outermost = min(array_column($returns, 1) ?: [0]);
+
+    foreach ($returns as [$return, $depth]) {
+      if ($depth === $outermost) {
+        $this->targets[spl_object_id($return)] = true;
+      }
+    }
+
+    return null;
+  }
+
   public function leaveNode(Node $node)
   {
-    if ($node instanceof Node\Stmt\Return_ && $node->expr instanceof Node\Expr\Array_) {
+    if ($node instanceof Node\Stmt\Return_ && $node->expr instanceof Node\Expr\Array_ && isset($this->targets[spl_object_id($node)])) {
         if (! isset($this->params['extender'])) {
             $params = json_encode($this->params);
             throw new \Exception("Invalid Extender Schema. Provided params: $params");

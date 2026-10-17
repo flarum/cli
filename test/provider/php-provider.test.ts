@@ -103,3 +103,86 @@ describe('PhpProvider Works', function () {
     }).toThrow();
   });
 });
+
+describe('adding an extender to extend.php', function () {
+  const provider = new PhpSubsystemProvider(path.resolve(__dirname, '../../php-subsystem/index.php'));
+
+  const classConst = (value: string) => ({ type: ExpressionType.CLASS_CONST, value, auxiliaryValue: 'class' });
+
+  const listener: ExtenderDef = {
+    // Fully qualified with a leading backslash, as the steps that add extenders give it.
+    extender: { className: '\\Flarum\\Extend\\Event' },
+    methodCalls: [{ methodName: 'listen', args: [classConst('Flarum\\Post\\Event\\Saving'), classConst('Acme\\Thing\\Listener\\SavePost')] }],
+  };
+
+  const optional = `    (new Extend\\Conditional())
+        ->whenExtensionEnabled('flarum-tags', function () {
+            return [
+                (new Extend\\Event())
+                    ->listen(Saving::class, SaveTags::class),
+            ];
+        }),`;
+
+  test.each([
+    ['namespaced', '\nnamespace Acme\\Thing;\n'],
+    ['without a namespace', ''],
+  ])('adds it to the array the file returns, not to one a Conditional returns (%s)', function (_shape, namespace) {
+    const code = provider.withExtender(
+      `<?php
+${namespace}
+use Flarum\\Extend;
+
+return [
+${optional}
+];
+`,
+      listener
+    );
+
+    // The Conditional's array is left as it was, so the listener is added once, to the file's own.
+    expect(code).toContain(optional);
+    expect(code.split('SavePost::class').length).toBe(2);
+  });
+
+  test('chains onto an extender of the same kind the file already returns', function () {
+    const code = provider.withExtender(
+      `<?php
+
+namespace Acme\\Thing;
+
+use Flarum\\Extend;
+
+return [
+    (new Extend\\Event())
+        ->listen(Saving::class, SaveTags::class),
+];
+`,
+      listener
+    );
+
+    expect(code.split('new Extend\\Event()').length).toBe(2);
+    expect(code).toMatch(/->listen\(Saving::class, SaveTags::class\)\s*->listen\(\\Flarum\\Post\\Event\\Saving::class, Listener\\SavePost::class\)/);
+  });
+
+  test('adds it to the array a wrapping function returns, when that is the outermost one', function () {
+    const code = provider.withExtender(
+      `<?php
+
+namespace Acme\\Thing;
+
+use Flarum\\Extend;
+
+return (function () {
+    return [
+${optional}
+    ];
+})();
+`,
+      listener
+    );
+
+    expect(code).toContain(optional);
+    expect(code.split('SavePost::class').length).toBe(2);
+    expect(code).toMatch(/SavePost::class\),?\s*];\s*}\)\(\);/);
+  });
+});

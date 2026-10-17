@@ -93,21 +93,14 @@ export default class ImportExt extends BaseUpgradeStep {
   updateImportsFromFlarumExtensions(): Replacement {
     return (_file, code) => {
       // replace `import module from 'flarum/ext/module-path';` with `import module from 'ext:flarum/extension/module-path';`
-      // extension must not be one of [forum, admin, common]
-      const regex = new RegExp(
-        /import\s+(\w+)\s+from\s+["'](flarum\/(?!\b(?:common|admin|forum|utils|helpers|components|models)\b).*\/[\w/]+)["']/gim
-      );
+      // wherever the code names a module: in imports and exports of any kind, import(), require(),
+      // and `declare module`, which augments the module. extension must not be one of [forum, admin, common].
+      const regex =
+        /(\bfrom\s*|\bimport\s*\(\s*|\brequire\s*\(\s*|\bdeclare\s+module\s+|\bimport\s+)(["'])(flarum\/(?!\b(?:common|admin|forum|utils|helpers|components|models)\b)[\w-]+\/[^\s"']+)\2/gm;
 
-      // First collect all the imports that are from extensions
-      const imports = code.match(regex);
-
-      if (imports?.length) {
-        this.importingFromExtensions = [
-          ...this.importingFromExtensions,
-          ...imports.map((imp) => {
-            return imp.match(/from ["'](flarum\/\w+).*\/([\w/]+)["']/)![1];
-          }),
-        ];
+      // First collect all the extensions imported from
+      for (const match of code.matchAll(regex)) {
+        this.importingFromExtensions.push(match[3].split('/').slice(0, 2).join('/'));
       }
 
       // add todos to update imports that use other extensions
@@ -118,7 +111,7 @@ export default class ImportExt extends BaseUpgradeStep {
 
       return {
         updated: code
-          .replace(regex, `import $1 from 'ext:$2'`)
+          .replace(regex, '$1$2ext:$3$2')
           // imports from @flarum/core no longer supported, replace with flarum/
           .replace(/import\s+(\w+)\s+from\s+["']@flarum\/core\/([\w/]+)["']/gim, `import $1 from 'flarum/$2'`),
       };
@@ -138,11 +131,13 @@ export default class ImportExt extends BaseUpgradeStep {
       const paths = advanced.compilerOptions.paths;
 
       uniqueExtensions.forEach((ext) => {
-        if (paths[ext]) {
-          delete paths[ext];
-        }
+        // Where the 1.x mapping found the typings, which isn't always vendor.
+        const typings = paths[`${ext}/*`];
 
-        paths[`ext:${ext}`] = [`../vendor/${ext}/js/dist-typings/*`];
+        delete paths[ext];
+        delete paths[`${ext}/*`];
+
+        paths[`ext:${ext}/*`] ||= typings ?? [`../vendor/${ext}/js/dist-typings/*`];
       });
 
       return {

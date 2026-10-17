@@ -77,6 +77,75 @@ export default [
       });
     });
 
+    it('from an index that exports from an ambient module', async () => {
+      // Valid TypeScript, which Babel reports as an undeclared export unless it
+      // is told not to check.
+      const { index, written } = await upgrade({
+        'js/src/admin/index.ts': `import app from 'flarum/admin/app';
+
+declare module 'acme-shims' {
+  const shim: string;
+  export { shim };
+}
+
+app.initializers.add('acme-interstellar', () => {
+  app.extensionData.for('acme-interstellar').registerSetting({ setting: 'acme-interstellar.fuel', type: 'text' });
+});
+`,
+      });
+
+      expect(index).toBe(
+        await format(`export { default as extend } from './extend';
+
+declare module 'acme-shims' {
+  const shim: string;
+  export { shim };
+}
+`)
+      );
+
+      expect(written).toEqual({
+        'js/src/admin/extend.ts': await format(`import Extend from 'flarum/common/extenders';
+
+export default [new Extend.Admin().setting(() => ({ setting: 'acme-interstellar.fuel', type: 'text' }))];
+`),
+      });
+    });
+
+    it('into an admin/extend that exports from an ambient module', async () => {
+      const { written } = await upgrade({
+        'js/src/admin/index.ts': `import app from 'flarum/admin/app';
+
+export { default as extend } from './extend';
+
+app.initializers.add('acme-interstellar', () => {
+  app.extensionData.for('acme-interstellar').registerSetting({ setting: 'acme-interstellar.fuel', type: 'text' });
+});
+`,
+        'js/src/admin/extend.ts': `import Extend from 'flarum/common/extenders';
+
+declare module 'acme-shims' {
+  const shim: string;
+  export { shim };
+}
+
+export default [];
+`,
+      });
+
+      expect(written).toEqual({
+        'js/src/admin/extend.ts': await format(`import Extend from 'flarum/common/extenders';
+
+declare module 'acme-shims' {
+  const shim: string;
+  export { shim };
+}
+
+export default [new Extend.Admin().setting(() => ({ setting: 'acme-interstellar.fuel', type: 'text' }))];
+`),
+      });
+    });
+
     it('leaving an initializer that still has other work in place', async () => {
       const { index } = await upgrade({
         'js/src/admin/index.ts': `import app from 'flarum/admin/app';

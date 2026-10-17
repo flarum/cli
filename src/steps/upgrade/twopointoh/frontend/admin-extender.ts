@@ -4,9 +4,9 @@ import globby from 'globby';
 import chalk from 'chalk';
 import traverse, { Binding, NodePath } from '@babel/traverse';
 import * as t from '@babel/types';
-import { parse } from 'recast/parsers/babel-ts';
 import { BaseUpgradeStep, GitCommit, Replacement } from '../base';
 import { formatCode } from '../../../../utils/ast';
+import { parse } from '../../../../utils/babel-ts';
 import { extensionId } from '../../../../utils/composer';
 
 const TODO = '@TODO: register this with Extend.Admin in admin/extend instead';

@@ -230,6 +230,39 @@ class Search extends Replacement
                     $this->returnExtendersNode = $returnExtendersNode;
                 }
 
+                /** The class a registration names, by the name it has once it is a filter. */
+                private function registeredClass(Node\Expr $expr): ?string
+                {
+                    if ($expr instanceof Node\Expr\ClassConstFetch && $expr->class instanceof Node\Name) {
+                        $name = ($expr->class->getAttribute('resolvedName') ?? $expr->class)->toString();
+                    } elseif ($expr instanceof Node\Scalar\String_) {
+                        $name = $expr->value;
+                    } else {
+                        return null;
+                    }
+
+                    $name = str_replace(['FilterGambit', 'GambitFilter'], 'Filter', $name);
+
+                    return ltrim(str_replace('Gambit', 'Filter', $name), '\\');
+                }
+
+                /**
+                 * 1.x registered a class that was both a gambit and a filter
+                 * twice, with each extender: 2.0 needs it once.
+                 */
+                private function register(string $searcher, string $kind, Node\Expr $expr): void
+                {
+                    $class = $this->registeredClass($expr);
+
+                    foreach ($this->data['searchers'][$searcher][$kind] ?? [] as $registered) {
+                        if ($class !== null && $this->registeredClass($registered) === $class) {
+                            return;
+                        }
+                    }
+
+                    $this->data['searchers'][$searcher][$kind][] = $expr;
+                }
+
                 private function findNew(Node $node): ?Node\Expr\New_
                 {
                     if ($node instanceof Node\Expr\New_) {
@@ -292,9 +325,9 @@ class Search extends Replacement
                             }
 
                             if ($method === 'addFilter') {
-                                $this->data['searchers'][$searcher]['filters'][] = $arg->value;
+                                $this->register($searcher, 'filters', $arg->value);
                             } elseif ($method === 'addFilterMutator') {
-                                $this->data['searchers'][$searcher]['mutators'][] = $arg->value;
+                                $this->register($searcher, 'mutators', $arg->value);
                             }
                         } elseif ($class === 'Flarum\Extend\SimpleFlarumSearch') {
                             $searcher = NodeUtil::className($new->args[0]->value->class);
@@ -318,7 +351,7 @@ class Search extends Replacement
                             }
 
                             if ($method === 'addGambit') {
-                                $this->data['searchers'][$searcher]['filters'][] = $arg->value;
+                                $this->register($searcher, 'filters', $arg->value);
                             } elseif ($method === 'setFullTextGambit') {
                                 $this->data['searchers'][$searcher]['fulltext'] = isset($resolvedName)
                                     ? $resolvedName->name
@@ -381,11 +414,46 @@ class Search extends Replacement
             $collectorData = $collector->data;
         } elseif (isset($visitor)) {
             $collectorData = [
-                'extendData' => $visitor->data,
+                'extendData' => $this->reportable($visitor->data),
             ];
         }
 
         return new ReplacementResult($code, $collectorData);
+    }
+
+    /**
+     * The searchers the extenders registered, with each filter and mutator by
+     * the name it is written with, which is what the step reads. Not their
+     * syntax trees: a fully qualified name's refers to itself, which can't be
+     * encoded as JSON.
+     */
+    protected function reportable(array $data): array
+    {
+        $searchers = [];
+
+        foreach ($data['searchers'] ?? [] as $searcher => $registered) {
+            foreach (['filters', 'mutators'] as $kind) {
+                if (! isset($registered[$kind])) {
+                    continue;
+                }
+
+                $classes = [];
+
+                foreach ($registered[$kind] as $expr) {
+                    if ($expr instanceof Node\Scalar\String_) {
+                        $classes[] = ['class' => ['name' => $expr->value]];
+                    } elseif ($expr instanceof Node\Expr\ClassConstFetch && $expr->class instanceof Node\Name) {
+                        $classes[] = ['class' => ['name' => $expr->class->name]];
+                    }
+                }
+
+                $registered[$kind] = $classes;
+            }
+
+            $searchers[$searcher] = $registered;
+        }
+
+        return ['searchers' => $searchers];
     }
 
     function replaceNamespaces(string $file, string $code, array $ast, array $data): ?ReplacementResult
@@ -439,16 +507,32 @@ class Search extends Replacement
                     ],
                     'return' => ['void'],
                 ],
-                'constrain' => [
-                    'params' => [
-                        'query' => ['\\Illuminate\\Database\\Eloquent\\Builder'],
-                        'actor' => ['\\Flarum\\User\\User'],
-                        'negate' => ['bool'],
-                    ],
-                    'return' => ['void'],
-                ],
             ],
-        ]));
+        ], function (Node $node) {
+            // A filter's constrain() helper is its own, so its parameters are
+            // left as they are, but for the query it is given: 2.0 makes that
+            // an Eloquent builder.
+            if (! $node instanceof Node\Stmt\ClassMethod || strtolower($node->name->name) !== 'constrain') {
+                return;
+            }
+
+            foreach ($node->params as $param) {
+                $nullable = $param->type instanceof Node\NullableType;
+                $type = $nullable ? $param->type->type : $param->type;
+
+                if (! $type instanceof Node\Name || ltrim(NodeUtil::className($type), '\\') !== 'Illuminate\\Database\\Query\\Builder') {
+                    continue;
+                }
+
+                $eloquent = NodeUtil::makeType(['\\Illuminate\\Database\\Eloquent\\Builder']);
+
+                if ($nullable) {
+                    $param->type->type = $eloquent;
+                } else {
+                    $param->type = $eloquent;
+                }
+            }
+        }));
 
         return new ReplacementResult($traverser->traverse($ast));
     }

@@ -4,8 +4,8 @@ import * as t from '@babel/types';
 import traverse from '@babel/traverse';
 import fs from 'fs';
 import path from 'path';
-import { parse } from 'recast/parsers/babel-ts';
 import { getFunctionName } from '../../../../utils/ast';
+import { parse } from '../../../../utils/babel-ts';
 import { extensionId } from '../../../../utils/composer';
 
 /** The bundled extensions' IDs, which are their initializers' names in 2.0. */
