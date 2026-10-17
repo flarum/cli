@@ -51,6 +51,32 @@ if ('flarum-tags' in flarum.extensions) {
     );
   });
 
+  it('reads a file that exports from an ambient module', async () => {
+    // Valid TypeScript, which Babel reports as an undeclared export unless it
+    // is told not to check.
+    expect(
+      await upgrade(`declare module 'acme-shims' {
+  const shim: string;
+  export { shim };
+}
+
+if (app.initializers.has('flarum-tags')) {
+  console.log('tags');
+}
+`)
+    ).toBe(
+      await format(`declare module 'acme-shims' {
+  const shim: string;
+  export { shim };
+}
+
+if ('flarum-tags' in flarum.extensions) {
+  console.log('tags');
+}
+`)
+    );
+  });
+
   it('uses the IDs of the bundled extensions whose initializers 2.0 renamed', async () => {
     // fof/username-request's 1.x forum checks 'flarum/nicknames', which 2.0
     // renamed 'flarum-nicknames', so the check is false in 2.0.

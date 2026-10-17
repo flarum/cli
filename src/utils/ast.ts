@@ -6,17 +6,18 @@ import prettierConfig from '@flarum/prettier-config/prettierrc.json';
 // import { parse } from '@babel/parser';
 // import generate from '@babel/generator';
 import * as recast from 'recast';
+import * as babelTs from './babel-ts';
 
 export function parseCode(code: string): t.File {
   return recast.parse(code, {
-    parser: require('recast/parsers/babel-ts'),
+    parser: babelTs,
   });
 }
 
 export async function generateCode(ast: t.File, extenders = false): Promise<string> {
   // @ts-ignore
   const generatedCode = recast.print(ast, {
-    parser: require('recast/parsers/babel-ts'),
+    parser: babelTs,
   }).code;
 
   // Format the code
