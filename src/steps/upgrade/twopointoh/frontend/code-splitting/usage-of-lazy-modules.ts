@@ -202,6 +202,7 @@ export default class UsageOfLazyModules extends BaseUpgradeStep {
   updateComposerLoad(): Replacement {
     return (_file, code, advanced) => {
       const ast = advanced as t.File;
+      let addsOverride = false;
 
       this.forEachLazyModule(code, ({ module, importPath }) => {
         // before = app.composer.load(${module}, { ... }, ...);
@@ -209,7 +210,11 @@ export default class UsageOfLazyModules extends BaseUpgradeStep {
 
         const lines: (t.ExpressionStatement | t.MemberExpression)[] = [];
 
-        const composers = this.composers;
+        // A composer's prototype lines move into the then() of the file's own
+        // load of it, which has the module. Without one, they are given like
+        // any other lazy module's.
+        const movesToLoad = this.composers.includes(module) && loadsComposer(ast, module);
+        const overrideName = importedName(ast, 'flarum/common/extend', 'override');
 
         // pick up {module}.prototype... lines to add to the .then(() => { lines }) at the end of the call expression.
         traverse(ast, {
@@ -240,19 +245,20 @@ export default class UsageOfLazyModules extends BaseUpgradeStep {
 
             if (object.name !== module) return;
 
-            if (composers.includes(module)) {
+            if (movesToLoad) {
               lines.push(node);
               path.remove();
             } else if (
               (t.isFunctionExpression(expression.right) || t.isArrowFunctionExpression(expression.right)) &&
-              (t.isIdentifier(left.property) || t.isStringLiteral(left.property))
+              ((t.isIdentifier(left.property) && !left.computed) || t.isStringLiteral(left.property))
             ) {
-              // SettingsPage.prototype['draftsItems'] = ...;
-              // change to extend('flarum/forum/components/SettingsPage', 'draftItems', ...);
+              // SettingsPage.prototype['draftsItems'] = function () {...};
+              // change to override('flarum/forum/components/SettingsPage', 'draftsItems', function (original) {...});
               const methodName = t.isIdentifier(left.property) ? left.property.name : left.property.value;
-              const extend = t.callExpression(t.identifier('extend'), [t.stringLiteral(importPath), t.stringLiteral(methodName), expression.right]);
 
-              path.replaceWith(t.expressionStatement(extend));
+              path.replaceWith(overrideMethod(overrideName ?? 'override', importPath, methodName, expression.right));
+
+              if (!overrideName) addsOverride = true;
             }
           },
         });
@@ -367,6 +373,7 @@ export default class UsageOfLazyModules extends BaseUpgradeStep {
 
       return {
         updated: ast,
+        imports: addsOverride ? [{ import: { name: 'override', path: 'flarum/common/extend', defaultImport: false } }] : [],
       };
     };
   }
@@ -534,4 +541,95 @@ export default class UsageOfLazyModules extends BaseUpgradeStep {
       }
     }
   }
+}
+
+/** Whether the file loads the composer itself, with app.composer.load(Composer, ...). */
+function loadsComposer(ast: t.File, module: string): boolean {
+  let loads = false;
+
+  traverse(ast, {
+    CallExpression(path) {
+      const callee = path.node.callee;
+      const firstArg = path.node.arguments[0];
+
+      if (
+        t.isMemberExpression(callee) &&
+        t.isIdentifier(callee.property, { name: 'load' }) &&
+        t.isMemberExpression(callee.object) &&
+        t.isIdentifier(callee.object.property, { name: 'composer' }) &&
+        t.isIdentifier(callee.object.object, { name: 'app' }) &&
+        t.isIdentifier(firstArg, { name: module })
+      ) {
+        loads = true;
+        path.stop();
+      }
+    },
+  });
+
+  return loads;
+}
+
+/** The name a file imports one of a module's exports by, if it does. */
+function importedName(ast: t.File, source: string, name: string): string | null {
+  for (const node of ast.program.body) {
+    if (!t.isImportDeclaration(node) || node.source.value !== source) continue;
+
+    for (const specifier of node.specifiers) {
+      if (t.isImportSpecifier(specifier) && t.isIdentifier(specifier.imported, { name })) {
+        return specifier.local.name;
+      }
+    }
+  }
+
+  return null;
+}
+
+/** A name for a new binding in the function, that hides none it uses. */
+function unusedName(node: t.Node, name: string): string {
+  const used = new Set<string>();
+
+  t.traverseFast(node, (child) => {
+    if (t.isIdentifier(child)) used.add(child.name);
+  });
+
+  while (used.has(name)) name = '_' + name;
+
+  return name;
+}
+
+/**
+ * Module.prototype.method = fn; given with override() by the module's path,
+ * which replaces the method as the assignment did once the module loads. The
+ * original method comes first, after a TypeScript this parameter: a function
+ * that reads its arguments with `arguments` is called with them as they were.
+ */
+function overrideMethod(
+  override: string,
+  importPath: string,
+  methodName: string,
+  method: t.FunctionExpression | t.ArrowFunctionExpression
+): t.ExpressionStatement {
+  const original = t.identifier(unusedName(method, 'original'));
+  let replacement: t.FunctionExpression | t.ArrowFunctionExpression;
+
+  let readsArguments = false;
+
+  t.traverseFast(method, (child) => {
+    if (t.isIdentifier(child, { name: 'arguments' })) readsArguments = true;
+  });
+
+  if (t.isFunctionExpression(method) && readsArguments) {
+    const args = t.identifier(unusedName(method, 'args'));
+    const call = t.callExpression(t.memberExpression(method, t.identifier('apply')), [t.thisExpression(), args]);
+
+    replacement = t.functionExpression(null, [original, t.restElement(args)], t.blockStatement([t.returnStatement(call)]));
+  } else {
+    const first = method.params[0];
+    const at = t.isIdentifier(first, { name: 'this' }) ? 1 : 0;
+
+    replacement = t.cloneNode(method);
+    replacement.params.splice(at, 0, original);
+  }
+
+  return t.expressionStatement(t.callExpression(t.identifier(override), [t.stringLiteral(importPath), t.stringLiteral(methodName), replacement]));
 }
