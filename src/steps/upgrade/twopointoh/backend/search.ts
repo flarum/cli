@@ -7,6 +7,8 @@ import { GenerateGambitStub } from '../../../stubs/frontend/gambit';
 import { GenerateSearchGambitExtender } from '../../../js/search-gambit';
 import { LocaleStep } from '../../../locale/base';
 import { pluralKebabCaseModel } from '../../../../utils/model-name';
+import fs from 'fs';
+import path from 'path';
 
 type Gambit = {
   name: string;
@@ -14,6 +16,9 @@ type Gambit = {
   filterKey?: string;
   filterFile: string;
 };
+
+/** A gambit with an is: pattern, such as is:private, rather than a key and value. */
+const isBoolean = (gambit: Gambit) => gambit.pattern.includes('is:');
 
 export default class Search extends BaseUpgradeStep {
   type = 'Search & Filter API changes';
@@ -136,12 +141,6 @@ export default class Search extends BaseUpgradeStep {
           const result = await this.command.runSteps(
             new StepManager<FlarumProviders>().silentGroup((steps) => {
               this.gambits.forEach((gambit, index) => {
-                let gambitKey = gambit.pattern.replace('is:', '');
-
-                if (gambitKey.includes(':')) {
-                  gambitKey = gambitKey.split(':')[0];
-                }
-
                 const relatedSearcher = Object.keys(this.data.collectedData.extendData.searchers).find((searcher) => {
                   const filters = this.data.collectedData.extendData.searchers[searcher].filters || [];
                   return filters.some((filter: any) => {
@@ -155,11 +154,11 @@ export default class Search extends BaseUpgradeStep {
                   type = pluralKebabCaseModel(relatedSearcher.split('\\').pop()!.replace('Searcher', ''));
                 }
 
-                steps
+                const gambitSteps = steps
                   .namedStep(`gambit-${index}`, new GenerateGambitStub(this.command.STUB_PATH, genExtScaffolder()), {}, [], {
                     frontend: 'common',
                     className: gambit.name,
-                    type: gambit.pattern.includes('is:') ? 'boolean' : 'key-value',
+                    type: isBoolean(gambit) ? 'boolean' : 'key-value',
                     filterKey: gambit.filterKey,
                   })
                   .step(
@@ -176,11 +175,11 @@ export default class Search extends BaseUpgradeStep {
                       frontend: 'common',
                       modelType: type,
                     }
-                  )
-                  .step(new LocaleStep(genExtScaffolder()), {}, [], {
-                    key: `lib.gambits.${gambit.filterKey}.key`,
-                    value: gambitKey,
-                  });
+                  );
+
+                this.gambitTranslations(gambit).forEach((translation) => {
+                  gambitSteps.step(new LocaleStep(genExtScaffolder()), {}, [], translation);
+                });
 
                 delete this.gambits[index];
               });
@@ -207,6 +206,31 @@ export default class Search extends BaseUpgradeStep {
         };
       },
     ];
+  }
+
+  /**
+   * The translations a gambit's stub uses: its key, and a key-value gambit's
+   * hint, which the search shows beside it. Only the author can say what the
+   * hint should be, so it is left for them to write.
+   */
+  gambitTranslations(gambit: Gambit): { key: string; value: string }[] {
+    let gambitKey = gambit.pattern.replace('is:', '');
+
+    if (gambitKey.includes(':')) {
+      gambitKey = gambitKey.split(':')[0];
+    }
+
+    const translations = [{ key: `lib.gambits.${gambit.filterKey}.key`, value: gambitKey }];
+
+    if (!isBoolean(gambit)) {
+      const hint = `lib.gambits.${gambit.filterKey}.hint`;
+      const locale = fs.existsSync(path.join(this.root, 'resources/locale/en.yml')) ? 'resources/locale/en.yml' : 'locale/en.yml';
+
+      translations.push({ key: hint, value: gambitKey });
+      this.leaveTodo(locale, `describe what the ${gambitKey} gambit takes in ${hint}, which the search shows beside it.`);
+    }
+
+    return translations;
   }
 
   targets(): string[] {
