@@ -120,14 +120,20 @@ describe('the dependencies step', () => {
     it('updates the build tooling in both dependencies and devDependencies', async () => {
       const pkg = await upgrade('js/package.json', onePackageJson);
 
-      expect(pkg.devDependencies['flarum-webpack-config']).toBe('^3.0.6');
+      expect(pkg.devDependencies['flarum-webpack-config']).toBe('^3.0.7');
       expect(pkg.devDependencies['flarum-tsconfig']).toBe('^2.0.0');
     });
 
-    it('requires flarum-webpack-config 3.0.6, which loads code-split chunks from the right build', async () => {
+    it('requires flarum-webpack-config 3.0.7, which loads code-split chunks from the right build and exports a default export as its value', async () => {
       const pkg = await upgrade('js/package.json', { devDependencies: { 'flarum-webpack-config': '^3.0.0' } });
 
-      expect(pkg.devDependencies['flarum-webpack-config']).toBe('^3.0.6');
+      expect(pkg.devDependencies['flarum-webpack-config']).toBe('^3.0.7');
+    });
+
+    it('moves an extension already on flarum-webpack-config 3.0.6 to 3.0.7', async () => {
+      const pkg = await upgrade('js/package.json', { devDependencies: { 'flarum-webpack-config': '^3.0.6' } });
+
+      expect(pkg.devDependencies['flarum-webpack-config']).toBe('^3.0.7');
     });
 
     it('requires the webpack Flarum builds with', async () => {
@@ -187,7 +193,7 @@ describe('the dependencies step', () => {
       });
 
       expect(pkg.dependencies).toEqual({});
-      expect(pkg.devDependencies).toEqual({ 'flarum-webpack-config': '^3.0.6', prettier: '^3.0.3' });
+      expect(pkg.devDependencies).toEqual({ 'flarum-webpack-config': '^3.0.7', prettier: '^3.0.3' });
     });
 
     it('still drops a devDependency the extension also lists as a dependency, when it is not tooling', async () => {
@@ -285,10 +291,10 @@ describe('the dependencies step', () => {
   });
 
   describe('a new extension', () => {
-    it('is scaffolded with flarum-webpack-config 3.0.6 and the webpack Flarum builds with', () => {
+    it('is scaffolded with flarum-webpack-config 3.0.7 and the webpack Flarum builds with', () => {
       const scaffolded = scaffoldedPackageJson().devDependencies;
 
-      expect(scaffolded['flarum-webpack-config']).toBe('^3.0.6');
+      expect(scaffolded['flarum-webpack-config']).toBe('^3.0.7');
       expect(scaffolded.webpack).toBe('^5.104.1');
     });
   });

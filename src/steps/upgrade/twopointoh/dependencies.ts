@@ -275,9 +275,10 @@ export default class Dependencies extends BaseUpgradeStep {
 
       // The versions a new extension is scaffolded with. 3.0.6 is the first
       // flarum-webpack-config that loads an extension's code-split chunks from
-      // its own build.
+      // its own build, and 3.0.7 the first that exports a default export as its
+      // value, not under a name taken from its code.
       const map: Record<string, string> = {
-        'flarum-webpack-config': '^3.0.6',
+        'flarum-webpack-config': '^3.0.7',
         'flarum-tsconfig': '^2.0.0',
         '@flarum/jest-config': '^2.0.0',
         webpack: '^5.104.1',
