@@ -120,20 +120,26 @@ describe('the dependencies step', () => {
     it('updates the build tooling in both dependencies and devDependencies', async () => {
       const pkg = await upgrade('js/package.json', onePackageJson);
 
-      expect(pkg.devDependencies['flarum-webpack-config']).toBe('^3.0.7');
+      expect(pkg.devDependencies['flarum-webpack-config']).toBe('^3.1.0');
       expect(pkg.devDependencies['flarum-tsconfig']).toBe('^2.0.0');
     });
 
-    it('requires flarum-webpack-config 3.0.7, which loads code-split chunks from the right build and exports a default export as its value', async () => {
+    it('requires flarum-webpack-config 3.1.0, which supplies TypeScript 5.9 and only asks for webpack as a peer', async () => {
       const pkg = await upgrade('js/package.json', { devDependencies: { 'flarum-webpack-config': '^3.0.0' } });
 
-      expect(pkg.devDependencies['flarum-webpack-config']).toBe('^3.0.7');
+      expect(pkg.devDependencies['flarum-webpack-config']).toBe('^3.1.0');
     });
 
-    it('moves an extension already on flarum-webpack-config 3.0.6 to 3.0.7', async () => {
-      const pkg = await upgrade('js/package.json', { devDependencies: { 'flarum-webpack-config': '^3.0.6' } });
+    it('moves an extension already on flarum-webpack-config 3.0.7 to 3.1.0', async () => {
+      const pkg = await upgrade('js/package.json', { devDependencies: { 'flarum-webpack-config': '^3.0.7' } });
 
-      expect(pkg.devDependencies['flarum-webpack-config']).toBe('^3.0.7');
+      expect(pkg.devDependencies['flarum-webpack-config']).toBe('^3.1.0');
+    });
+
+    it('requires @flarum/jest-config 2.1.0, which tests with the mithril Flarum ships', async () => {
+      const pkg = await upgrade('js/package.json', { devDependencies: { '@flarum/jest-config': '^2.0.0' } });
+
+      expect(pkg.devDependencies['@flarum/jest-config']).toBe('^2.1.0');
     });
 
     it('requires the webpack Flarum builds with', async () => {
@@ -193,7 +199,7 @@ describe('the dependencies step', () => {
       });
 
       expect(pkg.dependencies).toEqual({});
-      expect(pkg.devDependencies).toEqual({ 'flarum-webpack-config': '^3.0.7', prettier: '^3.0.3' });
+      expect(pkg.devDependencies).toEqual({ 'flarum-webpack-config': '^3.1.0', prettier: '^3.0.3' });
     });
 
     it('still drops a devDependency the extension also lists as a dependency, when it is not tooling', async () => {
@@ -237,7 +243,7 @@ describe('the dependencies step', () => {
         expect([name, pkg.scripts[name]]).toEqual([name, scaffolded.scripts[name].replace(/<%= params\.jsPackageManager %>/g, 'yarn')]);
       }
 
-      expect(pkg.devDependencies.typescript).toBe('^4.9.5');
+      expect(pkg.devDependencies.typescript).toBe('^5.9.3');
       expect(pkg.devDependencies['typescript-coverage-report']).toBe(scaffolded.devDependencies['typescript-coverage-report']);
       expect(notes).toContain(
         'build and check typings: clean-typings, build-typings, post-build-typings, check-typings, check-typings-coverage, typescript, typescript-coverage-report.'
@@ -262,7 +268,7 @@ describe('the dependencies step', () => {
     it('keeps the TypeScript the extension lists, wherever it lists it', async () => {
       const { pkg } = await withTypings({ dependencies: { typescript: '^4.5.4' } });
 
-      expect(pkg.devDependencies.typescript).toBe('^4.9.5');
+      expect(pkg.devDependencies.typescript).toBe('^5.9.3');
       expect(pkg.dependencies).not.toHaveProperty('typescript');
     });
 
@@ -291,10 +297,11 @@ describe('the dependencies step', () => {
   });
 
   describe('a new extension', () => {
-    it('is scaffolded with flarum-webpack-config 3.0.7 and the webpack Flarum builds with', () => {
+    it('is scaffolded with flarum-webpack-config 3.1.0, @flarum/jest-config 2.1.0 and the webpack Flarum builds with', () => {
       const scaffolded = scaffoldedPackageJson().devDependencies;
 
-      expect(scaffolded['flarum-webpack-config']).toBe('^3.0.7');
+      expect(scaffolded['flarum-webpack-config']).toBe('^3.1.0');
+      expect(scaffolded['@flarum/jest-config']).toBe('^2.1.0');
       expect(scaffolded.webpack).toBe('^5.104.1');
     });
   });

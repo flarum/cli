@@ -1,8 +1,8 @@
-import { AdvancedContent, BaseUpgradeStep, GitCommit, Replacement } from './base';
+import { BaseUpgradeStep, GitCommit, Replacement } from './base';
 import chalk from 'chalk';
 import fs from 'fs';
 import path from 'path';
-import { compilerOptions, libs } from './typescript-4-9';
+import { compilerOptions, libs } from './typescript-5-9';
 
 // What `fl init` gave 1.x extensions. `sed -i` with no suffix is GNU sed's
 // form: BSD sed, as on macOS, takes the next argument as the suffix and fails.
@@ -10,14 +10,6 @@ import { compilerOptions, libs } from './typescript-4-9';
 const GNU_POST_BUILD_TYPINGS = "find dist-typings -type f -name '*.d.ts' -print0 | xargs -0 sed -i 's,../src/@types,@types,g'";
 const PORTABLE_POST_BUILD_TYPINGS =
   "find dist-typings -type f -name '*.d.ts' -print0 | xargs -0 sed -i.bak 's,../src/@types,@types,g' && find dist-typings -type f -name '*.d.ts.bak' -delete";
-
-// Syntax TypeScript 4.9 can't compile, each checked against typescript@4.9.5.
-const NEWER_SYNTAX: [RegExp, string][] = [
-  [/(?:\bfrom|^\s*import)\s+(["'])[^\n"']*\1\s+with\s*{/, 'import attributes (TypeScript 5.3); use `assert` instead of `with`'],
-  [/^\s*export\s+type\s+\*/, '`export type *` (TypeScript 5.0)'],
-  [/[,<]\s*const\s+[$A-Z_a-z][\w$]*\s*(?:extends\b|[,=>])/, '`const` type parameters (TypeScript 5.0)'],
-  [/^\s*(?:await\s+)?using\s+[$A-Z_a-z][\w$]*\s*[:=]/, '`using` declarations (TypeScript 5.2)'],
-];
 
 // Packages an extension only needs to build, check and test its frontend.
 const BUILD_TOOLING = new Set([
@@ -48,8 +40,8 @@ function scaffoldedPackageJson(packageManager: 'yarn' | 'npm'): Record<string, a
 }
 
 const TYPES_COMMENT = [
-  'Only load the type packages the code imports. Others, such as the',
-  "@types/node webpack brings along, use syntax TypeScript 4.9 can't read.",
+  'Only load the type packages the code imports, not every one in',
+  'node_modules, such as the @types/node webpack brings along.',
 ];
 
 /**
@@ -75,13 +67,15 @@ function insertCompilerOption(code: string, comment: string[] | null, option: st
 const sortedByName = (dependencies: Record<string, string>) =>
   Object.fromEntries(Object.entries(dependencies).sort(([a], [b]) => a.localeCompare(b)));
 
-const isTypeScript = (file: string) => /\.tsx?$/.test(file);
+/**
+ * Whether a TypeScript constraint could resolve to TypeScript 6 or newer:
+ * `^6.0.3`, `>=4.2`, `latest`, `*`. A caret, tilde or exact constraint on 4 or
+ * 5 can't.
+ */
+const allowsSixOrNewer = (constraint: string) => {
+  const match = constraint.trim().match(/^[=^~]?\s*v?(\d+)(?:\.|$)/);
 
-/** Whether a version constraint stays within TypeScript 4: `4.9.5`, `^4.5.4`, `~4.7`, `4.x`. */
-const isFourX = (constraint: string) => {
-  const version = constraint.trim().replace(/^\^|^~/, '');
-
-  return version === '4' || version.startsWith('4.');
+  return !match || Number(match[1]) >= 6;
 };
 
 /**
@@ -110,13 +104,11 @@ const asksForNewer = (constraint: string, than: string): boolean => {
 export default class Dependencies extends BaseUpgradeStep {
   type = 'Update the extension dependencies to the latest versions.';
 
-  /** The TypeScript the extension asked for, when it was not a 4.x. */
+  /** The TypeScript the extension asked for, when it allowed TypeScript 6 or newer. */
   protected typeScriptWas: string | null = null;
 
-  /** What was removed from tsconfig.json, as TypeScript 4.9 doesn't have it. */
+  /** What was removed from tsconfig.json, as TypeScript 5.9 refuses it. */
   protected removedCompilerOptions: string[] = [];
-
-  protected newerSyntax = false;
 
   /** Constraints left as they were, as they already ask for newer versions. */
   protected keptNewer: string[] = [];
@@ -143,28 +135,13 @@ export default class Dependencies extends BaseUpgradeStep {
       case 'js/tsconfig.test.json':
         replacements.push(this.testTypes());
         break;
-      default:
-        if (isTypeScript(file)) {
-          replacements.push(this.flagNewerSyntax());
-        }
     }
 
     return replacements;
   }
 
   targets(): string[] {
-    return ['composer.json', 'js/package.json', 'js/tsconfig.json', 'js/tsconfig.test.json', 'js/src/**/*.ts', 'js/src/**/*.tsx'];
-  }
-
-  // TypeScript sources are only searched, line by line: parsing them would
-  // fail on the very syntax being looked for, and reformatting would change
-  // more than the lines flagged.
-  advancedContent(file: string, code: string): AdvancedContent {
-    return isTypeScript(file) ? null : super.advancedContent(file, code);
-  }
-
-  async updateCode(file: string, code: string, updated: string | AdvancedContent): Promise<string> {
-    return isTypeScript(file) && typeof updated === 'string' ? updated : super.updateCode(file, code, updated);
+    return ['composer.json', 'js/package.json', 'js/tsconfig.json', 'js/tsconfig.test.json'];
   }
 
   gitCommit(): GitCommit {
@@ -182,10 +159,9 @@ export default class Dependencies extends BaseUpgradeStep {
 
     const notes = [
       this.typeScriptWas &&
-        `TypeScript ${this.typeScriptWas} was brought down to ^4.9.5: Flarum 2.0 builds and checks its typings with TypeScript 4.9.`,
+        `TypeScript ${this.typeScriptWas} was brought down to ^5.9.3: flarum-tsconfig resolves modules the way TypeScript 6 refuses without ignoreDeprecations.`,
       this.removedCompilerOptions.length > 0 &&
-        `Removed from js/tsconfig.json, as TypeScript 4.9 does not have them: ${this.removedCompilerOptions.join(', ')}.`,
-      this.newerSyntax && 'Some TypeScript uses syntax 4.9 cannot compile; look for the @TODO comments.',
+        `Removed from js/tsconfig.json, as TypeScript 5.9 refuses them: ${this.removedCompilerOptions.join(', ')}.`,
       this.addedTypings.length > 0 && `Added what the reusable frontend workflow runs to build and check typings: ${this.addedTypings.join(', ')}.`,
       this.movedToDev.length > 0 && `Moved to devDependencies, as the extension only builds with them: ${this.movedToDev.join(', ')}.`,
       this.keptNewer.length > 0 && `Kept, as they already ask for newer versions than Flarum 2.0 needs: ${this.keptNewer.join(', ')}.`,
@@ -273,30 +249,34 @@ export default class Dependencies extends BaseUpgradeStep {
     return (_file, _code, advanced) => {
       advanced = advanced as Record<string, any>;
 
-      // The versions a new extension is scaffolded with. 3.0.6 is the first
-      // flarum-webpack-config that loads an extension's code-split chunks from
-      // its own build, and 3.0.7 the first that exports a default export as its
-      // value, not under a name taken from its code.
+      // The versions a new extension is scaffolded with. 3.1.0 is the first
+      // flarum-webpack-config that supplies TypeScript 5.9 and only asks for
+      // webpack as a peer, and @flarum/jest-config 2.1.0 tests with the mithril
+      // Flarum ships.
       const map: Record<string, string> = {
-        'flarum-webpack-config': '^3.0.7',
+        'flarum-webpack-config': '^3.1.0',
         'flarum-tsconfig': '^2.0.0',
-        '@flarum/jest-config': '^2.0.0',
+        '@flarum/jest-config': '^2.1.0',
         webpack: '^5.104.1',
         'webpack-cli': '^4.9.1',
-        // What Flarum 2.0 builds and checks its typings with.
-        typescript: '^4.9.5',
+        // What Flarum builds and checks its typings with.
+        typescript: '^5.9.3',
       };
 
       // Extensions list the tooling under either key, often split between both.
       for (const dependencies of [advanced.dependencies, advanced.devDependencies]) {
         for (const key of Object.keys(dependencies || {})) {
-          if (key === 'typescript' && !isFourX(String(dependencies[key]))) {
-            this.typeScriptWas = dependencies[key];
-          }
+          // TypeScript is the exception: it moves to what Flarum checks typings
+          // with, whatever the extension asked for. flarum-tsconfig resolves
+          // modules the way TypeScript 6 refuses, so a newer one comes down,
+          // unless the extension's tsconfig already resolves them another way.
+          if (key === 'typescript' && allowsSixOrNewer(String(dependencies[key])) && this.tsConfigReadsWithSixOrNewer()) {
+            this.keptNewer.push(`${key} ${dependencies[key]}`);
+          } else if (key === 'typescript') {
+            if (allowsSixOrNewer(String(dependencies[key]))) {
+              this.typeScriptWas = dependencies[key];
+            }
 
-          // TypeScript is the exception: it comes down to what Flarum checks
-          // typings with, whatever the extension asked for.
-          if (key === 'typescript') {
             dependencies[key] = map[key];
           } else if (map[key]) {
             this.raise(dependencies, key, map[key]);
@@ -401,8 +381,8 @@ export default class Dependencies extends BaseUpgradeStep {
   }
 
   /**
-   * Drop the compiler options, and option values, TypeScript 4.9 doesn't have:
-   * it refuses a tsconfig.json with any. A tsconfig.json it can read is left
+   * Drop the compiler options, and option values, TypeScript 5.9 refuses: it
+   * won't read a tsconfig.json with any. A tsconfig.json it can read is left
    * exactly as it was.
    */
   updateTsConfig(): Replacement {
@@ -435,10 +415,6 @@ export default class Dependencies extends BaseUpgradeStep {
         }
       }
 
-      if (Array.isArray(tsconfig.extends)) {
-        this.leaveTodo('js/tsconfig.json', 'It extends a list of configs, which TypeScript 4.9 cannot read. Extend one, and move the rest into it.');
-      }
-
       this.removedCompilerOptions.push(...removed);
 
       return removed.length > 0 ? { updated: tsconfig } : null;
@@ -447,9 +423,8 @@ export default class Dependencies extends BaseUpgradeStep {
 
   /**
    * TypeScript loads every type package in node_modules unless told which,
-   * and 4.9 can't read the @types/node that webpack's minimizer brings along.
-   * Load only the ones the code imports. The file is edited as text so its
-   * comments stay.
+   * including the @types/node that webpack's minimizer brings along. Load only
+   * the ones the code imports. The file is edited as text so its comments stay.
    */
   limitTypes(): Replacement {
     return (_file, code, advanced) => {
@@ -492,6 +467,22 @@ export default class Dependencies extends BaseUpgradeStep {
     };
   }
 
+  /**
+   * Whether TypeScript 6 and newer accept the extension's tsconfig.json: it
+   * replaces the moduleResolution flarum-tsconfig sets, which they refuse, and
+   * sets no baseUrl, which they refuse too.
+   */
+  protected tsConfigReadsWithSixOrNewer(): boolean {
+    try {
+      const code = fs.readFileSync(path.join(this.root, 'js/tsconfig.json'), 'utf8');
+      const options = (this.advancedContent('js/tsconfig.json', code) as Record<string, any>)?.compilerOptions ?? {};
+
+      return ['bundler', 'node16', 'nodenext'].includes(String(options.moduleResolution).toLowerCase()) && options.baseUrl === undefined;
+    } catch {
+      return false;
+    }
+  }
+
   /** The extension's js/package.json, or nothing when it has none. */
   protected packageJson(): Record<string, any> {
     try {
@@ -499,35 +490,5 @@ export default class Dependencies extends BaseUpgradeStep {
     } catch {
       return {};
     }
-  }
-
-  /**
-   * Put a @TODO above each line using syntax TypeScript 4.9 can't compile.
-   */
-  flagNewerSyntax(): Replacement {
-    return (_file, code) => {
-      const flagged: string[] = [];
-
-      for (const line of code.split('\n')) {
-        for (const [pattern, what] of NEWER_SYNTAX) {
-          if (!pattern.test(line)) continue;
-
-          const indent = line.slice(0, line.length - line.trimStart().length);
-          const todo = `${indent}// @TODO: Flarum 2.0 builds with TypeScript 4.9, which has no ${what}.`;
-
-          // An earlier run already flagged it.
-          if (flagged.slice(-NEWER_SYNTAX.length).some((previous) => previous.trim() === todo.trim())) continue;
-
-          flagged.push(line.endsWith('\r') ? `${todo}\r` : todo);
-          this.newerSyntax = true;
-        }
-
-        flagged.push(line);
-      }
-
-      const updated = flagged.join('\n');
-
-      return updated === code ? null : { updated };
-    };
   }
 }

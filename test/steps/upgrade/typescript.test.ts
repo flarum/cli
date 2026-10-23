@@ -5,9 +5,9 @@ import path from 'path';
 import Dependencies from '../../../src/steps/upgrade/twopointoh/dependencies';
 
 /**
- * Flarum 2.0 builds and checks its typings with TypeScript 4.9 (core's
- * `^4.5.4` resolves to 4.9.5). These tests pin how the upgrade brings an
- * extension's TypeScript in line with that.
+ * Flarum builds and checks its typings with TypeScript 5.9, which
+ * flarum-webpack-config 3.1 supplies to extensions. These tests pin how the
+ * upgrade brings an extension's TypeScript in line with that.
  */
 
 type Step = InstanceType<typeof Dependencies>;
@@ -27,7 +27,7 @@ const upgradeJson = async (step: Step, file: string, content: Record<string, any
 
 // What the step puts first in compilerOptions, at the given indentation.
 const typesOption = (indent: string) =>
-  `${indent}// Only load the type packages the code imports. Others, such as the\n${indent}// @types/node webpack brings along, use syntax TypeScript 4.9 can't read.\n${indent}"types": [],\n`;
+  `${indent}// Only load the type packages the code imports, not every one in\n${indent}// node_modules, such as the @types/node webpack brings along.\n${indent}"types": [],\n`;
 
 /** An extension with the given js/package.json, for what the step reads from disk. */
 function extensionWith(pkg: Record<string, unknown>): string {
@@ -39,6 +39,15 @@ function extensionWith(pkg: Record<string, unknown>): string {
   return root;
 }
 
+/** An extension with the given js/package.json and js/tsconfig.json. */
+function extensionWithTsConfig(pkg: Record<string, unknown>, tsconfig: Record<string, unknown>): string {
+  const root = extensionWith(pkg);
+
+  fs.writeFileSync(path.join(root, 'js/tsconfig.json'), JSON.stringify(tsconfig));
+
+  return root;
+}
+
 const scaffolded = (file: string) => fs.readFileSync(path.resolve(__dirname, '../../../boilerplate/skeleton/extension', file), 'utf8');
 
 // What `fl init` gave 1.x extensions, and core and every bundled extension
@@ -46,43 +55,52 @@ const scaffolded = (file: string) => fs.readFileSync(path.resolve(__dirname, '..
 // takes the next argument as the suffix and fails.
 const gnuPostBuildTypings = "find dist-typings -type f -name '*.d.ts' -print0 | xargs -0 sed -i 's,../src/@types,@types,g'";
 
-describe('TypeScript, which Flarum 2.0 builds with at 4.9', () => {
+describe('TypeScript, which Flarum builds with at 5.9', () => {
   describe('the version', () => {
-    it('is the 4.9 Flarum builds with', async () => {
-      const pkg = await upgradeJson(newStep(), 'js/package.json', { devDependencies: { typescript: '^4.5.4' } });
-
-      expect(pkg.devDependencies.typescript).toBe('^4.9.5');
-    });
-
-    it('comes down from TypeScript 5, saying why', async () => {
+    it.each(['^4.5.4', '4.9.5', '~4.7.4', '^5.4.5', '~5.9.2'])('raises %s to the 5.9 Flarum builds with, without a note', async (constraint) => {
       const step = newStep();
-      const pkg = await upgradeJson(step, 'js/package.json', { devDependencies: { typescript: '^5.4.5' } });
+      const pkg = await upgradeJson(step, 'js/package.json', { devDependencies: { typescript: constraint } });
 
-      expect(pkg.devDependencies.typescript).toBe('^4.9.5');
-      expect(step.pauseMessage()).toContain(
-        'TypeScript ^5.4.5 was brought down to ^4.9.5: Flarum 2.0 builds and checks its typings with TypeScript 4.9.'
-      );
-    });
-
-    it('says nothing about a 4.x it only moved to 4.9', async () => {
-      const step = newStep();
-      await upgradeJson(step, 'js/package.json', { devDependencies: { typescript: '^4.5.4' } });
-
+      expect(pkg.devDependencies.typescript).toBe('^5.9.3');
       expect(step.pauseMessage()).not.toContain('brought down');
     });
 
-    it.each([
-      ['4.9.5', false],
-      ['~4.7.4', false],
-      ['4.x', false],
-      ['^5.0.0', true],
-      ['>=4.2', true],
-      ['latest', true],
-    ])('says why it changed %s only when that could have been a TypeScript 5', async (constraint, says) => {
-      const step = newStep();
-      await upgradeJson(step, 'js/package.json', { devDependencies: { typescript: constraint } });
+    it('keeps the 5.9 a new extension is scaffolded with', async () => {
+      const pkg = await upgradeJson(newStep(), 'js/package.json', { devDependencies: { typescript: '^5.9.3' } });
 
-      expect(step.pauseMessage().includes(`TypeScript ${constraint} was brought down`)).toBe(says);
+      expect(pkg.devDependencies.typescript).toBe('^5.9.3');
+    });
+
+    it.each(['^6.0.3', '^7.0.0', '>=4.2', 'latest', '*'])('brings %s, which allows TypeScript 6, down to 5.9, saying why', async (constraint) => {
+      const step = newStep();
+      const pkg = await upgradeJson(step, 'js/package.json', { devDependencies: { typescript: constraint } });
+
+      expect(pkg.devDependencies.typescript).toBe('^5.9.3');
+      expect(step.pauseMessage()).toContain(
+        `TypeScript ${constraint} was brought down to ^5.9.3: flarum-tsconfig resolves modules the way TypeScript 6 refuses without ignoreDeprecations.`
+      );
+    });
+
+    it.each(['bundler', 'NodeNext', 'node16'])(
+      'keeps a TypeScript 6 or newer the tsconfig already resolves modules for, with moduleResolution %s',
+      async (moduleResolution) => {
+        const pkg = { devDependencies: { typescript: '^7.0.2' } };
+        const root = extensionWithTsConfig(pkg, { extends: 'flarum-tsconfig', compilerOptions: { moduleResolution } });
+        const step = new Dependencies({} as any, root, 1, 1, false);
+
+        expect((await upgradeJson(step, 'js/package.json', pkg)).devDependencies.typescript).toBe('^7.0.2');
+        expect(step.pauseMessage()).toContain('Kept, as they already ask for newer versions than Flarum 2.0 needs: typescript ^7.0.2.');
+        expect(step.pauseMessage()).not.toContain('brought down');
+      }
+    );
+
+    it('brings a TypeScript 6 or newer down when the tsconfig still sets baseUrl, which TypeScript 6 refuses', async () => {
+      const pkg = { devDependencies: { typescript: '^7.0.2' } };
+      const root = extensionWithTsConfig(pkg, { compilerOptions: { moduleResolution: 'bundler', baseUrl: '.' } });
+      const step = new Dependencies({} as any, root, 1, 1, false);
+
+      expect((await upgradeJson(step, 'js/package.json', pkg)).devDependencies.typescript).toBe('^5.9.3');
+      expect(step.pauseMessage()).toContain('TypeScript ^7.0.2 was brought down to ^5.9.3');
     });
 
     it('is not added to an extension without it', async () => {
@@ -92,21 +110,21 @@ describe('TypeScript, which Flarum 2.0 builds with at 4.9', () => {
     });
 
     it('is the version a new extension is scaffolded with', () => {
-      expect(JSON.parse(scaffolded('js/package.json')).devDependencies.typescript).toBe('^4.9.5');
+      expect(JSON.parse(scaffolded('js/package.json')).devDependencies.typescript).toBe('^5.9.3');
     });
   });
 
   describe('in tsconfig.json', () => {
-    it('drops the compiler options TypeScript 4.9 does not have, and says so', async () => {
+    it('drops the compiler options, and values, TypeScript 5.9 refuses, and says so', async () => {
       const step = newStep();
       const tsconfig = await upgradeJson(step, 'js/tsconfig.json', {
         extends: 'flarum-tsconfig',
         include: ['src/**/*'],
         compilerOptions: {
-          moduleResolution: 'bundler',
-          verbatimModuleSyntax: true,
-          allowImportingTsExtensions: true,
-          target: 'ES2023',
+          suppressImplicitAnyIndexErrors: true,
+          keyofStringsOnly: true,
+          importsNotUsedAsValues: 'error',
+          target: 'ES3',
           lib: ['DOM', 'es2023'],
           declarationDir: './dist-typings',
           baseUrl: '.',
@@ -116,25 +134,31 @@ describe('TypeScript, which Flarum 2.0 builds with at 4.9', () => {
 
       expect(tsconfig.compilerOptions).toEqual({
         types: [],
-        lib: ['DOM'],
+        lib: ['DOM', 'es2023'],
         declarationDir: './dist-typings',
         baseUrl: '.',
         paths: { 'flarum/*': ['../vendor/flarum/core/js/dist-typings/*'] },
       });
       expect(step.pauseMessage()).toContain(
-        'Removed from js/tsconfig.json, as TypeScript 4.9 does not have them: moduleResolution "bundler", verbatimModuleSyntax, allowImportingTsExtensions, target "ES2023", lib "es2023".'
+        'Removed from js/tsconfig.json, as TypeScript 5.9 refuses them: suppressImplicitAnyIndexErrors, keyofStringsOnly, importsNotUsedAsValues, target "ES3".'
       );
     });
 
-    it('keeps the values TypeScript 4.9 has, however they are written', async () => {
-      const tsconfig = await upgradeJson(newStep(), 'js/tsconfig.json', {
-        compilerOptions: { target: 'ESNext', moduleResolution: 'Node', module: 'ES2020', jsx: 'preserve' },
-      });
+    it('keeps the options and values TypeScript 5.9 has, however they are written', async () => {
+      const options = {
+        target: 'ES2023',
+        moduleResolution: 'Bundler',
+        module: 'ESNext',
+        jsx: 'preserve',
+        verbatimModuleSyntax: true,
+        allowImportingTsExtensions: true,
+      };
+      const tsconfig = await upgradeJson(newStep(), 'js/tsconfig.json', { compilerOptions: options });
 
-      expect(tsconfig.compilerOptions).toEqual({ types: [], target: 'ESNext', moduleResolution: 'Node', module: 'ES2020', jsx: 'preserve' });
+      expect(tsconfig.compilerOptions).toEqual({ types: [], ...options });
     });
 
-    it('leaves a tsconfig TypeScript 4.9 can read as it was, but for the type packages it loads', async () => {
+    it('leaves a tsconfig TypeScript 5.9 can read as it was, but for the type packages it loads', async () => {
       const step = newStep();
       const code = `{
   // Use Flarum's shared TypeScript settings.
@@ -221,80 +245,25 @@ describe('TypeScript, which Flarum 2.0 builds with at 4.9', () => {
       expect(test).toContain('"types": ["jest"]');
     });
 
-    it('flags a list of configs to extend, which TypeScript 4.9 cannot read', async () => {
+    it('keeps a list of configs to extend, which TypeScript 5 reads', async () => {
       const step = newStep();
       const tsconfig = await upgradeJson(step, 'js/tsconfig.json', { extends: ['flarum-tsconfig', './tsconfig.paths.json'] });
 
       expect(tsconfig.extends).toEqual(['flarum-tsconfig', './tsconfig.paths.json']);
-      expect((step as any).followUps).toEqual([
-        {
-          file: 'js/tsconfig.json',
-          line: null,
-          text: 'It extends a list of configs, which TypeScript 4.9 cannot read. Extend one, and move the rest into it.',
-        },
-      ]);
+      expect((step as any).followUps).toEqual([]);
     });
   });
 
-  describe('syntax TypeScript 4.9 cannot compile', () => {
-    const todo = (what: string) => `// @TODO: Flarum 2.0 builds with TypeScript 4.9, which has no ${what}.`;
-
-    it('is flagged where it is used, and nothing else changes', async () => {
-      const step = newStep();
-      const code = `import data from './data.json' with { type: 'json' };
-export type * from './types';
-
-export function first<const T extends readonly unknown[]>(items: T) {
-  using handle = open();
-
-  return items[0];
-}
-`;
-
-      expect(await upgrade(step, 'js/src/forum/utils.ts', code)).toBe(`${todo('import attributes (TypeScript 5.3); use `assert` instead of `with`')}
-import data from './data.json' with { type: 'json' };
-${todo('`export type *` (TypeScript 5.0)')}
-export type * from './types';
-
-${todo('`const` type parameters (TypeScript 5.0)')}
-export function first<const T extends readonly unknown[]>(items: T) {
-  ${todo('`using` declarations (TypeScript 5.2)')}
-  using handle = open();
-
-  return items[0];
-}
-`);
-      expect(step.pauseMessage()).toContain('Some TypeScript uses syntax 4.9 cannot compile; look for the @TODO comments.');
+  describe('syntax TypeScript 5 added', () => {
+    it('is left alone, as Flarum builds with TypeScript 5.9', () => {
+      expect(newStep().replacements('js/src/forum/utils.ts')).toEqual([]);
     });
 
-    it('leaves what TypeScript 4.9 has alone', async () => {
-      const step = newStep();
-      const code = `import data from './data.json' assert { type: 'json' };
+    it('is not looked for in the extension’s TypeScript', () => {
+      const targets = newStep().targets();
 
-@decorate
-export class Thing {
-  accessor count = 0;
-  settings = { a: 1 } satisfies Record<string, number>;
-}
-`;
-
-      expect(await upgrade(step, 'js/src/forum/Thing.tsx', code)).toBe(code);
-      expect(step.pauseMessage()).not.toContain('@TODO');
-    });
-
-    it('is flagged once, however often the step runs', async () => {
-      const code = `export function first<const T>(item: T) {
-  return item;
-}
-`;
-      const once = await upgrade(newStep(), 'js/src/forum/utils.ts', code);
-
-      expect(once.match(/@TODO/g)).toHaveLength(1);
-      expect(await upgrade(newStep(), 'js/src/forum/utils.ts', once)).toBe(once);
-    });
-
-    it('is looked for in the extension’s TypeScript', () => {
-      expect(newStep().targets()).toEqual(expect.arrayContaining(['js/tsconfig.json', 'js/src/**/*.ts', 'js/src/**/*.tsx']));
+      expect(targets).toEqual(expect.arrayContaining(['js/tsconfig.json']));
+      expect(targets).not.toContain('js/src/**/*.ts');
     });
   });
 
