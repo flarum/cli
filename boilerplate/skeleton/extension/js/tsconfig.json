@@ -12,8 +12,8 @@
       "@types/**/*"
 ],
   "compilerOptions": {
-    // Only load the type packages the code imports. Others, such as the
-    // @types/node webpack brings along, use syntax TypeScript 4.9 can't read.
+    // Only load the type packages the code imports, not every one in
+    // node_modules, such as the @types/node webpack brings along.
     "types": [],
     // This will output typings to `dist-typings`
     "declarationDir": "./dist-typings",
