@@ -251,14 +251,16 @@ export default class Dependencies extends BaseUpgradeStep {
 
       // The versions a new extension is scaffolded with. 3.1.0 is the first
       // flarum-webpack-config that supplies TypeScript 5.9 and only asks for
-      // webpack as a peer, and @flarum/jest-config 2.1.0 tests with the mithril
-      // Flarum ships.
+      // webpack as a peer, and @flarum/jest-config 2.1.1 tests with the mithril
+      // Flarum ships and requires that flarum-webpack-config. Prettier 3 is what
+      // the upgrade has just formatted the code with.
       const map: Record<string, string> = {
         'flarum-webpack-config': '^3.1.0',
         'flarum-tsconfig': '^2.0.0',
-        '@flarum/jest-config': '^2.1.0',
+        '@flarum/jest-config': '^2.1.1',
+        prettier: '^3.9.10',
         webpack: '^5.104.1',
-        'webpack-cli': '^4.9.1',
+        'webpack-cli': '^7.2.3',
         // What Flarum builds and checks its typings with.
         typescript: '^5.9.3',
       };
