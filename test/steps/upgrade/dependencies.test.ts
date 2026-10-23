@@ -136,10 +136,22 @@ describe('the dependencies step', () => {
       expect(pkg.devDependencies['flarum-webpack-config']).toBe('^3.1.0');
     });
 
-    it('requires @flarum/jest-config 2.1.0, which tests with the mithril Flarum ships', async () => {
+    it('requires @flarum/jest-config 2.1.1, which tests with the mithril Flarum ships and the flarum-webpack-config it builds with', async () => {
       const pkg = await upgrade('js/package.json', { devDependencies: { '@flarum/jest-config': '^2.0.0' } });
 
-      expect(pkg.devDependencies['@flarum/jest-config']).toBe('^2.1.0');
+      expect(pkg.devDependencies['@flarum/jest-config']).toBe('^2.1.1');
+    });
+
+    it('requires Prettier 3, which the upgrade formats the code with', async () => {
+      const pkg = await upgrade('js/package.json', onePackageJson);
+
+      expect(pkg.devDependencies.prettier).toBe('^3.9.10');
+    });
+
+    it('requires webpack-cli 7', async () => {
+      const pkg = await upgrade('js/package.json', onePackageJson);
+
+      expect(pkg.devDependencies['webpack-cli']).toBe('^7.2.3');
     });
 
     it('requires the webpack Flarum builds with', async () => {
@@ -150,13 +162,13 @@ describe('the dependencies step', () => {
 
     it('keeps tooling the extension already asks for newer versions of, and says so', async () => {
       const step = new Dependencies({} as any, '/extension', 1, 1, false);
-      const code = JSON.stringify({ devDependencies: { 'webpack-cli': '^5.1.4', webpack: '^5.65.0' } }, null, 2);
+      const code = JSON.stringify({ devDependencies: { 'webpack-cli': '^5.1.4', webpack: '^5.107.2' } }, null, 2);
       const result = await step.applyReplacements('js/package.json', code, step.advancedContent('js/package.json', code));
       const pkg = JSON.parse(result.updated as string);
 
-      expect(pkg.devDependencies['webpack-cli']).toBe('^5.1.4');
-      expect(pkg.devDependencies.webpack).toBe('^5.104.1');
-      expect(step.pauseMessage()).toContain('webpack-cli ^5.1.4');
+      expect(pkg.devDependencies.webpack).toBe('^5.107.2');
+      expect(pkg.devDependencies['webpack-cli']).toBe('^7.2.3');
+      expect(step.pauseMessage()).toContain('webpack ^5.107.2');
     });
 
     it('moves the build tooling to devDependencies, and says so', async () => {
@@ -194,12 +206,12 @@ describe('the dependencies step', () => {
 
     it('keeps the newer constraint of tooling listed under both keys', async () => {
       const pkg = await upgrade('js/package.json', {
-        dependencies: { 'flarum-webpack-config': '^2.0.0', prettier: '^3.0.3' },
-        devDependencies: { 'flarum-webpack-config': '^2.0.0', prettier: '^2.5.1' },
+        dependencies: { 'flarum-webpack-config': '^2.0.0', webpack: '^5.107.2' },
+        devDependencies: { 'flarum-webpack-config': '^2.0.0', webpack: '^5.65.0' },
       });
 
       expect(pkg.dependencies).toEqual({});
-      expect(pkg.devDependencies).toEqual({ 'flarum-webpack-config': '^3.1.0', prettier: '^3.0.3' });
+      expect(pkg.devDependencies).toEqual({ 'flarum-webpack-config': '^3.1.0', webpack: '^5.107.2' });
     });
 
     it('still drops a devDependency the extension also lists as a dependency, when it is not tooling', async () => {
@@ -220,7 +232,7 @@ describe('the dependencies step', () => {
 
     it('brings the tooling to the versions a new extension is scaffolded with', async () => {
       const scaffolded = scaffoldedPackageJson().devDependencies;
-      const tooling = ['flarum-webpack-config', 'flarum-tsconfig', '@flarum/jest-config', 'webpack', 'webpack-cli', 'typescript'];
+      const tooling = ['flarum-webpack-config', 'flarum-tsconfig', '@flarum/jest-config', 'prettier', 'webpack', 'webpack-cli', 'typescript'];
 
       const pkg = await upgrade('js/package.json', {
         devDependencies: Object.fromEntries(tooling.map((name) => [name, '^0.0.1'])),
@@ -275,9 +287,9 @@ describe('the dependencies step', () => {
     it('adds nothing to an extension that has them all', async () => {
       const scaffolded = scaffoldedPackageJson();
       const scripts = Object.fromEntries(typings.map((name) => [name, scaffolded.scripts[name]]));
-      const { pkg, notes } = await withTypings({ scripts, devDependencies: { prettier: '^2.5.1' } });
+      const { pkg, notes } = await withTypings({ scripts, devDependencies: { '@flarum/prettier-config': '^1.0.0' } });
 
-      expect(pkg.devDependencies).toEqual({ prettier: '^2.5.1' });
+      expect(pkg.devDependencies).toEqual({ '@flarum/prettier-config': '^1.0.0' });
       expect(notes).not.toContain('build and check typings');
     });
 
@@ -297,12 +309,14 @@ describe('the dependencies step', () => {
   });
 
   describe('a new extension', () => {
-    it('is scaffolded with flarum-webpack-config 3.1.0, @flarum/jest-config 2.1.0 and the webpack Flarum builds with', () => {
+    it('is scaffolded with the tooling Flarum builds with', () => {
       const scaffolded = scaffoldedPackageJson().devDependencies;
 
       expect(scaffolded['flarum-webpack-config']).toBe('^3.1.0');
-      expect(scaffolded['@flarum/jest-config']).toBe('^2.1.0');
+      expect(scaffolded['@flarum/jest-config']).toBe('^2.1.1');
       expect(scaffolded.webpack).toBe('^5.104.1');
+      expect(scaffolded['webpack-cli']).toBe('^7.2.3');
+      expect(scaffolded.prettier).toBe('^3.9.10');
     });
   });
 });
